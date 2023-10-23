@@ -1,0 +1,12 @@
+{
+    "languageName": "English",
+    "authIncorrectCreds": "Incorrect username or password.",
+    "PasswordsDoNotMatch": "Passwords do not match.",
+    "signedInDisp": "Signed in as {0}",
+    "signedInDispDisabled": "Auth Disabled.",
+    "home": "Home",
+    "console": "Console",
+    "registry": "Registry",
+    "compose": "Compose",
+    "addFirstStackMsg": "Compose your first stack!"
+}

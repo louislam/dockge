@@ -1,0 +1,8 @@
+# dotenv environment variable files
+.env
+node_modules
+dist
+.idea
+data
+tmp
+
