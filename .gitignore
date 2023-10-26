@@ -1,8 +1,10 @@
-# dotenv environment variable files
+# Should update .dockerignore as well
 .env
 node_modules
 dist
+frontend-dist
 .idea
 data
 tmp
+/private
 

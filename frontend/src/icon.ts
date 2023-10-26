@@ -50,7 +50,7 @@ import {
     faInfoCircle,
     faClone,
     faCertificate,
-    faTerminal, faWarehouse, faHome,
+    faTerminal, faWarehouse, faHome, faRocket,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -101,6 +101,7 @@ library.add(
     faTerminal,
     faWarehouse,
     faHome,
+    faRocket,
 );
 
 export { FontAwesomeIcon };

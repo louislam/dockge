@@ -7,68 +7,44 @@
                     class="form-check-input select-input"
                     type="checkbox"
                     :aria-label="$t('Check/Uncheck')"
-                    :checked="isSelected(monitor.id)"
+                    :checked="isSelected(stack.id)"
                     @click.stop="toggleSelection"
                 />
             </div>
 
-            <router-link :to="monitorURL(monitor.id)" class="item" :class="{ 'disabled': ! monitor.active }">
+            <router-link :to="`/compose/${stack.name}`" class="item">
                 <div class="row">
-                    <div class="col-9 col-md-8 small-padding" :class="{ 'monitor-item': $root.userHeartbeatBar == 'bottom' || $root.userHeartbeatBar == 'none' }">
+                    <div class="col-9 col-md-8 small-padding">
                         <div class="info">
-                            <Uptime :monitor="monitor" type="24" :pill="true" />
-                            <span v-if="hasChildren" class="collapse-padding" @click.prevent="changeCollapsed">
-                                <font-awesome-icon icon="chevron-down" class="animated" :class="{ collapsed: isCollapsed}" />
-                            </span>
-                            {{ monitorName }}
+                            <Uptime :stack="stack" type="24" :pill="true" />
+                            {{ stackName }}
                         </div>
-                        <div v-if="monitor.tags.length > 0" class="tags">
-                            <Tag v-for="tag in monitor.tags" :key="tag" :item="tag" :size="'sm'" />
+                        <div v-if="stack.tags.length > 0" class="tags">
+                            <!--<Tag v-for="tag in stack.tags" :key="tag" :item="tag" :size="'sm'" />-->
                         </div>
-                    </div>
-                    <div v-show="$root.userHeartbeatBar == 'normal'" :key="$root.userHeartbeatBar" class="col-3 col-md-4">
-                        <HeartbeatBar ref="heartbeatBar" size="small" :monitor-id="monitor.id" />
-                    </div>
-                </div>
-
-                <div v-if="$root.userHeartbeatBar == 'bottom'" class="row">
-                    <div class="col-12 bottom-style">
-                        <HeartbeatBar ref="heartbeatBar" size="small" :monitor-id="monitor.id" />
                     </div>
                 </div>
             </router-link>
         </div>
-
-        <transition name="slide-fade-up">
-            <div v-if="!isCollapsed" class="childs">
-                <MonitorListItem
-                    v-for="(item, index) in sortedChildMonitorList"
-                    :key="index" :monitor="item"
-                    :showPathName="showPathName"
-                    :isSelectMode="isSelectMode"
-                    :isSelected="isSelected"
-                    :select="select"
-                    :deselect="deselect"
-                    :depth="depth + 1"
-                />
-            </div>
-        </transition>
     </div>
 </template>
 
 <script>
 
+import Uptime from "./Uptime.vue";
+
 export default {
     components: {
+        Uptime
 
     },
     props: {
-        /** Monitor this represents */
-        monitor: {
+        /** Stack this represents */
+        stack: {
             type: Object,
             default: null,
         },
-        /** Should the monitor name show it's parent */
+        /** Should the stack name show it's parent */
         showPathName: {
             type: Boolean,
             default: false,
@@ -78,22 +54,22 @@ export default {
             type: Boolean,
             default: false,
         },
-        /** How many ancestors are above this monitor */
+        /** How many ancestors are above this stack */
         depth: {
             type: Number,
             default: 0,
         },
-        /** Callback to determine if monitor is selected */
+        /** Callback to determine if stack is selected */
         isSelected: {
             type: Function,
             default: () => {}
         },
-        /** Callback fired when monitor is selected */
+        /** Callback fired when stack is selected */
         select: {
             type: Function,
             default: () => {}
         },
-        /** Callback fired when monitor is deselected */
+        /** Callback fired when stack is deselected */
         deselect: {
             type: Function,
             default: () => {}
@@ -105,51 +81,16 @@ export default {
         };
     },
     computed: {
-        sortedChildMonitorList() {
-            let result = Object.values(this.$root.monitorList);
-
-            result = result.filter(childMonitor => childMonitor.parent === this.monitor.id);
-
-            result.sort((m1, m2) => {
-
-                if (m1.active !== m2.active) {
-                    if (m1.active === 0) {
-                        return 1;
-                    }
-
-                    if (m2.active === 0) {
-                        return -1;
-                    }
-                }
-
-                if (m1.weight !== m2.weight) {
-                    if (m1.weight > m2.weight) {
-                        return -1;
-                    }
-
-                    if (m1.weight < m2.weight) {
-                        return 1;
-                    }
-                }
-
-                return m1.name.localeCompare(m2.name);
-            });
-
-            return result;
-        },
-        hasChildren() {
-            return this.sortedChildMonitorList.length > 0;
-        },
         depthMargin() {
             return {
                 marginLeft: `${31 * this.depth}px`,
             };
         },
-        monitorName() {
+        stackName() {
             if (this.showPathName) {
-                return this.monitor.pathName;
+                return this.stack.pathName;
             } else {
-                return this.monitor.name;
+                return this.stack.name;
             }
         }
     },
@@ -161,28 +102,10 @@ export default {
     },
     beforeMount() {
 
-        // Always unfold if monitor is accessed directly
-        if (this.monitor.childrenIDs.includes(parseInt(this.$route.params.id))) {
-            this.isCollapsed = false;
-            return;
-        }
-
-        // Set collapsed value based on local storage
-        let storage = window.localStorage.getItem("monitorCollapsed");
-        if (storage === null) {
-            return;
-        }
-
-        let storageObject = JSON.parse(storage);
-        if (storageObject[`monitor_${this.monitor.id}`] == null) {
-            return;
-        }
-
-        this.isCollapsed = storageObject[`monitor_${this.monitor.id}`];
     },
     methods: {
         /**
-         * Changes the collapsed value of the current monitor and saves
+         * Changes the collapsed value of the current stack and saves
          * it to local storage
          * @returns {void}
          */
@@ -190,25 +113,25 @@ export default {
             this.isCollapsed = !this.isCollapsed;
 
             // Save collapsed value into local storage
-            let storage = window.localStorage.getItem("monitorCollapsed");
+            let storage = window.localStorage.getItem("stackCollapsed");
             let storageObject = {};
             if (storage !== null) {
                 storageObject = JSON.parse(storage);
             }
-            storageObject[`monitor_${this.monitor.id}`] = this.isCollapsed;
+            storageObject[`stack_${this.stack.id}`] = this.isCollapsed;
 
-            window.localStorage.setItem("monitorCollapsed", JSON.stringify(storageObject));
+            window.localStorage.setItem("stackCollapsed", JSON.stringify(storageObject));
         },
 
         /**
-         * Toggle selection of monitor
+         * Toggle selection of stack
          * @returns {void}
          */
         toggleSelection() {
-            if (this.isSelected(this.monitor.id)) {
-                this.deselect(this.monitor.id);
+            if (this.isSelected(this.stack.id)) {
+                this.deselect(this.stack.id);
             } else {
-                this.select(this.monitor.id);
+                this.select(this.stack.id);
             }
         },
     },
@@ -228,7 +151,7 @@ export default {
     padding-right: 2px !important;
 }
 
-// .monitor-item {
+// .stack-item {
 //     width: 100%;
 // }
 

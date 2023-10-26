@@ -1,15 +1,9 @@
-FROM debian:bookworm-slim
-
-COPY --from=docker:dind /usr/local/bin/docker /usr/local/bin/
-
-RUN apt update && apt install --yes --no-install-recommends \
-    curl \
-    ca-certificates \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
-RUN curl https://bun.sh/install | bash -s "bun-v1.0.3"
-
+FROM louislam/dockge:base
 WORKDIR /app
-
-COPY . .
-RUN bun install --production --frozen-lockfile
+COPY --chown=node:node  . .
+RUN pnpm install --prod --frozen-lockfile && \
+    mkdir ./data \
+VOLUME /app/data
+EXPOSE 5001
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["tsx", "./backend/index.ts"]

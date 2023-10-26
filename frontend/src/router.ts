@@ -4,8 +4,8 @@ import Layout from "./layouts/Layout.vue";
 import Setup from "./pages/Setup.vue";
 import Dashboard from "./pages/Dashboard.vue";
 import DashboardHome from "./pages/DashboardHome.vue";
-import EditStack from "./pages/EditStack.vue";
 import Console from "./pages/Console.vue";
+import Compose from "./pages/Compose.vue";
 
 const routes = [
     {
@@ -23,7 +23,13 @@ const routes = [
                         children: [
                             {
                                 path: "/compose",
-                                component: EditStack,
+                                component: Compose,
+                            },
+                            {
+                                path: "/compose/:stackName",
+                                name: "compose",
+                                component: Compose,
+                                props: true,
                             },
 
                         ]

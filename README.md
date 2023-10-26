@@ -1,21 +1,33 @@
+<div align="center" width="100%">
+    <img src="./frontend/public/icon.svg" width="128" alt="" />
+</div>
+
 # Dockge
 
-## Features
+A fancy, easy-to-use and reactive docker stack (`docker-compose.yml`) manager.
 
-- Easy-to-use
-- Fancy UI
-- Focus on `docker-compose` stack management
+## ⭐ Features
+
+- Focus on `docker-compose.yml` stack management
 - Interactive editor for `docker-compose.yml` files
-- Easy to expose your service to the internet with https
+- Interactive web terminal for containers and any docker commands
+- Reactive - Everything is just responsive. Progress and terminal output are in real-time
+- Easy-to-use & fancy UI - If you love Uptime Kuma's UI, you will love this too
 
+## Installation
 
 ## Motivations
 
-- Want to build my dream web-based container manager
-- Want to try next gen runtime like Deno or Bun, but I chose Deno because at this moment, Deno is more stable and Jetbrains IDE support is better.
-- Full TypeScript and ES module
-- Try DaisyUI + TailwindCSS
+- Try ES Module and TypeScript in 2023
+- I have been using Portainer for some time, but I am sometimes not satisfied with it. For example, sometimes when I deploy a stack, it keeps spinning the loading icon for a few minutes, and I don't know what's going on.
 
-## Dockge?
+If you love this project, please consider giving this project a ⭐.
 
-Naming idea is coming from Twitch emotes. There are many emotes sound like this such as `bedge` and `sadge`.
+## More Ideas?
+
+- Container file manager
+- App store for yaml templates
+- Container stats
+- Get app icons
+- Switch Docker context
+- Zero-config private docker registry

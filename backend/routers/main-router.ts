@@ -7,7 +7,7 @@ export class MainRouter extends Router {
         const router = express.Router();
 
         router.get("/", (req, res) => {
-
+            res.send(server.indexHTML);
         });
 
         return router;

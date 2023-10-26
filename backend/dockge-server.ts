@@ -20,27 +20,20 @@ import { R } from "redbean-node";
 import { genSecret, isDev } from "./util-common";
 import { generatePasswordHash } from "./password-hash";
 import { Bean } from "redbean-node/dist/bean";
-import { DockgeSocket } from "./util-server";
+import { Arguments, Config, DockgeSocket } from "./util-server";
 import { DockerSocketHandler } from "./socket-handlers/docker-socket-handler";
-import { Terminal } from "./terminal";
-
-export interface Arguments {
-    sslKey? : string;
-    sslCert? : string;
-    sslKeyPassphrase? : string;
-    port? : number;
-    hostname? : string;
-    dataDir? : string;
-}
+import expressStaticGzip from "express-static-gzip";
+import path from "path";
+import { TerminalSocketHandler } from "./socket-handlers/terminal-socket-handler";
+import { Stack } from "./stack";
 
 export class DockgeServer {
     app : Express;
     httpServer : http.Server;
     packageJSON : PackageJson;
     io : socketIO.Server;
-    config : Arguments;
-    indexHTML : string;
-    terminal : Terminal;
+    config : Config;
+    indexHTML : string = "";
 
     /**
      * List of express routers
@@ -55,6 +48,7 @@ export class DockgeServer {
     socketHandlerList : SocketHandler[] = [
         new MainSocketHandler(),
         new DockerSocketHandler(),
+        new TerminalSocketHandler(),
     ];
 
     /**
@@ -64,10 +58,20 @@ export class DockgeServer {
 
     jwtSecret? : string;
 
+    stacksDir : string = "";
+
     /**
      *
      */
     constructor() {
+        // Catch unexpected errors here
+        let unexpectedErrorHandler = (error : unknown) => {
+            console.trace(error);
+            console.error("If you keep encountering errors, please report to https://github.com/louislam/uptime-kuma/issues");
+        };
+        process.addListener("unhandledRejection", unexpectedErrorHandler);
+        process.addListener("uncaughtException", unexpectedErrorHandler);
+
         if (!process.env.NODE_ENV) {
             process.env.NODE_ENV = "production";
         }
@@ -75,8 +79,8 @@ export class DockgeServer {
         // Log NODE ENV
         log.info("server", "NODE_ENV: " + process.env.NODE_ENV);
 
-        // Load arguments
-        const args = this.config = parse<Arguments>({
+        // Define all possible arguments
+        let args = parse<Arguments>({
             sslKey: {
                 type: String,
                 optional: true,
@@ -103,21 +107,101 @@ export class DockgeServer {
             }
         });
 
-        // Load from environment variables or default values if args are not set
-        args.sslKey = args.sslKey || process.env.DOCKGE_SSL_KEY || undefined;
-        args.sslCert = args.sslCert || process.env.DOCKGE_SSL_CERT || undefined;
-        args.sslKeyPassphrase = args.sslKeyPassphrase || process.env.DOCKGE_SSL_KEY_PASSPHRASE || undefined;
-        args.port = args.port || parseInt(process.env.DOCKGE_PORT) || 5001;
-        args.hostname = args.hostname || process.env.DOCKGE_HOSTNAME || undefined;
-        args.dataDir = args.dataDir || process.env.DOCKGE_DATA_DIR || "./data/";
+        this.config = args as Config;
 
-        log.debug("server", args);
+        // Load from environment variables or default values if args are not set
+        this.config.sslKey = args.sslKey || process.env.DOCKGE_SSL_KEY || undefined;
+        this.config.sslCert = args.sslCert || process.env.DOCKGE_SSL_CERT || undefined;
+        this.config.sslKeyPassphrase = args.sslKeyPassphrase || process.env.DOCKGE_SSL_KEY_PASSPHRASE || undefined;
+        this.config.port = args.port || parseInt(process.env.DOCKGE_PORT) || 5001;
+        this.config.hostname = args.hostname || process.env.DOCKGE_HOSTNAME || undefined;
+        this.config.dataDir = args.dataDir || process.env.DOCKGE_DATA_DIR || "./data/";
+
+        log.debug("server", this.config);
 
         this.packageJSON = packageJSON as PackageJson;
 
+        try {
+            this.indexHTML = fs.readFileSync("./frontend-dist/index.html").toString();
+        } catch (e) {
+            // "dist/index.html" is not necessary for development
+            if (process.env.NODE_ENV !== "development") {
+                log.error("server", "Error: Cannot find 'frontend-dist/index.html', did you install correctly?");
+                process.exit(1);
+            }
+        }
+
+        // Create all the necessary directories
         this.initDataDir();
 
-        this.terminal = new Terminal(this);
+        // Create express
+        this.app = express();
+
+        // Create HTTP server
+        if (this.config.sslKey && this.config.sslCert) {
+            log.info("server", "Server Type: HTTPS");
+            this.httpServer = https.createServer({
+                key: fs.readFileSync(this.config.sslKey),
+                cert: fs.readFileSync(this.config.sslCert),
+                passphrase: this.config.sslKeyPassphrase,
+            }, this.app);
+        } else {
+            log.info("server", "Server Type: HTTP");
+            this.httpServer = http.createServer(this.app);
+        }
+
+        // Binding Routers
+        for (const router of this.routerList) {
+            this.app.use(router.create(this.app, this));
+        }
+
+        // Static files
+        this.app.use("/", expressStaticGzip("frontend-dist", {
+            enableBrotli: true,
+        }));
+
+        // Universal Route Handler, must be at the end of all express routes.
+        this.app.get("*", async (_request, response) => {
+            response.send(this.indexHTML);
+        });
+
+        // Allow all CORS origins in development
+        let cors = undefined;
+        if (isDev) {
+            cors = {
+                origin: "*",
+            };
+        }
+
+        // Create Socket.io
+        this.io = new socketIO.Server(this.httpServer, {
+            cors,
+        });
+
+        this.io.on("connection", (socket: Socket) => {
+            log.info("server", "Socket connected!");
+
+            this.sendInfo(socket, true);
+
+            if (this.needSetup) {
+                log.info("server", "Redirect to setup page");
+                socket.emit("setup");
+            }
+
+            // Create socket handlers
+            for (const socketHandler of this.socketHandlerList) {
+                socketHandler.create(socket as DockgeSocket, this);
+            }
+        });
+
+        this.io.on("disconnect", () => {
+
+        });
+
+    }
+
+    prepareServer() {
+
     }
 
     /**
@@ -156,64 +240,6 @@ export class DockgeServer {
             log.info("server", "No user, need setup");
             this.needSetup = true;
         }
-
-        // Create express
-        this.app = express();
-
-        if (this.config.sslKey && this.config.sslCert) {
-            log.info("server", "Server Type: HTTPS");
-            this.httpServer = https.createServer({
-                key: fs.readFileSync(this.config.sslKey),
-                cert: fs.readFileSync(this.config.sslCert),
-                passphrase: this.config.sslKeyPassphrase,
-            }, this.app);
-        } else {
-            log.info("server", "Server Type: HTTP");
-            this.httpServer = http.createServer(this.app);
-        }
-
-        try {
-            this.indexHTML = fs.readFileSync("./dist/index.html").toString();
-        } catch (e) {
-            // "dist/index.html" is not necessary for development
-            if (process.env.NODE_ENV !== "development") {
-                log.error("server", "Error: Cannot find 'dist/index.html', did you install correctly?");
-                process.exit(1);
-            }
-        }
-
-        for (const router of this.routerList) {
-            this.app.use(router.create(this.app, this));
-        }
-
-        let cors = undefined;
-
-        if (isDev) {
-            cors = {
-                origin: "*",
-            };
-        }
-
-        // Create Socket.io
-        this.io = new socketIO.Server(this.httpServer, {
-            cors,
-        });
-
-        this.io.on("connection", (socket: Socket) => {
-            log.info("server", "Socket connected!");
-
-            this.sendInfo(socket, true);
-
-            if (this.needSetup) {
-                log.info("server", "Redirect to setup page");
-                socket.emit("setup");
-            }
-
-            // Create socket handlers
-            for (const socketHandler of this.socketHandlerList) {
-                socketHandler.create(socket as DockgeSocket, this);
-            }
-        });
 
         // Listen
         this.httpServer.listen(5001, this.config.hostname, () => {
@@ -349,14 +375,21 @@ export class DockgeServer {
      * Initialize the data directory
      */
     initDataDir() {
+        if (! fs.existsSync(this.config.dataDir)) {
+            fs.mkdirSync(this.config.dataDir, { recursive: true });
+        }
+
         // Check if a directory
         if (!fs.lstatSync(this.config.dataDir).isDirectory()) {
             throw new Error(`Fatal error: ${this.config.dataDir} is not a directory`);
         }
 
-        if (! fs.existsSync(this.config.dataDir)) {
-            fs.mkdirSync(this.config.dataDir, { recursive: true });
+        // Create data/stacks directory
+        this.stacksDir = path.join(this.config.dataDir, "stacks");
+        if (!fs.existsSync(this.stacksDir)) {
+            fs.mkdirSync(this.stacksDir, { recursive: true });
         }
+
         log.info("server", `Data Dir: ${this.config.dataDir}`);
     }
 
@@ -377,5 +410,20 @@ export class DockgeServer {
         jwtSecretBean.value = generatePasswordHash(genSecret());
         await R.store(jwtSecretBean);
         return jwtSecretBean;
+    }
+
+    sendStackList(socket : DockgeSocket) {
+        let room = socket.userID.toString();
+        let stackList = Stack.getStackList(this);
+        let list = {};
+
+        for (let stack of stackList) {
+            list[stack.name] = stack.toSimpleJSON();
+        }
+
+        this.io.to(room).emit("stackList", {
+            ok: true,
+            stackList: list,
+        });
     }
 }

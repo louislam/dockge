@@ -3,19 +3,12 @@ import { Socket } from "socket.io-client";
 import { defineComponent } from "vue";
 import jwtDecode from "jwt-decode";
 import { Terminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";
-import { WebLinksAddon } from "xterm-addon-web-links";
 
-const terminal = new Terminal({
-    fontSize: 16,
-    fontFamily: "monospace",
-    cursorBlink: true,
-});
-terminal.loadAddon(new FitAddon());
-terminal.loadAddon(new WebLinksAddon());
 let terminalInputBuffer = "";
 let cursorPosition = 0;
 let socket : Socket;
+
+let terminalMap : Map<string, Terminal> = new Map();
 
 function removeInput() {
     const backspaceCount = terminalInputBuffer.length;
@@ -44,7 +37,6 @@ export default defineComponent({
             loggedIn: false,
             allowLoginDialog: false,
             username: null,
-
             stackList: {},
         };
     },
@@ -66,6 +58,7 @@ export default defineComponent({
         this.initSocketIO();
     },
     mounted() {
+        return;
         terminal.onKey(e => {
             const code = e.key.charCodeAt(0);
             console.debug("Encode: " + JSON.stringify(e.key));
@@ -100,6 +93,7 @@ export default defineComponent({
                 // TODO
             } else if (e.key === "\u0003") {      // Ctrl + C
                 console.debug("Ctrl + C");
+                socket.emit("terminalInputRaw", e.key);
                 removeInput();
             } else {
                 cursorPosition++;
@@ -131,7 +125,7 @@ export default defineComponent({
             }
 
             socket = io(url, {
-
+                transports: [ "websocket", "polling" ]
             });
 
             socket.on("connect", () => {
@@ -195,8 +189,19 @@ export default defineComponent({
                 this.$router.push("/setup");
             });
 
-            socket.on("commandOutput", (data) => {
+            socket.on("terminalWrite", (terminalName, data) => {
+                const terminal = terminalMap.get(terminalName);
+                if (!terminal) {
+                    console.error("Terminal not found: " + terminalName);
+                    return;
+                }
                 terminal.write(data);
+            });
+
+            socket.on("stackList", (res) => {
+                if (res.ok) {
+                    this.stackList = res.stackList;
+                }
             });
         },
 
@@ -210,10 +215,6 @@ export default defineComponent({
 
         getSocket() : Socket {
             return socket;
-        },
-
-        getTerminal() : Terminal {
-            return terminal;
         },
 
         /**
@@ -269,13 +270,23 @@ export default defineComponent({
         },
 
         afterLogin() {
-            terminal.clear();
+
+        },
+
+        bindTerminal(terminalName : string, terminal : Terminal) {
             // Load terminal, get terminal screen
-            socket.emit("getTerminalBuffer", (res) => {
-                console.log("getTerminalBuffer");
-                terminal.write(res.buffer);
+            socket.emit("terminalJoin", terminalName, (res) => {
+                if (res.ok) {
+                    terminal.write(res.buffer);
+                    terminalMap.set(terminalName, terminal);
+                } else {
+                    this.toastRes(res);
+                }
             });
         },
 
+        unbindTerminal(terminalName : string) {
+            terminalMap.delete(terminalName);
+        }
     }
 });

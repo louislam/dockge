@@ -107,6 +107,8 @@ export default {
                     this.$root.loggedIn = true;
                     this.$root.username = this.$root.getJWTPayload()?.username;
 
+                    this.$root.afterLogin();
+
                     // Trigger Chrome Save Password
                     history.pushState({}, "");
                 }

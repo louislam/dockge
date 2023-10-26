@@ -8,5 +8,15 @@
     "console": "Console",
     "registry": "Registry",
     "compose": "Compose",
-    "addFirstStackMsg": "Compose your first stack!"
+    "addFirstStackMsg": "Compose your first stack!",
+    "stackName" : "Stack Name",
+    "deployStack": "Deploy",
+    "deleteStack": "Delete",
+    "stopStack": "Stop",
+    "restartStack": "Restart",
+    "startStack": "Start",
+    "editStack": "Edit",
+    "discardStack": "Discard",
+    "saveStackDraft": "Save",
+    "notAvailableShort" : "N/A"
 }

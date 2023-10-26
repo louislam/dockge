@@ -158,7 +158,7 @@ export function colorOptions(self) {
 export function loadToastSettings() {
     return {
         position: POSITION.BOTTOM_RIGHT,
-        containerClassName: "toast-container mb-5",
+        containerClassName: "toast-container",
         showCloseButtonOnHover: true,
 
         filterBeforeCreate: (toast, toasts) => {

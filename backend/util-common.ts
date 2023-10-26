@@ -1,12 +1,38 @@
-import dayjs from "dayjs";
-
 // For loading dayjs plugins, don't remove event though it is not used in this file
+import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 
-import { randomBytes } from "crypto";
+let randomBytes : (numBytes: number) => Uint8Array;
+
+if (typeof window !== "undefined" && window.crypto) {
+    randomBytes = function randomBytes(numBytes: number) {
+        const bytes = new Uint8Array(numBytes);
+        for (let i = 0; i < numBytes; i += 65536) {
+            window.crypto.getRandomValues(bytes.subarray(i, i + Math.min(numBytes - i, 65536)));
+        }
+        return bytes;
+    };
+} else {
+    randomBytes = (await import("node:crypto")).randomBytes;
+}
 
 export const isDev = process.env.NODE_ENV === "development";
+export const TERMINAL_COLS = 80;
+export const TERMINAL_ROWS = 10;
+export const PROGRESS_TERMINAL_ROWS = 8;
+
+export const ERROR_TYPE_VALIDATION = 1;
+
+export const allowedCommandList : string[] = [
+    "docker",
+    "ls",
+    "cd",
+    "dir",
+];
+export const allowedRawKeys = [
+    "\u0003", // Ctrl + C
+];
 
 /**
  * Generate a decimal integer number from a string
@@ -54,7 +80,6 @@ export function genSecret(length = 64) {
  * @returns Cryptographically suitable random integer
  */
 export function getCryptoRandomInt(min: number, max: number):number {
-
     // synchronous version of: https://github.com/joepie91/node-random-number-csprng
 
     const range = max - min;
@@ -76,11 +101,11 @@ export function getCryptoRandomInt(min: number, max: number):number {
         tmpRange = tmpRange >>> 1;
     }
 
-    const randomBytes = getRandomBytes(bytesNeeded);
+    const bytes = randomBytes(bytesNeeded);
     let randomValue = 0;
 
     for (let i = 0; i < bytesNeeded; i++) {
-        randomValue |= randomBytes[i] << 8 * i;
+        randomValue |= bytes[i] << 8 * i;
     }
 
     randomValue = randomValue & mask;
@@ -92,27 +117,15 @@ export function getCryptoRandomInt(min: number, max: number):number {
     }
 }
 
-/**
- * Returns either the NodeJS crypto.randomBytes() function or its
- * browser equivalent implemented via window.crypto.getRandomValues()
- */
-const getRandomBytes = (
-    (typeof window !== "undefined" && window.crypto)
+export function getComposeTerminalName(stack : string) {
+    return "compose-" + stack;
+}
 
-        // Browsers
-        ? function () {
-            return (numBytes: number) => {
-                const randomBytes = new Uint8Array(numBytes);
-                for (let i = 0; i < numBytes; i += 65536) {
-                    window.crypto.getRandomValues(randomBytes.subarray(i, i + Math.min(numBytes - i, 65536)));
-                }
-                return randomBytes;
-            };
-        }
+export function getContainerTerminalName(container : string) {
+    return "container-" + container;
+}
 
-        // Node
-        : function () {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            return randomBytes;
-        }
-)();
+export function getContainerExecTerminalName(container : string, index : number) {
+    return "container-exec-" + container + "-" + index;
+}
+

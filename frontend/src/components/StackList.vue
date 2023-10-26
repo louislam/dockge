@@ -26,7 +26,7 @@
 
             <!-- TODO -->
             <div v-if="false" class="header-filter">
-                <!--<MonitorListFilter :filterState="filterState" @update-filter="updateFilter" />-->
+                <!--<StackListFilter :filterState="filterState" @update-filter="updateFilter" />-->
             </div>
 
             <!-- TODO: Selection Controls -->
@@ -40,12 +40,12 @@
                 <button class="btn-outline-normal" @click="pauseDialog"><font-awesome-icon icon="pause" size="sm" /> {{ $t("Pause") }}</button>
                 <button class="btn-outline-normal" @click="resumeSelected"><font-awesome-icon icon="play" size="sm" /> {{ $t("Resume") }}</button>
 
-                <span v-if="selectedMonitorCount > 0">
-                    {{ $t("selectedMonitorCount", [ selectedMonitorCount ]) }}
+                <span v-if="selectedStackCount > 0">
+                    {{ $t("selectedStackCount", [ selectedStackCount ]) }}
                 </span>
             </div>
         </div>
-        <div ref="monitorList" class="monitor-list" :class="{ scrollbar: scrollbar }" :style="monitorListStyle">
+        <div ref="stackList" class="stack-list" :class="{ scrollbar: scrollbar }" :style="stackListStyle">
             <div v-if="Object.keys($root.stackList).length === 0" class="text-center mt-3">
                 <router-link to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
             </div>
@@ -53,7 +53,7 @@
             <StackListItem
                 v-for="(item, index) in sortedStackList"
                 :key="index"
-                :monitor="item"
+                :stack="item"
                 :showPathName="filtersActive"
                 :isSelectMode="selectMode"
                 :isSelected="isSelected"
@@ -64,7 +64,7 @@
     </div>
 
     <Confirm ref="confirmPause" :yes-text="$t('Yes')" :no-text="$t('No')" @yes="pauseSelected">
-        {{ $t("pauseMonitorMsg") }}
+        {{ $t("pauseStackMsg") }}
     </Confirm>
 </template>
 
@@ -89,7 +89,7 @@ export default {
             selectMode: false,
             selectAll: false,
             disableSelectAllWatcher: false,
-            selectedMonitors: {},
+            selectedStacks: {},
             windowTop: 0,
             filterState: {
                 status: null,
@@ -103,7 +103,7 @@ export default {
          * Improve the sticky appearance of the list by increasing its
          * height as user scrolls down.
          * Not used on mobile.
-         * @returns {object} Style for monitor list
+         * @returns {object} Style for stack list
          */
         boxStyle() {
             if (window.innerWidth > 550) {
@@ -119,80 +119,43 @@ export default {
         },
 
         /**
-         * Returns a sorted list of monitors based on the applied filters and search text.
-         * @returns {Array} The sorted list of monitors.
+         * Returns a sorted list of stacks based on the applied filters and search text.
+         * @returns {Array} The sorted list of stacks.
          */
         sortedStackList() {
             let result = Object.values(this.$root.stackList);
 
-            result = result.filter(monitor => {
+            result = result.filter(stack => {
                 // filter by search text
-                // finds monitor name, tag name or tag value
+                // finds stack name, tag name or tag value
                 let searchTextMatch = true;
                 if (this.searchText !== "") {
                     const loweredSearchText = this.searchText.toLowerCase();
                     searchTextMatch =
-                        monitor.name.toLowerCase().includes(loweredSearchText)
-                        || monitor.tags.find(tag => tag.name.toLowerCase().includes(loweredSearchText)
+                        stack.name.toLowerCase().includes(loweredSearchText)
+                        || stack.tags.find(tag => tag.name.toLowerCase().includes(loweredSearchText)
                             || tag.value?.toLowerCase().includes(loweredSearchText));
-                }
-
-                // filter by status
-                let statusMatch = true;
-                if (this.filterState.status != null && this.filterState.status.length > 0) {
-                    if (monitor.id in this.$root.lastHeartbeatList && this.$root.lastHeartbeatList[monitor.id]) {
-                        monitor.status = this.$root.lastHeartbeatList[monitor.id].status;
-                    }
-                    statusMatch = this.filterState.status.includes(monitor.status);
                 }
 
                 // filter by active
                 let activeMatch = true;
                 if (this.filterState.active != null && this.filterState.active.length > 0) {
-                    activeMatch = this.filterState.active.includes(monitor.active);
+                    activeMatch = this.filterState.active.includes(stack.active);
                 }
 
                 // filter by tags
                 let tagsMatch = true;
                 if (this.filterState.tags != null && this.filterState.tags.length > 0) {
-                    tagsMatch = monitor.tags.map(tag => tag.tag_id) // convert to array of tag IDs
-                        .filter(monitorTagId => this.filterState.tags.includes(monitorTagId)) // perform Array Intersaction between filter and monitor's tags
+                    tagsMatch = stack.tags.map(tag => tag.tag_id) // convert to array of tag IDs
+                        .filter(stackTagId => this.filterState.tags.includes(stackTagId)) // perform Array Intersaction between filter and stack's tags
                         .length > 0;
                 }
 
-                // Hide children if not filtering
-                let showChild = true;
-                if (this.filterState.status == null && this.filterState.active == null && this.filterState.tags == null && this.searchText === "") {
-                    if (monitor.parent !== null) {
-                        showChild = false;
-                    }
-                }
-
-                return searchTextMatch && statusMatch && activeMatch && tagsMatch && showChild;
+                return searchTextMatch && activeMatch && tagsMatch;
             });
 
             // Filter result by active state, weight and alphabetical
             result.sort((m1, m2) => {
-                if (m1.active !== m2.active) {
-                    if (m1.active === false) {
-                        return 1;
-                    }
-
-                    if (m2.active === false) {
-                        return -1;
-                    }
-                }
-
-                if (m1.weight !== m2.weight) {
-                    if (m1.weight > m2.weight) {
-                        return -1;
-                    }
-
-                    if (m1.weight < m2.weight) {
-                        return 1;
-                    }
-                }
-
                 return m1.name.localeCompare(m2.name);
             });
 
@@ -203,8 +166,9 @@ export default {
             return document.body.classList.contains("dark");
         },
 
-        monitorListStyle() {
-            let listHeaderHeight = 107;
+        stackListStyle() {
+            //let listHeaderHeight = 107;
+            let listHeaderHeight = 60;
 
             if (this.selectMode) {
                 listHeaderHeight += 42;
@@ -215,8 +179,8 @@ export default {
             };
         },
 
-        selectedMonitorCount() {
-            return Object.keys(this.selectedMonitors).length;
+        selectedStackCount() {
+            return Object.keys(this.selectedStacks).length;
         },
 
         /**
@@ -229,8 +193,8 @@ export default {
     },
     watch: {
         searchText() {
-            for (let monitor of this.sortedMonitorList) {
-                if (!this.selectedMonitors[monitor.id]) {
+            for (let stack of this.sortedStackList) {
+                if (!this.selectedStacks[stack.id]) {
                     if (this.selectAll) {
                         this.disableSelectAllWatcher = true;
                         this.selectAll = false;
@@ -241,11 +205,11 @@ export default {
         },
         selectAll() {
             if (!this.disableSelectAllWatcher) {
-                this.selectedMonitors = {};
+                this.selectedStacks = {};
 
                 if (this.selectAll) {
-                    this.sortedMonitorList.forEach((item) => {
-                        this.selectedMonitors[item.id] = true;
+                    this.sortedStackList.forEach((item) => {
+                        this.selectedStacks[item.id] = true;
                     });
                 }
             } else {
@@ -255,7 +219,7 @@ export default {
         selectMode() {
             if (!this.selectMode) {
                 this.selectAll = false;
-                this.selectedMonitors = {};
+                this.selectedStacks = {};
             }
         },
     },
@@ -286,7 +250,7 @@ export default {
             this.searchText = "";
         },
         /**
-         * Update the MonitorList Filter
+         * Update the StackList Filter
          * @param {object} newFilter Object with new filter
          * @returns {void}
          */
@@ -294,28 +258,28 @@ export default {
             this.filterState = newFilter;
         },
         /**
-         * Deselect a monitor
-         * @param {number} id ID of monitor
+         * Deselect a stack
+         * @param {number} id ID of stack
          * @returns {void}
          */
         deselect(id) {
-            delete this.selectedMonitors[id];
+            delete this.selectedStacks[id];
         },
         /**
-         * Select a monitor
-         * @param {number} id ID of monitor
+         * Select a stack
+         * @param {number} id ID of stack
          * @returns {void}
          */
         select(id) {
-            this.selectedMonitors[id] = true;
+            this.selectedStacks[id] = true;
         },
         /**
-         * Determine if monitor is selected
-         * @param {number} id ID of monitor
-         * @returns {bool} Is the monitor selected?
+         * Determine if stack is selected
+         * @param {number} id ID of stack
+         * @returns {bool} Is the stack selected?
          */
         isSelected(id) {
-            return id in this.selectedMonitors;
+            return id in this.selectedStacks;
         },
         /**
          * Disable select mode and reset selection
@@ -323,7 +287,7 @@ export default {
          */
         cancelSelectMode() {
             this.selectMode = false;
-            this.selectedMonitors = {};
+            this.selectedStacks = {};
         },
         /**
          * Show dialog to confirm pause
@@ -333,24 +297,24 @@ export default {
             this.$refs.confirmPause.show();
         },
         /**
-         * Pause each selected monitor
+         * Pause each selected stack
          * @returns {void}
          */
         pauseSelected() {
-            Object.keys(this.selectedMonitors)
-                .filter(id => this.$root.monitorList[id].active)
-                .forEach(id => this.$root.getSocket().emit("pauseMonitor", id, () => {}));
+            Object.keys(this.selectedStacks)
+                .filter(id => this.$root.stackList[id].active)
+                .forEach(id => this.$root.getSocket().emit("pauseStack", id, () => {}));
 
             this.cancelSelectMode();
         },
         /**
-         * Resume each selected monitor
+         * Resume each selected stack
          * @returns {void}
          */
         resumeSelected() {
-            Object.keys(this.selectedMonitors)
-                .filter(id => !this.$root.monitorList[id].active)
-                .forEach(id => this.$root.getSocket().emit("resumeMonitor", id, () => {}));
+            Object.keys(this.selectedStacks)
+                .filter(id => !this.$root.stackList[id].active)
+                .forEach(id => this.$root.getSocket().emit("resumeStack", id, () => {}));
 
             this.cancelSelectMode();
         },
@@ -428,7 +392,7 @@ export default {
     max-width: 15em;
 }
 
-.monitor-item {
+.stack-item {
     width: 100%;
 }
 

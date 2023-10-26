@@ -14,7 +14,7 @@ export default defineConfig({
     },
     root: "./frontend",
     build: {
-        outDir: "../dist",
+        outDir: "../frontend-dist",
     },
     plugins: [
         vue(),

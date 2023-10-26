@@ -71,7 +71,7 @@ export class MainSocketHandler extends SocketHandler {
                     }
 
                     log.debug("auth", "afterLogin");
-                    await this.afterLogin(socket, user);
+                    await this.afterLogin(server, socket, user);
                     log.debug("auth", "afterLogin ok");
 
                     log.info("auth", `Successfully logged in user ${decoded.username}. IP=${clientIP}`);
@@ -128,7 +128,7 @@ export class MainSocketHandler extends SocketHandler {
 
             if (user) {
                 if (user.twofa_status === 0) {
-                    this.afterLogin(socket, user);
+                    this.afterLogin(server, socket, user);
 
                     log.info("auth", `Successfully logged in user ${data.username}. IP=${clientIP}`);
 
@@ -151,7 +151,7 @@ export class MainSocketHandler extends SocketHandler {
                     const verify = notp.totp.verify(data.token, user.twofa_secret, twoFAVerifyOptions);
 
                     if (user.twofa_last_token !== data.token && verify) {
-                        this.afterLogin(socket, user);
+                        this.afterLogin(server, socket, user);
 
                         await R.exec("UPDATE `user` SET twofa_last_token = ? WHERE id = ? ", [
                             data.token,
@@ -189,10 +189,15 @@ export class MainSocketHandler extends SocketHandler {
         });
     }
 
-    async afterLogin(socket : DockgeSocket, user : User) {
+    async afterLogin(server: DockgeServer, socket : DockgeSocket, user : User) {
         socket.userID = user.id;
-        socket.join(user.id + "");
-        socket.join("terminal");
+        socket.join(user.id.toString());
+
+        try {
+            server.sendStackList(socket);
+        } catch (e) {
+            log.error("server", e);
+        }
     }
 
     async login(username : string, password : string) {

@@ -377,7 +377,7 @@ optgroup {
         color: $dark-font-color;
     }
 
-    .monitor-list {
+    .stack-list {
         .item {
             &:hover {
                 background-color: $dark-bg2;
@@ -474,7 +474,7 @@ optgroup {
     opacity: 0;
 }
 
-.monitor-list {
+.stack-list {
     &.scrollbar {
         overflow-y: auto;
     }
@@ -653,10 +653,26 @@ $shadow-box-padding: 20px;
     }
 }
 
-#terminal {
+.main-terminal {
     .xterm-viewport {
         border-radius: 10px;
         background-color: $dark-bg !important;
+    }
+}
+
+code {
+    padding: .2em .4em;
+    margin: 0;
+    font-size: 85%;
+    white-space: break-spaces;
+    background-color: rgba(239, 239, 239, 0.15);
+
+    border-radius: 6px;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color: black;
+
+    .dark & {
+        color: $dark-font-color;
     }
 }
 
