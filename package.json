@@ -20,6 +20,7 @@
         "check-password-strength": "~2.0.7",
         "command-exists": "^1.2.9",
         "compare-versions": "~6.1.0",
+        "croner": "^7.0.4",
         "dayjs": "^1.11.10",
         "express": "~4.18.2",
         "express-static-gzip": "~2.1.7",

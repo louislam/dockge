@@ -3,6 +3,7 @@ import App from "./App.vue";
 import { router } from "./router";
 import { FontAwesomeIcon } from "./icon.js";
 import { i18n } from "./i18n";
+await import("../../backend/util-common");
 
 // Dependencies
 import "bootstrap";
@@ -24,10 +25,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import socket from "./mixins/socket";
 import lang from "./mixins/lang";
 import theme from "./mixins/theme";
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.extend(relativeTime);
 
 const app = createApp(rootApp());
 

@@ -203,6 +203,20 @@ export default defineComponent({
                     this.stackList = res.stackList;
                 }
             });
+
+            socket.on("stackStatusList", (res) => {
+                if (res.ok) {
+
+                    console.log(res.stackStatusList);
+
+                    for (let stackName in res.stackStatusList) {
+                        const stackObj = this.stackList[stackName];
+                        if (stackObj) {
+                            stackObj.status = res.stackStatusList[stackName];
+                        }
+                    }
+                }
+            });
         },
 
         /**

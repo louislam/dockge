@@ -1,18 +1,6 @@
 import { SocketHandler } from "../socket-handler.js";
 import { DockgeServer } from "../dockge-server";
 import { callbackError, checkLogin, DockgeSocket, ValidationError } from "../util-server";
-import { log } from "../log";
-import yaml from "yaml";
-import path from "path";
-import fs from "fs";
-import {
-    allowedCommandList,
-    allowedRawKeys,
-    getComposeTerminalName,
-    isDev,
-    PROGRESS_TERMINAL_ROWS
-} from "../util-common";
-import { Terminal } from "../terminal";
 import { Stack } from "../stack";
 
 export class DockerSocketHandler extends SocketHandler {
@@ -23,6 +11,7 @@ export class DockerSocketHandler extends SocketHandler {
                 checkLogin(socket);
                 const stack = this.saveStack(socket, server, name, composeYAML, isAdd);
                 await stack.deploy(socket);
+                server.sendStackList();
                 callback({
                     ok: true,
                 });
@@ -39,7 +28,33 @@ export class DockerSocketHandler extends SocketHandler {
                     ok: true,
                     "msg": "Saved"
                 });
-                server.sendStackList(socket);
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        socket.on("deleteStack", async (name : unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof(name) !== "string") {
+                    throw new ValidationError("Name must be a string");
+                }
+                const stack = Stack.getStack(server, name);
+
+                try {
+                    await stack.delete(socket);
+                } catch (e) {
+                    server.sendStackList();
+                    throw e;
+                }
+
+                server.sendStackList();
+                callback({
+                    ok: true,
+                    msg: "Deleted"
+                });
+
             } catch (e) {
                 callbackError(e, callback);
             }

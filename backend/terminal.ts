@@ -47,6 +47,10 @@ export class Terminal {
     }
 
     public start() {
+        if (this._ptyProcess) {
+            return;
+        }
+
         this._ptyProcess = pty.spawn(this.file, this.args, {
             name: this.name,
             cwd: this.cwd,
@@ -139,10 +143,12 @@ export class MainTerminal extends InteractiveTerminal {
     constructor(server : DockgeServer, name : string, cwd : string = "./") {
         let shell;
 
-        if (commandExistsSync("pwsh")) {
-            shell = "pwsh";
-        } else if (os.platform() === "win32") {
-            shell = "powershell.exe";
+        if (os.platform() === "win32") {
+            if (commandExistsSync("pwsh.exe")) {
+                shell = "pwsh.exe";
+            } else {
+                shell = "powershell.exe";
+            }
         } else {
             shell = "bash";
         }

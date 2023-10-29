@@ -13,6 +13,7 @@ A fancy, easy-to-use and reactive docker stack (`docker-compose.yml`) manager.
 - Interactive web terminal for containers and any docker commands
 - Reactive - Everything is just responsive. Progress and terminal output are in real-time
 - Easy-to-use & fancy UI - If you love Uptime Kuma's UI, you will love this too
+- Build on top of [Compose V2](https://docs.docker.com/compose/migrate/), as known as `compose.yaml` and `docker compose`
 
 ## Installation
 
@@ -30,4 +31,6 @@ If you love this project, please consider giving this project a ⭐.
 - Container stats
 - Get app icons
 - Switch Docker context
+- Support Dockerfile and build
 - Zero-config private docker registry
+- Support Docker swarm

@@ -2,9 +2,9 @@
     <transition name="slide-fade" appear>
         <div>
             <h1 v-if="isAdd" class="mb-3">Compose</h1>
-            <h1 v-else class="mb-3">Stack: {{ stack.name }}</h1>
+            <h1 v-else class="mb-3"><Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}</h1>
 
-            <div class="mb-3">
+            <div v-if="stack.isManagedByDockge" class="mb-3">
                 <div class="btn-group" role="group">
                     <button v-if="isEditMode" class="btn btn-primary" :disabled="processing" @click="deployStack">
                         <font-awesome-icon icon="rocket" class="me-1" />
@@ -18,10 +18,11 @@
 
                     <button v-if="!isEditMode" class="btn btn-normal" :disabled="processing" @click="isEditMode = true">{{ $t("editStack") }}</button>
                     <button v-if="isEditMode && !isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
+                    <button v-if="!isEditMode" class="btn btn-primary" :disabled="processing">{{ $t("updateStack") }}</button>
                     <button v-if="!isEditMode" class="btn btn-primary" :disabled="processing">{{ $t("startStack") }}</button>
                     <button v-if="!isEditMode" class="btn btn-primary " :disabled="processing">{{ $t("restartStack") }}</button>
                     <button v-if="!isEditMode" class="btn btn-danger" :disabled="processing">{{ $t("stopStack") }}</button>
-                    <button v-if="!isEditMode" class="btn btn-danger" :disabled="processing">{{ $t("deleteStack") }}</button>
+                    <button v-if="!isEditMode" class="btn btn-danger" :disabled="processing" @click="showDeleteDialog = !showDeleteDialog">{{ $t("deleteStack") }}</button>
                 </div>
             </div>
 
@@ -33,18 +34,20 @@
                     :allow-input="false"
                     class="mb-3 terminal"
                     :rows="progressTerminalRows"
-                    @has-data="showProgressTerminal = true"
+                    @has-data="showProgressTerminal = true; submitted = true;"
                 ></Terminal>
             </transition>
 
-            <div class="row">
+            <div v-if="stack.isManagedByDockge" class="row">
                 <div class="col">
-                    <h4 class="mb-3">General</h4>
-                    <div class="shadow-box big-padding mb-3">
-                        <!-- Stack Name -->
-                        <div v-if="isAdd" class="mb-3">
-                            <label for="name" class="form-label">{{ $t("stackName") }}</label>
-                            <input id="name" v-model="stack.name" type="text" class="form-control" required>
+                    <div v-if="isAdd">
+                        <h4 class="mb-3">General</h4>
+                        <div class="shadow-box big-padding mb-3">
+                            <!-- Stack Name -->
+                            <div class="mb-3">
+                                <label for="name" class="form-label">{{ $t("stackName") }}</label>
+                                <input id="name" v-model="stack.name" type="text" class="form-control" required>
+                            </div>
                         </div>
                     </div>
 
@@ -58,8 +61,9 @@
                 <div class="col">
                     <h4 class="mb-3">compose.yaml</h4>
 
-                    <div class="shadow-box mb-3">
-                        <prism-editor v-model="stack.composeYAML" class="yaml-editor" :highlight="highlighter" line-numbers :readonly="!isEditMode" @input="yamlCodeChange"></prism-editor>
+                    <!-- YAML editor -->
+                    <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
+                        <prism-editor ref="editor" v-model="stack.composeYAML" class="yaml-editor" :highlight="highlighter" line-numbers :readonly="!isEditMode" @input="yamlCodeChange"></prism-editor>
                     </div>
                     <div class="mb-3">
                         {{ yamlError }}
@@ -75,6 +79,15 @@
                     </div>-->
                 </div>
             </div>
+
+            <div v-if="!stack.isManagedByDockge">
+                {{ $t("stackNotManagedByDockgeMsg") }}
+            </div>
+
+            <!-- Delete Dialog -->
+            <BModal v-model="showDeleteDialog" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
+                {{ $t("deleteStackMsg") }}
+            </BModal>
         </div>
     </transition>
 </template>
@@ -89,6 +102,7 @@ import "prismjs/themes/prism-tomorrow.css";
 import "vue-prism-editor/dist/prismeditor.min.css";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { getComposeTerminalName, PROGRESS_TERMINAL_ROWS } from "../../../backend/util-common";
+import { BModal } from "bootstrap-vue-next";
 
 const template = `version: "3.8"
 services:
@@ -104,6 +118,7 @@ export default {
     components: {
         FontAwesomeIcon,
         PrismEditor,
+        BModal,
     },
     data() {
         return {
@@ -112,14 +127,25 @@ export default {
             processing: true,
             showProgressTerminal: false,
             progressTerminalRows: PROGRESS_TERMINAL_ROWS,
-            stack: {},
+            stack: {
+
+            },
             isEditMode: false,
             submitted: false,
+            showDeleteDialog: false,
         };
     },
     computed: {
         isAdd() {
             return this.$route.path === "/compose" && !this.submitted;
+        },
+
+        /**
+         * Get the stack from the global stack list, because it may contain more real-time data like status
+         * @return {*}
+         */
+        globalStack() {
+            return this.$root.stackList[this.stack.name];
         },
     },
     watch: {
@@ -139,6 +165,7 @@ export default {
             this.stack = {
                 name: "",
                 composeYAML: template,
+                isManagedByDockge: true,
             };
 
         } else {
@@ -147,11 +174,17 @@ export default {
         }
     },
     methods: {
+        bindTerminal() {
+            // Bind Terminal output
+            const terminalName = getComposeTerminalName(this.stack.name);
+            this.$refs.progressTerminal.bind(terminalName);
+        },
         loadStack() {
             this.$root.getSocket().emit("getStack", this.stack.name, (res) => {
                 if (res.ok) {
                     this.stack = res.stack;
                     this.processing = false;
+                    this.bindTerminal();
                 } else {
                     this.$root.toastRes(res);
                 }
@@ -160,9 +193,7 @@ export default {
         deployStack() {
             this.processing = true;
 
-            // Bind Terminal output
-            const terminalName = getComposeTerminalName(this.stack.name);
-            this.$refs.progressTerminal.bind(terminalName);
+            this.bindTerminal();
 
             this.$root.getSocket().emit("deployStack", this.stack.name, this.stack.composeYAML, this.isAdd, (res) => {
                 this.processing = false;
@@ -170,8 +201,6 @@ export default {
 
                 if (res.ok) {
                     this.$router.push("/compose/" + this.stack.name);
-                } else {
-                    this.submitted = true;
                 }
             });
         },
@@ -184,6 +213,14 @@ export default {
 
                 if (res.ok) {
                     this.$router.push("/compose/" + this.stack.name);
+                }
+            });
+        },
+        deleteDialog() {
+            this.$root.getSocket().emit("deleteStack", this.stack.name, (res) => {
+                this.$root.toastRes(res);
+                if (res.ok) {
+                    this.$router.push("/");
                 }
             });
         },
@@ -220,5 +257,9 @@ export default {
 <style scoped lang="scss">
 .terminal {
     height: 200px;
+}
+
+.editor-box.edit-mode {
+    background-color: #2c2f38 !important;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :class="{ 'dim' : !stack.isManagedByDockge }">
         <div :style="depthMargin">
             <!-- Checkbox -->
             <div v-if="isSelectMode" class="select-input-wrapper">
@@ -16,7 +16,7 @@
                 <div class="row">
                     <div class="col-9 col-md-8 small-padding">
                         <div class="info">
-                            <Uptime :stack="stack" type="24" :pill="true" />
+                            <Uptime :stack="stack" :fixed-width="true" />
                             {{ stackName }}
                         </div>
                         <div v-if="stack.tags.length > 0" class="tags">
@@ -36,7 +36,6 @@ import Uptime from "./Uptime.vue";
 export default {
     components: {
         Uptime
-
     },
     props: {
         /** Stack this represents */
@@ -179,6 +178,10 @@ export default {
     padding-left: 4px;
     position: relative;
     z-index: 15;
+}
+
+.dim {
+    opacity: 0.5;
 }
 
 </style>

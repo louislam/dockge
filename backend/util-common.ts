@@ -1,7 +1,15 @@
-// For loading dayjs plugins, don't remove event though it is not used in this file
+/*
+ * Common utilities for backend and frontend
+ */
+
+// Init dayjs
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(relativeTime);
 
 let randomBytes : (numBytes: number) => Uint8Array;
 
@@ -17,6 +25,58 @@ if (typeof window !== "undefined" && window.crypto) {
     randomBytes = (await import("node:crypto")).randomBytes;
 }
 
+// Stack Status
+export const UNKNOWN = 0;
+export const CREATED_FILE = 1;
+export const CREATED_STACK = 2;
+export const RUNNING = 3;
+export const EXITED = 4;
+
+export function statusName(status : number) : string {
+    switch (status) {
+        case CREATED_FILE:
+            return "draft";
+        case CREATED_STACK:
+            return "created_stack";
+        case RUNNING:
+            return "running";
+        case EXITED:
+            return "exited";
+        default:
+            return "unknown";
+    }
+}
+
+export function statusNameShort(status : number) : string {
+    switch (status) {
+        case CREATED_FILE:
+            return "draft";
+        case CREATED_STACK:
+            return "inactive";
+        case RUNNING:
+            return "active";
+        case EXITED:
+            return "inactive";
+        default:
+            return "?";
+    }
+}
+
+export function statusColor(status : number) : string {
+    switch (status) {
+        case CREATED_FILE:
+            return "dark";
+        case CREATED_STACK:
+            return "danger";
+        case RUNNING:
+            return "primary";
+        case EXITED:
+            return "danger";
+        default:
+            return "secondary";
+    }
+}
+
 export const isDev = process.env.NODE_ENV === "development";
 export const TERMINAL_COLS = 80;
 export const TERMINAL_ROWS = 10;
@@ -30,6 +90,7 @@ export const allowedCommandList : string[] = [
     "cd",
     "dir",
 ];
+
 export const allowedRawKeys = [
     "\u0003", // Ctrl + C
 ];

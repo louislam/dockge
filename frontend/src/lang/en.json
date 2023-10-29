@@ -18,5 +18,7 @@
     "editStack": "Edit",
     "discardStack": "Discard",
     "saveStackDraft": "Save",
-    "notAvailableShort" : "N/A"
+    "notAvailableShort" : "N/A",
+    "deleteStackMsg": "Are you sure you want to delete this stack?",
+    "stackNotManagedByDockgeMsg": "This stack is not managed by Dockge."
 }

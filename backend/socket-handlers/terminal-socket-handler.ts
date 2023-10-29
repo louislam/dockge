@@ -5,8 +5,14 @@ import { log } from "../log";
 import yaml from "yaml";
 import path from "path";
 import fs from "fs";
-import { allowedCommandList, allowedRawKeys, isDev } from "../util-common";
-import { Terminal } from "../terminal";
+import {
+    allowedCommandList,
+    allowedRawKeys,
+    getComposeTerminalName,
+    isDev,
+    PROGRESS_TERMINAL_ROWS
+} from "../util-common";
+import { MainTerminal, Terminal } from "../terminal";
 
 export class TerminalSocketHandler extends SocketHandler {
     create(socket : DockgeSocket, server : DockgeServer) {
@@ -57,12 +63,36 @@ export class TerminalSocketHandler extends SocketHandler {
         });
 
         // Create Terminal
-        socket.on("terminalCreate", async (terminalName : unknown, callback : unknown) => {
+        socket.on("mainTerminal", async (terminalName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof(terminalName) !== "string") {
+                    throw new ValidationError("Terminal name must be a string.");
+                }
 
+                log.debug("deployStack", "Terminal name: " + terminalName);
+
+                let terminal = Terminal.getTerminal(terminalName);
+
+                if (!terminal) {
+                    terminal = new MainTerminal(server, terminalName);
+                    terminal.rows = 50;
+                    log.debug("deployStack", "Terminal created");
+                }
+
+                terminal.join(socket);
+                terminal.start();
+
+                callback({
+                    ok: true,
+                });
+            } catch (e) {
+                callbackError(e, callback);
+            }
         });
 
         // Join Terminal
-        socket.on("terminalJoin", async (terminalName : unknown, callback : unknown) => {
+        socket.on("terminalJoin", async (terminalName : unknown, callback) => {
             if (typeof(callback) !== "function") {
                 log.debug("console", "Callback is not a function.");
                 return;

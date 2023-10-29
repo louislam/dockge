@@ -23,6 +23,9 @@ dependencies:
   compare-versions:
     specifier: ~6.1.0
     version: 6.1.0
+  croner:
+    specifier: ^7.0.4
+    version: 7.0.4
   dayjs:
     specifier: ^1.11.10
     version: 1.11.10
@@ -1782,6 +1785,11 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /croner@7.0.4:
+    resolution: {integrity: sha512-P8Zd88km8oQ0xH8Es0u75GtOnFyCNopuAhlFv5kAnbcTuXd0xNvRTgnxnJEs63FicCOsHTL7rpu4BHzY3cMq4w==}
+    engines: {node: '>=6.0'}
+    dev: false
 
   /cross-env@7.0.3:
     resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}

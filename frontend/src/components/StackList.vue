@@ -71,6 +71,7 @@
 <script>
 import Confirm from "../components/Confirm.vue";
 import StackListItem from "../components/StackListItem.vue";
+import { CREATED_FILE, CREATED_STACK, EXITED, RUNNING, UNKNOWN } from "../../../backend/util-common";
 
 export default {
     components: {
@@ -154,8 +155,30 @@ export default {
                 return searchTextMatch && activeMatch && tagsMatch;
             });
 
-            // Filter result by active state, weight and alphabetical
             result.sort((m1, m2) => {
+                if (m1.status !== m2.status) {
+                    if (m2.status === RUNNING) {
+                        return 1;
+                    } else if (m1.status === RUNNING) {
+                        return -1;
+                    } else if (m2.status === EXITED) {
+                        return 1;
+                    } else if (m1.status === EXITED) {
+                        return -1;
+                    } else if (m2.status === CREATED_STACK) {
+                        return 1;
+                    } else if (m1.status === CREATED_STACK) {
+                        return -1;
+                    } else if (m2.status === CREATED_FILE) {
+                        return 1;
+                    } else if (m1.status === CREATED_FILE) {
+                        return -1;
+                    } else if (m2.status === UNKNOWN) {
+                        return 1;
+                    } else if (m1.status === UNKNOWN) {
+                        return -1;
+                    }
+                }
                 return m1.name.localeCompare(m2.name);
             });
 

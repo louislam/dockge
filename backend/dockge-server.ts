@@ -26,6 +26,8 @@ import expressStaticGzip from "express-static-gzip";
 import path from "path";
 import { TerminalSocketHandler } from "./socket-handlers/terminal-socket-handler";
 import { Stack } from "./stack";
+import { Cron } from "croner";
+import childProcess from "child_process";
 
 export class DockgeServer {
     app : Express;
@@ -248,6 +250,15 @@ export class DockgeServer {
             } else {
                 log.info("server", `Listening on ${this.config.port}`);
             }
+
+            // Run every 5 seconds
+            const job = Cron("*/2 * * * * *", {
+                protect: true,  // Enabled over-run protection.
+            }, () => {
+                log.debug("server", "Cron job running");
+                this.sendStackList(true);
+            });
+
         });
     }
 
@@ -412,18 +423,40 @@ export class DockgeServer {
         return jwtSecretBean;
     }
 
-    sendStackList(socket : DockgeSocket) {
-        let room = socket.userID.toString();
-        let stackList = Stack.getStackList(this);
-        let list = {};
-
-        for (let stack of stackList) {
-            list[stack.name] = stack.toSimpleJSON();
+    sendStackList(useCache = false) {
+        let stackList = Stack.getStackList(this, useCache);
+        let roomList = this.io.sockets.adapter.rooms.keys();
+        for (let room of roomList) {
+            // Check if the room is a number (user id)
+            if (Number(room)) {
+                this.io.to(room).emit("stackList", {
+                    ok: true,
+                    stackList: Object.fromEntries(stackList),
+                });
+            }
         }
+    }
 
-        this.io.to(room).emit("stackList", {
-            ok: true,
-            stackList: list,
-        });
+    sendStackStatusList() {
+        let statusList = Stack.getStatusList();
+
+        let roomList = this.io.sockets.adapter.rooms.keys();
+
+        for (let room of roomList) {
+            // Check if the room is a number (user id)
+            if (Number(room)) {
+                log.debug("server", "Send stack status list to room " + room);
+                this.io.to(room).emit("stackStatusList", {
+                    ok: true,
+                    stackStatusList: Object.fromEntries(statusList),
+                });
+            } else {
+                log.debug("server", "Skip sending stack status list to room " + room);
+            }
+        }
+    }
+
+    get stackDirFullPath() {
+        return path.resolve(this.stacksDir);
     }
 }

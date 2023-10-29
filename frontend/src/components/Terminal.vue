@@ -46,7 +46,7 @@ export default {
             rows: this.rows,
         });
 
-        this.terminal.loadAddon(new WebLinksAddon());
+        //this.terminal.loadAddon(new WebLinksAddon());
 
         // Bind to a div
         this.terminal.open(this.$refs.terminal);

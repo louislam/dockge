@@ -9,7 +9,7 @@
                 </p>
             </div>
 
-            <Terminal :allow-input="true" class="terminal"></Terminal>
+            <Terminal ref="terminal" :allow-input="true" class="terminal" :rows="20"></Terminal>
         </div>
     </transition>
 </template>
@@ -20,7 +20,16 @@ export default {
     components: {
     },
     mounted() {
-        this.$root.terminalFit(50);
+        // Bind Terminal Component to Socket.io
+        const terminalName = "console";
+        this.$refs.terminal.bind(terminalName);
+
+        // Create a new Terminal
+        this.$root.getSocket().emit("mainTerminal", terminalName, (res) => {
+            if (!res.ok) {
+                this.$root.toastRes(res);
+            }
+        });
     },
     methods: {
 

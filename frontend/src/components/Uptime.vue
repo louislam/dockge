@@ -1,23 +1,17 @@
 <template>
-    <span :class="className" :title="title">{{ uptime }}</span>
+    <span :class="className">{{ statusName }}</span>
 </template>
 
 <script>
+import { statusColor, statusNameShort } from "../../../backend/util-common";
 
 export default {
     props: {
-        /** Monitor this represents */
-        monitor: {
+        stack: {
             type: Object,
             default: null,
         },
-        /** Type of monitor */
-        type: {
-            type: String,
-            default: null,
-        },
-        /** Is this a pill? */
-        pill: {
+        fixedWidth: {
             type: Boolean,
             default: false,
         },
@@ -25,28 +19,26 @@ export default {
 
     computed: {
         uptime() {
+            return "0.00%";
             return this.$t("notAvailableShort");
         },
 
         color() {
-            return "secondary";
+            return statusColor(this.stack?.status);
+        },
+
+        statusName() {
+            return this.$t(statusNameShort(this.stack?.status));
         },
 
         className() {
-            if (this.pill) {
-                return `badge rounded-pill bg-${this.color}`;
-            }
+            let className = `badge rounded-pill bg-${this.color}`;
 
-            return "";
+            if (this.fixedWidth) {
+                className += " fixed-width";
+            }
+            return className;
         },
-
-        title() {
-            if (this.type === "720") {
-                return `30${this.$t("-day")}`;
-            }
-
-            return `24${this.$t("-hour")}`;
-        }
     },
 };
 </script>
@@ -54,5 +46,9 @@ export default {
 <style>
 .badge {
     min-width: 62px;
+}
+
+.fixed-width {
+    width: 62px;
 }
 </style>
