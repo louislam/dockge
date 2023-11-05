@@ -1,32 +1,8 @@
 <template>
-    <div :class="{ 'dim' : !stack.isManagedByDockge }">
-        <div :style="depthMargin">
-            <!-- Checkbox -->
-            <div v-if="isSelectMode" class="select-input-wrapper">
-                <input
-                    class="form-check-input select-input"
-                    type="checkbox"
-                    :aria-label="$t('Check/Uncheck')"
-                    :checked="isSelected(stack.id)"
-                    @click.stop="toggleSelection"
-                />
-            </div>
-
-            <router-link :to="`/compose/${stack.name}`" class="item">
-                <div class="row">
-                    <div class="col-9 col-md-8 small-padding">
-                        <div class="info">
-                            <Uptime :stack="stack" :fixed-width="true" />
-                            {{ stackName }}
-                        </div>
-                        <div v-if="stack.tags.length > 0" class="tags">
-                            <!--<Tag v-for="tag in stack.tags" :key="tag" :item="tag" :size="'sm'" />-->
-                        </div>
-                    </div>
-                </div>
-            </router-link>
-        </div>
-    </div>
+    <router-link :to="`/compose/${stack.name}`" :class="{ 'dim' : !stack.isManagedByDockge }" class="item">
+        <Uptime :stack="stack" :fixed-width="true" class="me-2" />
+        <span class="title">{{ stackName }}</span>
+    </router-link>
 </template>
 
 <script>
@@ -42,11 +18,6 @@ export default {
         stack: {
             type: Object,
             default: null,
-        },
-        /** Should the stack name show it's parent */
-        showPathName: {
-            type: Boolean,
-            default: false,
         },
         /** If the user is in select mode */
         isSelectMode: {
@@ -86,11 +57,7 @@ export default {
             };
         },
         stackName() {
-            if (this.showPathName) {
-                return this.stack.pathName;
-            } else {
-                return this.stack.name;
-            }
+            return this.stack.name;
         }
     },
     watch: {

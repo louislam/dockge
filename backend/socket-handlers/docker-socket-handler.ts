@@ -14,6 +14,7 @@ export class DockerSocketHandler extends SocketHandler {
                 server.sendStackList();
                 callback({
                     ok: true,
+                    msg: "Deployed",
                 });
             } catch (e) {
                 callbackError(e, callback);
@@ -69,10 +70,114 @@ export class DockerSocketHandler extends SocketHandler {
                 }
 
                 const stack = Stack.getStack(server, stackName);
+
+                stack.startCombinedTerminal(socket);
+
                 callback({
                     ok: true,
                     stack: stack.toJSON(),
                 });
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // requestStackList
+        socket.on("requestStackList", async (callback) => {
+            try {
+                checkLogin(socket);
+                server.sendStackList();
+                callback({
+                    ok: true,
+                    msg: "Updated"
+                });
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // startStack
+        socket.on("startStack", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = Stack.getStack(server, stackName);
+                await stack.start(socket);
+                callback({
+                    ok: true,
+                    msg: "Started"
+                });
+                server.sendStackList();
+
+                stack.startCombinedTerminal(socket);
+
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // stopStack
+        socket.on("stopStack", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = Stack.getStack(server, stackName);
+                await stack.stop(socket);
+                callback({
+                    ok: true,
+                    msg: "Stopped"
+                });
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // restartStack
+        socket.on("restartStack", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = Stack.getStack(server, stackName);
+                await stack.restart(socket);
+                callback({
+                    ok: true,
+                    msg: "Restarted"
+                });
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // updateStack
+        socket.on("updateStack", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = Stack.getStack(server, stackName);
+                await stack.update(socket);
+                callback({
+                    ok: true,
+                    msg: "Updated"
+                });
+                server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -95,5 +200,6 @@ export class DockerSocketHandler extends SocketHandler {
         stack.save(isAdd);
         return stack;
     }
+
 }
 

@@ -18,33 +18,61 @@ export default {
 
     },
     props: {
-        allowInput: {
-            type: Boolean,
-            default: true,
+        name: {
+            type: String,
+            required: true,
         },
+
         rows: {
             type: Number,
             default: TERMINAL_ROWS,
+        },
+
+        cols: {
+            type: Number,
+            default: TERMINAL_COLS,
+        },
+
+        // Mode
+        // displayOnly: Only display terminal output
+        // mainTerminal: Allow input limited commands and output
+        // interactive: Free input and output
+        mode: {
+            type: String,
+            default: "displayOnly",
         }
     },
     emits: [ "has-data" ],
     data() {
         return {
-            name: null,
             first: true,
+            terminalInputBuffer: "",
+            cursorPosition: 0,
         };
     },
     created() {
 
     },
     mounted() {
+        let cursorBlink = true;
+
+        if (this.mode === "displayOnly") {
+            cursorBlink = false;
+        }
+
         this.terminal = new Terminal({
             fontSize: 16,
             fontFamily: "monospace",
-            cursorBlink: this.allowInput,
-            cols: TERMINAL_COLS,
+            cursorBlink,
+            cols: this.cols,
             rows: this.rows,
         });
+
+        if (this.mode === "mainTerminal") {
+            this.mainTerminalConfig();
+        } else if (this.mode === "interactive") {
+            this.interactiveTerminalConfig();
+        }
 
         //this.terminal.loadAddon(new WebLinksAddon());
 
@@ -60,6 +88,24 @@ export default {
                 this.first = false;
             }
         });
+
+        this.bind();
+
+        // Create a new Terminal
+        if (this.mode === "mainTerminal") {
+            this.$root.getSocket().emit("mainTerminal", this.name, (res) => {
+                if (!res.ok) {
+                    this.$root.toastRes(res);
+                }
+            });
+        } else if (this.mode === "interactive") {
+            this.$root.getSocket().emit("interactiveTerminal", this.name, (res) => {
+                if (!res.ok) {
+                    this.$root.toastRes(res);
+                }
+            });
+        }
+
     },
 
     unmounted() {
@@ -69,12 +115,77 @@ export default {
 
     methods: {
         bind(name) {
-            if (this.name) {
+            // Workaround: normally this.name should be set, but it is not sometimes, so we use the parameter, but eventually this.name and name must be the same name
+            if (name) {
+                this.$root.unbindTerminal(name);
+                this.$root.bindTerminal(name, this.terminal);
+                console.debug("Terminal bound via parameter: " + name);
+            } else if (this.name) {
                 this.$root.unbindTerminal(this.name);
+                this.$root.bindTerminal(this.name, this.terminal);
+                console.debug("Terminal bound: " + this.name);
+            } else {
+                console.debug("Terminal name not set");
             }
-            this.name = name;
-            this.$root.bindTerminal(this.name, this.terminal);
         },
+
+        removeInput() {
+            const backspaceCount = this.terminalInputBuffer.length;
+            const backspaces = "\b \b".repeat(backspaceCount);
+            this.cursorPosition = 0;
+            this.terminal.write(backspaces);
+            this.terminalInputBuffer = "";
+        },
+
+        mainTerminalConfig() {
+            this.terminal.onKey(e => {
+                const code = e.key.charCodeAt(0);
+                console.debug("Encode: " + JSON.stringify(e.key));
+
+                if (e.key === "\r") {
+                    // Return if no input
+                    if (this.terminalInputBuffer.length === 0) {
+                        return;
+                    }
+
+                    const buffer = this.terminalInputBuffer;
+
+                    // Remove the input from the terminal
+                    this.removeInput();
+
+                    this.$root.getSocket().emit("terminalInput", this.name, buffer + e.key, (err) => {
+                        this.$root.toastError(err.msg);
+                    });
+
+                } else if (code === 127) { // Backspace
+                    if (this.cursorPosition > 0) {
+                        this.terminal.write("\b \b");
+                        this.cursorPosition--;
+                        this.terminalInputBuffer = this.terminalInputBuffer.slice(0, -1);
+                    }
+                } else if (e.key === "\u001B\u005B\u0041" || e.key === "\u001B\u005B\u0042") {      // UP OR DOWN
+                    // Do nothing
+
+                } else if (e.key === "\u001B\u005B\u0043") {      // RIGHT
+                    // TODO
+                } else if (e.key === "\u001B\u005B\u0044") {      // LEFT
+                    // TODO
+                } else if (e.key === "\u0003") {      // Ctrl + C
+                    console.debug("Ctrl + C");
+                    this.$root.getSocket().emit("terminalInput", this.name, e.key);
+                    this.removeInput();
+                } else {
+                    this.cursorPosition++;
+                    this.terminalInputBuffer += e.key;
+                    console.log(this.terminalInputBuffer);
+                    this.terminal.write(e.key);
+                }
+            });
+        },
+
+        interactiveTerminalConfig() {
+
+        }
     }
 };
 </script>

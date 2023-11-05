@@ -5,9 +5,11 @@ import yaml from "yaml";
 import { DockgeSocket, ValidationError } from "./util-server";
 import path from "path";
 import {
+    COMBINED_TERMINAL_COLS,
+    COMBINED_TERMINAL_ROWS,
     CREATED_FILE,
     CREATED_STACK,
-    EXITED,
+    EXITED, getCombinedTerminalName,
     getComposeTerminalName,
     PROGRESS_TERMINAL_ROWS,
     RUNNING,
@@ -24,6 +26,8 @@ export class Stack {
     protected _configFilePath?: string;
     protected server: DockgeServer;
 
+    protected combinedTerminal? : Terminal;
+
     protected static managedStackList: Map<string, Stack> = new Map();
 
     constructor(server : DockgeServer, name : string, composeYAML? : string) {
@@ -37,7 +41,6 @@ export class Stack {
         return {
             ...obj,
             composeYAML: this.composeYAML,
-            isManagedByDockge: this.isManagedByDockge,
         };
     }
 
@@ -46,7 +49,18 @@ export class Stack {
             name: this.name,
             status: this._status,
             tags: [],
+            isManagedByDockge: this.isManagedByDockge,
         };
+    }
+
+    /**
+     * Get the status of the stack from `docker compose ps --format json`
+     */
+    ps() : object {
+        let res = childProcess.execSync("docker compose ps --format json", {
+            cwd: this.path
+        });
+        return JSON.parse(res.toString());
     }
 
     get isManagedByDockge() : boolean {
@@ -128,70 +142,29 @@ export class Stack {
         fs.writeFileSync(path.join(dir, "compose.yaml"), this.composeYAML);
     }
 
-    deploy(socket? : DockgeSocket) : Promise<number> {
+    async deploy(socket? : DockgeSocket) : Promise<number> {
         const terminalName = getComposeTerminalName(this.name);
-        log.debug("deployStack", "Terminal name: " + terminalName);
-
-        const terminal = new Terminal(this.server, terminalName, "docker-compose", [ "up", "-d" ], this.path);
-        log.debug("deployStack", "Terminal created");
-
-        terminal.rows = PROGRESS_TERMINAL_ROWS;
-
-        if (socket) {
-            terminal.join(socket);
-            log.debug("deployStack", "Terminal joined");
-        } else {
-            log.debug("deployStack", "No socket, not joining");
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker-compose", [ "up", "-d", "--remove-orphans" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to deploy, please check the terminal output for more information.");
         }
-
-        return new Promise((resolve, reject) => {
-            terminal.onExit((exitCode : number) => {
-                if (exitCode === 0) {
-                    resolve(exitCode);
-                } else {
-                    reject(new Error("Failed to deploy, please check the terminal output for more information."));
-                }
-            });
-            terminal.start();
-        });
+        return exitCode;
     }
 
-    delete(socket?: DockgeSocket) : Promise<number> {
-        // Docker compose down
+    async delete(socket?: DockgeSocket) : Promise<number> {
         const terminalName = getComposeTerminalName(this.name);
-        log.debug("deleteStack", "Terminal name: " + terminalName);
-
-        const terminal = new Terminal(this.server, terminalName, "docker-compose", [ "down" ], this.path);
-
-        terminal.rows = PROGRESS_TERMINAL_ROWS;
-
-        if (socket) {
-            terminal.join(socket);
-            log.debug("deployStack", "Terminal joined");
-        } else {
-            log.debug("deployStack", "No socket, not joining");
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker-compose", [ "down", "--remove-orphans", "--rmi", "all" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to delete, please check the terminal output for more information.");
         }
 
-        return new Promise((resolve, reject) => {
-            terminal.onExit((exitCode : number) => {
-                if (exitCode === 0) {
-                    // Remove the stack folder
-                    try {
-                        fs.rmSync(this.path, {
-                            recursive: true,
-                            force: true
-                        });
-                        resolve(exitCode);
-                    } catch (e) {
-                        reject(e);
-                    }
-                } else {
-                    reject(new Error("Failed to delete, please check the terminal output for more information."));
-                }
-            });
-            terminal.start();
+        // Remove the stack folder
+        fs.rmSync(this.path, {
+            recursive: true,
+            force: true
         });
 
+        return exitCode;
     }
 
     static getStackList(server : DockgeServer, useCacheForManaged = false) : Map<string, Stack> {
@@ -257,6 +230,10 @@ export class Stack {
         return statusList;
     }
 
+    /**
+     * Convert the status string from `docker compose ls` to the status number
+     * @param status
+     */
     static statusConvert(status : string) : number {
         if (status.startsWith("created")) {
             return CREATED_STACK;
@@ -289,5 +266,54 @@ export class Stack {
         stack._status = UNKNOWN;
         stack._configFilePath = path.resolve(dir);
         return stack;
+    }
+
+    async start(socket: DockgeSocket) {
+        const terminalName = getComposeTerminalName(this.name);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker-compose", [ "up", "-d", "--remove-orphans" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to start, please check the terminal output for more information.");
+        }
+        return exitCode;
+    }
+
+    async stop(socket: DockgeSocket) : Promise<number> {
+        const terminalName = getComposeTerminalName(this.name);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker-compose", [ "stop" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to stop, please check the terminal output for more information.");
+        }
+        return exitCode;
+    }
+
+    async restart(socket: DockgeSocket) : Promise<number> {
+        const terminalName = getComposeTerminalName(this.name);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker-compose", [ "restart" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to restart, please check the terminal output for more information.");
+        }
+        return exitCode;
+    }
+
+    async update(socket: DockgeSocket) {
+        const terminalName = getComposeTerminalName(this.name);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker-compose", [ "pull" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to pull, please check the terminal output for more information.");
+        }
+        exitCode = await Terminal.exec(this.server, socket, terminalName, "docker-compose", [ "up", "-d", "--remove-orphans" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to restart, please check the terminal output for more information.");
+        }
+        return exitCode;
+    }
+
+    async startCombinedTerminal(socket: DockgeSocket) {
+        const terminalName = getCombinedTerminalName(this.name);
+        const terminal = Terminal.getOrCreateTerminal(this.server, terminalName, "docker-compose", [ "logs", "-f" ], this.path);
+        terminal.rows = COMBINED_TERMINAL_ROWS;
+        terminal.cols = COMBINED_TERMINAL_COLS;
+        terminal.join(socket);
+        terminal.start();
     }
 }

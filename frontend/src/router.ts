@@ -6,6 +6,15 @@ import Dashboard from "./pages/Dashboard.vue";
 import DashboardHome from "./pages/DashboardHome.vue";
 import Console from "./pages/Console.vue";
 import Compose from "./pages/Compose.vue";
+import ContainerTerminal from "./pages/ContainerTerminal.vue";
+
+const Settings = () => import("./pages/Settings.vue");
+
+// Settings - Sub Pages
+import Appearance from "./components/settings/Appearance.vue";
+import General from "./components/settings/General.vue";
+const Security = () => import("./components/settings/Security.vue");
+import About from "./components/settings/About.vue";
 
 const routes = [
     {
@@ -30,13 +39,41 @@ const routes = [
                                 name: "compose",
                                 component: Compose,
                                 props: true,
+                                children: [
+                                    {
+                                        path: "/compose/:stackName/terminal/:serviceName/:type",
+                                        component: ContainerTerminal,
+                                        name: "containerTerminal",
+                                    },
+                                ]
                             },
-
                         ]
                     },
                     {
                         path: "/console",
                         component: Console,
+                    },
+                    {
+                        path: "/settings",
+                        component: Settings,
+                        children: [
+                            {
+                                path: "general",
+                                component: General,
+                            },
+                            {
+                                path: "appearance",
+                                component: Appearance,
+                            },
+                            {
+                                path: "security",
+                                component: Security,
+                            },
+                            {
+                                path: "about",
+                                component: About,
+                            },
+                        ]
                     },
                 ]
             },

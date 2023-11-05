@@ -3,7 +3,14 @@ import * as os from "node:os";
 import * as pty from "@homebridge/node-pty-prebuilt-multiarch";
 import { LimitQueue } from "./utils/limit-queue";
 import { DockgeSocket } from "./util-server";
-import { getCryptoRandomInt, TERMINAL_COLS, TERMINAL_ROWS } from "./util-common";
+import {
+    allowedCommandList, allowedRawKeys,
+    getComposeTerminalName,
+    getCryptoRandomInt,
+    PROGRESS_TERMINAL_ROWS,
+    TERMINAL_COLS,
+    TERMINAL_ROWS
+} from "./util-common";
 import { sync as commandExistsSync } from "command-exists";
 import { log } from "./log";
 
@@ -25,6 +32,7 @@ export class Terminal {
     protected callback? : (exitCode : number) => void;
 
     protected _rows : number = TERMINAL_ROWS;
+    protected _cols : number = TERMINAL_COLS;
 
     constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
@@ -43,7 +51,16 @@ export class Terminal {
 
     set rows(rows : number) {
         this._rows = rows;
-        this.ptyProcess?.resize(TERMINAL_COLS, rows);
+        this.ptyProcess?.resize(this.cols, this.rows);
+    }
+
+    get cols() {
+        return this._cols;
+    }
+
+    set cols(cols : number) {
+        this._cols = cols;
+        this.ptyProcess?.resize(this.cols, this.rows);
     }
 
     public start() {
@@ -119,6 +136,30 @@ export class Terminal {
     public static getTerminal(name : string) : Terminal | undefined {
         return Terminal.terminalMap.get(name);
     }
+
+    public static getOrCreateTerminal(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) : Terminal {
+        let terminal = Terminal.getTerminal(name);
+        if (!terminal) {
+            terminal = new Terminal(server, name, file, args, cwd);
+        }
+        return terminal;
+    }
+
+    public static exec(server : DockgeServer, socket : DockgeSocket | undefined, terminalName : string, file : string, args : string | string[], cwd : string) : Promise<number> {
+        const terminal = new Terminal(server, terminalName, file, args, cwd);
+        terminal.rows = PROGRESS_TERMINAL_ROWS;
+
+        if (socket) {
+            terminal.join(socket);
+        }
+
+        return new Promise((resolve) => {
+            terminal.onExit((exitCode : number) => {
+                resolve(exitCode);
+            });
+            terminal.start();
+        });
+    }
 }
 
 /**
@@ -140,7 +181,7 @@ export class InteractiveTerminal extends Terminal {
  * User interactive terminal that use bash or powershell with limited commands such as docker, ls, cd, dir
  */
 export class MainTerminal extends InteractiveTerminal {
-    constructor(server : DockgeServer, name : string, cwd : string = "./") {
+    constructor(server : DockgeServer, name : string) {
         let shell;
 
         if (os.platform() === "win32") {
@@ -152,6 +193,25 @@ export class MainTerminal extends InteractiveTerminal {
         } else {
             shell = "bash";
         }
-        super(server, name, shell, [], cwd);
+        super(server, name, shell, [], server.stacksDir);
+    }
+
+    public write(input : string) {
+        // For like Ctrl + C
+        if (allowedRawKeys.includes(input)) {
+            super.write(input);
+            return;
+        }
+
+        // Check if the command is allowed
+        const cmdParts = input.split(" ");
+        const executable = cmdParts[0].trim();
+        log.debug("console", "Executable: " + executable);
+        log.debug("console", "Executable length: " + executable.length);
+
+        if (!allowedCommandList.includes(executable)) {
+            throw new Error("Command not allowed.");
+        }
+        super.write(input);
     }
 }

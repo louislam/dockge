@@ -11,6 +11,8 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(relativeTime);
 
+import { parseDocument, Document } from "yaml";
+
 let randomBytes : (numBytes: number) => Uint8Array;
 
 if (typeof window !== "undefined" && window.crypto) {
@@ -50,13 +52,13 @@ export function statusName(status : number) : string {
 export function statusNameShort(status : number) : string {
     switch (status) {
         case CREATED_FILE:
-            return "draft";
+            return "inactive";
         case CREATED_STACK:
             return "inactive";
         case RUNNING:
             return "active";
         case EXITED:
-            return "inactive";
+            return "exited";
         default:
             return "?";
     }
@@ -67,7 +69,7 @@ export function statusColor(status : number) : string {
         case CREATED_FILE:
             return "dark";
         case CREATED_STACK:
-            return "danger";
+            return "dark";
         case RUNNING:
             return "primary";
         case EXITED:
@@ -78,9 +80,12 @@ export function statusColor(status : number) : string {
 }
 
 export const isDev = process.env.NODE_ENV === "development";
-export const TERMINAL_COLS = 80;
+export const TERMINAL_COLS = 105;
 export const TERMINAL_ROWS = 10;
 export const PROGRESS_TERMINAL_ROWS = 8;
+
+export const COMBINED_TERMINAL_COLS = 50;
+export const COMBINED_TERMINAL_ROWS = 15;
 
 export const ERROR_TYPE_VALIDATION = 1;
 
@@ -182,11 +187,68 @@ export function getComposeTerminalName(stack : string) {
     return "compose-" + stack;
 }
 
+export function getCombinedTerminalName(stack : string) {
+    return "combined-" + stack;
+}
+
 export function getContainerTerminalName(container : string) {
     return "container-" + container;
 }
 
-export function getContainerExecTerminalName(container : string, index : number) {
+export function getContainerExecTerminalName(stackName : string, container : string, index : number) {
     return "container-exec-" + container + "-" + index;
 }
 
+export function copyYAMLComments(doc : Document, src : Document) {
+    doc.comment = src.comment;
+    doc.commentBefore = src.commentBefore;
+
+    if (doc && doc.contents && src && src.contents) {
+        // @ts-ignore
+        copyYAMLCommentsItems(doc.contents.items, src.contents.items);
+    }
+}
+
+/**
+ * Copy yaml comments from srcItems to items
+ * Typescript is super annoying here, so I have to use any here
+ * TODO: Since comments are belong to the array index, the comments will be lost if the order of the items is changed or removed or added.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function copyYAMLCommentsItems(items : any, srcItems : any) {
+    if (!items || !srcItems) {
+        return;
+    }
+
+    for (let i = 0; i < items.length; i++) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const item : any = items[i];
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const srcItem : any = srcItems[i];
+
+        if (!srcItem) {
+            continue;
+        }
+
+        if (item.key && srcItem.key) {
+            item.key.comment = srcItem.key.comment;
+            item.key.commentBefore = srcItem.key.commentBefore;
+        }
+
+        if (srcItem.comment) {
+            item.comment = srcItem.comment;
+        }
+
+        if (item.value && srcItem.value) {
+            if (typeof item.value === "object" && typeof srcItem.value === "object") {
+                item.value.comment = srcItem.value.comment;
+                item.value.commentBefore = srcItem.value.commentBefore;
+
+                if (item.value.items && srcItem.value.items) {
+                    copyYAMLCommentsItems(item.value.items, srcItem.value.items);
+                }
+            }
+        }
+    }
+}

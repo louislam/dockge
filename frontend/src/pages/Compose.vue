@@ -5,7 +5,7 @@
             <h1 v-else class="mb-3"><Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}</h1>
 
             <div v-if="stack.isManagedByDockge" class="mb-3">
-                <div class="btn-group" role="group">
+                <div class="btn-group me-2" role="group">
                     <button v-if="isEditMode" class="btn btn-primary" :disabled="processing" @click="deployStack">
                         <font-awesome-icon icon="rocket" class="me-1" />
                         {{ $t("deployStack") }}
@@ -16,14 +16,37 @@
                         {{ $t("saveStackDraft") }}
                     </button>
 
-                    <button v-if="!isEditMode" class="btn btn-normal" :disabled="processing" @click="isEditMode = true">{{ $t("editStack") }}</button>
-                    <button v-if="isEditMode && !isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
-                    <button v-if="!isEditMode" class="btn btn-primary" :disabled="processing">{{ $t("updateStack") }}</button>
-                    <button v-if="!isEditMode" class="btn btn-primary" :disabled="processing">{{ $t("startStack") }}</button>
-                    <button v-if="!isEditMode" class="btn btn-primary " :disabled="processing">{{ $t("restartStack") }}</button>
-                    <button v-if="!isEditMode" class="btn btn-danger" :disabled="processing">{{ $t("stopStack") }}</button>
-                    <button v-if="!isEditMode" class="btn btn-danger" :disabled="processing" @click="showDeleteDialog = !showDeleteDialog">{{ $t("deleteStack") }}</button>
+                    <button v-if="!isEditMode" class="btn btn-secondary" :disabled="processing" @click="enableEditMode">
+                        <font-awesome-icon icon="pen" class="me-1" />
+                        {{ $t("editStack") }}
+                    </button>
+
+                    <button v-if="!isEditMode && !active" class="btn btn-primary" :disabled="processing" @click="startStack">
+                        <font-awesome-icon icon="play" class="me-1" />
+                        {{ $t("startStack") }}
+                    </button>
+
+                    <button v-if="!isEditMode && active" class="btn btn-normal " :disabled="processing" @click="restartStack">
+                        <font-awesome-icon icon="rotate" class="me-1" />
+                        {{ $t("restartStack") }}
+                    </button>
+
+                    <button v-if="!isEditMode" class="btn btn-normal" :disabled="processing" @click="updateStack">
+                        <font-awesome-icon icon="cloud-arrow-down" class="me-1" />
+                        {{ $t("updateStack") }}
+                    </button>
+
+                    <button v-if="!isEditMode && active" class="btn btn-normal" :disabled="processing" @click="stopStack">
+                        <font-awesome-icon icon="stop" class="me-1" />
+                        {{ $t("stopStack") }}
+                    </button>
                 </div>
+
+                <button v-if="isEditMode && !isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
+                <button v-if="!isEditMode" class="btn btn-danger" :disabled="processing" @click="showDeleteDialog = !showDeleteDialog">
+                    <font-awesome-icon icon="trash" class="me-1" />
+                    {{ $t("deleteStack") }}
+                </button>
             </div>
 
             <!-- Progress Terminal -->
@@ -31,17 +54,18 @@
                 <Terminal
                     v-show="showProgressTerminal"
                     ref="progressTerminal"
-                    :allow-input="false"
                     class="mb-3 terminal"
+                    :name="terminalName"
                     :rows="progressTerminalRows"
                     @has-data="showProgressTerminal = true; submitted = true;"
                 ></Terminal>
             </transition>
 
             <div v-if="stack.isManagedByDockge" class="row">
-                <div class="col">
+                <div class="col-lg-6">
+                    <!-- General -->
                     <div v-if="isAdd">
-                        <h4 class="mb-3">General</h4>
+                        <h4 class="mb-3">{{ $t("general") }}</h4>
                         <div class="shadow-box big-padding mb-3">
                             <!-- Stack Name -->
                             <div class="mb-3">
@@ -51,22 +75,73 @@
                         </div>
                     </div>
 
-                    <h4 class="mb-3">Containers</h4>
-                    <div class="shadow-box big-padding mb-3">
-                        <div v-for="(service, name) in jsonConfig.services" :key="name">
-                            {{ name }} {{ service }}
-                        </div>
+                    <!-- Containers -->
+                    <h4 class="mb-3">{{ $tc("container", 2) }}</h4>
+
+                    <div v-if="isEditMode" class="input-group mb-3">
+                        <input
+                            v-model="newContainerName"
+                            placeholder="New Container Name..."
+                            class="form-control"
+                            @keyup.enter="addContainer"
+                        />
+                        <button class="btn btn-primary" @click="addContainer">
+                            {{ $t("addContainer") }}
+                        </button>
+                    </div>
+
+                    <div ref="containerList">
+                        <Container
+                            v-for="(service, name) in jsonConfig.services"
+                            :key="name"
+                            :name="name"
+                            :is-edit-mode="isEditMode"
+                            :first="name === Object.keys(jsonConfig.services)[0]"
+                        />
+                    </div>
+
+                    <button v-if="false && isEditMode && jsonConfig.services && Object.keys(jsonConfig.services).length > 0" class="btn btn-normal mb-3" @click="addContainer">{{ $t("addContainer") }}</button>
+
+                    <!-- Combined Terminal Output -->
+                    <div v-show="!isEditMode">
+                        <h4 class="mb-3">Logs</h4>
+                        <Terminal
+                            ref="combinedTerminal"
+                            class="mb-3 terminal"
+                            :name="combinedTerminalName"
+                            :rows="combinedTerminalRows"
+                            :cols="combinedTerminalCols"
+                            style="height: 350px;"
+                        ></Terminal>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col-lg-6">
                     <h4 class="mb-3">compose.yaml</h4>
 
                     <!-- YAML editor -->
                     <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
-                        <prism-editor ref="editor" v-model="stack.composeYAML" class="yaml-editor" :highlight="highlighter" line-numbers :readonly="!isEditMode" @input="yamlCodeChange"></prism-editor>
+                        <prism-editor
+                            ref="editor"
+                            v-model="stack.composeYAML"
+                            class="yaml-editor"
+                            :highlight="highlighter"
+                            line-numbers :readonly="!isEditMode"
+                            @input="yamlCodeChange"
+                            @focus="editorFocus = true"
+                            @blur="editorFocus = false"
+                        ></prism-editor>
                     </div>
-                    <div class="mb-3">
+                    <div v-if="isEditMode" class="mb-3">
                         {{ yamlError }}
+                    </div>
+
+                    <h4 class="mb-3">{{ $tc("network", 2) }}</h4>
+                    <div class="shadow-box big-padding mb-3">
+                        <NetworkInput />
+                    </div>
+
+                    <h4 class="mb-3">{{ $tc("volume", 2) }}</h4>
+                    <div class="shadow-box big-padding mb-3">
                     </div>
 
                     <!-- <div class="shadow-box big-padding mb-3">
@@ -80,7 +155,7 @@
                 </div>
             </div>
 
-            <div v-if="!stack.isManagedByDockge">
+            <div v-if="!stack.isManagedByDockge && !processing">
                 {{ $t("stackNotManagedByDockgeMsg") }}
             </div>
 
@@ -96,43 +171,65 @@
 import { highlight, languages } from "prismjs/components/prism-core";
 import { PrismEditor } from "vue-prism-editor";
 import "prismjs/components/prism-yaml";
-import * as yaml from "yaml";
+import { parseDocument, Document } from "yaml";
 
 import "prismjs/themes/prism-tomorrow.css";
 import "vue-prism-editor/dist/prismeditor.min.css";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { getComposeTerminalName, PROGRESS_TERMINAL_ROWS } from "../../../backend/util-common";
+import {
+    COMBINED_TERMINAL_COLS,
+    COMBINED_TERMINAL_ROWS,
+    copyYAMLComments,
+    getCombinedTerminalName,
+    getComposeTerminalName,
+    PROGRESS_TERMINAL_ROWS,
+    RUNNING
+} from "../../../backend/util-common";
 import { BModal } from "bootstrap-vue-next";
+import NetworkInput from "../components/NetworkInput.vue";
 
 const template = `version: "3.8"
 services:
   nginx:
     image: nginx:latest
+    restart: always
     ports:
-      - "8080:8080"
+      - "8080:80"
 `;
 
 let yamlErrorTimeout = null;
 
 export default {
     components: {
+        NetworkInput,
         FontAwesomeIcon,
         PrismEditor,
         BModal,
     },
+    beforeRouteUpdate(to, from, next) {
+        this.exitConfirm(next);
+    },
+    beforeRouteLeave(to, from, next) {
+        this.exitConfirm(next);
+    },
+    yamlDoc: null,  // For keeping the yaml comments
     data() {
         return {
+            editorFocus: false,
             jsonConfig: {},
             yamlError: "",
             processing: true,
             showProgressTerminal: false,
             progressTerminalRows: PROGRESS_TERMINAL_ROWS,
+            combinedTerminalRows: COMBINED_TERMINAL_ROWS,
+            combinedTerminalCols: COMBINED_TERMINAL_COLS,
             stack: {
 
             },
             isEditMode: false,
             submitted: false,
             showDeleteDialog: false,
+            newContainerName: "",
         };
     },
     computed: {
@@ -147,11 +244,59 @@ export default {
         globalStack() {
             return this.$root.stackList[this.stack.name];
         },
+
+        status() {
+            return this.globalStack?.status;
+        },
+
+        active() {
+            return this.status === RUNNING;
+        },
+
+        terminalName() {
+            if (!this.stack.name) {
+                return "";
+            }
+            return getComposeTerminalName(this.stack.name);
+        },
+
+        combinedTerminalName() {
+            if (!this.stack.name) {
+                return "";
+            }
+            return getCombinedTerminalName(this.stack.name);
+        },
+
+        networks() {
+            return this.jsonConfig.networks;
+        }
+
     },
     watch: {
         "stack.composeYAML": {
             handler() {
-                this.yamlCodeChange();
+                if (this.editorFocus) {
+                    console.debug("yaml code changed");
+                    this.yamlCodeChange();
+                }
+            },
+            deep: true,
+        },
+        jsonConfig: {
+            handler() {
+                if (!this.editorFocus) {
+                    console.debug("jsonConfig changed");
+
+                    let doc = new Document(this.jsonConfig);
+
+                    // Stick back the yaml comments
+                    if (this.yamlDoc) {
+                        copyYAMLComments(doc, this.yamlDoc);
+                    }
+
+                    this.stack.composeYAML = doc.toString();
+                    this.yamlDoc = doc;
+                }
             },
             deep: true,
         },
@@ -161,12 +306,24 @@ export default {
             this.processing = false;
             this.isEditMode = true;
 
+            let composeYAML;
+
+            if (this.$root.composeTemplate) {
+                composeYAML = this.$root.composeTemplate;
+                this.$root.composeTemplate = "";
+
+            } else {
+                composeYAML = template;
+            }
+
             // Default Values
             this.stack = {
                 name: "",
-                composeYAML: template,
+                composeYAML,
                 isManagedByDockge: true,
             };
+
+            this.yamlCodeChange();
 
         } else {
             this.stack.name = this.$route.params.stackName;
@@ -174,15 +331,28 @@ export default {
         }
     },
     methods: {
-        bindTerminal() {
-            // Bind Terminal output
-            const terminalName = getComposeTerminalName(this.stack.name);
-            this.$refs.progressTerminal.bind(terminalName);
+        exitConfirm(next) {
+            if (this.isEditMode) {
+                if (confirm("You are currently editing a stack. Are you sure you want to leave?")) {
+                    next();
+                } else {
+                    next(false);
+                }
+            } else {
+                next();
+            }
         },
+
+        bindTerminal() {
+            this.$refs.progressTerminal?.bind(this.terminalName);
+        },
+
         loadStack() {
+            this.processing = true;
             this.$root.getSocket().emit("getStack", this.stack.name, (res) => {
                 if (res.ok) {
                     this.stack = res.stack;
+                    this.yamlCodeChange();
                     this.processing = false;
                     this.bindTerminal();
                 } else {
@@ -190,20 +360,41 @@ export default {
                 }
             });
         },
+
         deployStack() {
             this.processing = true;
 
-            this.bindTerminal();
+            if (!this.jsonConfig.services) {
+                this.$root.toastError("No services found in compose.yaml");
+                this.processing = false;
+                return;
+            }
+
+            // Set the stack name if empty, use the first container name
+            if (!this.stack.name) {
+                let serviceName = Object.keys(this.jsonConfig.services)[0];
+                let service = this.jsonConfig.services[serviceName];
+
+                if (service.container_name) {
+                    this.stack.name = service.container_name;
+                } else {
+                    this.stack.name = serviceName;
+                }
+            }
+
+            this.bindTerminal(this.terminalName);
 
             this.$root.getSocket().emit("deployStack", this.stack.name, this.stack.composeYAML, this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
                 if (res.ok) {
+                    this.isEditMode = false;
                     this.$router.push("/compose/" + this.stack.name);
                 }
             });
         },
+
         saveStack() {
             this.processing = true;
 
@@ -212,10 +403,48 @@ export default {
                 this.$root.toastRes(res);
 
                 if (res.ok) {
+                    this.isEditMode = false;
                     this.$router.push("/compose/" + this.stack.name);
                 }
             });
         },
+
+        startStack() {
+            this.processing = true;
+
+            this.$root.getSocket().emit("startStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
+        stopStack() {
+            this.processing = true;
+
+            this.$root.getSocket().emit("stopStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
+        restartStack() {
+            this.processing = true;
+
+            this.$root.getSocket().emit("restartStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
+        updateStack() {
+            this.processing = true;
+
+            this.$root.getSocket().emit("updateStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
         deleteDialog() {
             this.$root.getSocket().emit("deleteStack", this.stack.name, (res) => {
                 this.$root.toastRes(res);
@@ -233,9 +462,28 @@ export default {
         highlighter(code) {
             return highlight(code, languages.yaml);
         },
+
         yamlCodeChange() {
             try {
-                this.jsonConfig = yaml.parse(this.stack.composeYAML) ?? {};
+                let doc = parseDocument(this.stack.composeYAML);
+                if (doc.errors.length > 0) {
+                    throw doc.errors[0];
+                }
+
+                this.yamlDoc = doc;
+                console.log(this.yamlDoc);
+
+                this.jsonConfig = doc.toJS() ?? {};
+
+                if (!this.jsonConfig.version) {
+                    this.jsonConfig.version = "3.8";
+                }
+
+                if (!this.jsonConfig.services) {
+                    this.jsonConfig.services = {};
+                }
+
+                clearTimeout(yamlErrorTimeout);
                 this.yamlError = "";
             } catch (e) {
                 clearTimeout(yamlErrorTimeout);
@@ -250,6 +498,76 @@ export default {
                 }
             }
         },
+
+        enableEditMode() {
+            this.isEditMode = true;
+        },
+
+        checkYAML() {
+
+        },
+
+        addContainer() {
+            this.checkYAML();
+
+            if (this.jsonConfig.services[this.newContainerName]) {
+                this.$root.toastError("Container name already exists");
+                return;
+            }
+
+            if (!this.newContainerName) {
+                this.$root.toastError("Container name cannot be empty");
+                return;
+            }
+
+            this.jsonConfig.services[this.newContainerName] = {
+                restart: "always",
+            };
+            this.newContainerName = "";
+            let element = this.$refs.containerList.lastElementChild;
+            element.scrollIntoView({
+                block: "start",
+                behavior: "smooth"
+            });
+        },
+
+        combineNetworks() {
+            let networks = this.jsonConfig.networks;
+
+            if (!networks) {
+                networks = {};
+            }
+
+            for (let serviceName in this.jsonConfig.services) {
+
+                let service = this.jsonConfig.services[serviceName];
+                let serviceNetworks = service.networks;
+
+                if (!networks) {
+                    continue;
+                }
+
+                // If it is an array, it should be array of string
+                if (Array.isArray(serviceNetworks)) {
+                    for (let n of serviceNetworks) {
+                        console.log(n);
+                        if (!n) {
+                            continue;
+                        }
+                        if (!networks[n]) {
+                            networks[n] = {};
+                        }
+                    }
+
+                } else if (typeof serviceNetworks === "object") {
+
+                }
+            }
+
+            console.debug(networks);
+
+            return networks;
+        }
     }
 };
 </script>
@@ -259,7 +577,9 @@ export default {
     height: 200px;
 }
 
-.editor-box.edit-mode {
-    background-color: #2c2f38 !important;
+.editor-box {
+    &.edit-mode {
+        background-color: #2c2f38 !important;
+    }
 }
 </style>

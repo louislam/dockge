@@ -4,19 +4,9 @@ import { defineComponent } from "vue";
 import jwtDecode from "jwt-decode";
 import { Terminal } from "xterm";
 
-let terminalInputBuffer = "";
-let cursorPosition = 0;
 let socket : Socket;
 
 let terminalMap : Map<string, Terminal> = new Map();
-
-function removeInput() {
-    const backspaceCount = terminalInputBuffer.length;
-    const backspaces = "\b \b".repeat(backspaceCount);
-    cursorPosition = 0;
-    terminal.write(backspaces);
-    terminalInputBuffer = "";
-}
 
 export default defineComponent({
     data() {
@@ -38,6 +28,7 @@ export default defineComponent({
             allowLoginDialog: false,
             username: null,
             stackList: {},
+            composeTemplate: "",
         };
     },
     computed: {
@@ -59,49 +50,7 @@ export default defineComponent({
     },
     mounted() {
         return;
-        terminal.onKey(e => {
-            const code = e.key.charCodeAt(0);
-            console.debug("Encode: " + JSON.stringify(e.key));
 
-            if (e.key === "\r") {
-                // Return if no input
-                if (terminalInputBuffer.length === 0) {
-                    return;
-                }
-
-                const buffer = terminalInputBuffer;
-
-                // Remove the input from the terminal
-                removeInput();
-
-                socket.emit("terminalInput", buffer + e.key, (err) => {
-                    this.toastError(err.msg);
-                });
-
-            } else if (code === 127) { // Backspace
-                if (cursorPosition > 0) {
-                    terminal.write("\b \b");
-                    cursorPosition--;
-                    terminalInputBuffer = terminalInputBuffer.slice(0, -1);
-                }
-            } else if (e.key === "\u001B\u005B\u0041" || e.key === "\u001B\u005B\u0042") {      // UP OR DOWN
-                // Do nothing
-
-            } else if (e.key === "\u001B\u005B\u0043") {      // RIGHT
-                // TODO
-            } else if (e.key === "\u001B\u005B\u0044") {      // LEFT
-                // TODO
-            } else if (e.key === "\u0003") {      // Ctrl + C
-                console.debug("Ctrl + C");
-                socket.emit("terminalInputRaw", e.key);
-                removeInput();
-            } else {
-                cursorPosition++;
-                terminalInputBuffer += e.key;
-                console.log(terminalInputBuffer);
-                terminal.write(e.key);
-            }
-        });
     },
     methods: {
         /**
@@ -206,9 +155,6 @@ export default defineComponent({
 
             socket.on("stackStatusList", (res) => {
                 if (res.ok) {
-
-                    console.log(res.stackStatusList);
-
                     for (let stackName in res.stackStatusList) {
                         const stackObj = this.stackList[stackName];
                         if (stackObj) {

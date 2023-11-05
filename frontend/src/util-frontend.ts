@@ -212,3 +212,4 @@ export function getToastErrorTimeout() {
 
     return errorTimeout;
 }
+

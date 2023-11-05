@@ -12,14 +12,11 @@
                     <a v-if="searchText == ''" class="search-icon">
                         <font-awesome-icon icon="search" />
                     </a>
-                    <a v-if="searchText != ''" class="search-icon" @click="clearSearchText">
+                    <a v-if="searchText != ''" class="search-icon" style="cursor: pointer" @click="clearSearchText">
                         <font-awesome-icon icon="times" />
                     </a>
                     <form>
-                        <input
-                            v-model="searchText" class="form-control search-input" :placeholder="$t('Search...')"
-                            autocomplete="off"
-                        />
+                        <input v-model="searchText" class="form-control search-input" autocomplete="off" />
                     </form>
                 </div>
             </div>
@@ -54,7 +51,6 @@
                 v-for="(item, index) in sortedStackList"
                 :key="index"
                 :stack="item"
-                :showPathName="filtersActive"
                 :isSelectMode="selectMode"
                 :isSelected="isSelected"
                 :select="select"

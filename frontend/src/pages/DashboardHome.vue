@@ -8,17 +8,34 @@
             <div class="shadow-box big-padding text-center mb-4">
                 <div class="row">
                     <div class="col">
-                        <h3>{{ $t("Up") }}</h3>
-                        <span class="num">123</span>
+                        <h3>{{ $t("active") }}</h3>
+                        <span class="num active">{{ activeNum }}</span>
+                    </div>
+                    <div class="col">
+                        <h3>{{ $t("exited") }}</h3>
+                        <span class="num exited">{{ exitedNum }}</span>
+                    </div>
+                    <div class="col">
+                        <h3>{{ $t("inactive") }}</h3>
+                        <span class="num inactive">{{ inactiveNum }}</span>
                     </div>
                 </div>
             </div>
+
+            <h2 class="mb-3">Docker Run</h2>
+            <div class="mb-3">
+                <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required placeholder="docker run ..."></textarea>
+            </div>
+
+            <button class="btn-normal btn" @click="convertDockerRun">Convert to Compose</button>
         </div>
     </transition>
     <router-view ref="child" />
 </template>
 
 <script>
+import * as convertDockerRunToCompose from "composerize";
+import { statusNameShort } from "../../../backend/util-common";
 
 export default {
     components: {
@@ -41,8 +58,22 @@ export default {
             },
             importantHeartBeatListLength: 0,
             displayedRecords: [],
+            dockerRunCommand: "",
         };
     },
+
+    computed: {
+        activeNum() {
+            return this.getStatusNum("active");
+        },
+        inactiveNum() {
+            return this.getStatusNum("inactive");
+        },
+        exitedNum() {
+            return this.getStatusNum("exited");
+        },
+    },
+
     watch: {
         perPage() {
             this.$nextTick(() => {
@@ -67,6 +98,31 @@ export default {
     },
 
     methods: {
+
+        getStatusNum(statusName) {
+            let num = 0;
+
+            for (let stackName in this.$root.stackList) {
+                const stack = this.$root.stackList[stackName];
+                if (statusNameShort(stack.status) === statusName) {
+                    num += 1;
+                }
+            }
+            return num;
+        },
+
+        convertDockerRun() {
+            try {
+                if (this.dockerRunCommand.trim() === "docker run") {
+                    throw new Error("Please enter a docker run command");
+                }
+                this.$root.composeTemplate = convertDockerRunToCompose(this.dockerRunCommand);
+                this.$router.push("/compose");
+            } catch (e) {
+                this.$root.toastError(e.message);
+            }
+        },
+
         /**
          * Updates the displayed records when a new important heartbeat arrives.
          * @param {object} heartbeat - The heartbeat object received.
@@ -134,9 +190,17 @@ export default {
 
 .num {
     font-size: 30px;
-    color: $primary;
+
     font-weight: bold;
     display: block;
+
+    &.active {
+        color: $primary;
+    }
+
+    &.exited {
+        color: $danger;
+    }
 }
 
 .shadow-box {
@@ -154,5 +218,10 @@ table {
         table-layout: fixed;
         overflow-wrap: break-word;
     }
+}
+
+.docker-run {
+    background-color: $dark-bg !important;
+    border: none;
 }
 </style>

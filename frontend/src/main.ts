@@ -1,9 +1,11 @@
+// Dayjs init inside this, so it has to be the first import
+await import("../../backend/util-common");
+
 import { createApp, defineComponent, h } from "vue";
 import App from "./App.vue";
 import { router } from "./router";
 import { FontAwesomeIcon } from "./icon.js";
 import { i18n } from "./i18n";
-await import("../../backend/util-common");
 
 // Dependencies
 import "bootstrap";
@@ -15,12 +17,6 @@ import "vue-toastification/dist/index.css";
 import "xterm/css/xterm.css";
 import "./styles/main.scss";
 
-// Dayjs
-import dayjs from "dayjs";
-import timezone from "dayjs/plugin/timezone";
-import utc from "dayjs/plugin/utc";
-import relativeTime from "dayjs/plugin/relativeTime";
-
 // Minxins
 import socket from "./mixins/socket";
 import lang from "./mixins/lang";
@@ -30,18 +26,8 @@ const app = createApp(rootApp());
 
 app.use(Toast, {
     position: POSITION.BOTTOM_RIGHT,
-    containerClassName: "toast-container mb-5",
     showCloseButtonOnHover: true,
-
-    filterBeforeCreate: (toast, toasts) => {
-        if (toast.timeout === 0) {
-            return false;
-        } else {
-            return toast;
-        }
-    },
 });
-
 app.use(router);
 app.use(i18n);
 app.component("FontAwesomeIcon", FontAwesomeIcon);

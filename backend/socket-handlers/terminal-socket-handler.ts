@@ -8,64 +8,49 @@ import fs from "fs";
 import {
     allowedCommandList,
     allowedRawKeys,
-    getComposeTerminalName,
+    getComposeTerminalName, getContainerExecTerminalName,
     isDev,
     PROGRESS_TERMINAL_ROWS
 } from "../util-common";
-import { MainTerminal, Terminal } from "../terminal";
+import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
 
 export class TerminalSocketHandler extends SocketHandler {
     create(socket : DockgeSocket, server : DockgeServer) {
 
-        socket.on("terminalInputRaw", async (key : unknown) => {
+        socket.on("terminalInput", async (terminalName : unknown, cmd : unknown, errorCallback) => {
             try {
                 checkLogin(socket);
 
-                if (typeof(key) !== "string") {
-                    throw new Error("Key must be a string.");
+                if (typeof(terminalName) !== "string") {
+                    throw new Error("Terminal name must be a string.");
                 }
-
-                if (allowedRawKeys.includes(key)) {
-                    server.terminal.write(key);
-                }
-            } catch (e) {
-
-            }
-        });
-
-        socket.on("terminalInput", async (terminalName : unknown, cmd : unknown, errorCallback : unknown) => {
-            try {
-                checkLogin(socket);
 
                 if (typeof(cmd) !== "string") {
                     throw new Error("Command must be a string.");
                 }
 
-                // Check if the command is allowed
-                const cmdParts = cmd.split(" ");
-                const executable = cmdParts[0].trim();
-                log.debug("console", "Executable: " + executable);
-                log.debug("console", "Executable length: " + executable.length);
-
-                if (!allowedCommandList.includes(executable)) {
-                    throw new Error("Command not allowed.");
+                let terminal = Terminal.getTerminal(terminalName);
+                if (terminal instanceof InteractiveTerminal) {
+                    terminal.write(cmd);
+                } else {
+                    throw new Error("Terminal not found or it is not a Interactive Terminal.");
                 }
-
-                server.terminal.write(cmd);
             } catch (e) {
-                if (typeof(errorCallback) === "function") {
-                    errorCallback({
-                        ok: false,
-                        msg: e.message,
-                    });
-                }
+                errorCallback({
+                    ok: false,
+                    msg: e.message,
+                });
             }
         });
 
-        // Create Terminal
+        // Main Terminal
         socket.on("mainTerminal", async (terminalName : unknown, callback) => {
             try {
                 checkLogin(socket);
+
+                // TODO: Reset the name here, force one main terminal for now
+                terminalName = "console";
+
                 if (typeof(terminalName) !== "string") {
                     throw new ValidationError("Terminal name must be a string.");
                 }
@@ -91,7 +76,40 @@ export class TerminalSocketHandler extends SocketHandler {
             }
         });
 
-        // Join Terminal
+        // Interactive Terminal for containers
+        socket.on("interactiveTerminal", async (stackName : unknown, serviceName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string.");
+                }
+
+                if (typeof(serviceName) !== "string") {
+                    throw new ValidationError("Service name must be a string.");
+                }
+
+                const terminalName = getContainerExecTerminalName(stackName, serviceName, 0);
+                let terminal = Terminal.getTerminal(terminalName);
+
+                if (!terminal) {
+                    terminal = new InteractiveTerminal(server, terminalName);
+                    terminal.rows = 50;
+                    log.debug("deployStack", "Terminal created");
+                }
+
+                terminal.join(socket);
+                terminal.start();
+
+                callback({
+                    ok: true,
+                });
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // Join Output Terminal
         socket.on("terminalJoin", async (terminalName : unknown, callback) => {
             if (typeof(callback) !== "function") {
                 log.debug("console", "Callback is not a function.");
@@ -124,18 +142,9 @@ export class TerminalSocketHandler extends SocketHandler {
 
         });
 
-        // Resize Terminal
+        // TODO: Resize Terminal
         socket.on("terminalResize", async (rows : unknown) => {
-            try {
-                checkLogin(socket);
-                if (typeof(rows) !== "number") {
-                    throw new Error("Rows must be a number.");
-                }
-                log.debug("console", "Resize terminal to " + rows + " rows.");
-                server.terminal.resize(rows);
-            } catch (e) {
 
-            }
         });
     }
 }

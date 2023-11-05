@@ -58,7 +58,13 @@
                             </li>-->
 
                             <li>
-                                <router-link to="/settings/general" class="dropdown-item" :class="{ active: $route.path.includes('settings') }">
+                                <button class="dropdown-item" @click="scanFolder">
+                                    <font-awesome-icon icon="arrows-rotate" /> {{ $t("scanFolder") }}
+                                </button>
+                            </li>
+
+                            <li>
+                                <router-link to="/settings/appearance" class="dropdown-item" :class="{ active: $route.path.includes('settings') }">
                                     <font-awesome-icon icon="cog" /> {{ $t("Settings") }}
                                 </router-link>
                             </li>
@@ -75,42 +81,10 @@
             </ul>
         </header>
 
-        <!-- Mobile header -->
-        <header v-else class="d-flex flex-wrap justify-content-center pt-2 pb-2 mb-3">
-            <router-link to="/dashboard" class="d-flex align-items-center text-dark text-decoration-none">
-                <object class="bi" width="40" height="40" data="/icon.svg" />
-                <span class="fs-4 title ms-2">Dockge</span>
-            </router-link>
-        </header>
-
         <main>
             <router-view v-if="$root.loggedIn" />
             <Login v-if="! $root.loggedIn && $root.allowLoginDialog" />
         </main>
-
-        <!-- Mobile Only -->
-        <div v-if="$root.isMobile" style="width: 100%; height: calc(60px + env(safe-area-inset-bottom));" />
-        <nav v-if="$root.isMobile && $root.loggedIn" class="bottom-nav">
-            <router-link to="/dashboard" class="nav-link">
-                <div><font-awesome-icon icon="tachometer-alt" /></div>
-                {{ $t("Home") }}
-            </router-link>
-
-            <router-link to="/list" class="nav-link">
-                <div><font-awesome-icon icon="list" /></div>
-                {{ $t("List") }}
-            </router-link>
-
-            <router-link to="/add" class="nav-link">
-                <div><font-awesome-icon icon="plus" /></div>
-                {{ $t("Add") }}
-            </router-link>
-
-            <router-link to="/settings" class="nav-link">
-                <div><font-awesome-icon icon="cog" /></div>
-                {{ $t("Settings") }}
-            </router-link>
-        </nav>
     </div>
 </template>
 
@@ -163,7 +137,11 @@ export default {
     },
 
     methods: {
-
+        scanFolder() {
+            this.$root.getSocket().emit("requestStackList", (res) => {
+                this.$root.toastRes(res);
+            });
+        },
     },
 
 };

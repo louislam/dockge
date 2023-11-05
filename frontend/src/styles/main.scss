@@ -35,6 +35,10 @@ textarea.form-control {
     color: $maintenance !important;
 }
 
+::placeholder {
+    color: $dark-font-color3 !important;
+}
+
 .incident a,
 .bg-maintenance a {
     color: inherit;
@@ -45,7 +49,7 @@ textarea.form-control {
 
     .dark & {
         .list-group-item {
-            background-color: $dark-bg;
+            background-color: $dark-bg2;
             color: $dark-font-color;
             border-color: $dark-border-color;
         }
@@ -320,6 +324,7 @@ optgroup {
 
     .bg-primary {
         color: $dark-font-color2;
+        background: $primary-gradient;
     }
 
     .btn-secondary {
@@ -486,19 +491,17 @@ optgroup {
     }
 
     .item {
-        display: block;
+        display: flex;
+        align-items: center;
+        height: 52px;
         text-decoration: none;
-        padding: 13px 15px 10px 15px;
         border-radius: 10px;
         transition: all ease-in-out 0.15s;
+        width: 100%;
+        padding: 0 8px;
 
         &.disabled {
             opacity: 0.3;
-        }
-
-        .info {
-            white-space: nowrap;
-            overflow: hidden;
         }
 
         &:hover {
@@ -508,9 +511,10 @@ optgroup {
         &.active {
             background-color: #cdf8f4;
         }
-        .tags {
-            // Removes margin to line up tags list with uptime percentage
-            margin-left: -0.25rem;
+
+        .title {
+            display: inline-block;
+            margin-top: -4px;
         }
     }
 }
@@ -675,6 +679,19 @@ code {
         color: $dark-font-color;
     }
 }
+
+// Vue Prism Editor bug - workaround
+// https://github.com/koca/vue-prism-editor/issues/87
+/*
+.prism-editor__textarea {
+    width: 999999px !important;
+}
+.prism-editor__editor {
+    white-space: pre !important;
+}
+.prism-editor__container {
+    overflow-x: scroll !important;
+}*/
 
 // Localization
 @import "localization.scss";

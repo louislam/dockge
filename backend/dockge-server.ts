@@ -424,14 +424,27 @@ export class DockgeServer {
     }
 
     sendStackList(useCache = false) {
-        let stackList = Stack.getStackList(this, useCache);
         let roomList = this.io.sockets.adapter.rooms.keys();
+        let map : Map<string, object> | undefined;
+
         for (let room of roomList) {
             // Check if the room is a number (user id)
             if (Number(room)) {
+
+                // Get the list only if there is a room
+                if (!map) {
+                    map = new Map();
+                    let stackList = Stack.getStackList(this, useCache);
+
+                    for (let [ stackName, stack ] of stackList) {
+                        map.set(stackName, stack.toSimpleJSON());
+                    }
+                }
+
+                log.debug("server", "Send stack list to room " + room);
                 this.io.to(room).emit("stackList", {
                     ok: true,
-                    stackList: Object.fromEntries(stackList),
+                    stackList: Object.fromEntries(map),
                 });
             }
         }
