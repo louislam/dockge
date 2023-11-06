@@ -6,7 +6,7 @@
 
 A fancy, easy-to-use and reactive docker `compose.yaml` stack manager.
 
-<img src="https://github.com/louislam/dockge/assets/1336778/26a583e1-ecb1-4a8d-aedf-76157d714ad7" width="800" alt="" />
+<img src="https://github.com/louislam/dockge/assets/1336778/26a583e1-ecb1-4a8d-aedf-76157d714ad7" width="900" alt="" />
 
 ## ⭐ Features
 
