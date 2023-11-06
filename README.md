@@ -49,7 +49,15 @@ Dockge is now running on http://localhost:5001
 If you love this project, please consider giving this project a ⭐.
 
 
+## FAQ
 
+#### "Dockge"?
+
+"Dockge" is a coinage word which is created by myself. I hope it sounds like `Badge` but replacing with `Dock` - `Dock-ge`.
+
+The naming idea was coming from Twitch emotes like `sadge`, `bedge` or `wokege`. They are all ending with `-ge`.
+
+If you are not comfortable with the pronunciation, you can call it `Dockage`
 
 ## More Ideas?
 
