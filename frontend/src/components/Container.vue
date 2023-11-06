@@ -172,6 +172,9 @@ export default defineComponent({
         },
 
         service() {
+            if (!this.jsonObject.services[this.name]) {
+                return {};
+            }
             return this.jsonObject.services[this.name];
         },
 

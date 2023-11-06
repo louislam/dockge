@@ -372,12 +372,21 @@ export default {
                 return;
             }
 
+            // Check if services is object
+            if (typeof this.jsonConfig.services !== "object") {
+                this.$root.toastError("Services must be an object");
+                this.processing = false;
+                return;
+            }
+
+            let serviceNameList = Object.keys(this.jsonConfig.services);
+
             // Set the stack name if empty, use the first container name
-            if (!this.stack.name) {
-                let serviceName = Object.keys(this.jsonConfig.services)[0];
+            if (!this.stack.name && serviceNameList.length > 0) {
+                let serviceName = serviceNameList[0];
                 let service = this.jsonConfig.services[serviceName];
 
-                if (service.container_name) {
+                if (service && service.container_name) {
                     this.stack.name = service.container_name;
                 } else {
                     this.stack.name = serviceName;
@@ -472,18 +481,24 @@ export default {
                     throw doc.errors[0];
                 }
 
+                const config = doc.toJS() ?? {};
+
+                // Check data types
+                // "services" must be an object
+                if (!config.services) {
+                    config.services = {};
+                }
+
+                if (Array.isArray(config.services) || typeof config.services !== "object") {
+                    throw new Error("Services must be an object");
+                }
+
+                if (!config.version) {
+                    config.version = "3.8";
+                }
+
                 this.yamlDoc = doc;
-                console.log(this.yamlDoc);
-
-                this.jsonConfig = doc.toJS() ?? {};
-
-                if (!this.jsonConfig.version) {
-                    this.jsonConfig.version = "3.8";
-                }
-
-                if (!this.jsonConfig.services) {
-                    this.jsonConfig.services = {};
-                }
+                this.jsonConfig = config;
 
                 clearTimeout(yamlErrorTimeout);
                 this.yamlError = "";
