@@ -1,8 +1,6 @@
 # Should be identical to .gitignore
 .env
 node_modules
-dist
-frontend-dist
 .idea
 data
 tmp

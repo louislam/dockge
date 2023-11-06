@@ -1,11 +1,12 @@
 ############################################
 # ⭐ Main Image
 ############################################
-FROM louislam/dockge:base
+FROM louislam/dockge:base AS release
 WORKDIR /app
 COPY --chown=node:node  . .
 RUN pnpm install --prod --frozen-lockfile && \
-    mkdir ./data \
+    mkdir ./data
+
 VOLUME /app/data
 EXPOSE 5001
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]

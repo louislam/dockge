@@ -13,10 +13,29 @@ A fancy, easy-to-use and reactive docker stack (`docker-compose.yml`) manager.
 - Interactive web terminal for containers and any docker commands
 - Reactive - Everything is just responsive. Progress and terminal output are in real-time
 - Easy-to-use & fancy UI - If you love Uptime Kuma's UI/UX, you will love this too
-- Build on top of [Compose V2](https://docs.docker.com/compose/migrate/), as known as `compose.yaml` and `docker compose`
 - Convert `docker run ...` command into `docker-compose.yml` file
 
-## Installation
+## 🔧 How to Install
+
+1. Create a directory `./dockge/`
+1. Create a `compose.yaml` inside `./dockge` file with the following content:
+
+```yaml
+version: "3.8"
+services:
+  dockge:
+    image: louislam/dockge:nightly
+    ports:
+      - 5001:5001
+    volumes:
+      - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+```
+
+2. `cd ./dockge/`
+3. `docker-compose up -d`
+
+Dockge is now running on http://localhost:5001
 
 ## Motivations
 

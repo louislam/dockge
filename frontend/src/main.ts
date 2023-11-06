@@ -1,5 +1,5 @@
 // Dayjs init inside this, so it has to be the first import
-await import("../../backend/util-common");
+import "../../backend/util-common";
 
 import { createApp, defineComponent, h } from "vue";
 import App from "./App.vue";

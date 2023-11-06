@@ -1,6 +1,7 @@
 /*
  * Common utilities for backend and frontend
  */
+import { Document } from "yaml";
 
 // Init dayjs
 import dayjs from "dayjs";
@@ -11,20 +12,21 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(relativeTime);
 
-import { parseDocument, Document } from "yaml";
-
 let randomBytes : (numBytes: number) => Uint8Array;
+initRandomBytes();
 
-if (typeof window !== "undefined" && window.crypto) {
-    randomBytes = function randomBytes(numBytes: number) {
-        const bytes = new Uint8Array(numBytes);
-        for (let i = 0; i < numBytes; i += 65536) {
-            window.crypto.getRandomValues(bytes.subarray(i, i + Math.min(numBytes - i, 65536)));
-        }
-        return bytes;
-    };
-} else {
-    randomBytes = (await import("node:crypto")).randomBytes;
+async function initRandomBytes() {
+    if (typeof window !== "undefined" && window.crypto) {
+        randomBytes = function randomBytes(numBytes: number) {
+            const bytes = new Uint8Array(numBytes);
+            for (let i = 0; i < numBytes; i += 65536) {
+                window.crypto.getRandomValues(bytes.subarray(i, i + Math.min(numBytes - i, 65536)));
+            }
+            return bytes;
+        };
+    } else {
+        randomBytes = (await import("node:crypto")).randomBytes;
+    }
 }
 
 // Stack Status

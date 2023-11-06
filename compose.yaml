@@ -1,0 +1,10 @@
+# docker run -d --name dockge -p 5001:5001 -v dockge:/app/data -v /var/run/docker.sock:/var/run/docker.sock --restart=always louislam/dockge:nightly
+version: "3.8"
+services:
+  dockge:
+    image: louislam/dockge:nightly
+    ports:
+      - 5001:5001
+    volumes:
+      - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
