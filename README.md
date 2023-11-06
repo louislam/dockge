@@ -4,18 +4,20 @@
 
 # Dockge
 
-A fancy, easy-to-use and reactive docker stack (`compose.yaml`) manager.
+A fancy, easy-to-use and reactive docker `compose.yaml` stack manager.
 
-Dockge is built on top of [Compose V2](https://docs.docker.com/compose/migrate/). `compose.yaml` as known as `docker-compose.yml`
+Dockge is built on top of [Compose V2](https://docs.docker.com/compose/migrate/). `compose.yaml`  is as known as `docker-compose.yml`.
 
 ## ⭐ Features
 
-- Focus on `docker-compose.yml` stack management
-- Interactive editor for `docker-compose.yml`
-- Interactive web terminal for containers and any docker commands
-- Reactive - Everything is just responsive. Progress and terminal output are in real-time
-- Easy-to-use & fancy UI - If you love Uptime Kuma's UI/UX, you will love this too
-- Convert `docker run ...` command into `docker-compose.yml` file
+- Focus on `compose.yaml` stack management
+- Interactive editor for `compose.yaml`
+- Interactive web terminal for containers and docker commands
+- Reactive
+   - Everything is just responsive. Progress and terminal output are in real-time
+- Easy-to-use & fancy UI
+   - If you love Uptime Kuma's UI/UX, you will love this too
+- Convert `docker run ...` command into `compose.yaml` file
 
 ## 🔧 How to Install
 
@@ -44,8 +46,10 @@ Dockge is now running on http://localhost:5001
 - I have been using Portainer for some time, but for the stack management, I am sometimes not satisfied with it. For example, sometimes when I try to deploy a stack, the loading icon keeps spinning for a few minutes without progress. And sometimes error messages are not clear.
 - Try to develop with ES Module + TypeScript (Originally, I planned to use Deno or Bun.js, but they do not support for arm64, so I stepped back to Node.js)
 
-
 If you love this project, please consider giving this project a ⭐.
+
+
+
 
 ## More Ideas?
 
