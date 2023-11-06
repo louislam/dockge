@@ -1,13 +1,13 @@
 <template>
     <transition name="slide-fade" appear>
         <div>
-            <h1 class="mb-3">Bash</h1>
-            <p>
-                Stack: {{ stackName }}<br />
-                Container: {{ serviceName }}
-            </p>
+            <h1 class="mb-3">Terminal - {{ serviceName }} ({{ stackName }})</h1>
 
-            <Terminal class="terminal" :rows="20" mode="interactive" :name="terminalName" :stack-name="stackName" :service-name="serviceName"></Terminal>
+            <div class="mb-3">
+                <router-link :to="sh" class="btn btn-normal me-2">Switch to sh</router-link>
+            </div>
+
+            <Terminal class="terminal" :rows="20" mode="interactive" :name="terminalName" :stack-name="stackName" :service-name="serviceName" :shell="shell"></Terminal>
         </div>
     </transition>
 </template>
@@ -27,12 +27,25 @@ export default {
         stackName() {
             return this.$route.params.stackName;
         },
+        shell() {
+            return this.$route.params.type;
+        },
         serviceName() {
             return this.$route.params.serviceName;
         },
         terminalName() {
             return getContainerExecTerminalName(this.stackName, this.serviceName, 0);
-        }
+        },
+        sh() {
+            return {
+                name: "containerTerminal",
+                params: {
+                    stackName: this.stackName,
+                    serviceName: this.serviceName,
+                    type: "sh",
+                },
+            };
+        },
     },
     mounted() {
 

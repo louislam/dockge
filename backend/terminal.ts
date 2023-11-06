@@ -98,12 +98,12 @@ export class Terminal {
             // Remove room
             this.server.io.in(this.name).socketsLeave(this.name);
 
+            Terminal.terminalMap.delete(this.name);
+            log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
+
             if (this.callback) {
                 this.callback(res.exitCode);
             }
-
-            Terminal.terminalMap.delete(this.name);
-            log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
         });
     }
 

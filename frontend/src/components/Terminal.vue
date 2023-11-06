@@ -33,6 +33,12 @@ export default {
             type: String,
         },
 
+        // Require if mode is interactive
+        shell: {
+            type: String,
+            default: "bash",
+        },
+
         rows: {
             type: Number,
             default: TERMINAL_ROWS,
@@ -110,7 +116,7 @@ export default {
             });
         } else if (this.mode === "interactive") {
             console.debug("Create Interactive terminal:", this.name);
-            this.$root.getSocket().emit("interactiveTerminal", this.stackName, this.serviceName, (res) => {
+            this.$root.getSocket().emit("interactiveTerminal", this.stackName, this.serviceName, this.shell, (res) => {
                 if (!res.ok) {
                     this.$root.toastRes(res);
                 }

@@ -74,10 +74,9 @@ export default {
 
         subMenus() {
             return {
-                /*
                 general: {
                     title: this.$t("General"),
-                },*/
+                },
                 appearance: {
                     title: this.$t("Appearance"),
                 },

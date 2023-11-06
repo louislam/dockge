@@ -16,7 +16,7 @@ interface DBConfig {
 
 export class Database {
     /**
-     * SQLite file path (Default: ./data/kuma.db)
+     * SQLite file path (Default: ./data/dockge.db)
      * @type {string}
      */
     static sqlitePath;

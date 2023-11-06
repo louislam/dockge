@@ -317,14 +317,14 @@ export class Stack {
         terminal.start();
     }
 
-    async joinContainerTerminal(socket: DockgeSocket, serviceName: string, index: number = 0) {
+    async joinContainerTerminal(socket: DockgeSocket, serviceName: string, shell : string = "sh", index: number = 0) {
         const terminalName = getContainerExecTerminalName(this.name, serviceName, index);
         let terminal = Terminal.getTerminal(terminalName);
 
         if (!terminal) {
-            terminal = new InteractiveTerminal(this.server, terminalName, "docker", [ "compose", "exec", serviceName, "bash" ], this.path);
+            terminal = new InteractiveTerminal(this.server, terminalName, "docker", [ "compose", "exec", serviceName, shell ], this.path);
             terminal.rows = TERMINAL_ROWS;
-            log.debug("deployStack", "Terminal created");
+            log.debug("joinContainerTerminal", "Terminal created");
         }
 
         terminal.join(socket);

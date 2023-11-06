@@ -10,7 +10,7 @@
                 ⚠️ {{ $t("Frontend Version do not match backend version!") }}
             </div>
 
-            <div class="my-3 update-link"><a href="https://github.com/louislam/uptime-kuma/releases" target="_blank" rel="noopener">{{ $t("Check Update On GitHub") }}</a></div>
+            <div class="my-3 update-link"><a href="https://github.com/louislam/dockge/releases" target="_blank" rel="noopener">{{ $t("Check Update On GitHub") }}</a></div>
 
             <div class="mt-1">
                 <div class="form-check">

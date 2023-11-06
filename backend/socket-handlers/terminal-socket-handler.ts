@@ -32,7 +32,7 @@ export class TerminalSocketHandler extends SocketHandler {
 
                 let terminal = Terminal.getTerminal(terminalName);
                 if (terminal instanceof InteractiveTerminal) {
-                    log.debug("terminalInput", "Terminal found, writing to terminal.");
+                    //log.debug("terminalInput", "Terminal found, writing to terminal.");
                     terminal.write(cmd);
                 } else {
                     throw new Error("Terminal not found or it is not a Interactive Terminal.");
@@ -79,7 +79,7 @@ export class TerminalSocketHandler extends SocketHandler {
         });
 
         // Interactive Terminal for containers
-        socket.on("interactiveTerminal", async (stackName : unknown, serviceName : unknown, callback) => {
+        socket.on("interactiveTerminal", async (stackName : unknown, serviceName : unknown, shell : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -91,12 +91,16 @@ export class TerminalSocketHandler extends SocketHandler {
                     throw new ValidationError("Service name must be a string.");
                 }
 
+                if (typeof(shell) !== "string") {
+                    throw new ValidationError("Shell must be a string.");
+                }
+
                 log.debug("interactiveTerminal", "Stack name: " + stackName);
                 log.debug("interactiveTerminal", "Service name: " + serviceName);
 
                 // Get stack
                 const stack = Stack.getStack(server, stackName);
-                stack.joinContainerTerminal(socket, serviceName);
+                stack.joinContainerTerminal(socket, serviceName, shell);
 
                 callback({
                     ok: true,

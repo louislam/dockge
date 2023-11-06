@@ -11,7 +11,7 @@ export default obj;
 
 // How much time in ms to wait between update checks
 const UPDATE_CHECKER_INTERVAL_MS = 1000 * 60 * 60 * 48;
-const CHECK_URL = "https://uptime.kuma.pet/version";
+const CHECK_URL = "https://dockge.kuma.pet/version";
 
 let interval : NodeJS.Timeout;
 
