@@ -104,7 +104,7 @@
 
                     <!-- Combined Terminal Output -->
                     <div v-show="!isEditMode">
-                        <h4 class="mb-3">Logs</h4>
+                        <h4 class="mb-3">Terminal</h4>
                         <Terminal
                             ref="combinedTerminal"
                             class="mb-3 terminal"
@@ -135,13 +135,15 @@
                         {{ yamlError }}
                     </div>
 
-                    <h4 class="mb-3">{{ $tc("network", 2) }}</h4>
-                    <div class="shadow-box big-padding mb-3">
-                        <NetworkInput />
-                    </div>
+                    <div v-if="isEditMode">
+                        <h4 class="mb-3">{{ $tc("network", 2) }}</h4>
+                        <div class="shadow-box big-padding mb-3">
+                            <NetworkInput />
+                        </div>
 
-                    <h4 class="mb-3">{{ $tc("volume", 2) }}</h4>
-                    <div class="shadow-box big-padding mb-3">
+                        <h4 class="mb-3">{{ $tc("volume", 2) }}</h4>
+                        <div class="shadow-box big-padding mb-3">
+                        </div>
                     </div>
 
                     <!-- <div class="shadow-box big-padding mb-3">
@@ -531,43 +533,6 @@ export default {
             });
         },
 
-        combineNetworks() {
-            let networks = this.jsonConfig.networks;
-
-            if (!networks) {
-                networks = {};
-            }
-
-            for (let serviceName in this.jsonConfig.services) {
-
-                let service = this.jsonConfig.services[serviceName];
-                let serviceNetworks = service.networks;
-
-                if (!networks) {
-                    continue;
-                }
-
-                // If it is an array, it should be array of string
-                if (Array.isArray(serviceNetworks)) {
-                    for (let n of serviceNetworks) {
-                        console.log(n);
-                        if (!n) {
-                            continue;
-                        }
-                        if (!networks[n]) {
-                            networks[n] = {};
-                        }
-                    }
-
-                } else if (typeof serviceNetworks === "object") {
-
-                }
-            }
-
-            console.debug(networks);
-
-            return networks;
-        }
     }
 };
 </script>

@@ -20,7 +20,17 @@ export default {
     props: {
         name: {
             type: String,
-            required: true,
+            require: true,
+        },
+
+        // Require if mode is interactive
+        stackName: {
+            type: String,
+        },
+
+        // Require if mode is interactive
+        serviceName: {
+            type: String,
         },
 
         rows: {
@@ -99,7 +109,8 @@ export default {
                 }
             });
         } else if (this.mode === "interactive") {
-            this.$root.getSocket().emit("interactiveTerminal", this.name, (res) => {
+            console.debug("Create Interactive terminal:", this.name);
+            this.$root.getSocket().emit("interactiveTerminal", this.stackName, this.serviceName, (res) => {
                 if (!res.ok) {
                     this.$root.toastRes(res);
                 }
@@ -184,7 +195,13 @@ export default {
         },
 
         interactiveTerminalConfig() {
-
+            this.terminal.onKey(e => {
+                this.$root.getSocket().emit("terminalInput", this.name, e.key, (res) => {
+                    if (!res.ok) {
+                        this.$root.toastRes(res);
+                    }
+                });
+            });
         }
     }
 };
@@ -193,6 +210,7 @@ export default {
 <style scoped lang="scss">
 .main-terminal {
     height: 100%;
+    overflow-x: scroll;
 }
 </style>
 

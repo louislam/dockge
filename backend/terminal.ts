@@ -51,7 +51,11 @@ export class Terminal {
 
     set rows(rows : number) {
         this._rows = rows;
-        this.ptyProcess?.resize(this.cols, this.rows);
+        try {
+            this.ptyProcess?.resize(this.cols, this.rows);
+        } catch (e) {
+            log.debug("Terminal", "Failed to resize terminal: " + e.message);
+        }
     }
 
     get cols() {
@@ -60,7 +64,11 @@ export class Terminal {
 
     set cols(cols : number) {
         this._cols = cols;
-        this.ptyProcess?.resize(this.cols, this.rows);
+        try {
+            this.ptyProcess?.resize(this.cols, this.rows);
+        } catch (e) {
+            log.debug("Terminal", "Failed to resize terminal: " + e.message);
+        }
     }
 
     public start() {
@@ -133,11 +141,16 @@ export class Terminal {
         this._ptyProcess?.kill();
     }
 
+    /**
+     * Get a running and non-exited terminal
+     * @param name
+     */
     public static getTerminal(name : string) : Terminal | undefined {
         return Terminal.terminalMap.get(name);
     }
 
     public static getOrCreateTerminal(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) : Terminal {
+        // Since exited terminal will be removed from the map, it is safe to get the terminal from the map
         let terminal = Terminal.getTerminal(name);
         if (!terminal) {
             terminal = new Terminal(server, name, file, args, cwd);

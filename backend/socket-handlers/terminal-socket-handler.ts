@@ -13,6 +13,7 @@ import {
     PROGRESS_TERMINAL_ROWS
 } from "../util-common";
 import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
+import { Stack } from "../stack";
 
 export class TerminalSocketHandler extends SocketHandler {
     create(socket : DockgeSocket, server : DockgeServer) {
@@ -31,6 +32,7 @@ export class TerminalSocketHandler extends SocketHandler {
 
                 let terminal = Terminal.getTerminal(terminalName);
                 if (terminal instanceof InteractiveTerminal) {
+                    log.debug("terminalInput", "Terminal found, writing to terminal.");
                     terminal.write(cmd);
                 } else {
                     throw new Error("Terminal not found or it is not a Interactive Terminal.");
@@ -89,17 +91,12 @@ export class TerminalSocketHandler extends SocketHandler {
                     throw new ValidationError("Service name must be a string.");
                 }
 
-                const terminalName = getContainerExecTerminalName(stackName, serviceName, 0);
-                let terminal = Terminal.getTerminal(terminalName);
+                log.debug("interactiveTerminal", "Stack name: " + stackName);
+                log.debug("interactiveTerminal", "Service name: " + serviceName);
 
-                if (!terminal) {
-                    terminal = new InteractiveTerminal(server, terminalName);
-                    terminal.rows = 50;
-                    log.debug("deployStack", "Terminal created");
-                }
-
-                terminal.join(socket);
-                terminal.start();
+                // Get stack
+                const stack = Stack.getStack(server, stackName);
+                stack.joinContainerTerminal(socket, serviceName);
 
                 callback({
                     ok: true,

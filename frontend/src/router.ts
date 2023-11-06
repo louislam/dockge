@@ -39,13 +39,11 @@ const routes = [
                                 name: "compose",
                                 component: Compose,
                                 props: true,
-                                children: [
-                                    {
-                                        path: "/compose/:stackName/terminal/:serviceName/:type",
-                                        component: ContainerTerminal,
-                                        name: "containerTerminal",
-                                    },
-                                ]
+                            },
+                            {
+                                path: "/terminal/:stackName/:serviceName/:type",
+                                component: ContainerTerminal,
+                                name: "containerTerminal",
                             },
                         ]
                     },

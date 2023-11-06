@@ -71,7 +71,7 @@ export class DockerSocketHandler extends SocketHandler {
 
                 const stack = Stack.getStack(server, stackName);
 
-                stack.startCombinedTerminal(socket);
+                stack.joinCombinedTerminal(socket);
 
                 callback({
                     ok: true,
@@ -113,7 +113,7 @@ export class DockerSocketHandler extends SocketHandler {
                 });
                 server.sendStackList();
 
-                stack.startCombinedTerminal(socket);
+                stack.joinCombinedTerminal(socket);
 
             } catch (e) {
                 callbackError(e, callback);

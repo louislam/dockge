@@ -141,7 +141,7 @@ export default defineComponent({
             socket.on("terminalWrite", (terminalName, data) => {
                 const terminal = terminalMap.get(terminalName);
                 if (!terminal) {
-                    console.error("Terminal not found: " + terminalName);
+                    //console.error("Terminal not found: " + terminalName);
                     return;
                 }
                 terminal.write(data);

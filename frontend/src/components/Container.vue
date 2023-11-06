@@ -14,7 +14,7 @@
                 <div class="function">
                     <router-link v-if="!isEditMode" class="btn btn-normal" :to="terminalRouteLink">
                         <font-awesome-icon icon="terminal" />
-                        Terminal
+                        Bash
                     </router-link>
                 </div>
             </div>
@@ -160,10 +160,15 @@ export default defineComponent({
             return {
                 name: "containerTerminal",
                 params: {
+                    stackName: this.stackName,
                     serviceName: this.name,
-                    type: "logs",
+                    type: "bash",
                 },
             };
+        },
+
+        stackName() {
+            return this.$parent.$parent.stack.name;
         },
 
         service() {

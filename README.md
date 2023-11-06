@@ -20,7 +20,7 @@ A fancy, easy-to-use and reactive docker stack (`docker-compose.yml`) manager.
 
 ## Motivations
 
-- I have been using Portainer for some time, but I am sometimes not satisfied with it. For example, sometimes when I deploy a stack, the loading icon keeps spinning for a few minutes without progress. And sometimes error messages are not clear.
+- I have been using Portainer for some time, but for the stack management, I am sometimes not satisfied with it. For example, sometimes when I try to deploy a stack, the loading icon keeps spinning for a few minutes without progress. And sometimes error messages are not clear.
 - Try to develop with ES Module + TypeScript (Originally, I planned to use Deno or Bun.js, but they do not support for arm64, so I stepped back to Node.js)
 
 
@@ -34,8 +34,6 @@ If you love this project, please consider giving this project a ⭐.
 - Get app icons
 - Switch Docker context
 - Support Dockerfile and build
-- Zero-config private docker registry
 - Support Docker swarm
-
 
 

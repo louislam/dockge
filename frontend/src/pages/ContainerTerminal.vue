@@ -1,36 +1,38 @@
 <template>
     <transition name="slide-fade" appear>
         <div>
-            <h1 class="mb-3">Console</h1>
+            <h1 class="mb-3">Bash</h1>
+            <p>
+                Stack: {{ stackName }}<br />
+                Container: {{ serviceName }}
+            </p>
 
-            <div>
-                <p>
-                    Allowed commands:
-                    <template v-for="(command, index) in allowedCommandList" :key="command">
-                        <code>{{ command }}</code>
-
-                        <!-- No comma at the end -->
-                        <span v-if="index !== allowedCommandList.length - 1">, </span>
-                    </template>
-                </p>
-            </div>
-
-            <Terminal class="terminal" :rows="20" mode="mainTerminal" name="console"></Terminal>
+            <Terminal class="terminal" :rows="20" mode="interactive" :name="terminalName" :stack-name="stackName" :service-name="serviceName"></Terminal>
         </div>
     </transition>
 </template>
 
 <script>
-
-import { allowedCommandList } from "../../../backend/util-common";
+import { getContainerExecTerminalName } from "../../../backend/util-common";
 
 export default {
     components: {
     },
     data() {
         return {
-            allowedCommandList,
+
         };
+    },
+    computed: {
+        stackName() {
+            return this.$route.params.stackName;
+        },
+        serviceName() {
+            return this.$route.params.serviceName;
+        },
+        terminalName() {
+            return getContainerExecTerminalName(this.stackName, this.serviceName, 0);
+        }
     },
     mounted() {
 

@@ -84,7 +84,7 @@ export const TERMINAL_COLS = 105;
 export const TERMINAL_ROWS = 10;
 export const PROGRESS_TERMINAL_ROWS = 8;
 
-export const COMBINED_TERMINAL_COLS = 50;
+export const COMBINED_TERMINAL_COLS = 56;
 export const COMBINED_TERMINAL_ROWS = 15;
 
 export const ERROR_TYPE_VALIDATION = 1;
