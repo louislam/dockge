@@ -18,7 +18,7 @@ A fancy, easy-to-use and reactive docker stack (`docker-compose.yml`) manager.
 ## 🔧 How to Install
 
 1. Create a directory `./dockge/`
-1. Create a `compose.yaml` inside `./dockge` file with the following content:
+1. Create a `compose.yaml` file inside `./dockge` with the following content:
 
 ```yaml
 version: "3.8"
