@@ -4,7 +4,9 @@
 
 # Dockge
 
-A fancy, easy-to-use and reactive docker stack (`docker-compose.yml`) manager.
+A fancy, easy-to-use and reactive docker stack (`compose.yaml`) manager.
+
+Dockge is built on top of [Compose V2](https://docs.docker.com/compose/migrate/). `compose.yaml` as known as `docker-compose.yml`
 
 ## ⭐ Features
 
