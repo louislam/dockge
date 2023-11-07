@@ -12,6 +12,9 @@ export default defineConfig({
     server: {
         port: 5000,
     },
+    define: {
+        "FRONTEND_VERSION": JSON.stringify(process.env.npm_package_version),
+    },
     root: "./frontend",
     build: {
         outDir: "../frontend-dist",

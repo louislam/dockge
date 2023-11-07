@@ -27,7 +27,7 @@ import path from "path";
 import { TerminalSocketHandler } from "./socket-handlers/terminal-socket-handler";
 import { Stack } from "./stack";
 import { Cron } from "croner";
-import childProcess from "child_process";
+import gracefulShutdown from "http-graceful-shutdown";
 
 export class DockgeServer {
     app : Express;
@@ -260,6 +260,16 @@ export class DockgeServer {
             });
 
         });
+
+        gracefulShutdown(this.httpServer, {
+            signals: "SIGINT SIGTERM",
+            timeout: 30000,                   // timeout: 30 secs
+            development: false,               // not in dev mode
+            forceExit: true,                  // triggers process.exit() at the end of shutdown process
+            onShutdown: this.shutdownFunction,     // shutdown function (async) - e.g. for cleanup DB, ...
+            finally: this.finalFunction,            // finally function (sync) - e.g. for logging
+        });
+
     }
 
     /**
@@ -280,12 +290,12 @@ export class DockgeServer {
         }
 
         socket.emit("info", {
-            versionProperty,
-            latestVersionProperty,
+            version: versionProperty,
+            latestVersion: latestVersionProperty,
             isContainer,
-            primaryBaseURL: await Settings.get("primaryBaseURL"),
-            serverTimezone: await this.getTimezone(),
-            serverTimezoneOffset: this.getTimezoneOffset(),
+            //primaryBaseURL: await Settings.get("primaryBaseURL"),
+            //serverTimezone: await this.getTimezone(),
+            //serverTimezoneOffset: this.getTimezoneOffset(),
         });
     }
 
@@ -471,5 +481,27 @@ export class DockgeServer {
 
     get stackDirFullPath() {
         return path.resolve(this.stacksDir);
+    }
+
+    /**
+     * Shutdown the application
+     * Stops all monitors and closes the database connection.
+     * @param signal The signal that triggered this function to be called.
+     */
+    async shutdownFunction(signal : string | undefined) {
+        log.info("server", "Shutdown requested");
+        log.info("server", "Called signal: " + signal);
+
+        // TODO: Close all terminals?
+
+        await Database.close();
+        Settings.stopCacheCleaner();
+    }
+
+    /**
+     * Final function called before application exits
+     */
+    finalFunction() {
+        log.info("server", "Graceful shutdown successful!");
     }
 }

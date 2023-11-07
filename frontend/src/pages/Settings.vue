@@ -117,39 +117,9 @@ export default {
         loadSettings() {
             this.$root.getSocket().emit("getSettings", (res) => {
                 this.settings = res.data;
-
                 if (this.settings.checkUpdate === undefined) {
                     this.settings.checkUpdate = true;
                 }
-
-                if (this.settings.searchEngineIndex === undefined) {
-                    this.settings.searchEngineIndex = false;
-                }
-
-                if (this.settings.entryPage === undefined) {
-                    this.settings.entryPage = "dashboard";
-                }
-
-                if (this.settings.nscd === undefined) {
-                    this.settings.nscd = true;
-                }
-
-                if (this.settings.dnsCache === undefined) {
-                    this.settings.dnsCache = false;
-                }
-
-                if (this.settings.keepDataPeriodDays === undefined) {
-                    this.settings.keepDataPeriodDays = 180;
-                }
-
-                if (this.settings.tlsExpiryNotifyDays === undefined) {
-                    this.settings.tlsExpiryNotifyDays = [ 7, 14, 21 ];
-                }
-
-                if (this.settings.trustProxy === undefined) {
-                    this.settings.trustProxy = false;
-                }
-
                 this.settingsLoaded = true;
             });
         },

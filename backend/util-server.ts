@@ -3,6 +3,8 @@ import { Terminal } from "./terminal";
 import { randomBytes } from "crypto";
 import { log } from "./log";
 import { ERROR_TYPE_VALIDATION } from "./util-common";
+import { R } from "redbean-node";
+import { verifyPassword } from "./password-hash";
 
 export interface DockgeSocket extends Socket {
     userID: number;
@@ -56,4 +58,20 @@ export function callbackError(error : unknown, callback : unknown) {
     } else {
         log.debug("console", "Unknown error: " + error);
     }
+}
+
+export async function doubleCheckPassword(socket : DockgeSocket, currentPassword : unknown) {
+    if (typeof currentPassword !== "string") {
+        throw new Error("Wrong data type?");
+    }
+
+    let user = await R.findOne("user", " id = ? AND active = 1 ", [
+        socket.userID,
+    ]);
+
+    if (!user || !verifyPassword(currentPassword, user.password)) {
+        throw new Error("Incorrect current password");
+    }
+
+    return user;
 }

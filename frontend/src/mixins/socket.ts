@@ -39,10 +39,40 @@ export default defineComponent({
                 return "🐻";
             }
         },
+
+        /**
+         *  Frontend Version
+         *  It should be compiled to a static value while building the frontend.
+         *  Please see ./frontend/vite.config.ts, it is defined via vite.js
+         * @returns {string}
+         */
+        frontendVersion() {
+            // eslint-disable-next-line no-undef
+            return FRONTEND_VERSION;
+        },
+
+        /**
+         * Are both frontend and backend in the same version?
+         * @returns {boolean}
+         */
+        isFrontendBackendVersionMatched() {
+            if (!this.info.version) {
+                return true;
+            }
+            return this.info.version === this.frontendVersion;
+        },
+
     },
     watch: {
         remember() {
             localStorage.remember = (this.remember) ? "1" : "0";
+        },
+
+        // Reload the SPA if the server version is changed.
+        "info.version"(to, from) {
+            if (from && from !== to) {
+                window.location.reload();
+            }
         },
     },
     created() {
@@ -247,6 +277,7 @@ export default defineComponent({
 
         unbindTerminal(terminalName : string) {
             terminalMap.delete(terminalName);
-        }
+        },
+
     }
 });

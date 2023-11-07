@@ -198,6 +198,13 @@ export class Stack {
         let composeList = JSON.parse(res.toString());
 
         for (let composeStack of composeList) {
+
+            // Skip the dockge stack
+            // TODO: Could be self managed?
+            if (composeStack.Name === "dockge") {
+                continue;
+            }
+
             let stack = stackList.get(composeStack.Name);
 
             // This stack probably is not managed by Dockge, but we still want to show it

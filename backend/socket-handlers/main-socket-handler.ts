@@ -6,9 +6,10 @@ import { R } from "redbean-node";
 import { loginRateLimiter, twoFaRateLimiter } from "../rate-limiter";
 import { generatePasswordHash, needRehashPassword, shake256, SHAKE256_LENGTH, verifyPassword } from "../password-hash";
 import { User } from "../models/user";
-import { DockgeSocket } from "../util-server";
+import { checkLogin, DockgeSocket, doubleCheckPassword } from "../util-server";
 import { passwordStrength } from "check-password-strength";
 import jwt from "jsonwebtoken";
+import { Settings } from "../settings";
 
 export class MainSocketHandler extends SocketHandler {
     create(socket : DockgeSocket, server : DockgeServer) {
@@ -187,11 +188,62 @@ export class MainSocketHandler extends SocketHandler {
             }
 
         });
+
+        socket.on("getSettings", async (callback) => {
+            try {
+                checkLogin(socket);
+                const data = await Settings.getSettings("general");
+
+                callback({
+                    ok: true,
+                    data: data,
+                });
+
+            } catch (e) {
+                callback({
+                    ok: false,
+                    msg: e.message,
+                });
+            }
+        });
+
+        socket.on("setSettings", async (data, currentPassword, callback) => {
+            try {
+                checkLogin(socket);
+
+                // If currently is disabled auth, don't need to check
+                // Disabled Auth + Want to Disable Auth => No Check
+                // Disabled Auth + Want to Enable Auth => No Check
+                // Enabled Auth + Want to Disable Auth => Check!!
+                // Enabled Auth + Want to Enable Auth => No Check
+                const currentDisabledAuth = await Settings.get("disableAuth");
+                if (!currentDisabledAuth && data.disableAuth) {
+                    await doubleCheckPassword(socket, currentPassword);
+                }
+
+                await Settings.setSettings("general", data);
+
+                callback({
+                    ok: true,
+                    msg: "Saved"
+                });
+
+                server.sendInfo(socket);
+
+            } catch (e) {
+                callback({
+                    ok: false,
+                    msg: e.message,
+                });
+            }
+        });
     }
 
     async afterLogin(server: DockgeServer, socket : DockgeSocket, user : User) {
         socket.userID = user.id;
         socket.join(user.id.toString());
+
+        server.sendInfo(socket);
 
         try {
             server.sendStackList(socket);
