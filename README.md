@@ -22,7 +22,7 @@ A fancy, easy-to-use and reactive docker `compose.yaml` stack manager.
 ## 🔧 How to Install
 
 1. Create a directory `dockge`
-1. Create a `compose.yaml` file inside `dockge` with the following content:
+2. Create or download [`compose.yaml`](https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml) and put it inside `dockge`:
 
 ```yaml
 version: "3.8"
@@ -35,8 +35,6 @@ services:
       - ./data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
 ```
-
-2. `cd ./dockge/`
 3. `docker-compose up -d`
 
 Dockge is now running on http://localhost:5001

@@ -16,6 +16,7 @@ export class DockerSocketHandler extends SocketHandler {
                     ok: true,
                     msg: "Deployed",
                 });
+                stack.joinCombinedTerminal(socket);
             } catch (e) {
                 callbackError(e, callback);
             }
