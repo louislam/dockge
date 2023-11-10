@@ -4,7 +4,7 @@
 
 # Dockge
 
-A fancy, easy-to-use and reactive docker `compose.yaml` stack manager.
+A fancy, easy-to-use and reactive docker `compose.yaml` stack oriented manager.
 
 <img src="https://github.com/louislam/dockge/assets/1336778/26a583e1-ecb1-4a8d-aedf-76157d714ad7" width="900" alt="" />
 
@@ -21,23 +21,51 @@ A fancy, easy-to-use and reactive docker `compose.yaml` stack manager.
 
 ## 🔧 How to Install
 
-1. Create a directory `dockge`
-2. Create or download [`compose.yaml`](https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml) and put it inside `dockge`:
+### Basic
+
+Default stacks directory is `/opt/stacks`.
+
+```
+# Create a directory that stores your stacks
+mkdir -p /opt/stacks
+
+# Create a directory that stores dockge's compose.yaml
+mkdir -p /opt/dockge
+cd /opt/dockge
+
+# Download the compose.yaml
+wget https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml
+
+# Start Server
+docker-compose up -d
+```
+
+### Advanced
+
+If you want to store your stacks in another directory, you can change the `DOCKGE_STACKS_DIR` environment variable and volumes.
+
+For exmaples, if you want to store your stacks in `/my-stacks`:
 
 ```yaml
 version: "3.8"
 services:
   dockge:
-    image: louislam/dockge:nightly
+    image: louislam/dockge:1
+    restart: unless-stopped
     ports:
       - 5001:5001
     volumes:
-      - ./data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
-```
-3. `docker-compose up -d`
+      - ./data:/app/data
 
-Dockge is now running on http://localhost:5001
+      # Your stacks directory in the host
+      # (The paths inside container must be the same as the host)
+      - /my-stacks:/my-stacks
+    environment:
+      # Tell Dockge where is your stacks directory
+      - DOCKGE_STACKS_DIR=/my-stacks
+```
+
 
 ## Motivations
 
@@ -56,6 +84,10 @@ If you love this project, please consider giving this project a ⭐.
 The naming idea was coming from Twitch emotes like `sadge`, `bedge` or `wokege`. They are all ending with `-ge`.
 
 If you are not comfortable with the pronunciation, you can call it `Dockage`
+
+#### Can I manage a single container without `compose.yaml`?
+
+The main objective of Dockge is that try to use docker `compose.yaml` for everything. If you want to manage a single container, you can just use Portainer or Docker CLI.
 
 ## More Ideas?
 

@@ -72,7 +72,7 @@ export class MainSocketHandler extends SocketHandler {
                     }
 
                     log.debug("auth", "afterLogin");
-                    await this.afterLogin(server, socket, user);
+                    await server.afterLogin(socket, user);
                     log.debug("auth", "afterLogin ok");
 
                     log.info("auth", `Successfully logged in user ${decoded.username}. IP=${clientIP}`);
@@ -129,7 +129,7 @@ export class MainSocketHandler extends SocketHandler {
 
             if (user) {
                 if (user.twofa_status === 0) {
-                    this.afterLogin(server, socket, user);
+                    server.afterLogin(socket, user);
 
                     log.info("auth", `Successfully logged in user ${data.username}. IP=${clientIP}`);
 
@@ -152,7 +152,7 @@ export class MainSocketHandler extends SocketHandler {
                     const verify = notp.totp.verify(data.token, user.twofa_secret, twoFAVerifyOptions);
 
                     if (user.twofa_last_token !== data.token && verify) {
-                        this.afterLogin(server, socket, user);
+                        server.afterLogin(socket, user);
 
                         await R.exec("UPDATE `user` SET twofa_last_token = ? WHERE id = ? ", [
                             data.token,
@@ -189,6 +189,35 @@ export class MainSocketHandler extends SocketHandler {
 
         });
 
+        // Change Password
+        socket.on("changePassword", async (password, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (! password.newPassword) {
+                    throw new Error("Invalid new password");
+                }
+
+                if (passwordStrength(password.newPassword).value === "Too weak") {
+                    throw new Error("Password is too weak. It should contain alphabetic and numeric characters. It must be at least 6 characters in length.");
+                }
+
+                let user = await doubleCheckPassword(socket, password.currentPassword);
+                await user.resetPassword(password.newPassword);
+
+                callback({
+                    ok: true,
+                    msg: "Password has been updated successfully.",
+                });
+
+            } catch (e) {
+                callback({
+                    ok: false,
+                    msg: e.message,
+                });
+            }
+        });
+
         socket.on("getSettings", async (callback) => {
             try {
                 checkLogin(socket);
@@ -221,6 +250,8 @@ export class MainSocketHandler extends SocketHandler {
                     await doubleCheckPassword(socket, currentPassword);
                 }
 
+                console.log(data);
+
                 await Settings.setSettings("general", data);
 
                 callback({
@@ -237,19 +268,6 @@ export class MainSocketHandler extends SocketHandler {
                 });
             }
         });
-    }
-
-    async afterLogin(server: DockgeServer, socket : DockgeSocket, user : User) {
-        socket.userID = user.id;
-        socket.join(user.id.toString());
-
-        server.sendInfo(socket);
-
-        try {
-            server.sendStackList(socket);
-        } catch (e) {
-            log.error("server", e);
-        }
     }
 
     async login(username : string, password : string) {

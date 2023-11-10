@@ -43,5 +43,6 @@
     "addContainer": "Add Container",
     "addNetwork": "Add Network",
     "disableauth.message1": "Are you sure want to <strong>disable authentication</strong>?",
-    "disableauth.message2": "It is designed for scenarios <strong>where you intend to implement third-party authentication</strong> in front of Uptime Kuma such as Cloudflare Access, Authelia or other authentication mechanisms."
+    "disableauth.message2": "It is designed for scenarios <strong>where you intend to implement third-party authentication</strong> in front of Uptime Kuma such as Cloudflare Access, Authelia or other authentication mechanisms.",
+    "passwordNotMatchMsg": "The repeat password does not match."
 }

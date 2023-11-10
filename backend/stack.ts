@@ -333,4 +333,26 @@ export class Stack {
         terminal.join(socket);
         terminal.start();
     }
+
+    async getServiceStatusList() {
+        let statusList = new Map<string, number>();
+
+        let res = childProcess.execSync("docker compose ps --format json", {
+            cwd: this.path,
+        });
+
+        let lines = res.toString().split("\n");
+
+        console.log(lines);
+
+        for (let line of lines) {
+            try {
+                let obj = JSON.parse(line);
+                statusList.set(obj.Service, obj.State);
+            } catch (e) {
+            }
+        }
+
+        return statusList;
+    }
 }

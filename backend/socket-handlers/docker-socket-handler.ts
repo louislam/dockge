@@ -183,6 +183,26 @@ export class DockerSocketHandler extends SocketHandler {
                 callbackError(e, callback);
             }
         });
+
+        // Services status
+        socket.on("serviceStatusList", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = Stack.getStack(server, stackName);
+                const serviceStatusList = Object.fromEntries(await stack.getServiceStatusList());
+                callback({
+                    ok: true,
+                    serviceStatusList,
+                });
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
     }
 
     saveStack(socket : DockgeSocket, server : DockgeServer, name : unknown, composeYAML : unknown, isAdd : unknown) : Stack {

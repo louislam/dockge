@@ -134,7 +134,7 @@ export class Database {
         R.freeze(true);
 
         if (autoloadModels) {
-            await R.autoloadModels("./server/model");
+            R.autoloadModels("./backend/models", "ts");
         }
 
         if (dbConfig.type === "sqlite") {

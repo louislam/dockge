@@ -97,6 +97,7 @@
                             :name="name"
                             :is-edit-mode="isEditMode"
                             :first="name === Object.keys(jsonConfig.services)[0]"
+                            :status="serviceStatusList[name]"
                         />
                     </div>
 
@@ -201,6 +202,8 @@ services:
 
 let yamlErrorTimeout = null;
 
+let serviceStatusTimeout = null;
+
 export default {
     components: {
         NetworkInput,
@@ -228,10 +231,12 @@ export default {
             stack: {
 
             },
+            serviceStatusList: {},
             isEditMode: false,
             submitted: false,
             showDeleteDialog: false,
             newContainerName: "",
+            stopServiceStatusTimeout: false,
         };
     },
     computed: {
@@ -331,8 +336,33 @@ export default {
             this.stack.name = this.$route.params.stackName;
             this.loadStack();
         }
+
+        this.requestServiceStatus();
+    },
+    unmounted() {
+        this.stopServiceStatusTimeout = true;
+        clearTimeout(serviceStatusTimeout);
     },
     methods: {
+
+        startServiceStatusTimeout() {
+            clearTimeout(serviceStatusTimeout);
+            serviceStatusTimeout = setTimeout(async () => {
+                this.requestServiceStatus();
+            }, 2000);
+        },
+
+        requestServiceStatus() {
+            this.$root.getSocket().emit("serviceStatusList", this.stack.name, (res) => {
+                if (res.ok) {
+                    this.serviceStatusList = res.serviceStatusList;
+                }
+                if (!this.stopServiceStatusTimeout) {
+                    this.startServiceStatusTimeout();
+                }
+            });
+        },
+
         exitConfirm(next) {
             if (this.isEditMode) {
                 if (confirm("You are currently editing a stack. Are you sure you want to leave?")) {

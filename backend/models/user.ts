@@ -20,7 +20,7 @@ export class User extends BeanModel {
 
     /**
      * Reset this users password
-     * @param {string} newPassword Users new password
+     * @param {string} newPassword
      * @returns {Promise<void>}
      */
     async resetPassword(newPassword : string) {
@@ -42,3 +42,5 @@ export class User extends BeanModel {
     }
 
 }
+
+export default User;

@@ -33,7 +33,7 @@
         "knex": "~2.5.1",
         "limiter-es6-compat": "~2.1.2",
         "mysql2": "^3.6.3",
-        "redbean-node": "0.3.1",
+        "redbean-node": "0.3.2",
         "socket.io": "~4.7.2",
         "socket.io-client": "~4.7.2",
         "timezones-list": "~3.0.2",

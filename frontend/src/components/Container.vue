@@ -7,7 +7,7 @@
                     <span class="me-1">{{ imageName }}:</span><span class="tag">{{ imageTag }}</span>
                 </div>
                 <div v-if="!isEditMode">
-                    <span class="badge bg-primary me-1">Running</span>
+                    <span class="badge me-1" :class="bgStyle">{{ status }}</span>
                 </div>
             </div>
             <div class="col-5">
@@ -146,6 +146,10 @@ export default defineComponent({
             type: Boolean,
             default: false,
         },
+        status: {
+            type: String,
+            default: "N/A",
+        }
     },
     emits: [
     ],
@@ -155,6 +159,14 @@ export default defineComponent({
         };
     },
     computed: {
+
+        bgStyle() {
+            if (this.status === "running") {
+                return "bg-primary";
+            } else {
+                return "bg-secondary";
+            }
+        },
 
         terminalRouteLink() {
             return {

@@ -221,6 +221,40 @@ export default defineComponent({
         },
 
         /**
+         * Send request to log user in
+         * @param {string} username Username to log in with
+         * @param {string} password Password to log in with
+         * @param {string} token User token
+         * @param {loginCB} callback Callback to call with result
+         * @returns {void}
+         */
+        login(username : string, password : string, token : string, callback) {
+            this.getSocket().emit("login", {
+                username,
+                password,
+                token,
+            }, (res) => {
+                if (res.tokenRequired) {
+                    callback(res);
+                }
+
+                if (res.ok) {
+                    this.storage().token = res.token;
+                    this.socketIO.token = res.token;
+                    this.loggedIn = true;
+                    this.username = this.getJWTPayload()?.username;
+
+                    this.afterLogin();
+
+                    // Trigger Chrome Save Password
+                    history.pushState({}, "");
+                }
+
+                callback(res);
+            });
+        },
+
+        /**
          * Log in using a token
          * @param {string} token Token to log in with
          * @returns {void}

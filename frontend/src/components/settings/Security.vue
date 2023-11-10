@@ -64,7 +64,8 @@
                 </form>
             </template>
 
-            <div v-if="! settings.disableAuth" class="mt-5 mb-3">
+            <!-- TODO: Hidden for now -->
+            <div v-if="! settings.disableAuth && false" class="mt-5 mb-3">
                 <h5 class="my-4 settings-subheading">
                     {{ $t("Two Factor Authentication") }}
                 </h5>
@@ -182,7 +183,7 @@ export default {
             this.saveSettings(() => {
                 this.password.currentPassword = "";
                 this.$root.username = null;
-                this.$root.socket.token = "autoLogin";
+                this.$root.socketIO.token = "autoLogin";
             }, this.password.currentPassword);
         },
 

@@ -28,6 +28,7 @@ import { TerminalSocketHandler } from "./socket-handlers/terminal-socket-handler
 import { Stack } from "./stack";
 import { Cron } from "croner";
 import gracefulShutdown from "http-graceful-shutdown";
+import User from "./models/user";
 
 export class DockgeServer {
     app : Express;
@@ -194,7 +195,7 @@ export class DockgeServer {
             cors,
         });
 
-        this.io.on("connection", (socket: Socket) => {
+        this.io.on("connection", async (socket: Socket) => {
             log.info("server", "Socket connected!");
 
             this.sendInfo(socket, true);
@@ -208,6 +209,20 @@ export class DockgeServer {
             for (const socketHandler of this.socketHandlerList) {
                 socketHandler.create(socket as DockgeSocket, this);
             }
+
+            // ***************************
+            // Better do anything after added all socket handlers here
+            // ***************************
+
+            log.debug("auth", "check auto login");
+            if (await Settings.get("disableAuth")) {
+                log.info("auth", "Disabled Auth: auto login to admin");
+                this.afterLogin(socket as DockgeSocket, await R.findOne("user"));
+                socket.emit("autoLogin");
+            } else {
+                log.debug("auth", "need auth");
+            }
+
         });
 
         this.io.on("disconnect", () => {
@@ -216,8 +231,17 @@ export class DockgeServer {
 
     }
 
-    prepareServer() {
+    async afterLogin(socket : DockgeSocket, user : User) {
+        socket.userID = user.id;
+        socket.join(user.id.toString());
 
+        this.sendInfo(socket);
+
+        try {
+            this.sendStackList();
+        } catch (e) {
+            log.error("server", e);
+        }
     }
 
     /**

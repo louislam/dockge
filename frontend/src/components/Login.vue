@@ -71,7 +71,7 @@ export default {
         submit() {
             this.processing = true;
 
-            this.login(this.username, this.password, this.token, (res) => {
+            this.$root.login(this.username, this.password, this.token, (res) => {
                 this.processing = false;
 
                 if (res.tokenRequired) {
@@ -82,40 +82,6 @@ export default {
             });
         },
 
-        /**
-         * Send request to log user in
-         * @param {string} username Username to log in with
-         * @param {string} password Password to log in with
-         * @param {string} token User token
-         * @param {loginCB} callback Callback to call with result
-         * @returns {void}
-         */
-        login(username, password, token, callback) {
-
-            this.$root.getSocket().emit("login", {
-                username,
-                password,
-                token,
-            }, (res) => {
-                if (res.tokenRequired) {
-                    callback(res);
-                }
-
-                if (res.ok) {
-                    this.$root.storage().token = res.token;
-                    this.$root.socketIO.token = res.token;
-                    this.$root.loggedIn = true;
-                    this.$root.username = this.$root.getJWTPayload()?.username;
-
-                    this.$root.afterLogin();
-
-                    // Trigger Chrome Save Password
-                    history.pushState({}, "");
-                }
-
-                callback(res);
-            });
-        }
     },
 };
 </script>
