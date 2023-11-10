@@ -1,8 +1,8 @@
 <template>
-    <div v-show="false">
+    <div>
         <form class="my-4" autocomplete="off" @submit.prevent="saveGeneral">
             <!-- Client side Timezone -->
-            <div class="mb-4">
+            <div v-if="false" class="mb-4">
                 <label for="timezone" class="form-label">
                     {{ $t("Display Timezone") }}
                 </label>
@@ -21,7 +21,7 @@
             </div>
 
             <!-- Server Timezone -->
-            <div class="mb-4">
+            <div v-if="false" class="mb-4">
                 <label for="timezone" class="form-label">
                     {{ $t("Server Timezone") }}
                 </label>
@@ -49,6 +49,9 @@
                         class="form-control"
                         placeholder="localhost"
                     />
+                    <button class="btn btn-outline-primary" type="button" @click="autoGetPrimaryHostname">
+                        {{ $t("Auto Get") }}
+                    </button>
                 </div>
 
                 <div class="form-text"></div>
@@ -102,14 +105,8 @@ export default {
             this.saveSettings();
         },
         /** Get the base URL of the application */
-        autoGetPrimaryBaseURL() {
-            this.settings.primaryBaseURL = location.protocol + "//" + location.host;
-        },
-
-        testChrome() {
-            this.$root.getSocket().emit("testChrome", this.settings.chromeExecutable, (res) => {
-                this.$root.toastRes(res);
-            });
+        autoGetPrimaryHostname() {
+            this.settings.primaryHostname = location.hostname;
         },
     },
 };

@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  mariadb:
+    image: mariadb:latest
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    environment:
+      - MARIADB_ROOT_PASSWORD=123456
