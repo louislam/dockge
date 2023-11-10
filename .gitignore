@@ -1,10 +1,12 @@
 # Should update .dockerignore as well
 .env
 node_modules
-dist
-frontend-dist
 .idea
 data
+stacks
 tmp
 /private
+
+# Git only
+frontend-dist
 

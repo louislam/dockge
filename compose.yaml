@@ -1,4 +1,3 @@
-# docker run -d --name dockge -p 5001:5001 -v dockge:/app/data -v /var/run/docker.sock:/var/run/docker.sock --restart=always louislam/dockge:nightly
 version: "3.8"
 services:
   dockge:
@@ -6,5 +5,8 @@ services:
     ports:
       - 5001:5001
     volumes:
-      - ./data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/app/data
+      - /opt/stacks:/opt/stacks
+    environment:
+      - DOCKGE_STACKS_DIR=/opt/stacks

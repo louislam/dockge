@@ -64,11 +64,7 @@ export class Stack {
     }
 
     get isManagedByDockge() : boolean {
-        if (this._configFilePath) {
-            return this._configFilePath.startsWith(this.server.stackDirFullPath) && fs.existsSync(this.path) && fs.statSync(this.path).isDirectory();
-        } else {
-            return false;
-        }
+        return fs.existsSync(this.path) && fs.statSync(this.path).isDirectory();
     }
 
     get status() : number {

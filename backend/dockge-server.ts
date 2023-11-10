@@ -81,6 +81,14 @@ export class DockgeServer {
         // Log NODE ENV
         log.info("server", "NODE_ENV: " + process.env.NODE_ENV);
 
+        // Default stacks directory
+        let defaultStacksDir;
+        if (process.platform === "win32") {
+            defaultStacksDir = "./stacks";
+        } else {
+            defaultStacksDir = "/opt/stacks";
+        }
+
         // Define all possible arguments
         let args = parse<Arguments>({
             sslKey: {
@@ -106,6 +114,10 @@ export class DockgeServer {
             dataDir: {
                 type: String,
                 optional: true,
+            },
+            stacksDir: {
+                type: String,
+                optional: true,
             }
         });
 
@@ -118,6 +130,8 @@ export class DockgeServer {
         this.config.port = args.port || parseInt(process.env.DOCKGE_PORT) || 5001;
         this.config.hostname = args.hostname || process.env.DOCKGE_HOSTNAME || undefined;
         this.config.dataDir = args.dataDir || process.env.DOCKGE_DATA_DIR || "./data/";
+        this.config.stacksDir = args.stacksDir || process.env.DOCKGE_STACKS_DIR || defaultStacksDir;
+        this.stacksDir = this.config.stacksDir;
 
         log.debug("server", this.config);
 
@@ -406,7 +420,6 @@ export class DockgeServer {
         }
 
         // Create data/stacks directory
-        this.stacksDir = path.join(this.config.dataDir, "stacks");
         if (!fs.existsSync(this.stacksDir)) {
             fs.mkdirSync(this.stacksDir, { recursive: true });
         }

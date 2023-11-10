@@ -19,11 +19,13 @@ export interface Arguments {
     port? : number;
     hostname? : string;
     dataDir? : string;
+    stacksDir? : string;
 }
 
 // Some config values are required
 export interface Config extends Arguments {
     dataDir : string;
+    stacksDir : string;
 }
 
 export function checkLogin(socket : DockgeSocket) {

@@ -3,6 +3,7 @@
 node_modules
 .idea
 data
+stacks
 tmp
 /private
 
@@ -11,5 +12,6 @@ docker
 frontend
 .editorconfig
 .eslintrc.cjs
+.git
 .gitignore
 README.md

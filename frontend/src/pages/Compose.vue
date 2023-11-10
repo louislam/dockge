@@ -194,7 +194,7 @@ const template = `version: "3.8"
 services:
   nginx:
     image: nginx:latest
-    restart: always
+    restart: unless-stopped
     ports:
       - "8080:80"
 `;
@@ -538,7 +538,7 @@ export default {
             }
 
             this.jsonConfig.services[this.newContainerName] = {
-                restart: "always",
+                restart: "unless-stopped",
             };
             this.newContainerName = "";
             let element = this.$refs.containerList.lastElementChild;
