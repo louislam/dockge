@@ -137,13 +137,17 @@
                     </div>
 
                     <div v-if="isEditMode">
+                        <!-- Volumes -->
+                        <div v-if="false">
+                            <h4 class="mb-3">{{ $tc("volume", 2) }}</h4>
+                            <div class="shadow-box big-padding mb-3">
+                            </div>
+                        </div>
+
+                        <!-- Networks -->
                         <h4 class="mb-3">{{ $tc("network", 2) }}</h4>
                         <div class="shadow-box big-padding mb-3">
                             <NetworkInput />
-                        </div>
-
-                        <h4 class="mb-3">{{ $tc("volume", 2) }}</h4>
-                        <div class="shadow-box big-padding mb-3">
                         </div>
                     </div>
 

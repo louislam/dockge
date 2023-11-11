@@ -114,7 +114,12 @@
                     <label class="form-label">
                         {{ $tc("network", 2) }}
                     </label>
-                    <ArrayInput name="networks" :display-name="$t('network')" placeholder="Network Name" />
+
+                    <div v-if="networkList.length === 0 && service.networks.length > 0" class="text-warning mb-3">
+                        No networks available. You need to add internal networks or enable external networks in the right side first.
+                    </div>
+
+                    <ArraySelect name="networks" :display-name="$t('network')" placeholder="Network Name" :options="networkList" />
                 </div>
 
                 <!-- Depends on -->
@@ -164,6 +169,14 @@ export default defineComponent({
         };
     },
     computed: {
+
+        networkList() {
+            let list = [];
+            for (const networkName in this.jsonObject.networks) {
+                list.push(networkName);
+            }
+            return list;
+        },
 
         bgStyle() {
             if (this.status === "running") {

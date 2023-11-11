@@ -10,6 +10,7 @@ declare module 'vue' {
     About: typeof import('./src/components/settings/About.vue')['default']
     Appearance: typeof import('./src/components/settings/Appearance.vue')['default']
     ArrayInput: typeof import('./src/components/ArrayInput.vue')['default']
+    ArraySelect: typeof import('./src/components/ArraySelect.vue')['default']
     BModal: typeof import('bootstrap-vue-next')['BModal']
     Confirm: typeof import('./src/components/Confirm.vue')['default']
     Container: typeof import('./src/components/Container.vue')['default']

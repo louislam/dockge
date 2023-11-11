@@ -29,6 +29,7 @@ import { Stack } from "./stack";
 import { Cron } from "croner";
 import gracefulShutdown from "http-graceful-shutdown";
 import User from "./models/user";
+import childProcess from "child_process";
 
 export class DockgeServer {
     app : Express;
@@ -514,6 +515,20 @@ export class DockgeServer {
                 log.debug("server", "Skip sending stack status list to room " + room);
             }
         }
+    }
+
+    getDockerNetworkList() : string[] {
+        let res = childProcess.spawnSync("docker", [ "network", "ls", "--format", "{{.Name}}" ]);
+        let list = res.stdout.toString().split("\n");
+
+        // Remove empty string item
+        list = list.filter((item) => {
+            return item !== "";
+        }).sort((a, b) => {
+            return a.localeCompare(b);
+        });
+
+        return list;
     }
 
     get stackDirFullPath() {

@@ -203,6 +203,20 @@ export class DockerSocketHandler extends SocketHandler {
                 callbackError(e, callback);
             }
         });
+
+        // getExternalNetworkList
+        socket.on("getDockerNetworkList", async (callback) => {
+            try {
+                checkLogin(socket);
+                const dockerNetworkList = server.getDockerNetworkList();
+                callback({
+                    ok: true,
+                    dockerNetworkList,
+                });
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
     }
 
     saveStack(socket : DockgeSocket, server : DockgeServer, name : unknown, composeYAML : unknown, isAdd : unknown) : Stack {
