@@ -13,6 +13,8 @@ A fancy, easy-to-use and reactive docker `compose.yaml` stack-oriented manager.
 ## ⭐ Features
 
 - Manage `compose.yaml`
+  - Create/Edit/Start/Stop/Restart/Delete
+  - Update Docker Images
 - Interactive Editor for `compose.yaml`
 - Interactive Web Terminal
 - Reactive
