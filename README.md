@@ -20,6 +20,10 @@ A fancy, easy-to-use and reactive docker `compose.yaml` stack-oriented manager.
 - Easy-to-use & fancy UI
    - If you love Uptime Kuma's UI/UX, you will love this too
 - Convert `docker run ...` commands into `compose.yaml`
+- File based structure
+   - Dockge won't kidnap your compose files, they stored on your drive as usual. You can interact with them using normal `docker compose` commands   
+   <img src="https://github.com/louislam/dockge/assets/1336778/cc071864-592e-4909-b73a-343a57494002" width=300 />
+
 
 ## 🔧 How to Install
 
@@ -33,7 +37,8 @@ Requirements:
 
 ### Basic
 
-Default stacks directory is `/opt/stacks`.
+- Default Stacks Directory: `/opt/stacks`
+- Default Port: 5001
 
 ```
 # Create a directory that stores your stacks and stores dockge's compose.yaml
@@ -49,6 +54,8 @@ docker compose up -d
 # If you are using docker-compose V1
 # docker-compose up -d 
 ```
+
+Dockge is now running on http://localhost:5001
 
 ### Advanced
 
@@ -113,7 +120,7 @@ If you love this project, please consider giving this project a ⭐.
 
 The naming idea was coming from Twitch emotes like `sadge`, `bedge` or `wokege`. They are all ending with `-ge`.
 
-If you are not comfortable with the pronunciation, you can call it `Dockage`
+If you are not comfortable with the pronunciation, you can call it `Dockage`.
 
 #### Can I manage a single container without `compose.yaml`?
 
