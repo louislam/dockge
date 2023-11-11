@@ -11,6 +11,9 @@ dependencies:
   '@louislam/sqlite3':
     specifier: ~15.1.6
     version: 15.1.6
+  '@vueform/multiselect':
+    specifier: ^2.6.6
+    version: 2.6.6
   bcryptjs:
     specifier: ~2.4.3
     version: 2.4.3
@@ -1035,6 +1038,10 @@ packages:
   /@vue/shared@3.3.8:
     resolution: {integrity: sha512-8PGwybFwM4x8pcfgqEQFy70NaQxASvOC5DJwLQfpArw1UDfUXrJkdxD3BhVTMS+0Lef/TU7YO0Jvr0jJY8T+mw==}
     dev: true
+
+  /@vueform/multiselect@2.6.6:
+    resolution: {integrity: sha512-JDWesVRmyGz9HmHp2Ooy1cb8XgKohiztwMDtjm8c0/Th+7wEZENZuYa0iY5CTvaJNANl3LVqh9BNnCc/YlM/Bg==}
+    dev: false
 
   /@vueuse/core@10.5.0(vue@3.3.8):
     resolution: {integrity: sha512-z/tI2eSvxwLRjOhDm0h/SXAjNm8N5ld6/SC/JQs6o6kpJ6Ya50LnEL8g5hoYu005i28L0zqB5L5yAl8Jl26K3A==}
