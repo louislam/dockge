@@ -1,0 +1,17 @@
+# Should be identical to .gitignore
+.env
+node_modules
+.idea
+data
+stacks
+tmp
+/private
+
+# Docker extra
+docker
+frontend
+.editorconfig
+.eslintrc.cjs
+.git
+.gitignore
+README.md
