@@ -7,6 +7,9 @@ services:
       # Host Port : Container Port
       - 5001:5001
     volumes:
+      # If you want to use private registries, you need to share the auth file with Dockge:
+      # - /root/.docker/:/root/.docker
+
       # Docker Socket
       - /var/run/docker.sock:/var/run/docker.sock
       # Dockge Config
