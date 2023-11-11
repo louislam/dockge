@@ -4,7 +4,7 @@
 
 # Dockge
 
-A fancy, easy-to-use and reactive docker `compose.yaml` stack oriented manager.
+A fancy, easy-to-use and reactive docker `compose.yaml` stack-oriented manager.
 
 <img src="https://github.com/louislam/dockge/assets/1336778/26a583e1-ecb1-4a8d-aedf-76157d714ad7" width="900" alt="" />
 
@@ -21,23 +21,31 @@ A fancy, easy-to-use and reactive docker `compose.yaml` stack oriented manager.
 
 ## 🔧 How to Install
 
+Requirements:
+- [Docker CE](https://docs.docker.com/engine/install/) 20+ is recommended
+- [Docker Compose V2](https://docs.docker.com/compose/install/linux/)
+- OS: 
+  - As long as you can run Docker CE, it should be fine, but:
+  - Debian/Raspbian Buster or lower is not supported, please upgrade to Bullseye
+- Arch: armv7, arm64, amd64 (a.k.a x86_64)
+
 ### Basic
 
 Default stacks directory is `/opt/stacks`.
 
 ```
-# Create a directory that stores your stacks
-mkdir -p /opt/stacks
-
-# Create a directory that stores dockge's compose.yaml
-mkdir -p /opt/dockge
+# Create a directory that stores your stacks and stores dockge's compose.yaml
+mkdir -p /opt/stacks /opt/dockge
 cd /opt/dockge
 
 # Download the compose.yaml
-wget https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml
+curl https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml --output compose.yaml
 
 # Start Server
-docker-compose up -d
+docker compose up -d
+
+# If you are using docker-compose V1
+# docker-compose up -d 
 ```
 
 ### Advanced
@@ -66,6 +74,13 @@ services:
       - DOCKGE_STACKS_DIR=/my-stacks
 ```
 
+## How to Update
+
+```bash
+cd /opt/stacks
+docker compose pull
+docker compose up -d
+```
 
 ## Motivations
 
@@ -88,6 +103,15 @@ If you are not comfortable with the pronunciation, you can call it `Dockage`
 #### Can I manage a single container without `compose.yaml`?
 
 The main objective of Dockge is that try to use docker `compose.yaml` for everything. If you want to manage a single container, you can just use Portainer or Docker CLI.
+
+#### Can I manage existing stacks?
+
+Yes, you can. However, you need to move your compose file into the stacks directory:
+
+1. Stop your stack
+2. Move your compose file into `/opt/stacks/<stackName>/compose.yaml`
+3. In Dockge, click the " Scan Stacks Folder" button in the top-right corner's dropdown menu
+4. Now you should see your stack in the list
 
 ## More Ideas?
 
