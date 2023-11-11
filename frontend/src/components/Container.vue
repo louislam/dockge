@@ -115,7 +115,7 @@
                         {{ $tc("network", 2) }}
                     </label>
 
-                    <div v-if="networkList.length === 0 && service.networks.length > 0" class="text-warning mb-3">
+                    <div v-if="networkList.length === 0 && service.networks && service.networks.length > 0" class="text-warning mb-3">
                         No networks available. You need to add internal networks or enable external networks in the right side first.
                     </div>
 
