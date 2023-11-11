@@ -64,7 +64,7 @@
                             </li>
 
                             <li>
-                                <router-link to="/settings/appearance" class="dropdown-item" :class="{ active: $route.path.includes('settings') }">
+                                <router-link to="/settings/general" class="dropdown-item" :class="{ active: $route.path.includes('settings') }">
                                     <font-awesome-icon icon="cog" /> {{ $t("Settings") }}
                                 </router-link>
                             </li>

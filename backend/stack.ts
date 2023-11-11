@@ -343,8 +343,6 @@ export class Stack {
 
         let lines = res.toString().split("\n");
 
-        console.log(lines);
-
         for (let line of lines) {
             try {
                 let obj = JSON.parse(line);

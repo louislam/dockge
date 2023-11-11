@@ -8,6 +8,10 @@
                 </div>
                 <div v-if="!isEditMode">
                     <span class="badge me-1" :class="bgStyle">{{ status }}</span>
+
+                    <a v-for="port in service.ports" :href="parsePort(port).url" target="_blank">
+                        <span class="badge me-1 bg-secondary">{{ parsePort(port).display }}</span>
+                    </a>
                 </div>
             </div>
             <div class="col-5">
@@ -128,6 +132,7 @@
 <script>
 import { defineComponent } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { parseDockerPort } from "../../../backend/util-common";
 
 export default defineComponent({
     components: {
@@ -220,6 +225,10 @@ export default defineComponent({
         }
     },
     methods: {
+        parsePort(port) {
+            let hostname = this.$root.info.primaryHostname || location.hostname;
+            return parseDockerPort(port, hostname);
+        },
         remove() {
             delete this.jsonObject.services[this.name];
         },

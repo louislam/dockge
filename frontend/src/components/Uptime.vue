@@ -43,7 +43,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .badge {
     min-width: 62px;
 }

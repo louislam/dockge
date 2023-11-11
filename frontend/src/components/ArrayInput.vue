@@ -1,13 +1,18 @@
 <template>
     <div>
-        <ul v-if="isArrayInited" class="list-group">
-            <li v-for="(value, index) in array" :key="index" class="list-group-item">
-                <input v-model="array[index]" type="text" class="no-bg domain-input" :placeholder="placeholder" />
-                <font-awesome-icon icon="times" class="action remove ms-2 me-3 text-danger" @click="remove(index)" />
-            </li>
-        </ul>
+        <div v-if="valid">
+            <ul v-if="isArrayInited" class="list-group">
+                <li v-for="(value, index) in array" :key="index" class="list-group-item">
+                    <input v-model="array[index]" type="text" class="no-bg domain-input" :placeholder="placeholder" />
+                    <font-awesome-icon icon="times" class="action remove ms-2 me-3 text-danger" @click="remove(index)" />
+                </li>
+            </ul>
 
-        <button class="btn btn-normal btn-sm mt-3" @click="addField">{{ $t("addListItem", [ displayName ]) }}</button>
+            <button class="btn btn-normal btn-sm mt-3" @click="addField">{{ $t("addListItem", [ displayName ]) }}</button>
+        </div>
+        <div v-else>
+            Long syntax is not supported here. Please use the YAML editor.
+        </div>
     </div>
 </template>
 
@@ -54,6 +59,21 @@ export default {
         service() {
             return this.$parent.$parent.service;
         },
+
+        valid() {
+            // Check if the array is actually an array
+            if (!Array.isArray(this.array)) {
+                return false;
+            }
+
+            // Check if the array contains non-object only.
+            for (let item of this.array) {
+                if (typeof item === "object") {
+                    return false;
+                }
+            }
+            return true;
+        }
 
     },
     created() {

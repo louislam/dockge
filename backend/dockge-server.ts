@@ -331,7 +331,7 @@ export class DockgeServer {
             version: versionProperty,
             latestVersion: latestVersionProperty,
             isContainer,
-            //primaryBaseURL: await Settings.get("primaryBaseURL"),
+            primaryHostname: await Settings.get("primaryHostname"),
             //serverTimezone: await this.getTimezone(),
             //serverTimezoneOffset: this.getTimezoneOffset(),
         });
