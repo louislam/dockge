@@ -8,6 +8,8 @@ A fancy, easy-to-use and reactive docker `compose.yaml` stack-oriented manager.
 
 <img src="https://github.com/louislam/dockge/assets/1336778/26a583e1-ecb1-4a8d-aedf-76157d714ad7" width="900" alt="" />
 
+[View Video](https://youtu.be/AWAlOQeNpgU)
+
 ## ⭐ Features
 
 - Manage `compose.yaml`
@@ -52,7 +54,7 @@ docker compose up -d
 
 If you want to store your stacks in another directory, you can change the `DOCKGE_STACKS_DIR` environment variable and volumes.
 
-For exmaples, if you want to store your stacks in `/my-stacks`:
+For example, if you want to store your stacks in `/my-stacks`:
 
 ```yaml
 version: "3.8"
@@ -61,10 +63,14 @@ services:
     image: louislam/dockge:1
     restart: unless-stopped
     ports:
+      # Host Port:Container Port
       - 5001:5001
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data:/app/data
+        
+      # If you want to use private registries, you need to share the auth file with Dockge:
+      # - /root/.docker/:/root/.docker
 
       # Your stacks directory in the host
       # (The paths inside container must be the same as the host)
@@ -81,6 +87,15 @@ cd /opt/stacks
 docker compose pull
 docker compose up -d
 ```
+
+## Screenshots
+
+![](https://github.com/louislam/dockge/assets/1336778/7139e88c-77ed-4d45-96e3-00b66d36d871)
+
+![](https://github.com/louislam/dockge/assets/1336778/f019944c-0e87-405b-a1b8-625b35de1eeb)
+
+![](https://github.com/louislam/dockge/assets/1336778/a4478d23-b1c4-4991-8768-1a7cad3472e3)
+
 
 ## Motivations
 
