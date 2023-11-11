@@ -34,7 +34,6 @@
 </template>
 
 <script>
-import * as convertDockerRunToCompose from "composerize";
 import { statusNameShort } from "../../../backend/util-common";
 
 export default {
@@ -112,15 +111,20 @@ export default {
         },
 
         convertDockerRun() {
-            try {
-                if (this.dockerRunCommand.trim() === "docker run") {
-                    throw new Error("Please enter a docker run command");
-                }
-                this.$root.composeTemplate = convertDockerRunToCompose(this.dockerRunCommand);
-                this.$router.push("/compose");
-            } catch (e) {
-                this.$root.toastError(e.message);
+            if (this.dockerRunCommand.trim() === "docker run") {
+                throw new Error("Please enter a docker run command");
             }
+
+            // composerize is working in dev, but after "vite build", it is not working
+            // So pass to backend to do the conversion
+            this.$root.getSocket().emit("composerize", this.dockerRunCommand, (res) => {
+                if (res.ok) {
+                    this.$root.composeTemplate = res.composeTemplate;
+                    this.$router.push("/compose");
+                } else {
+                    this.$root.toastRes(res);
+                }
+            });
         },
 
         /**

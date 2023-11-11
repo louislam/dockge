@@ -3,6 +3,9 @@ import { DockgeServer } from "../dockge-server";
 import { callbackError, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { Stack } from "../stack";
 
+// @ts-ignore
+import composerize from "composerize";
+
 export class DockerSocketHandler extends SocketHandler {
     create(socket : DockgeSocket, server : DockgeServer) {
 
@@ -212,6 +215,25 @@ export class DockerSocketHandler extends SocketHandler {
                 callback({
                     ok: true,
                     dockerNetworkList,
+                });
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // composerize
+        socket.on("composerize", async (dockerRunCommand : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(dockerRunCommand) !== "string") {
+                    throw new ValidationError("dockerRunCommand must be a string");
+                }
+
+                const composeTemplate = composerize(dockerRunCommand);
+                callback({
+                    ok: true,
+                    composeTemplate,
                 });
             } catch (e) {
                 callbackError(e, callback);
