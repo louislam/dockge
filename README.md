@@ -8,7 +8,7 @@ A fancy, easy-to-use and reactive docker `compose.yaml` stack-oriented manager.
 
 <img src="https://github.com/louislam/dockge/assets/1336778/26a583e1-ecb1-4a8d-aedf-76157d714ad7" width="900" alt="" />
 
-[View Video](https://youtu.be/AWAlOQeNpgU?t=48)
+View Video: https://youtu.be/AWAlOQeNpgU?t=48
 
 ## ⭐ Features
 
@@ -26,6 +26,8 @@ A fancy, easy-to-use and reactive docker `compose.yaml` stack-oriented manager.
    - Dockge won't kidnap your compose files, they stored on your drive as usual. You can interact with them using normal `docker compose` commands   
    <img src="https://github.com/louislam/dockge/assets/1336778/cc071864-592e-4909-b73a-343a57494002" width=300 />
 
+
+![](https://github.com/louislam/dockge/assets/1336778/89fc1023-b069-42c0-a01c-918c495f1a6a)
 
 ## 🔧 How to Install
 
