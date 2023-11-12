@@ -227,5 +227,7 @@ table {
 .docker-run {
     background-color: $dark-bg !important;
     border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
 }
 </style>

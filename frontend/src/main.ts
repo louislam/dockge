@@ -13,6 +13,7 @@ import Toast, { POSITION, useToast } from "vue-toastification";
 import "xterm/lib/xterm.js";
 
 // CSS
+import "@fontsource/jetbrains-mono";
 import "vue-toastification/dist/index.css";
 import "xterm/css/xterm.css";
 import "./styles/main.scss";
