@@ -23,6 +23,9 @@ import socket from "./mixins/socket";
 import lang from "./mixins/lang";
 import theme from "./mixins/theme";
 
+// Set Title
+document.title = document.title + " - " + location.host;
+
 const app = createApp(rootApp());
 
 app.use(Toast, {
