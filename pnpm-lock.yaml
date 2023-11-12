@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@fontsource/jetbrains-mono':
+    specifier: ^5.0.17
+    version: 5.0.17
   '@homebridge/node-pty-prebuilt-multiarch':
     specifier: ~0.11.10
     version: 0.11.10
@@ -38,9 +41,6 @@ dependencies:
   express-static-gzip:
     specifier: ~2.1.7
     version: 2.1.7
-  firacode:
-    specifier: ^6.2.0
-    version: 6.2.0
   http-graceful-shutdown:
     specifier: ~3.1.13
     version: 3.1.13
@@ -468,6 +468,10 @@ packages:
       - '@vue/composition-api'
       - vue
     dev: true
+
+  /@fontsource/jetbrains-mono@5.0.17:
+    resolution: {integrity: sha512-Y/EtdbwKwNQTGpnMrexX8SVW6Jqlh0nX2bNHI9Z9m6FsyjbocZIFNJqwSY9bDUoi7irGtz8nuidAN7FF8wYuJA==}
+    dev: false
 
   /@fortawesome/fontawesome-common-types@6.4.2:
     resolution: {integrity: sha512-1DgP7f+XQIJbLFCTX1V2QnxVmpLdKdzzo2k8EmvDOePfchaIGQ9eCHj2up3/jNEbZuBqel5OxiaOJf37TWauRA==}
@@ -2127,10 +2131,6 @@ packages:
       locate-path: 6.0.0
       path-exists: 4.0.0
     dev: true
-
-  /firacode@6.2.0:
-    resolution: {integrity: sha512-t5R3aO2BmhRXnYtKXbImLVNsILuCIbJ/XlDzBufjpi3il8P/CVdpWco83Ud3r2Tl0gitAmyP4o1fbJ52ozV1jw==}
-    dev: false
 
   /flat-cache@3.1.1:
     resolution: {integrity: sha512-/qM2b3LUIaIgviBQovTLvijfyOQXPtSRnRK26ksj2J7rzPIecePUIpJsZ4T02Qg+xiAEKIs5K8dsHEd+VaKa/Q==}

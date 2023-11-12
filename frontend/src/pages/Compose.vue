@@ -587,14 +587,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import 'firacode/distr/fira_code.css';
-
 .terminal {
     height: 200px;
 }
 
 .editor-box {
-    font-family: 'Fira Code', monospace;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
     &.edit-mode {
         background-color: #2c2f38 !important;
     }

@@ -16,6 +16,7 @@
         "mark-as-nightly": "tsx ./extra/mark-as-nightly.ts"
     },
     "dependencies": {
+        "@fontsource/jetbrains-mono": "^5.0.17",
         "@homebridge/node-pty-prebuilt-multiarch": "~0.11.10",
         "@louislam/sqlite3": "~15.1.6",
         "bcryptjs": "~2.4.3",
@@ -27,7 +28,6 @@
         "dayjs": "~1.11.10",
         "express": "~4.18.2",
         "express-static-gzip": "~2.1.7",
-        "firacode": "^6.2.0",
         "http-graceful-shutdown": "~3.1.13",
         "jsonwebtoken": "~9.0.2",
         "jwt-decode": "~3.1.2",
