@@ -94,7 +94,7 @@ services:
 ## How to Update
 
 ```bash
-cd /opt/stacks
+cd /opt/dockge
 docker compose pull
 docker compose up -d
 ```
