@@ -17,14 +17,8 @@ if (! exists) {
     // Process package.json
     pkg.version = newVersion;
     fs.writeFileSync("package.json", JSON.stringify(pkg, null, 4) + "\n");
-
-    // Also update pnpm-lock.yaml
-    const npm = /^win/.test(process.platform) ? "pnpm.cmd" : "pnpm";
-    childProcess.spawnSync(npm, [ "install" ]);
-
     commit(newVersion);
     tag(newVersion);
-
 } else {
     console.log("version exists");
 }
