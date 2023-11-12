@@ -32,11 +32,12 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
 ## 🔧 How to Install
 
 Requirements:
-- [Docker CE](https://docs.docker.com/engine/install/) 20+ is recommended
-- [Docker Compose V2](https://docs.docker.com/compose/install/linux/)
+- [Docker CE](https://docs.docker.com/engine/install/) 20+ is recommended / Podman
+- (Docker only) [Docker Compose Plugin](https://docs.docker.com/compose/install/linux/)
+- (Podman only) podman-docker (Debian: `apt install podman-docker`)
 - OS: 
-  - As long as you can run Docker CE, it should be fine, but:
-  - Debian/Raspbian Buster or lower is not supported, please upgrade to Bullseye
+  - As long as you can run Docker CE / Podman, it should be fine, but:
+  - Debian/Raspbian Buster or lower is not supported, please upgrade to Bullseye or higher
 - Arch: armv7, arm64, amd64 (a.k.a x86_64)
 
 ### Basic
@@ -55,7 +56,7 @@ curl https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml --out
 # Start Server
 docker compose up -d
 
-# If you are using docker-compose V1
+# If you are using docker-compose V1 or Podman
 # docker-compose up -d 
 ```
 
