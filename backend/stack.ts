@@ -177,6 +177,11 @@ export class Stack {
 
             for (let filename of filenameList) {
                 try {
+                    // Check if it is a directory
+                    let stat = fs.statSync(path.join(stacksDir, filename));
+                    if (!stat.isDirectory()) {
+                        continue;
+                    }
                     let stack = this.getStack(server, filename);
                     stack._status = CREATED_FILE;
                     stackList.set(filename, stack);
