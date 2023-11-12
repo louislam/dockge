@@ -8,10 +8,10 @@
         "start": "tsx ./backend/index.ts",
         "dev:backend": "cross-env NODE_ENV=development tsx watch ./backend/index.ts",
         "dev:frontend": "cross-env NODE_ENV=development vite --host --config ./frontend/vite.config.ts",
-        "release-final": "tsx ./extra/test-docker.ts && tsx extra/update-version.ts && npm run build:docker",
+        "release-final": "tsx ./extra/test-docker.ts && pnpm run build:frontend && tsx extra/update-version.ts && npm run build:docker",
         "build:frontend": "vite build --config ./frontend/vite.config.ts",
         "build:docker-base": "docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:base -f ./docker/Base.Dockerfile . --push",
-        "build:docker": "pnpm run build:frontend && node ./extra/env2arg.js docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:latest -t louislam/dockge:1 -t louislam/dockge:$VERSION --target release -f ./docker/Dockerfile . --push",
+        "build:docker": "node ./extra/env2arg.js docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:latest -t louislam/dockge:1 -t louislam/dockge:$VERSION --target release -f ./docker/Dockerfile . --push",
         "build:docker-nightly": "pnpm run build:frontend && docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:nightly --target nightly -f ./docker/Dockerfile . --push",
         "start-docker": "docker run --rm -p 5001:5001 --name dockge louislam/dockge:latest",
         "mark-as-nightly": "tsx ./extra/mark-as-nightly.ts"
