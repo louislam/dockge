@@ -4,7 +4,7 @@
 
 # Dockge
 
-A fancy, easy-to-use and reactive docker `compose.yaml` stack-oriented manager.
+A fancy, easy-to-use and reactive self-hosted docker compose.yaml stack-oriented manager.
 
 <img src="https://github.com/louislam/dockge/assets/1336778/26a583e1-ecb1-4a8d-aedf-76157d714ad7" width="900" alt="" />
 
@@ -118,6 +118,10 @@ docker compose up -d
 
 If you love this project, please consider giving this project a ⭐.
 
+
+## 🗣️ Discussion / Ask for Help
+
+Please go to https://github.com/louislam/dockge/discussions
 
 ## FAQ
 
