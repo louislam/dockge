@@ -1,5 +1,6 @@
 import pkg from "../package.json";
 import childProcess from "child_process";
+import fs from "fs";
 
 const newVersion = process.env.VERSION;
 
@@ -15,6 +16,7 @@ const exists = tagExists(newVersion);
 if (! exists) {
     // Process package.json
     pkg.version = newVersion;
+    fs.writeFileSync("package.json", JSON.stringify(pkg, null, 4) + "\n");
 
     // Also update pnpm-lock.yaml
     const npm = /^win/.test(process.platform) ? "pnpm.cmd" : "pnpm";
