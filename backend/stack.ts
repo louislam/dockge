@@ -72,9 +72,9 @@ export class Stack {
     }
 
     validate() {
-        // Check name, allows [a-z][A-Z][0-9] _ - only
-        if (!this.name.match(/^[a-zA-Z0-9_-]+$/)) {
-            throw new ValidationError("Stack name can only contain [a-z][A-Z][0-9] _ - only");
+        // Check name, allows [a-z][0-9] _ - only
+        if (!this.name.match(/^[a-z0-9_-]+$/)) {
+            throw new ValidationError("Stack name can only contain [a-z][0-9] _ - only");
         }
 
         // Check YAML format
