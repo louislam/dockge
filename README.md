@@ -86,8 +86,10 @@ services:
       # If you want to use private registries, you need to share the auth file with Dockge:
       # - /root/.docker/:/root/.docker
 
-      # Your stacks directory in the host
-      # (The paths inside container must be the same as the host)
+      # Your stacks directory in the host (The paths inside container must be the same as the host)
+      # ⚠️⚠️ If you did it wrong, your data could end up be written into a wrong path.
+      # ✔️✔️✔️✔️ CORRECT: - /my-stacks:/my-stacks (Both paths match)
+      # ❌❌❌❌ WRONG: - /docker:/my-stacks (Both paths do not match)
       - /my-stacks:/my-stacks
     environment:
       # Tell Dockge where is your stacks directory
