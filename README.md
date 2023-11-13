@@ -130,11 +130,9 @@ Please go to https://github.com/louislam/dockge/discussions
 
 #### "Dockge"?
 
-"Dockge" is a coinage word which is created by myself. I hope it sounds like `Badge` but replacing with `Dock` - `Dock-ge`.
+"Dockge" is a coinage word which is created by myself. I hope it sounds like `Dodge`.
 
 The naming idea was coming from Twitch emotes like `sadge`, `bedge` or `wokege`. They are all ending with `-ge`.
-
-If you are not comfortable with the pronunciation, you can call it `Dockage`.
 
 #### Can I manage a single container without `compose.yaml`?
 
