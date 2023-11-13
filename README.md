@@ -86,8 +86,8 @@ services:
 
       # Your stacks directory in the host (The paths inside container must be the same as the host)
       # ⚠️⚠️ If you did it wrong, your data could end up be written into a wrong path.
-      # ✔️✔️✔️✔️ CORRECT: - /my-stacks:/my-stacks (Both paths match)
-      # ❌❌❌❌ WRONG: - /docker:/my-stacks (Both paths do not match)
+      # ✔️✔️✔️✔️ CORRECT EXAMPLE: - /my-stacks:/my-stacks (Both paths match)
+      # ❌❌❌❌ WRONG EXAMPLE: - /docker:/my-stacks (Both paths do not match)
       - /opt/stacks:/opt/stacks
     environment:
       # Tell Dockge where is your stacks directory
