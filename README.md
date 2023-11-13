@@ -122,9 +122,13 @@ docker compose up -d
 If you love this project, please consider giving this project a ⭐.
 
 
-## 🗣️ Discussion / Ask for Help
+## 🗣️
 
-Please go to https://github.com/louislam/dockge/discussions
+### Bug Report
+https://github.com/louislam/dockge/issues
+
+### Ask for Help / Discussions
+https://github.com/louislam/dockge/discussions
 
 ## FAQ
 
