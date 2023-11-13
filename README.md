@@ -68,8 +68,6 @@ Dockge is now running on http://localhost:5001
 
 If you want to store your stacks in another directory, you can change the `DOCKGE_STACKS_DIR` environment variable and volumes.
 
-For example, if you want to store your stacks in `/my-stacks`:
-
 ```yaml
 version: "3.8"
 services:
@@ -90,10 +88,10 @@ services:
       # ⚠️⚠️ If you did it wrong, your data could end up be written into a wrong path.
       # ✔️✔️✔️✔️ CORRECT: - /my-stacks:/my-stacks (Both paths match)
       # ❌❌❌❌ WRONG: - /docker:/my-stacks (Both paths do not match)
-      - /my-stacks:/my-stacks
+      - /opt/stacks:/opt/stacks
     environment:
       # Tell Dockge where is your stacks directory
-      - DOCKGE_STACKS_DIR=/my-stacks
+      - DOCKGE_STACKS_DIR=/opt/stacks
 ```
 
 ## How to Update
