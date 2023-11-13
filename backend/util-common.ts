@@ -96,6 +96,7 @@ export const allowedCommandList : string[] = [
     "ls",
     "cd",
     "dir",
+    "clear",
 ];
 
 export const allowedRawKeys = [

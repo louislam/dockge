@@ -2,16 +2,6 @@ import { SocketHandler } from "../socket-handler.js";
 import { DockgeServer } from "../dockge-server";
 import { callbackError, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { log } from "../log";
-import yaml from "yaml";
-import path from "path";
-import fs from "fs";
-import {
-    allowedCommandList,
-    allowedRawKeys,
-    getComposeTerminalName, getContainerExecTerminalName,
-    isDev,
-    PROGRESS_TERMINAL_ROWS
-} from "../util-common";
 import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
 import { Stack } from "../stack";
 
@@ -37,7 +27,7 @@ export class TerminalSocketHandler extends SocketHandler {
                 } else {
                     throw new Error("Terminal not found or it is not a Interactive Terminal.");
                 }
-            } catch (e) {
+            } catch (e: any) {
                 errorCallback({
                     ok: false,
                     msg: e.message,

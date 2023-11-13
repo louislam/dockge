@@ -24,22 +24,28 @@
 
             <h2 class="mb-3">Docker Run</h2>
             <div class="mb-3">
-                <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required placeholder="docker run ..."></textarea>
+                <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required
+                          placeholder="docker run ..."></textarea>
             </div>
 
-            <button class="btn-normal btn" @click="convertDockerRun">Convert to Compose</button>
+            <button class="btn-normal btn mb-4" @click="convertDockerRun">Convert to Compose</button>
+
+            <h2 class="mb-3">Import from URL</h2>
+            <div class="mb-3">
+                <input id="url" v-model="importUrl" class="form-control import-url" required placeholder="URL"/>
+            </div>
+
+            <button class="btn-normal btn" @click="importFromUrl">Import</button>
         </div>
     </transition>
-    <router-view ref="child" />
+    <router-view ref="child"/>
 </template>
 
 <script>
-import { statusNameShort } from "../../../backend/util-common";
+import {statusNameShort} from "../../../backend/util-common";
 
 export default {
-    components: {
-
-    },
+    components: {},
     props: {
         calculatedHeight: {
             type: Number,
@@ -58,6 +64,7 @@ export default {
             importantHeartBeatListLength: 0,
             displayedRecords: [],
             dockerRunCommand: "",
+            importUrl: "",
         };
     },
 
@@ -125,6 +132,18 @@ export default {
                     this.$root.toastRes(res);
                 }
             });
+        },
+
+        importFromUrl() {
+            fetch(this.importUrl)
+                .then(res => res.text())
+                .then(text => {
+                    this.$root.composeTemplate = text;
+                    this.$router.push("/compose");
+                })
+                .catch(err => {
+                    this.$root.toastError(err);
+                });
         },
 
         /**
@@ -225,6 +244,13 @@ table {
 }
 
 .docker-run {
+    background-color: $dark-bg !important;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+}
+
+.import-url {
     background-color: $dark-bg !important;
     border: none;
     font-family: 'JetBrains Mono', monospace;
