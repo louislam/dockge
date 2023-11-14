@@ -219,11 +219,14 @@ export class MainTerminal extends InteractiveTerminal {
         // Check if the command is allowed
         const cmdParts = input.split(" ");
         const executable = cmdParts[0].trim();
+        const knownOperators = ["&&", "||", "&", ";"];
         log.debug("console", "Executable: " + executable);
         log.debug("console", "Executable length: " + executable.length);
 
         if (!allowedCommandList.includes(executable)) {
             throw new Error("Command not allowed.");
+        } else if (knownOperators.some(operator => input.includes(operator))) {
+            throw new Error("Control operators are not allowed.");
         }
         super.write(input);
     }
