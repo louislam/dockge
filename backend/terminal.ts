@@ -219,7 +219,7 @@ export class MainTerminal extends InteractiveTerminal {
         // Check if the command is allowed
         const cmdParts = input.split(" ");
         const executable = cmdParts[0].trim();
-        const knownOperators = ["&&", "||", "&", ";"];
+        const knownOperators = ["||", "&", ";"];
         log.debug("console", "Executable: " + executable);
         log.debug("console", "Executable length: " + executable.length);
 
