@@ -7,14 +7,16 @@ services:
       # Host Port : Container Port
       - 5001:5001
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/app/data
+        
       # If you want to use private registries, you need to share the auth file with Dockge:
       # - /root/.docker/:/root/.docker
 
-      # Docker Socket
-      - /var/run/docker.sock:/var/run/docker.sock
-      # Dockge Config
-      - ./data:/app/data
       # Your stacks directory in the host (The paths inside container must be the same as the host)
+      # ⚠️⚠️ If you did it wrong, your data could end up be written into a wrong path.
+      # ✔️✔️✔️✔️ CORRECT: - /my-stacks:/my-stacks (Both paths match)
+      # ❌❌❌❌ WRONG: - /docker:/my-stacks (Both paths do not match)
       - /opt/stacks:/opt/stacks
     environment:
       # Tell Dockge where is your stacks directory

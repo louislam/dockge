@@ -68,9 +68,10 @@
                         <h4 class="mb-3">{{ $t("general") }}</h4>
                         <div class="shadow-box big-padding mb-3">
                             <!-- Stack Name -->
-                            <div class="mb-3">
+                            <div>
                                 <label for="name" class="form-label">{{ $t("stackName") }}</label>
-                                <input id="name" v-model="stack.name" type="text" class="form-control" required>
+                                <input id="name" v-model="stack.name" type="text" class="form-control" required @blur="stackNameToLowercase">
+                                <div class="form-text">Lowercase only</div>
                             </div>
                         </div>
                     </div>
@@ -582,6 +583,10 @@ export default {
             });
         },
 
+        stackNameToLowercase() {
+            this.stack.name = this.stack?.name?.toLowerCase();
+        },
+
     }
 };
 </script>
@@ -592,6 +597,8 @@ export default {
 }
 
 .editor-box {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
     &.edit-mode {
         background-color: #2c2f38 !important;
     }

@@ -13,6 +13,7 @@ import Toast, { POSITION, useToast } from "vue-toastification";
 import "xterm/lib/xterm.js";
 
 // CSS
+import "@fontsource/jetbrains-mono";
 import "vue-toastification/dist/index.css";
 import "xterm/css/xterm.css";
 import "./styles/main.scss";
@@ -21,6 +22,9 @@ import "./styles/main.scss";
 import socket from "./mixins/socket";
 import lang from "./mixins/lang";
 import theme from "./mixins/theme";
+
+// Set Title
+document.title = document.title + " - " + location.host;
 
 const app = createApp(rootApp());
 

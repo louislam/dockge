@@ -72,9 +72,9 @@ export class Stack {
     }
 
     validate() {
-        // Check name, allows [a-z][A-Z][0-9] _ - only
-        if (!this.name.match(/^[a-zA-Z0-9_-]+$/)) {
-            throw new ValidationError("Stack name can only contain [a-z][A-Z][0-9] _ - only");
+        // Check name, allows [a-z][0-9] _ - only
+        if (!this.name.match(/^[a-z0-9_-]+$/)) {
+            throw new ValidationError("Stack name can only contain [a-z][0-9] _ - only");
         }
 
         // Check YAML format
@@ -149,7 +149,7 @@ export class Stack {
 
     async delete(socket?: DockgeSocket) : Promise<number> {
         const terminalName = getComposeTerminalName(this.name);
-        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down", "--remove-orphans", "--rmi", "all" ], this.path);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down", "--remove-orphans", "all" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to delete, please check the terminal output for more information.");
         }
@@ -177,6 +177,11 @@ export class Stack {
 
             for (let filename of filenameList) {
                 try {
+                    // Check if it is a directory
+                    let stat = fs.statSync(path.join(stacksDir, filename));
+                    if (!stat.isDirectory()) {
+                        continue;
+                    }
                     let stack = this.getStack(server, filename);
                     stack._status = CREATED_FILE;
                     stackList.set(filename, stack);
