@@ -37,12 +37,12 @@ export class Stack {
         this._composeYAML = composeYAML;
 
         // Check if compose file name is different from compose.yaml
-        if (fs.existsSync(path.join(this.path, "compose.yml"))){
-            this._composeFileName = "compose.yml";
-        } else if (fs.existsSync(path.join(this.path, "docker-compose.yml"))){
-            this._composeFileName = "docker-compose.yml";
-        } else if (fs.existsSync(path.join(this.path, "docker-compose.yaml"))){
-            this._composeFileName = "docker-compose.yaml";
+        const supportedFileNames = [ "compose.yaml", "compose.yml", "docker-compose.yml", "docker-compose.yaml" ];
+        for (const filename of supportedFileNames){
+            if (fs.existsSync(path.join(this.path, filename))){
+                this._composeFileName = filename;
+                break;
+            }
         }
     }
 
@@ -160,7 +160,7 @@ export class Stack {
 
     async delete(socket?: DockgeSocket) : Promise<number> {
         const terminalName = getComposeTerminalName(this.name);
-        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down", "--remove-orphans", "all" ], this.path);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down", "--remove-orphans" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to delete, please check the terminal output for more information.");
         }
