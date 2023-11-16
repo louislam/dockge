@@ -149,7 +149,7 @@ export class Stack {
 
     async delete(socket?: DockgeSocket) : Promise<number> {
         const terminalName = getComposeTerminalName(this.name);
-        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down", "--remove-orphans", "all" ], this.path);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down", "--remove-orphans" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to delete, please check the terminal output for more information.");
         }
