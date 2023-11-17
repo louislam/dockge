@@ -34,6 +34,8 @@ export class Terminal {
     protected _rows : number = TERMINAL_ROWS;
     protected _cols : number = TERMINAL_COLS;
 
+    protected keepAliveInterval? : NodeJS.Timeout;
+
     constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
         this._name = name;
@@ -101,10 +103,26 @@ export class Terminal {
             Terminal.terminalMap.delete(this.name);
             log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
 
+            clearInterval(this.keepAliveInterval);
+
             if (this.callback) {
                 this.callback(res.exitCode);
             }
         });
+
+        // Close if there is no clients
+        this.keepAliveInterval = setInterval(() => {
+            const clients = this.server.io.sockets.adapter.rooms.get(this.name);
+            const numClients = clients ? clients.size : 0;
+
+            if (numClients === 0) {
+                log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
+                this.close();
+            } else {
+                log.debug("Terminal", "Terminal " + this.name + " has " + numClients + " client(s)");
+            }
+        }, 60 * 1000);
+
     }
 
     public onExit(callback : (exitCode : number) => void) {
@@ -138,7 +156,8 @@ export class Terminal {
     }
 
     close() {
-        this._ptyProcess?.kill();
+        // Send Ctrl+C to the terminal
+        this.ptyProcess?.write("\x03");
     }
 
     /**
@@ -172,6 +191,10 @@ export class Terminal {
             });
             terminal.start();
         });
+    }
+
+    public static getTerminalCount() {
+        return Terminal.terminalMap.size;
     }
 }
 
