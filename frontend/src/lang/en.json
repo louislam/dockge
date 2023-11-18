@@ -1,7 +1,10 @@
 {
     "languageName": "English",
+    "Create your admin account": "Create your admin account",
     "authIncorrectCreds": "Incorrect username or password.",
     "PasswordsDoNotMatch": "Passwords do not match.",
+    "Repeat Password": "Repeat Password",
+    "Create": "Create",
     "signedInDisp": "Signed in as {0}",
     "signedInDispDisabled": "Auth Disabled.",
     "home": "Home",

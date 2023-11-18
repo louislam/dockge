@@ -1,7 +1,10 @@
 {
     "languageName": "Francais",
+    "Create your admin account": "Créez votre compte administrateur",
     "authIncorrectCreds": "identifiant ou mot de passe incorrect.",
+    "Repeat Password": "Répéter le mot de passe",
     "PasswordsDoNotMatch": "Les mots de passe ne correspondent pas.",
+    "Create": "Créer",
     "signedInDisp": "Connecté en tant que {0}",
     "signedInDispDisabled": "Authentification désactivée.",
     "home": "Accueil",
