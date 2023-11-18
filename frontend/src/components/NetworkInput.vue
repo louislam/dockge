@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h5>Internal Networks</h5>
+        <h5>{{ $t("Internal Networks") }}</h5>
         <ul class="list-group">
             <li v-for="(networkRow, index) in networkList" :key="index" class="list-group-item">
                 <input v-model="networkRow.key" type="text" class="no-bg domain-input" placeholder="Network name..." />
@@ -10,10 +10,10 @@
 
         <button class="btn btn-normal btn-sm mt-3 me-2" @click="addField">{{ $t("addInternalNetwork") }}</button>
 
-        <h5 class="mt-3">External Networks</h5>
+        <h5 class="mt-3">{{ $t("External Networks") }}</h5>
 
         <div v-if="externalNetworkList.length === 0">
-            No External Networks
+            {{ $t("No External Networks") }}
         </div>
 
         <div v-for="(networkName, index) in externalNetworkList" :key="networkName" class="form-check form-switch my-3">

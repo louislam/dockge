@@ -27,7 +27,7 @@
         <div v-if="isEditMode" class="mt-2">
             <button class="btn btn-normal me-2" @click="showConfig = !showConfig">
                 <font-awesome-icon icon="edit" />
-                Edit
+                {{ $t("Edit") }}
             </button>
             <button v-if="false" class="btn btn-normal me-2">Rename</button>
             <button class="btn btn-danger me-2" @click="remove">
