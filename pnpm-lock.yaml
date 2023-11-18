@@ -54,11 +54,11 @@ dependencies:
     specifier: ~2.1.2
     version: 2.1.2
   mysql2:
-    specifier: ^3.6.3
+    specifier: ~3.6.3
     version: 3.6.3
   redbean-node:
-    specifier: 0.3.2
-    version: 0.3.2(mysql2@3.6.3)
+    specifier: ~0.3.3
+    version: 0.3.3(mysql2@3.6.3)
   socket.io:
     specifier: ~4.7.2
     version: 4.7.2
@@ -3854,8 +3854,8 @@ packages:
       resolve: 1.22.8
     dev: false
 
-  /redbean-node@0.3.2(mysql2@3.6.3):
-    resolution: {integrity: sha512-39VMxPWPpPicRlU4FSJJnJuUMoxw5/4envFthHtKnLe+3qWTBje3RMrJTFZcQGLruWQ/s2LgeYzdd+d0O+p+uQ==}
+  /redbean-node@0.3.3(mysql2@3.6.3):
+    resolution: {integrity: sha512-0J59/QlShdWs1h0lsFHRfb8NwjvgIYTQKwYrvq6FykRmeX1cG2u8AgHEIRVBrm56mtKLRASVy/8ykk6fSntLdw==}
     dependencies:
       '@types/node': 20.3.3
       await-lock: 2.2.2
