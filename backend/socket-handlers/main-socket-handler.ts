@@ -1,5 +1,4 @@
 import { SocketHandler } from "../socket-handler.js";
-import { Socket } from "socket.io";
 import { DockgeServer } from "../dockge-server";
 import { log } from "../log";
 import { R } from "redbean-node";

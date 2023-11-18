@@ -80,7 +80,7 @@ export class Database {
      * @param {boolean} noLog Should logs not be output?
      * @returns {Promise<void>}
      */
-    static async connect(autoloadModels = true, noLog = false) {
+    static async connect(autoloadModels = true) {
         const acquireConnectionTimeout = 120 * 1000;
         let dbConfig;
         try {

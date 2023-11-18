@@ -15,11 +15,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node: [18.x, 20.x] # Can be changed
+        node: [20.x] # Can be changed
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - run: git config --global core.autocrlf false  # Mainly for Windows
+      - uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3

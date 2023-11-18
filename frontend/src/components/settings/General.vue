@@ -68,13 +68,13 @@
 </template>
 
 <script>
-import HiddenInput from "../../components/HiddenInput.vue";
+
 import dayjs from "dayjs";
 import { timezoneList } from "../../util-frontend";
 
 export default {
     components: {
-        HiddenInput,
+
     },
 
     data() {
