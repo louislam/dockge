@@ -48,5 +48,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Lint
+        run: pnpm run lint
       # more things can be add later like tests etc..
-      
+

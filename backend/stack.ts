@@ -351,7 +351,11 @@ export class Stack {
         for (let line of lines) {
             try {
                 let obj = JSON.parse(line);
-                statusList.set(obj.Service, obj.State);
+                if (obj.Health === "") {
+                    statusList.set(obj.Service, obj.State);
+                } else {
+                    statusList.set(obj.Service, obj.Health);
+                }
             } catch (e) {
             }
         }
