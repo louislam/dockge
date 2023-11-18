@@ -34,6 +34,7 @@ export class Terminal {
     protected _rows : number = TERMINAL_ROWS;
     protected _cols : number = TERMINAL_COLS;
 
+    public enableKeepAlive : boolean = false;
     protected keepAliveInterval? : NodeJS.Timeout;
 
     constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
@@ -110,19 +111,24 @@ export class Terminal {
             }
         });
 
-        // Close if there is no clients
-        this.keepAliveInterval = setInterval(() => {
-            const clients = this.server.io.sockets.adapter.rooms.get(this.name);
-            const numClients = clients ? clients.size : 0;
+        if (this.enableKeepAlive) {
+            log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
 
-            if (numClients === 0) {
-                log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
-                this.close();
-            } else {
-                log.debug("Terminal", "Terminal " + this.name + " has " + numClients + " client(s)");
-            }
-        }, 60 * 1000);
+            // Close if there is no clients
+            this.keepAliveInterval = setInterval(() => {
+                const clients = this.server.io.sockets.adapter.rooms.get(this.name);
+                const numClients = clients ? clients.size : 0;
 
+                if (numClients === 0) {
+                    log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
+                    this.close();
+                } else {
+                    log.debug("Terminal", "Terminal " + this.name + " has " + numClients + " client(s)");
+                }
+            }, 60 * 1000);
+        } else {
+            log.debug("Terminal", "Keep alive disabled for terminal " + this.name);
+        }
     }
 
     public onExit(callback : (exitCode : number) => void) {
