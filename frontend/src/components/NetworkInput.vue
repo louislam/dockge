@@ -32,7 +32,7 @@
                 class="form-control"
                 @keyup.enter="createExternelNetwork"
             />
-            <button class="btn btn-normal btn-sm  me-2" type="button" @click="">
+            <button class="btn btn-normal btn-sm  me-2" type="button">
                 {{ $t("createExternalNetwork") }}
             </button>
         </div>

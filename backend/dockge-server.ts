@@ -291,7 +291,7 @@ export class DockgeServer {
             }
 
             // Run every 5 seconds
-            const job = Cron("*/2 * * * * *", {
+            Cron("*/2 * * * * *", {
                 protect: true,  // Enabled over-run protection.
             }, () => {
                 log.debug("server", "Cron job running");
