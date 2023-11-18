@@ -1,15 +1,14 @@
 // @ts-ignore Performance issue when using "vue-i18n", so we use "vue-i18n/dist/vue-i18n.esm-browser.prod.js", but typescript doesn't like that.
 import { createI18n } from "vue-i18n/dist/vue-i18n.esm-browser.prod.js";
 import en from "./lang/en.json";
-import fr from "./lang/fr.json";
 
 const languageList = {
+    "fr": "Français",
 
 };
 
 let messages = {
     en,
-    fr,
 };
 
 for (let lang in languageList) {
