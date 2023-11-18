@@ -12,6 +12,11 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(relativeTime);
 
+export interface LooseObject {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any
+}
+
 let randomBytes : (numBytes: number) => Uint8Array;
 initRandomBytes();
 

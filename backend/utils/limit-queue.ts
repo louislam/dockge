@@ -4,14 +4,14 @@
  */
 export class LimitQueue<T> extends Array<T> {
     __limit;
-    __onExceed = null;
+    __onExceed? : (item : T | undefined) => void;
 
     constructor(limit: number) {
         super();
         this.__limit = limit;
     }
 
-    push(value : T) {
+    pushItem(value : T) {
         super.push(value);
         if (this.length > this.__limit) {
             const item = this.shift();

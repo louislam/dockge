@@ -3,6 +3,10 @@
         "module": "ESNext",
         "target": "ESNext",
         "strict": true,
-        "moduleResolution": "bundler"
-    }
+        "moduleResolution": "bundler",
+        "skipLibCheck": true
+    },
+    "include": [
+        "backend/**/*"
+    ],
 }

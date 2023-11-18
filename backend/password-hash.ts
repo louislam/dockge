@@ -17,7 +17,7 @@ export function generatePasswordHash(password : string) {
  * @param {string} hash Hash to verify against
  * @returns {boolean} Does the password match the hash?
  */
-export function verifyPassword(password, hash) {
+export function verifyPassword(password : string, hash : string) {
     return bcrypt.compareSync(password, hash);
 }
 
@@ -37,7 +37,7 @@ export const SHAKE256_LENGTH = 16;
  * @param {number} len Output length of the hash
  * @returns {string} The hashed data in hex format
  */
-export function shake256(data, len) {
+export function shake256(data : string, len : number) {
     if (!data) {
         return "";
     }

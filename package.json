@@ -50,6 +50,7 @@
         "@fortawesome/free-regular-svg-icons": "6.4.2",
         "@fortawesome/free-solid-svg-icons": "6.4.2",
         "@fortawesome/vue-fontawesome": "3.0.3",
+        "@types/bcryptjs": "^2.4.6",
         "@types/bootstrap": "~5.2.9",
         "@types/command-exists": "~1.2.3",
         "@types/express": "~4.17.21",

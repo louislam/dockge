@@ -38,10 +38,12 @@ export class TerminalSocketHandler extends SocketHandler {
                     throw new Error("Terminal not found or it is not a Interactive Terminal.");
                 }
             } catch (e) {
-                errorCallback({
-                    ok: false,
-                    msg: e.message,
-                });
+                if (e instanceof Error) {
+                    errorCallback({
+                        ok: false,
+                        msg: e.message,
+                    });
+                }
             }
         });
 
