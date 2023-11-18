@@ -5,6 +5,7 @@
     "scripts": {
         "fmt": "eslint \"**/*.{ts,vue}\" --fix",
         "lint": "eslint \"**/*.{ts,vue}\"",
+        "check-ts": "tsc --noEmit",
         "start": "tsx ./backend/index.ts",
         "dev:backend": "cross-env NODE_ENV=development tsx watch ./backend/index.ts",
         "dev:frontend": "cross-env NODE_ENV=development vite --host --config ./frontend/vite.config.ts",
