@@ -20,6 +20,7 @@
         "@fontsource/jetbrains-mono": "^5.0.17",
         "@homebridge/node-pty-prebuilt-multiarch": "~0.11.10",
         "@louislam/sqlite3": "~15.1.6",
+        "@vueform/multiselect": "^2.6.6",
         "bcryptjs": "~2.4.3",
         "check-password-strength": "~2.0.7",
         "command-exists": "~1.2.9",

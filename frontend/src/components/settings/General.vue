@@ -57,6 +57,24 @@
                 <div class="form-text"></div>
             </div>
 
+            <!-- Docker Endpoint -->
+            <div class="mb-4">
+                <label class="form-label" for="dockerEndpointList">
+                    {{ $t("dockerEndpointList") }}
+                </label>
+
+                <Multiselect
+                    id="dockerEndpointList"
+                    v-model="settings.dockerEndpointList"
+                    mode="tags"
+                    :options="['/var/run/docker.sock']"
+                    :value="['/var/run/docker.sock']"
+                    :placeholder="$t('Enter The list of docker endpoints')"
+                    :searchable="true"
+                    :create-option="true"
+                ></Multiselect>
+            </div>
+
             <!-- Save Button -->
             <div>
                 <button class="btn btn-primary" type="submit">
@@ -71,10 +89,12 @@
 import HiddenInput from "../../components/HiddenInput.vue";
 import dayjs from "dayjs";
 import { timezoneList } from "../../util-frontend";
+import Multiselect from '@vueform/multiselect'
 
 export default {
     components: {
         HiddenInput,
+        Multiselect,
     },
 
     data() {
@@ -112,3 +132,18 @@ export default {
 };
 </script>
 
+<style src="@vueform/multiselect/themes/default.css">
+</style>
+<style>
+.multiselect {
+    background: #070a10;
+    border-color: #1d2634;
+    border-radius: var(--bs-border-radius);
+}
+.multiselect-tags-search {
+    background: none;
+}
+.multiselect-tag {
+    border-radius: var(--bs-border-radius);
+}
+</style>

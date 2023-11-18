@@ -9,7 +9,7 @@
     "registry": "Registry",
     "compose": "Compose",
     "addFirstStackMsg": "Compose your first stack!",
-    "stackName" : "Stack Name",
+    "stackName": "Stack Name",
     "deployStack": "Deploy",
     "deleteStack": "Delete",
     "stopStack": "Stop",
@@ -19,7 +19,7 @@
     "editStack": "Edit",
     "discardStack": "Discard",
     "saveStackDraft": "Save",
-    "notAvailableShort" : "N/A",
+    "notAvailableShort": "N/A",
     "deleteStackMsg": "Are you sure you want to delete this stack?",
     "stackNotManagedByDockgeMsg": "This stack is not managed by Dockge.",
     "primaryHostname": "Primary Hostname",
@@ -49,5 +49,6 @@
     "add": "Add",
     "applyToYAML": "Apply to YAML",
     "createExternalNetwork": "Create",
-    "addInternalNetwork": "Add"
+    "addInternalNetwork": "Add",
+    "dockerEndpointList": "Docker Endpoint List"
 }
