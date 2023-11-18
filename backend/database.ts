@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import knex from "knex";
 
+// @ts-ignore
 import Dialect from "knex/lib/dialects/sqlite3/index.js";
 
 import sqlite from "@louislam/sqlite3";
@@ -12,6 +13,11 @@ import { sleep } from "./util-common";
 
 interface DBConfig {
     type?: "sqlite" | "mysql";
+    hostname?: string;
+    port?: string;
+    database?: string;
+    username?: string;
+    password?: string;
 }
 
 export class Database {
@@ -19,7 +25,7 @@ export class Database {
      * SQLite file path (Default: ./data/dockge.db)
      * @type {string}
      */
-    static sqlitePath;
+    static sqlitePath : string;
 
     static noReject = true;
 
@@ -51,7 +57,7 @@ export class Database {
      * @typedef {string|undefined} envString
      * @returns {{type: "sqlite"} | {type:envString, hostname:envString, port:envString, database:envString, username:envString, password:envString}} Database config
      */
-    static readDBConfig() {
+    static readDBConfig() : DBConfig {
         const dbConfigString = fs.readFileSync(path.join(this.server.config.dataDir, "db-config.json")).toString("utf-8");
         const dbConfig = JSON.parse(dbConfigString);
 
@@ -67,10 +73,10 @@ export class Database {
 
     /**
      * @typedef {string|undefined} envString
-     * @param {{type: "sqlite"} | {type:envString, hostname:envString, port:envString, database:envString, username:envString, password:envString}} dbConfig the database configuration that should be written
+     * @param dbConfig the database configuration that should be written
      * @returns {void}
      */
-    static writeDBConfig(dbConfig) {
+    static writeDBConfig(dbConfig : DBConfig) {
         fs.writeFileSync(path.join(this.server.config.dataDir, "db-config.json"), JSON.stringify(dbConfig, null, 4));
     }
 
@@ -82,12 +88,15 @@ export class Database {
      */
     static async connect(autoloadModels = true) {
         const acquireConnectionTimeout = 120 * 1000;
-        let dbConfig;
+        let dbConfig : DBConfig;
         try {
             dbConfig = this.readDBConfig();
             Database.dbConfig = dbConfig;
         } catch (err) {
-            log.warn("db", err.message);
+            if (err instanceof Error) {
+                log.warn("db", err.message);
+            }
+
             dbConfig = {
                 type: "sqlite",
             };
@@ -176,13 +185,15 @@ export class Database {
                 directory: Database.knexMigrationsPath,
             });
         } catch (e) {
-            // Allow missing patch files for downgrade or testing pr.
-            if (e.message.includes("the following files are missing:")) {
-                log.warn("db", e.message);
-                log.warn("db", "Database migration failed, you may be downgrading Dockge.");
-            } else {
-                log.error("db", "Database migration failed");
-                throw e;
+            if (e instanceof Error) {
+                // Allow missing patch files for downgrade or testing pr.
+                if (e.message.includes("the following files are missing:")) {
+                    log.warn("db", e.message);
+                    log.warn("db", "Database migration failed, you may be downgrading Dockge.");
+                } else {
+                    log.error("db", "Database migration failed");
+                    throw e;
+                }
             }
         }
     }

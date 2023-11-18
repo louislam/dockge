@@ -197,7 +197,9 @@ export class Stack {
                     stack._status = CREATED_FILE;
                     stackList.set(filename, stack);
                 } catch (e) {
-                    log.warn("getStackList", `Failed to get stack ${filename}, error: ${e.message}`);
+                    if (e instanceof Error) {
+                        log.warn("getStackList", `Failed to get stack ${filename}, error: ${e.message}`);
+                    }
                 }
             }
 

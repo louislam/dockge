@@ -54,7 +54,9 @@ export class Terminal {
         try {
             this.ptyProcess?.resize(this.cols, this.rows);
         } catch (e) {
-            log.debug("Terminal", "Failed to resize terminal: " + e.message);
+            if (e instanceof Error) {
+                log.debug("Terminal", "Failed to resize terminal: " + e.message);
+            }
         }
     }
 
@@ -67,7 +69,9 @@ export class Terminal {
         try {
             this.ptyProcess?.resize(this.cols, this.rows);
         } catch (e) {
-            log.debug("Terminal", "Failed to resize terminal: " + e.message);
+            if (e instanceof Error) {
+                log.debug("Terminal", "Failed to resize terminal: " + e.message);
+            }
         }
     }
 
@@ -85,7 +89,7 @@ export class Terminal {
 
         // On Data
         this._ptyProcess.onData((data) => {
-            this.buffer.push(data);
+            this.buffer.pushItem(data);
             if (this.server.io) {
                 this.server.io.to(this.name).emit("terminalWrite", this.name, data);
             }

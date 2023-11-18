@@ -6,6 +6,11 @@ import { ERROR_TYPE_VALIDATION } from "./util-common";
 import { R } from "redbean-node";
 import { verifyPassword } from "./password-hash";
 
+export interface JWTDecoded {
+    username : string;
+    h? : string;
+}
+
 export interface DockgeSocket extends Socket {
     userID: number;
     consoleTerminal? : Terminal;

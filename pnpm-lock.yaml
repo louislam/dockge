@@ -54,11 +54,11 @@ dependencies:
     specifier: ~2.1.2
     version: 2.1.2
   mysql2:
-    specifier: ^3.6.3
+    specifier: ~3.6.3
     version: 3.6.3
   redbean-node:
-    specifier: 0.3.2
-    version: 0.3.2(mysql2@3.6.3)
+    specifier: ~0.3.3
+    version: 0.3.3(mysql2@3.6.3)
   socket.io:
     specifier: ~4.7.2
     version: 4.7.2
@@ -97,6 +97,9 @@ devDependencies:
   '@fortawesome/vue-fontawesome':
     specifier: 3.0.3
     version: 3.0.3(@fortawesome/fontawesome-svg-core@6.4.2)(vue@3.3.8)
+  '@types/bcryptjs':
+    specifier: ^2.4.6
+    version: 2.4.6
   '@types/bootstrap':
     specifier: ~5.2.9
     version: 5.2.9
@@ -1012,6 +1015,10 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@types/bcryptjs@2.4.6:
+    resolution: {integrity: sha512-9xlo6R2qDs5uixm0bcIqCeMCE6HiQsIyel9KQySStiyqNl2tnj2mP3DX1Nf56MD6KMenNNlBBsy3LJ7gUEQPXQ==}
+    dev: true
 
   /@types/body-parser@1.19.5:
     resolution: {integrity: sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==}
@@ -3847,8 +3854,8 @@ packages:
       resolve: 1.22.8
     dev: false
 
-  /redbean-node@0.3.2(mysql2@3.6.3):
-    resolution: {integrity: sha512-39VMxPWPpPicRlU4FSJJnJuUMoxw5/4envFthHtKnLe+3qWTBje3RMrJTFZcQGLruWQ/s2LgeYzdd+d0O+p+uQ==}
+  /redbean-node@0.3.3(mysql2@3.6.3):
+    resolution: {integrity: sha512-0J59/QlShdWs1h0lsFHRfb8NwjvgIYTQKwYrvq6FykRmeX1cG2u8AgHEIRVBrm56mtKLRASVy/8ykk6fSntLdw==}
     dependencies:
       '@types/node': 20.3.3
       await-lock: 2.2.2

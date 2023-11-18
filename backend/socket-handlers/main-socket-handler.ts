@@ -5,7 +5,7 @@ import { R } from "redbean-node";
 import { loginRateLimiter, twoFaRateLimiter } from "../rate-limiter";
 import { generatePasswordHash, needRehashPassword, shake256, SHAKE256_LENGTH, verifyPassword } from "../password-hash";
 import { User } from "../models/user";
-import { checkLogin, DockgeSocket, doubleCheckPassword } from "../util-server";
+import { checkLogin, DockgeSocket, doubleCheckPassword, JWTDecoded } from "../util-server";
 import { passwordStrength } from "check-password-strength";
 import jwt from "jsonwebtoken";
 import { Settings } from "../settings";
@@ -42,10 +42,12 @@ export class MainSocketHandler extends SocketHandler {
                 });
 
             } catch (e) {
-                callback({
-                    ok: false,
-                    msg: e.message,
-                });
+                if (e instanceof Error) {
+                    callback({
+                        ok: false,
+                        msg: e.message,
+                    });
+                }
             }
         });
 
@@ -56,7 +58,7 @@ export class MainSocketHandler extends SocketHandler {
             log.info("auth", `Login by token. IP=${clientIP}`);
 
             try {
-                const decoded = jwt.verify(token, server.jwtSecret);
+                const decoded = jwt.verify(token, server.jwtSecret) as JWTDecoded;
 
                 log.info("auth", "Username from JWT: " + decoded.username);
 
@@ -90,9 +92,13 @@ export class MainSocketHandler extends SocketHandler {
                     });
                 }
             } catch (error) {
+                if (!(error instanceof Error)) {
+                    console.error("Unknown error:", error);
+                    return;
+                }
                 log.error("auth", `Invalid token. IP=${clientIP}`);
                 if (error.message) {
-                    log.error("auth", error.message, `IP=${clientIP}`);
+                    log.error("auth", error.message + ` IP=${clientIP}`);
                 }
                 callback({
                     ok: false,
@@ -148,6 +154,7 @@ export class MainSocketHandler extends SocketHandler {
                 }
 
                 if (data.token) {
+                    // @ts-ignore
                     const verify = notp.totp.verify(data.token, user.twofa_secret, twoFAVerifyOptions);
 
                     if (user.twofa_last_token !== data.token && verify) {
@@ -210,10 +217,12 @@ export class MainSocketHandler extends SocketHandler {
                 });
 
             } catch (e) {
-                callback({
-                    ok: false,
-                    msg: e.message,
-                });
+                if (e instanceof Error) {
+                    callback({
+                        ok: false,
+                        msg: e.message,
+                    });
+                }
             }
         });
 
@@ -228,10 +237,12 @@ export class MainSocketHandler extends SocketHandler {
                 });
 
             } catch (e) {
-                callback({
-                    ok: false,
-                    msg: e.message,
-                });
+                if (e instanceof Error) {
+                    callback({
+                        ok: false,
+                        msg: e.message,
+                    });
+                }
             }
         });
 
@@ -261,22 +272,24 @@ export class MainSocketHandler extends SocketHandler {
                 server.sendInfo(socket);
 
             } catch (e) {
-                callback({
-                    ok: false,
-                    msg: e.message,
-                });
+                if (e instanceof Error) {
+                    callback({
+                        ok: false,
+                        msg: e.message,
+                    });
+                }
             }
         });
     }
 
-    async login(username : string, password : string) {
+    async login(username : string, password : string) : Promise<User | null> {
         if (typeof username !== "string" || typeof password !== "string") {
             return null;
         }
 
         const user = await R.findOne("user", " username = ? AND active = 1 ", [
             username,
-        ]);
+        ]) as User;
 
         if (user && verifyPassword(password, user.password)) {
             // Upgrade the hash to bcrypt
