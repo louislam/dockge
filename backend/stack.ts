@@ -352,10 +352,10 @@ export class Stack {
             try {
                 let obj = JSON.parse(line);
                 if (obj.Health === "") {
-+                       statusList.set(obj.Service, obj.State);
-+               } else {
-+                       statusList.set(obj.Service, obj.Health);
-+               }
+                    statusList.set(obj.Service, obj.State);
+                } else {
+                    statusList.set(obj.Service, obj.Health);
+                }
             } catch (e) {
             }
         }

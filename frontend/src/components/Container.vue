@@ -180,9 +180,9 @@ export default defineComponent({
 
         bgStyle() {
             if (this.status === "running" || this.status === "healthy") {
-                 return "bg-primary";
+                return "bg-primary";
             } else if (this.status === "unhealthy") {
-                 return "bg-danger";
+                return "bg-danger";
             } else {
                 return "bg-secondary";
             }
