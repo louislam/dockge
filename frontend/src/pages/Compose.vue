@@ -71,7 +71,7 @@
                             <div>
                                 <label for="name" class="form-label">{{ $t("stackName") }}</label>
                                 <input id="name" v-model="stack.name" type="text" class="form-control" required @blur="stackNameToLowercase">
-                                <div class="form-text">Lowercase only</div>
+                                <div class="form-text">{{ $t("Lowercase only") }}</div>
                             </div>
                         </div>
                     </div>

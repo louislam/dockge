@@ -5,7 +5,7 @@
 
             <div>
                 <p>
-                    Allowed commands:
+                    {{ $t("Allowed commands:") }}
                     <template v-for="(command, index) in allowedCommandList" :key="command">
                         <code>{{ command }}</code>
 

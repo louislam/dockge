@@ -22,12 +22,12 @@
                 </div>
             </div>
 
-            <h2 class="mb-3">Docker Run</h2>
+            <h2 class="mb-3">{{ $t("Docker Run") }}</h2>
             <div class="mb-3">
                 <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required placeholder="docker run ..."></textarea>
             </div>
 
-            <button class="btn-normal btn" @click="convertDockerRun">Convert to Compose</button>
+            <button class="btn-normal btn" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
         </div>
     </transition>
     <router-view ref="child" />
