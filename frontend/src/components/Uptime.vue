@@ -19,7 +19,6 @@ export default {
 
     computed: {
         uptime() {
-            return "0.00%";
             return this.$t("notAvailableShort");
         },
 

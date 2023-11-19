@@ -71,7 +71,7 @@
                             <div>
                                 <label for="name" class="form-label">{{ $t("stackName") }}</label>
                                 <input id="name" v-model="stack.name" type="text" class="form-control" required @blur="stackNameToLowercase">
-                                <div class="form-text">Lowercase only</div>
+                                <div class="form-text">{{ $t("Lowercase only") }}</div>
                             </div>
                         </div>
                     </div>
@@ -118,7 +118,7 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <h4 class="mb-3">compose.yaml</h4>
+                    <h4 class="mb-3">{{ stack.composeFileName }}</h4>
 
                     <!-- YAML editor -->
                     <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">

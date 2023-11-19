@@ -1,7 +1,13 @@
 // "limit" is bugged in Typescript, use "limiter-es6-compat" instead
 // See https://github.com/jhurliman/node-rate-limiter/issues/80
-import { RateLimiter } from "limiter-es6-compat";
+import { RateLimiter, RateLimiterOpts } from "limiter-es6-compat";
 import { log } from "./log";
+
+export interface KumaRateLimiterOpts extends RateLimiterOpts {
+    errorMessage : string;
+}
+
+export type KumaRateLimiterCallback = (err : object) => void;
 
 class KumaRateLimiter {
 
@@ -11,7 +17,7 @@ class KumaRateLimiter {
     /**
      * @param {object} config Rate limiter configuration object
      */
-    constructor(config) {
+    constructor(config : KumaRateLimiterOpts) {
         this.errorMessage = config.errorMessage;
         this.rateLimiter = new RateLimiter(config);
     }
@@ -24,11 +30,11 @@ class KumaRateLimiter {
 
     /**
      * Should the request be passed through
-     * @param {passCB} callback Callback function to call with decision
+     * @param callback Callback function to call with decision
      * @param {number} num Number of tokens to remove
      * @returns {Promise<boolean>} Should the request be allowed?
      */
-    async pass(callback, num = 1) {
+    async pass(callback : KumaRateLimiterCallback, num = 1) {
         const remainingRequests = await this.removeTokens(num);
         log.info("rate-limit", "remaining requests: " + remainingRequests);
         if (remainingRequests < 0) {

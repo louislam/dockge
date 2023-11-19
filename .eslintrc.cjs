@@ -92,6 +92,9 @@ module.exports = {
         "one-var": [ "error", "never" ],
         "max-statements-per-line": [ "error", { "max": 1 }],
         "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/no-unused-vars": [ "warn", {
+            "args": "none"
+        }],
         "prefer-const" : "off",
     },
 };

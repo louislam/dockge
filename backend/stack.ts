@@ -24,6 +24,7 @@ export class Stack {
     protected _status: number = UNKNOWN;
     protected _composeYAML?: string;
     protected _configFilePath?: string;
+    protected _composeFileName: string = "compose.yaml";
     protected server: DockgeServer;
 
     protected combinedTerminal? : Terminal;
@@ -34,6 +35,15 @@ export class Stack {
         this.name = name;
         this.server = server;
         this._composeYAML = composeYAML;
+
+        // Check if compose file name is different from compose.yaml
+        const supportedFileNames = [ "compose.yaml", "compose.yml", "docker-compose.yml", "docker-compose.yaml" ];
+        for (const filename of supportedFileNames) {
+            if (fs.existsSync(path.join(this.path, filename))) {
+                this._composeFileName = filename;
+                break;
+            }
+        }
     }
 
     toJSON() : object {
@@ -50,6 +60,7 @@ export class Stack {
             status: this._status,
             tags: [],
             isManagedByDockge: this.isManagedByDockge,
+            composeFileName: this._composeFileName,
         };
     }
 
@@ -84,7 +95,7 @@ export class Stack {
     get composeYAML() : string {
         if (this._composeYAML === undefined) {
             try {
-                this._composeYAML = fs.readFileSync(path.join(this.path, "compose.yaml"), "utf-8");
+                this._composeYAML = fs.readFileSync(path.join(this.path, this._composeFileName), "utf-8");
             } catch (e) {
                 this._composeYAML = "";
             }
@@ -135,7 +146,7 @@ export class Stack {
         }
 
         // Write or overwrite the compose.yaml
-        fs.writeFileSync(path.join(dir, "compose.yaml"), this.composeYAML);
+        fs.writeFileSync(path.join(dir, this._composeFileName), this.composeYAML);
     }
 
     async deploy(socket? : DockgeSocket) : Promise<number> {
@@ -186,7 +197,9 @@ export class Stack {
                     stack._status = CREATED_FILE;
                     stackList.set(filename, stack);
                 } catch (e) {
-                    log.warn("getStackList", `Failed to get stack ${filename}, error: ${e.message}`);
+                    if (e instanceof Error) {
+                        log.warn("getStackList", `Failed to get stack ${filename}, error: ${e.message}`);
+                    }
                 }
             }
 
@@ -351,7 +364,11 @@ export class Stack {
         for (let line of lines) {
             try {
                 let obj = JSON.parse(line);
-                statusList.set(obj.Service, obj.State);
+                if (obj.Health === "") {
+                    statusList.set(obj.Service, obj.State);
+                } else {
+                    statusList.set(obj.Service, obj.Health);
+                }
             } catch (e) {
             }
         }

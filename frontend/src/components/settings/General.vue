@@ -50,7 +50,7 @@
                         placeholder="localhost"
                     />
                     <button class="btn btn-outline-primary" type="button" @click="autoGetPrimaryHostname">
-                        {{ $t("Auto Get") }}
+                        {{ $t("autoGet") }}
                     </button>
                 </div>
 
@@ -68,13 +68,13 @@
 </template>
 
 <script>
-import HiddenInput from "../../components/HiddenInput.vue";
+
 import dayjs from "dayjs";
 import { timezoneList } from "../../util-frontend";
 
 export default {
     components: {
-        HiddenInput,
+
     },
 
     data() {

@@ -9,7 +9,7 @@
                 <div v-if="!isEditMode">
                     <span class="badge me-1" :class="bgStyle">{{ status }}</span>
 
-                    <a v-for="port in service.ports" :href="parsePort(port).url" target="_blank">
+                    <a v-for="port in service.ports" :key="port" :href="parsePort(port).url" target="_blank">
                         <span class="badge me-1 bg-secondary">{{ parsePort(port).display }}</span>
                     </a>
                 </div>
@@ -27,7 +27,7 @@
         <div v-if="isEditMode" class="mt-2">
             <button class="btn btn-normal me-2" @click="showConfig = !showConfig">
                 <font-awesome-icon icon="edit" />
-                Edit
+                {{ $t("Edit") }}
             </button>
             <button v-if="false" class="btn btn-normal me-2">Rename</button>
             <button class="btn btn-danger me-2" @click="remove">
@@ -179,8 +179,10 @@ export default defineComponent({
         },
 
         bgStyle() {
-            if (this.status === "running") {
+            if (this.status === "running" || this.status === "healthy") {
                 return "bg-primary";
+            } else if (this.status === "unhealthy") {
+                return "bg-danger";
             } else {
                 return "bg-secondary";
             }
