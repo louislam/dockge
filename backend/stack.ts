@@ -264,15 +264,18 @@ export class Stack {
 
     /**
      * Convert the status string from `docker compose ls` to the status number
+     * Input Example: "exited(1), running(1)"
      * @param status
      */
     static statusConvert(status : string) : number {
         if (status.startsWith("created")) {
             return CREATED_STACK;
-        } else if (status.startsWith("running")) {
-            return RUNNING;
-        } else if (status.startsWith("exited")) {
+        } else if (status.includes("exited")) {
+            // If one of the service is exited, we consider the stack is exited
             return EXITED;
+        } else if (status.startsWith("running")) {
+            // If there is no exited services, there should be only running services
+            return RUNNING;
         } else {
             return UNKNOWN;
         }
