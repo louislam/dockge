@@ -24,7 +24,7 @@ export class Stack {
     protected _status: number = UNKNOWN;
     protected _composeYAML?: string;
     protected _configFilePath?: string;
-    protected _composeFileName: string = "compose.yaml";
+    protected _composeFileName: string = process.env.COMPOSE_FILENAME || "compose.yaml";
     protected server: DockgeServer;
 
     protected combinedTerminal? : Terminal;

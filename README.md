@@ -92,6 +92,7 @@ services:
     environment:
       # Tell Dockge where is your stacks directory
       - DOCKGE_STACKS_DIR=/opt/stacks
+      - COMPOSE_FILENAME=docker-compose.yml #Specify filename to use when creating new stack
 ```
 
 ## How to Update
