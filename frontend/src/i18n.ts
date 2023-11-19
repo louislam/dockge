@@ -4,7 +4,7 @@ import en from "./lang/en.json";
 
 const languageList = {
     "fr": "Français",
-
+    "tr": "Türkçe",
 };
 
 let messages = {
