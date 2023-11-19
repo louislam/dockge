@@ -6,6 +6,7 @@ const languageList = {
     "fr": "Français",
     "tr": "Türkçe",
     "zh-CN": "简体中文",
+    "ur": "Urdu"
 };
 
 let messages = {
