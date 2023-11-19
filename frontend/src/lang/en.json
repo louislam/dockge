@@ -54,7 +54,7 @@
     "applyToYAML": "Apply to YAML",
     "createExternalNetwork": "Create",
     "addInternalNetwork": "Add",
-    "Save": "Sauvegarder",
+    "Save": "Save",
     "Language": "Language",
     "Current User": "Current User",
     "Change Password": "Change Password",
@@ -91,6 +91,4 @@
     "Internal Networks": "Internal Networks",
     "External Networks": "External Networks",
     "No External Networks": "No External Networks"
-
-
 }
