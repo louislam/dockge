@@ -174,6 +174,17 @@ export class Stack {
         return exitCode;
     }
 
+    updateStatus() {
+        let statusList = Stack.getStatusList();
+        let status = statusList.get(this.name);
+
+        if (status) {
+            this._status = status;
+        } else {
+            this._status = UNKNOWN;
+        }
+    }
+
     static getStackList(server : DockgeServer, useCacheForManaged = false) : Map<string, Stack> {
         let stacksDir = server.stacksDir;
         let stackList : Map<string, Stack>;
@@ -322,6 +333,14 @@ export class Stack {
         if (exitCode !== 0) {
             throw new Error("Failed to pull, please check the terminal output for more information.");
         }
+
+        // If the stack is not running, we don't need to restart it
+        this.updateStatus();
+        log.debug("update", "Status: " + this.status);
+        if (this.status !== RUNNING) {
+            return exitCode;
+        }
+
         exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "up", "-d", "--remove-orphans" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to restart, please check the terminal output for more information.");
