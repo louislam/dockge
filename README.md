@@ -130,6 +130,10 @@ https://github.com/louislam/dockge/issues
 ### Ask for Help / Discussions
 https://github.com/louislam/dockge/discussions
 
+## Translation
+
+If you want to translate Dockge into your language, please read [Translation Guide](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md)
+
 ## FAQ
 
 #### "Dockge"?
