@@ -5,6 +5,7 @@ import en from "./lang/en.json";
 const languageList = {
     "bg-BG": "Български",
     "es": "Español",
+    "de": "Deutsch",
     "fr": "Français",
     "pt": "Português",
     "tr": "Türkçe",
