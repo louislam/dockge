@@ -9,6 +9,8 @@ const languageList = {
     "pt": "Português",
     "tr": "Türkçe",
     "zh-CN": "简体中文",
+    "zh-TW": "繁體中文(台灣)",
+    "zh-HK": "繁體中文(香港)",
     "ko-KR": "한국어",
 };
 
