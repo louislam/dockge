@@ -22,10 +22,10 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
 - Reactive
    - Everything is just responsive. Progress (Pull/Up/Down) and terminal output are in real-time
 - Easy-to-use & fancy UI
-   - If you love Uptime Kuma's UI/UX, you will love this too
+   - If you love Uptime Kuma's UI/UX, you will love this one too
 - Convert `docker run ...` commands into `compose.yaml`
 - File based structure
-   - Dockge won't kidnap your compose files, they stored on your drive as usual. You can interact with them using normal `docker compose` commands   
+   - Dockge won't kidnap your compose files, they are stored on your drive as usual. You can interact with them using normal `docker compose` commands   
    <img src="https://github.com/louislam/dockge/assets/1336778/cc071864-592e-4909-b73a-343a57494002" width=300 />
 
 
@@ -55,7 +55,7 @@ cd /opt/dockge
 # Download the compose.yaml
 curl https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml --output compose.yaml
 
-# Start Server
+# Start the Server
 docker compose up -d
 
 # If you are using docker-compose V1 or Podman
@@ -117,9 +117,9 @@ docker compose up -d
 ## Motivations
 
 - I have been using Portainer for some time, but for the stack management, I am sometimes not satisfied with it. For example, sometimes when I try to deploy a stack, the loading icon keeps spinning for a few minutes without progress. And sometimes error messages are not clear.
-- Try to develop with ES Module + TypeScript (Originally, I planned to use Deno or Bun.js, but they do not support for arm64, so I stepped back to Node.js)
+- Try to develop with ES Module + TypeScript (Originally, I planned to use Deno or Bun.js, but they don't have support for arm64, so I stepped back to Node.js)
 
-If you love this project, please consider giving this project a ⭐.
+If you love this project, please consider giving it a ⭐.
 
 
 ## 🗣️
@@ -136,11 +136,11 @@ https://github.com/louislam/dockge/discussions
 
 "Dockge" is a coinage word which is created by myself. I hope it sounds like `Dodge`.
 
-The naming idea was coming from Twitch emotes like `sadge`, `bedge` or `wokege`. They are all ending with `-ge`.
+The naming idea came from Twitch emotes like `sadge`, `bedge` or `wokege`. They all end in `-ge`.
 
 #### Can I manage a single container without `compose.yaml`?
 
-The main objective of Dockge is that try to use docker `compose.yaml` for everything. If you want to manage a single container, you can just use Portainer or Docker CLI.
+The main objective of Dockge is to try to use the docker `compose.yaml` for everything. If you want to manage a single container, you can just use Portainer or Docker CLI.
 
 #### Can I manage existing stacks?
 
@@ -164,6 +164,4 @@ Yes, you can. However, you need to move your compose file into the stacks direct
 
 # Others
 
-Dockge is built on top of [Compose V2](https://docs.docker.com/compose/migrate/). `compose.yaml`  is also known as `docker-compose.yml`.
-
-
+Dockge is built on top of [Compose V2](https://docs.docker.com/compose/migrate/). `compose.yaml`  also known as `docker-compose.yml`.
