@@ -25,7 +25,7 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
    - If you love Uptime Kuma's UI/UX, you will love this one too
 - Convert `docker run ...` commands into `compose.yaml`
 - File based structure
-   - Dockge won't kidnap your compose files, they are stored on your drive as usual. You can interact with them using normal `docker compose` commands   
+   - Dockge won't kidnap your compose files, they are stored on your drive as usual. You can interact with them using normal `docker compose` commands
    <img src="https://github.com/louislam/dockge/assets/1336778/cc071864-592e-4909-b73a-343a57494002" width=300 />
 
 
@@ -37,7 +37,7 @@ Requirements:
 - [Docker CE](https://docs.docker.com/engine/install/) 20+ is recommended / Podman
 - (Docker only) [Docker Compose Plugin](https://docs.docker.com/compose/install/linux/)
 - (Podman only) podman-docker (Debian: `apt install podman-docker`)
-- OS: 
+- OS:
   - As long as you can run Docker CE / Podman, it should be fine, but:
   - Debian/Raspbian Buster or lower is not supported, please upgrade to Bullseye or higher
 - Arch: armv7, arm64, amd64 (a.k.a x86_64)
@@ -59,7 +59,7 @@ curl https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml --out
 docker compose up -d
 
 # If you are using docker-compose V1 or Podman
-# docker-compose up -d 
+# docker-compose up -d
 ```
 
 Dockge is now running on http://localhost:5001
@@ -80,7 +80,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data:/app/data
-        
+
       # If you want to use private registries, you need to share the auth file with Dockge:
       # - /root/.docker/:/root/.docker
 
