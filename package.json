@@ -7,7 +7,7 @@
         "lint": "eslint \"**/*.{ts,vue}\"",
         "check-ts": "tsc --noEmit",
         "start": "tsx ./backend/index.ts",
-        "dev:backend": "cross-env NODE_ENV=development tsx watch ./backend/index.ts",
+        "dev:backend": "cross-env NODE_ENV=development tsx watch --inspect ./backend/index.ts",
         "dev:frontend": "cross-env NODE_ENV=development vite --host --config ./frontend/vite.config.ts",
         "release-final": "tsx ./extra/test-docker.ts && tsx extra/update-version.ts && pnpm run build:frontend && npm run build:docker",
         "build:frontend": "vite build --config ./frontend/vite.config.ts",
