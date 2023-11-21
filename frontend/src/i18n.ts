@@ -5,13 +5,16 @@ import en from "./lang/en.json";
 const languageList = {
     "bg-BG": "Български",
     "es": "Español",
+    "de": "Deutsch",
     "fr": "Français",
     "pt": "Português",
     "tr": "Türkçe",
     "zh-CN": "简体中文",
     "zh-TW": "繁體中文(台灣)",
     "zh-HK": "繁體中文(香港)",
+    "ur": "Urdu",
     "ko-KR": "한국어",
+    "ru": "Русский",
 };
 
 let messages = {
