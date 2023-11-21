@@ -8,8 +8,8 @@ body:
   - type: checkboxes
     id: no-duplicate-issues
     attributes:
-      label: "Please go to https://github.com/louislam/dockge/discussions, here is for bug report only"
-      description: ""
+      label: "Please go to https://github.com/louislam/dockge/discussions"
+      description: "Here is for bug report only"
       options:
         - label: "I understand"
           required: true
