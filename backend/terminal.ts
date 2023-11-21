@@ -80,36 +80,52 @@ export class Terminal {
             return;
         }
 
-        this._ptyProcess = pty.spawn(this.file, this.args, {
-            name: this.name,
-            cwd: this.cwd,
-            cols: TERMINAL_COLS,
-            rows: this.rows,
-        });
+        try {
+            this._ptyProcess = pty.spawn(this.file, this.args, {
+                name: this.name,
+                cwd: this.cwd,
+                cols: TERMINAL_COLS,
+                rows: this.rows,
+            });
 
-        // On Data
-        this._ptyProcess.onData((data) => {
-            this.buffer.pushItem(data);
-            if (this.server.io) {
-                this.server.io.to(this.name).emit("terminalWrite", this.name, data);
+            // On Data
+            this._ptyProcess.onData((data) => {
+                this.buffer.pushItem(data);
+                if (this.server.io) {
+                    this.server.io.to(this.name).emit("terminalWrite", this.name, data);
+                }
+            });
+
+            // On Exit
+            this._ptyProcess.onExit(this.exit);
+        } catch (error) {
+            if (error instanceof Error) {
+                log.error("Terminal", "Failed to start terminal: " + error.message);
+                const exitCode = Number(error.message.split(" ").pop());
+                this.exit({
+                    exitCode,
+                });
             }
-        });
-
-        // On Exit
-        this._ptyProcess.onExit((res) => {
-            this.server.io.to(this.name).emit("terminalExit", this.name, res.exitCode);
-
-            // Remove room
-            this.server.io.in(this.name).socketsLeave(this.name);
-
-            Terminal.terminalMap.delete(this.name);
-            log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
-
-            if (this.callback) {
-                this.callback(res.exitCode);
-            }
-        });
+        }
     }
+
+    /**
+     * Exit event handler
+     * @param res
+     */
+    protected exit = (res : {exitCode: number, signal?: number | undefined}) => {
+        this.server.io.to(this.name).emit("terminalExit", this.name, res.exitCode);
+
+        // Remove room
+        this.server.io.in(this.name).socketsLeave(this.name);
+
+        Terminal.terminalMap.delete(this.name);
+        log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
+
+        if (this.callback) {
+            this.callback(res.exitCode);
+        }
+    };
 
     public onExit(callback : (exitCode : number) => void) {
         this.callback = callback;
