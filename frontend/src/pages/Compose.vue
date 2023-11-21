@@ -40,6 +40,13 @@
                         <font-awesome-icon icon="stop" class="me-1" />
                         {{ $t("stopStack") }}
                     </button>
+
+                    <BDropdown v-if="!isEditMode && active" right text="" variant="normal">
+                        <BDropdownItem @click="downStack">
+                            <font-awesome-icon icon="stop" class="me-1" />
+                            {{ $t("downStack") }}
+                        </BDropdownItem>
+                    </BDropdown>
                 </div>
 
                 <button v-if="isEditMode && !isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
@@ -468,6 +475,15 @@ export default {
             this.processing = true;
 
             this.$root.getSocket().emit("stopStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
+        downStack() {
+            this.processing = true;
+
+            this.$root.getSocket().emit("downStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });

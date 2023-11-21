@@ -330,6 +330,15 @@ export class Stack {
         return exitCode;
     }
 
+    async down(socket: DockgeSocket) : Promise<number> {
+        const terminalName = getComposeTerminalName(this.name);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to down, please check the terminal output for more information.");
+        }
+        return exitCode;
+    }
+
     async update(socket: DockgeSocket) {
         const terminalName = getComposeTerminalName(this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "pull" ], this.path);
