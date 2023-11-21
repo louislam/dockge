@@ -46,6 +46,7 @@
         "yaml": "~2.3.4"
     },
     "devDependencies": {
+        "@actions/github": "^6.0.0",
         "@fontsource/jetbrains-mono": "^5.0.17",
         "@fortawesome/fontawesome-svg-core": "6.4.2",
         "@fortawesome/free-regular-svg-icons": "6.4.2",

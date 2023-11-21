@@ -1,4 +1,4 @@
-const github = require("@actions/github");
+import github from "@actions/github";
 
 (async () => {
     try {
