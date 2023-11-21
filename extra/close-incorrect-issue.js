@@ -10,7 +10,7 @@ const github = require("@actions/github");
 
         const issue = {
             owner: "louislam",
-            repo: "uptime-kuma",
+            repo: "dockge",
             number: issueNumber,
         };
 
