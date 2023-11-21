@@ -9,11 +9,11 @@ const languageList = {
     "fr": "Français",
     "pt": "Português",
     "sl": "Slovenščina",
-    "tr": "Türkçe",    
+    "tr": "Türkçe",
     "zh-CN": "简体中文",
     "ur": "Urdu",
     "ko-KR": "한국어",
-    "ru": "Русский"    
+    "ru": "Русский"
 };
 
 let messages = {
