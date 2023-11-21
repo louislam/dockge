@@ -1,0 +1,15 @@
+name: 🚀 Feature Request
+description: "Please go to the Discussions tab"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please go to https://github.com/louislam/dockge/discussions
+  - type: checkboxes
+    id: no-duplicate-issues
+    attributes:
+      label: "Please go to https://github.com/louislam/dockge/discussions, here is for bug report only"
+      description: ""
+      options:
+        - label: "I understand"
+          required: true
