@@ -68,6 +68,8 @@ Dockge is now running on http://localhost:5001
 
 If you want to store your stacks in another directory, you can change the `DOCKGE_STACKS_DIR` environment variable and volumes.
 
+https://github.com/louislam/dockge/blob/2e26178d2d18c1c4ee10227d8d0c3193541b086c/compose.yaml#L1-L23
+
 ```yaml
 version: "3.8"
 services:
