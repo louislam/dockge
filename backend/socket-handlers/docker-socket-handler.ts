@@ -217,7 +217,7 @@ export class DockerSocketHandler extends SocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
-                const stack = Stack.getStack(server, stackName);
+                const stack = Stack.getStack(server, stackName, true);
                 const serviceStatusList = Object.fromEntries(await stack.getServiceStatusList());
                 callback({
                     ok: true,

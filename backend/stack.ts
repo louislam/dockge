@@ -31,17 +31,19 @@ export class Stack {
 
     protected static managedStackList: Map<string, Stack> = new Map();
 
-    constructor(server : DockgeServer, name : string, composeYAML? : string) {
+    constructor(server : DockgeServer, name : string, composeYAML? : string, skipFSOperations = false) {
         this.name = name;
         this.server = server;
         this._composeYAML = composeYAML;
 
-        // Check if compose file name is different from compose.yaml
-        const supportedFileNames = [ "compose.yaml", "compose.yml", "docker-compose.yml", "docker-compose.yaml" ];
-        for (const filename of supportedFileNames) {
-            if (fs.existsSync(path.join(this.path, filename))) {
-                this._composeFileName = filename;
-                break;
+        if (!skipFSOperations) {
+            // Check if compose file name is different from compose.yaml
+            const supportedFileNames = [ "compose.yaml", "compose.yml", "docker-compose.yml", "docker-compose.yaml" ];
+            for (const filename of supportedFileNames) {
+                if (fs.existsSync(path.join(this.path, filename))) {
+                    this._composeFileName = filename;
+                    break;
+                }
             }
         }
     }
@@ -281,23 +283,34 @@ export class Stack {
         }
     }
 
-    static getStack(server: DockgeServer, stackName: string) : Stack {
+    static getStack(server: DockgeServer, stackName: string, skipFSOperations = false) : Stack {
         let dir = path.join(server.stacksDir, stackName);
 
-        if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
-            // Maybe it is a stack managed by docker compose directly
-            let stackList = this.getStackList(server);
-            let stack = stackList.get(stackName);
+        if (!skipFSOperations) {
+            if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
+                // Maybe it is a stack managed by docker compose directly
+                let stackList = this.getStackList(server, true);
+                let stack = stackList.get(stackName);
 
-            if (stack) {
-                return stack;
-            } else {
-                // Really not found
-                throw new ValidationError("Stack not found");
+                if (stack) {
+                    return stack;
+                } else {
+                    // Really not found
+                    throw new ValidationError("Stack not found");
+                }
             }
+        } else {
+            log.debug("getStack", "Skip FS operations");
         }
 
-        let stack = new Stack(server, stackName);
+        let stack : Stack;
+
+        if (!skipFSOperations) {
+            stack = new Stack(server, stackName);
+        } else {
+            stack = new Stack(server, stackName, undefined, true);
+        }
+
         stack._status = UNKNOWN;
         stack._configFilePath = path.resolve(dir);
         return stack;
@@ -386,11 +399,11 @@ export class Stack {
     async getServiceStatusList() {
         let statusList = new Map<string, number>();
 
-        let res = childProcess.execSync("docker compose ps --format json", {
+        let res = childProcess.spawnSync("docker", [ "compose", "ps", "--format", "json" ], {
             cwd: this.path,
         });
 
-        let lines = res.toString().split("\n");
+        let lines = res.stdout.toString().split("\n");
 
         for (let line of lines) {
             try {
