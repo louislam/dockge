@@ -285,7 +285,7 @@ export class DockgeServer {
         }
 
         // Listen
-        this.httpServer.listen(5001, this.config.hostname, () => {
+        this.httpServer.listen(this.config.port, this.config.hostname, () => {
             if (this.config.hostname) {
                 log.info( "server", `Listening on ${this.config.hostname}:${this.config.port}`);
             } else {
