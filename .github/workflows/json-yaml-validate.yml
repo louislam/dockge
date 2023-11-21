@@ -23,5 +23,5 @@ jobs:
         id: json-yaml-validate
         uses: GrantBirki/json-yaml-validate@v1.3.0
         with:
-          comment: "true" # enable comment mode
+          comment: "false" # enable comment mode
           exclude_file: ".github/config/exclude.txt" # gitignore style file for exclusions
