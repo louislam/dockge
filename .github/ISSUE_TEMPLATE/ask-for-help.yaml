@@ -1,15 +1,14 @@
 name: "❓ Ask for help"
-description: "Please go to the Discussions tab"
+description: "Please go to the Discussions tab to submit a Help Request"
 body:
   - type: markdown
     attributes:
       value: |
-        Please go to https://github.com/louislam/dockge/discussions
+        Please go to https://github.com/louislam/dockge/discussions/new?category=ask-for-help
   - type: checkboxes
     id: no-duplicate-issues
     attributes:
-      label: "Please go to https://github.com/louislam/dockge/discussions"
-      description: "Here is for bug report only"
+      label: "Issues are for bug reports only"
       options:
         - label: "I understand"
           required: true
