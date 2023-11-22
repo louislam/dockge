@@ -15,6 +15,7 @@ const languageList = {
     "ur": "Urdu",
     "ko-KR": "한국어",
     "ru": "Русский"
+    "ar": "العربية"
 };
 
 let messages = {
