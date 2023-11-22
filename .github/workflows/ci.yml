@@ -56,5 +56,8 @@ jobs:
 
       - name: Check Typescript
         run: pnpm run check-ts
+
+      - name: Build
+        run: pnpm run build:frontend
       # more things can be add later like tests etc..
 
