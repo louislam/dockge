@@ -9,7 +9,6 @@ body:
     id: no-duplicate-issues
     attributes:
       label: "Issues are for bug reports only"
-      description: ""
       options:
         - label: "I understand"
           required: true
