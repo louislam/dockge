@@ -1,7 +1,5 @@
-name: "❓ Ask for help"
-description: "Submit any question related to Dockge"
-#title: "[Help] "
-labels: [help]
+title: "❓ Ask for help"
+labels: 
 body:
   - type: checkboxes
     id: no-duplicate-issues
