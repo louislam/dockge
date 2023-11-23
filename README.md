@@ -68,7 +68,31 @@ Dockge is now running on http://localhost:5001
 
 If you want to store your stacks in another directory, you can change the `DOCKGE_STACKS_DIR` environment variable and volumes.
 
-https://github.com/louislam/dockge/blob/2e26178d2d18c1c4ee10227d8d0c3193541b086c/compose.yaml#L1-L23
+```yaml
+version: "3.8"
+services:
+  dockge:
+    image: louislam/dockge:1
+    restart: unless-stopped
+    ports:
+      # Host Port : Container Port
+      - 5001:5001
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/app/data
+        
+      # If you want to use private registries, you need to share the auth file with Dockge:
+      # - /root/.docker/:/root/.docker
+
+      # Your stacks directory in the host (The paths inside container must be the same as the host)
+      # ⚠️⚠️ If you did it wrong, your data could end up be written into a wrong path.
+      # ✔️✔️✔️✔️ CORRECT: - /my-stacks:/my-stacks (Both paths match)
+      # ❌❌❌❌ WRONG: - /docker:/my-stacks (Both paths do not match)
+      - /opt/stacks:/opt/stacks
+    environment:
+      # Tell Dockge where is your stacks directory
+      - DOCKGE_STACKS_DIR=/opt/stacks
+```
 
 ## How to Update
 
