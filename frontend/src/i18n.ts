@@ -16,7 +16,8 @@ const languageList = {
     "ur": "Urdu",
     "ko-KR": "한국어",
     "ru": "Русский",
-    "cs-CZ": "Čeština"
+    "cs-CZ": "Čeština",
+    "ar": "العربية"
 };
 
 let messages = {
