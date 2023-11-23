@@ -19,7 +19,8 @@ const languageList = {
     "cs-CZ": "Čeština",
     "ar": "العربية",
     "th":"ไทย",
-    "it-IT":"Italiano"
+    "it-IT":"Italiano",
+    "sv-SE":"Svenska"
 };
 
 let messages = {
