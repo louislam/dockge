@@ -9,6 +9,7 @@ const languageList = {
     "fr": "Français",
     "pl-PL": "Polski",
     "pt": "Português",
+    "pt-BR": "Português-Brasil",
     "sl": "Slovenščina",
     "tr": "Türkçe",
     "zh-CN": "简体中文",
