@@ -18,7 +18,8 @@ const languageList = {
     "ru": "Русский",
     "cs-CZ": "Čeština",
     "ar": "العربية",
-    "th":"ไทย"
+    "th":"ไทย",
+    "it-IT":"Italiano"
 };
 
 let messages = {
