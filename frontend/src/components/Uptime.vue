@@ -19,7 +19,6 @@ export default {
 
     computed: {
         uptime() {
-            return "0.00%";
             return this.$t("notAvailableShort");
         },
 
@@ -46,6 +45,8 @@ export default {
 <style scoped>
 .badge {
     min-width: 62px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .fixed-width {

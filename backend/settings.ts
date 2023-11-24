@@ -1,5 +1,6 @@
 import { R } from "redbean-node";
 import { log } from "./log";
+import { LooseObject } from "./util-common";
 
 export class Settings {
 
@@ -15,20 +16,19 @@ export class Settings {
      *             timestamp: 12345678
      *         },
      *     }
-     * @type {{}}
      */
-    static cacheList = {
+    static cacheList : LooseObject = {
 
     };
 
-    static cacheCleaner = null;
+    static cacheCleaner? : NodeJS.Timeout;
 
     /**
      * Retrieve value of setting based on key
-     * @param {string} key Key of setting to retrieve
-     * @returns {Promise<any>} Value
+     * @param key Key of setting to retrieve
+     * @returns Value
      */
-    static async get(key) {
+    static async get(key : string) {
 
         // Start cache clear if not started yet
         if (!Settings.cacheCleaner) {
@@ -72,12 +72,12 @@ export class Settings {
 
     /**
      * Sets the specified setting to specified value
-     * @param {string} key Key of setting to set
-     * @param {any} value Value to set to
+     * @param key Key of setting to set
+     * @param value Value to set to
      * @param {?string} type Type of setting
      * @returns {Promise<void>}
      */
-    static async set(key, value, type = null) {
+    static async set(key : string, value : object | string | number | boolean, type : string | null = null) {
 
         let bean = await R.findOne("setting", " `key` = ? ", [
             key,
@@ -95,15 +95,15 @@ export class Settings {
 
     /**
      * Get settings based on type
-     * @param {string} type The type of setting
-     * @returns {Promise<Bean>} Settings
+     * @param type The type of setting
+     * @returns Settings
      */
-    static async getSettings(type) {
+    static async getSettings(type : string) {
         const list = await R.getAll("SELECT `key`, `value` FROM setting WHERE `type` = ? ", [
             type,
         ]);
 
-        const result = {};
+        const result : LooseObject = {};
 
         for (const row of list) {
             try {
@@ -118,11 +118,11 @@ export class Settings {
 
     /**
      * Set settings based on type
-     * @param {string} type Type of settings to set
-     * @param {object} data Values of settings
+     * @param type Type of settings to set
+     * @param data Values of settings
      * @returns {Promise<void>}
      */
-    static async setSettings(type, data) {
+    static async setSettings(type : string, data : LooseObject) {
         const keyList = Object.keys(data);
 
         const promiseList = [];
@@ -154,7 +154,7 @@ export class Settings {
      * @param {string[]} keyList Keys to remove
      * @returns {void}
      */
-    static deleteCache(keyList) {
+    static deleteCache(keyList : string[]) {
         for (const key of keyList) {
             delete Settings.cacheList[key];
         }
@@ -167,7 +167,7 @@ export class Settings {
     static stopCacheCleaner() {
         if (Settings.cacheCleaner) {
             clearInterval(Settings.cacheCleaner);
-            Settings.cacheCleaner = null;
+            Settings.cacheCleaner = undefined;
         }
     }
 }

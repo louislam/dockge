@@ -46,70 +46,6 @@ export class Terminal {
         this.cwd = cwd;
 
         Terminal.terminalMap.set(this.name, this);
-    }
-
-    get rows() {
-        return this._rows;
-    }
-
-    set rows(rows : number) {
-        this._rows = rows;
-        try {
-            this.ptyProcess?.resize(this.cols, this.rows);
-        } catch (e) {
-            log.debug("Terminal", "Failed to resize terminal: " + e.message);
-        }
-    }
-
-    get cols() {
-        return this._cols;
-    }
-
-    set cols(cols : number) {
-        this._cols = cols;
-        try {
-            this.ptyProcess?.resize(this.cols, this.rows);
-        } catch (e) {
-            log.debug("Terminal", "Failed to resize terminal: " + e.message);
-        }
-    }
-
-    public start() {
-        if (this._ptyProcess) {
-            return;
-        }
-
-        this._ptyProcess = pty.spawn(this.file, this.args, {
-            name: this.name,
-            cwd: this.cwd,
-            cols: TERMINAL_COLS,
-            rows: this.rows,
-        });
-
-        // On Data
-        this._ptyProcess.onData((data) => {
-            this.buffer.push(data);
-            if (this.server.io) {
-                this.server.io.to(this.name).emit("terminalWrite", this.name, data);
-            }
-        });
-
-        // On Exit
-        this._ptyProcess.onExit((res) => {
-            this.server.io.to(this.name).emit("terminalExit", this.name, res.exitCode);
-
-            // Remove room
-            this.server.io.in(this.name).socketsLeave(this.name);
-
-            Terminal.terminalMap.delete(this.name);
-            log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
-
-            clearInterval(this.keepAliveInterval);
-
-            if (this.callback) {
-                this.callback(res.exitCode);
-            }
-        });
 
         if (this.enableKeepAlive) {
             log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
@@ -130,6 +66,90 @@ export class Terminal {
             log.debug("Terminal", "Keep alive disabled for terminal " + this.name);
         }
     }
+
+    get rows() {
+        return this._rows;
+    }
+
+    set rows(rows : number) {
+        this._rows = rows;
+        try {
+            this.ptyProcess?.resize(this.cols, this.rows);
+        } catch (e) {
+            if (e instanceof Error) {
+                log.debug("Terminal", "Failed to resize terminal: " + e.message);
+            }
+        }
+    }
+
+    get cols() {
+        return this._cols;
+    }
+
+    set cols(cols : number) {
+        this._cols = cols;
+        try {
+            this.ptyProcess?.resize(this.cols, this.rows);
+        } catch (e) {
+            if (e instanceof Error) {
+                log.debug("Terminal", "Failed to resize terminal: " + e.message);
+            }
+        }
+    }
+
+    public start() {
+        if (this._ptyProcess) {
+            return;
+        }
+
+        try {
+            this._ptyProcess = pty.spawn(this.file, this.args, {
+                name: this.name,
+                cwd: this.cwd,
+                cols: TERMINAL_COLS,
+                rows: this.rows,
+            });
+
+            // On Data
+            this._ptyProcess.onData((data) => {
+                this.buffer.pushItem(data);
+                if (this.server.io) {
+                    this.server.io.to(this.name).emit("terminalWrite", this.name, data);
+                }
+            });
+
+            // On Exit
+            this._ptyProcess.onExit(this.exit);
+        } catch (error) {
+            if (error instanceof Error) {
+                log.error("Terminal", "Failed to start terminal: " + error.message);
+                const exitCode = Number(error.message.split(" ").pop());
+                this.exit({
+                    exitCode,
+                });
+            }
+        }
+    }
+
+    /**
+     * Exit event handler
+     * @param res
+     */
+    protected exit = (res : {exitCode: number, signal?: number | undefined}) => {
+        this.server.io.to(this.name).emit("terminalExit", this.name, res.exitCode);
+
+        // Remove room
+        this.server.io.in(this.name).socketsLeave(this.name);
+
+        Terminal.terminalMap.delete(this.name);
+        log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
+
+        clearInterval(this.keepAliveInterval);
+
+        if (this.callback) {
+            this.callback(res.exitCode);
+        }
+    };
 
     public onExit(callback : (exitCode : number) => void) {
         this.callback = callback;

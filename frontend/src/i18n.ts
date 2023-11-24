@@ -3,7 +3,24 @@ import { createI18n } from "vue-i18n/dist/vue-i18n.esm-browser.prod.js";
 import en from "./lang/en.json";
 
 const languageList = {
-
+    "bg-BG": "Български",
+    "es": "Español",
+    "de": "Deutsch",
+    "fr": "Français",
+    "pl-PL": "Polski",
+    "pt": "Português",
+    "pt-BR": "Português-Brasil",
+    "sl": "Slovenščina",
+    "tr": "Türkçe",
+    "zh-CN": "简体中文",
+    "ur": "Urdu",
+    "ko-KR": "한국어",
+    "ru": "Русский",
+    "cs-CZ": "Čeština",
+    "ar": "العربية",
+    "th":"ไทย",
+    "it-IT":"Italiano",
+    "sv-SE":"Svenska"
 };
 
 let messages = {

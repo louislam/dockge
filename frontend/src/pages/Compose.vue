@@ -40,6 +40,13 @@
                         <font-awesome-icon icon="stop" class="me-1" />
                         {{ $t("stopStack") }}
                     </button>
+
+                    <BDropdown v-if="!isEditMode && active" right text="" variant="normal">
+                        <BDropdownItem @click="downStack">
+                            <font-awesome-icon icon="stop" class="me-1" />
+                            {{ $t("downStack") }}
+                        </BDropdownItem>
+                    </BDropdown>
                 </div>
 
                 <button v-if="isEditMode && !isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
@@ -71,7 +78,7 @@
                             <div>
                                 <label for="name" class="form-label">{{ $t("stackName") }}</label>
                                 <input id="name" v-model="stack.name" type="text" class="form-control" required @blur="stackNameToLowercase">
-                                <div class="form-text">Lowercase only</div>
+                                <div class="form-text">{{ $t("Lowercase only") }}</div>
                             </div>
                         </div>
                     </div>
@@ -118,7 +125,7 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <h4 class="mb-3">compose.yaml</h4>
+                    <h4 class="mb-3">{{ stack.composeFileName }}</h4>
 
                     <!-- YAML editor -->
                     <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
@@ -468,6 +475,15 @@ export default {
             this.processing = true;
 
             this.$root.getSocket().emit("stopStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
+        downStack() {
+            this.processing = true;
+
+            this.$root.getSocket().emit("downStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });

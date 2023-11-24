@@ -61,7 +61,7 @@ export class DockgeServer {
      */
     needSetup = false;
 
-    jwtSecret? : string;
+    jwtSecret : string = "";
 
     stacksDir : string = "";
 
@@ -130,7 +130,7 @@ export class DockgeServer {
         this.config.sslKey = args.sslKey || process.env.DOCKGE_SSL_KEY || undefined;
         this.config.sslCert = args.sslCert || process.env.DOCKGE_SSL_CERT || undefined;
         this.config.sslKeyPassphrase = args.sslKeyPassphrase || process.env.DOCKGE_SSL_KEY_PASSPHRASE || undefined;
-        this.config.port = args.port || parseInt(process.env.DOCKGE_PORT) || 5001;
+        this.config.port = args.port || Number(process.env.DOCKGE_PORT) || 5001;
         this.config.hostname = args.hostname || process.env.DOCKGE_HOSTNAME || undefined;
         this.config.dataDir = args.dataDir || process.env.DOCKGE_DATA_DIR || "./data/";
         this.config.stacksDir = args.stacksDir || process.env.DOCKGE_STACKS_DIR || defaultStacksDir;
@@ -219,7 +219,7 @@ export class DockgeServer {
             log.debug("auth", "check auto login");
             if (await Settings.get("disableAuth")) {
                 log.info("auth", "Disabled Auth: auto login to admin");
-                this.afterLogin(socket as DockgeSocket, await R.findOne("user"));
+                this.afterLogin(socket as DockgeSocket, await R.findOne("user") as User);
                 socket.emit("autoLogin");
             } else {
                 log.debug("auth", "need auth");
@@ -259,7 +259,9 @@ export class DockgeServer {
         try {
             await Database.init(this);
         } catch (e) {
-            log.error("server", "Failed to prepare your database: " + e.message);
+            if (e instanceof Error) {
+                log.error("server", "Failed to prepare your database: " + e.message);
+            }
             process.exit(1);
         }
 
@@ -289,7 +291,7 @@ export class DockgeServer {
         }
 
         // Listen
-        this.httpServer.listen(5001, this.config.hostname, () => {
+        this.httpServer.listen(this.config.port, this.config.hostname, () => {
             if (this.config.hostname) {
                 log.info( "server", `Listening on ${this.config.hostname}:${this.config.port}`);
             } else {
@@ -297,7 +299,7 @@ export class DockgeServer {
             }
 
             // Run every 5 seconds
-            const job = Cron("*/2 * * * * *", {
+            Cron("*/2 * * * * *", {
                 protect: true,  // Enabled over-run protection.
             }, () => {
                 log.debug("server", "Cron job running");
@@ -382,7 +384,9 @@ export class DockgeServer {
                 return process.env.TZ;
             }
         } catch (e) {
-            log.warn("timezone", e.message + " in process.env.TZ");
+            if (e instanceof Error) {
+                log.warn("timezone", e.message + " in process.env.TZ");
+            }
         }
 
         const timezone = await Settings.get("serverTimezone");
@@ -395,7 +399,9 @@ export class DockgeServer {
                 return timezone;
             }
         } catch (e) {
-            log.warn("timezone", e.message + " in settings");
+            if (e instanceof Error) {
+                log.warn("timezone", e.message + " in settings");
+            }
         }
 
         // Guess

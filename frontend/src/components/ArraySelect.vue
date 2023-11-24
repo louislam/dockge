@@ -5,7 +5,7 @@
                 <li v-for="(value, index) in array" :key="index" class="list-group-item">
                     <select v-model="array[index]" class="no-bg domain-input">
                         <option value="">Select a network...</option>
-                        <option v-for="option in options" :value="option">{{ option }}</option>
+                        <option v-for="option in options" :key="option" :value="option">{{ option }}</option>
                     </select>
 
                     <font-awesome-icon icon="times" class="action remove ms-2 me-3 text-danger" @click="remove(index)" />
