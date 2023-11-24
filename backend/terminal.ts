@@ -46,25 +46,6 @@ export class Terminal {
         this.cwd = cwd;
 
         Terminal.terminalMap.set(this.name, this);
-
-        if (this.enableKeepAlive) {
-            log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
-
-            // Close if there is no clients
-            this.keepAliveInterval = setInterval(() => {
-                const clients = this.server.io.sockets.adapter.rooms.get(this.name);
-                const numClients = clients ? clients.size : 0;
-
-                if (numClients === 0) {
-                    log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
-                    this.close();
-                } else {
-                    log.debug("Terminal", "Terminal " + this.name + " has " + numClients + " client(s)");
-                }
-            }, 60 * 1000);
-        } else {
-            log.debug("Terminal", "Keep alive disabled for terminal " + this.name);
-        }
     }
 
     get rows() {
@@ -102,6 +83,25 @@ export class Terminal {
             return;
         }
 
+        if (this.enableKeepAlive) {
+            log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
+
+            // Close if there is no clients
+            this.keepAliveInterval = setInterval(() => {
+                const clients = this.server.io.sockets.adapter.rooms.get(this.name);
+                const numClients = clients ? clients.size : 0;
+
+                if (numClients === 0) {
+                    log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
+                    this.close();
+                } else {
+                    log.debug("Terminal", "Terminal " + this.name + " has " + numClients + " client(s)");
+                }
+            }, 60 * 1000);
+        } else {
+            log.debug("Terminal", "Keep alive disabled for terminal " + this.name);
+        }
+
         try {
             this._ptyProcess = pty.spawn(this.file, this.args, {
                 name: this.name,
@@ -122,6 +122,8 @@ export class Terminal {
             this._ptyProcess.onExit(this.exit);
         } catch (error) {
             if (error instanceof Error) {
+                clearInterval(this.keepAliveInterval);
+
                 log.error("Terminal", "Failed to start terminal: " + error.message);
                 const exitCode = Number(error.message.split(" ").pop());
                 this.exit({
@@ -182,6 +184,7 @@ export class Terminal {
     }
 
     close() {
+        clearInterval(this.keepAliveInterval);
         // Send Ctrl+C to the terminal
         this.ptyProcess?.write("\x03");
     }

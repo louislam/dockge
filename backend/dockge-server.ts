@@ -234,7 +234,7 @@ export class DockgeServer {
         if (isDev) {
             setInterval(() => {
                 log.debug("terminal", "Terminal count: " + Terminal.getTerminalCount());
-            }, 10000);
+            }, 5000);
         }
     }
 
@@ -298,11 +298,11 @@ export class DockgeServer {
                 log.info("server", `Listening on ${this.config.port}`);
             }
 
-            // Run every 5 seconds
-            Cron("*/2 * * * * *", {
+            // Run every 10 seconds
+            Cron("*/10 * * * * *", {
                 protect: true,  // Enabled over-run protection.
             }, () => {
-                log.debug("server", "Cron job running");
+                //log.debug("server", "Cron job running");
                 this.sendStackList(true);
             });
 

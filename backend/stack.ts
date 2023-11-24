@@ -298,7 +298,7 @@ export class Stack {
                 }
             }
         } else {
-            log.debug("getStack", "Skip FS operations");
+            //log.debug("getStack", "Skip FS operations");
         }
 
         let stack : Stack;
@@ -374,10 +374,19 @@ export class Stack {
     async joinCombinedTerminal(socket: DockgeSocket) {
         const terminalName = getCombinedTerminalName(this.name);
         const terminal = Terminal.getOrCreateTerminal(this.server, terminalName, "docker", [ "compose", "logs", "-f", "--tail", "100" ], this.path);
+        terminal.enableKeepAlive = true;
         terminal.rows = COMBINED_TERMINAL_ROWS;
         terminal.cols = COMBINED_TERMINAL_COLS;
         terminal.join(socket);
         terminal.start();
+    }
+
+    async leaveCombinedTerminal(socket: DockgeSocket) {
+        const terminalName = getCombinedTerminalName(this.name);
+        const terminal = Terminal.getTerminal(terminalName);
+        if (terminal) {
+            terminal.leave(socket);
+        }
     }
 
     async joinContainerTerminal(socket: DockgeSocket, serviceName: string, shell : string = "sh", index: number = 0) {
