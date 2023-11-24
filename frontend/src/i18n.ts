@@ -21,6 +21,7 @@ const languageList = {
     "th":"ไทย",
     "it-IT":"Italiano",
     "sv-SE":"Svenska"
+    "uk-UA":"Українська"    
 };
 
 let messages = {
