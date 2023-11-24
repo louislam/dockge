@@ -550,10 +550,6 @@ export default {
                     throw new Error("Services must be an object");
                 }
 
-                if (!config.version) {
-                    config.version = "3.8";
-                }
-
                 this.yamlDoc = doc;
                 this.jsonConfig = config;
 
