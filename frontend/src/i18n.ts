@@ -20,7 +20,7 @@ const languageList = {
     "ar": "العربية",
     "th":"ไทย",
     "it-IT":"Italiano",
-    "sv-SE":"Svenska"
+    "sv-SE":"Svenska",
     "uk-UA":"Українська"    
 };
 
