@@ -75,7 +75,9 @@ export class DockerSocketHandler extends SocketHandler {
 
                 const stack = Stack.getStack(server, stackName);
 
-                stack.joinCombinedTerminal(socket);
+                if (stack.isManagedByDockge) {
+                    stack.joinCombinedTerminal(socket);
+                }
 
                 callback({
                     ok: true,
