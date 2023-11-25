@@ -13,6 +13,7 @@ const languageList = {
     "sl": "Slovenščina",
     "tr": "Türkçe",
     "zh-CN": "简体中文",
+    "zh-TW": "繁體中文(台灣)",
     "ur": "Urdu",
     "ko-KR": "한국어",
     "ru": "Русский",
