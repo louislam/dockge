@@ -17,5 +17,3 @@ A simple guide on how to translate `Dockge` in your native language.
 2. Find the language code (You can find it at the end of the URL)
 3. Add your language at the end of `languageList` in `frontend/src/i18n.ts`, format: `"zh-TW": "繁體中文 (台灣)"`,
 4. Commit to new branch and make a new Pull Request for me to approve.
-
-*Note:* Currently we are only accepting one Pull Request per Language Translate.
