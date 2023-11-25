@@ -30,6 +30,7 @@ import { Cron } from "croner";
 import gracefulShutdown from "http-graceful-shutdown";
 import User from "./models/user";
 import childProcess from "child_process";
+import { Terminal } from "./terminal";
 
 export class DockgeServer {
     app : Express;
@@ -230,6 +231,11 @@ export class DockgeServer {
 
         });
 
+        if (isDev) {
+            setInterval(() => {
+                log.debug("terminal", "Terminal count: " + Terminal.getTerminalCount());
+            }, 5000);
+        }
     }
 
     async afterLogin(socket : DockgeSocket, user : User) {
@@ -285,18 +291,18 @@ export class DockgeServer {
         }
 
         // Listen
-        this.httpServer.listen(5001, this.config.hostname, () => {
+        this.httpServer.listen(this.config.port, this.config.hostname, () => {
             if (this.config.hostname) {
                 log.info( "server", `Listening on ${this.config.hostname}:${this.config.port}`);
             } else {
                 log.info("server", `Listening on ${this.config.port}`);
             }
 
-            // Run every 5 seconds
-            Cron("*/2 * * * * *", {
+            // Run every 10 seconds
+            Cron("*/10 * * * * *", {
                 protect: true,  // Enabled over-run protection.
             }, () => {
-                log.debug("server", "Cron job running");
+                //log.debug("server", "Cron job running");
                 this.sendStackList(true);
             });
 

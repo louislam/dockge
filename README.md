@@ -6,7 +6,7 @@
 
 A fancy, easy-to-use and reactive self-hosted docker compose.yaml stack-oriented manager.
 
-![GitHub Repo stars](https://img.shields.io/github/stars/louislam/dockge?logo=github) ![GitHub issues](https://img.shields.io/github/issues/louislam/dockge?logo=github) ![GitHub pull requests](https://img.shields.io/github/issues-pr/louislam/dockge?logo=github) ![Docker Pulls](https://img.shields.io/docker/pulls/louislam/dockge?logo=docker) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/louislam/dockge?logo=docker) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/louislam/dockge/master?logo=github) ![GitHub](https://img.shields.io/github/license/louislam/dockge?logo=github)
+![GitHub Repo stars](https://img.shields.io/github/stars/louislam/dockge?logo=github) ![GitHub issues](https://img.shields.io/github/issues/louislam/dockge?logo=github) ![GitHub pull requests](https://img.shields.io/github/issues-pr/louislam/dockge?logo=github) ![Docker Pulls](https://img.shields.io/docker/pulls/louislam/dockge?logo=docker) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/louislam/dockge/latest?label=docker%20image%20ver.) ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/louislam/dockge/master?logo=github) ![GitHub](https://img.shields.io/github/license/louislam/dockge?logo=github)
 
 <img src="https://github.com/louislam/dockge/assets/1336778/26a583e1-ecb1-4a8d-aedf-76157d714ad7" width="900" alt="" />
 
@@ -25,7 +25,7 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
    - If you love Uptime Kuma's UI/UX, you will love this one too
 - Convert `docker run ...` commands into `compose.yaml`
 - File based structure
-   - Dockge won't kidnap your compose files, they are stored on your drive as usual. You can interact with them using normal `docker compose` commands   
+   - Dockge won't kidnap your compose files, they are stored on your drive as usual. You can interact with them using normal `docker compose` commands
    <img src="https://github.com/louislam/dockge/assets/1336778/cc071864-592e-4909-b73a-343a57494002" width=300 />
 
 
@@ -37,7 +37,7 @@ Requirements:
 - [Docker CE](https://docs.docker.com/engine/install/) 20+ is recommended / Podman
 - (Docker only) [Docker Compose Plugin](https://docs.docker.com/compose/install/linux/)
 - (Podman only) podman-docker (Debian: `apt install podman-docker`)
-- OS: 
+- OS:
   - As long as you can run Docker CE / Podman, it should be fine, but:
   - Debian/Raspbian Buster or lower is not supported, please upgrade to Bullseye or higher
 - Arch: armv7, arm64, amd64 (a.k.a x86_64)
@@ -59,7 +59,7 @@ curl https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml --out
 docker compose up -d
 
 # If you are using docker-compose V1 or Podman
-# docker-compose up -d 
+# docker-compose up -d
 ```
 
 Dockge is now running on http://localhost:5001
@@ -75,7 +75,7 @@ services:
     image: louislam/dockge:1
     restart: unless-stopped
     ports:
-      # Host Port:Container Port
+      # Host Port : Container Port
       - 5001:5001
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -86,8 +86,8 @@ services:
 
       # Your stacks directory in the host (The paths inside container must be the same as the host)
       # ⚠️⚠️ If you did it wrong, your data could end up be written into a wrong path.
-      # ✔️✔️✔️✔️ CORRECT EXAMPLE: - /my-stacks:/my-stacks (Both paths match)
-      # ❌❌❌❌ WRONG EXAMPLE: - /docker:/my-stacks (Both paths do not match)
+      # ✔️✔️✔️✔️ CORRECT: - /my-stacks:/my-stacks (Both paths match)
+      # ❌❌❌❌ WRONG: - /docker:/my-stacks (Both paths do not match)
       - /opt/stacks:/opt/stacks
     environment:
       # Tell Dockge where is your stacks directory
@@ -129,6 +129,10 @@ https://github.com/louislam/dockge/issues
 
 ### Ask for Help / Discussions
 https://github.com/louislam/dockge/discussions
+
+## Translation
+
+If you want to translate Dockge into your language, please read [Translation Guide](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md)
 
 ## FAQ
 

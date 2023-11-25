@@ -40,6 +40,13 @@
                         <font-awesome-icon icon="stop" class="me-1" />
                         {{ $t("stopStack") }}
                     </button>
+
+                    <BDropdown v-if="!isEditMode && active" right text="" variant="normal">
+                        <BDropdownItem @click="downStack">
+                            <font-awesome-icon icon="stop" class="me-1" />
+                            {{ $t("downStack") }}
+                        </BDropdownItem>
+                    </BDropdown>
                 </div>
 
                 <button v-if="isEditMode && !isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
@@ -312,6 +319,12 @@ export default {
             },
             deep: true,
         },
+
+        $route(to, from) {
+            // Leave Combined Terminal
+            console.debug("leaveCombinedTerminal", from.params.stackName);
+            this.$root.getSocket().emit("leaveCombinedTerminal", this.stack.name, () => {});
+        }
     },
     mounted() {
         if (this.isAdd) {
@@ -354,7 +367,7 @@ export default {
             clearTimeout(serviceStatusTimeout);
             serviceStatusTimeout = setTimeout(async () => {
                 this.requestServiceStatus();
-            }, 2000);
+            }, 5000);
         },
 
         requestServiceStatus() {
@@ -473,6 +486,15 @@ export default {
             });
         },
 
+        downStack() {
+            this.processing = true;
+
+            this.$root.getSocket().emit("downStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
         restartStack() {
             this.processing = true;
 
@@ -526,10 +548,6 @@ export default {
 
                 if (Array.isArray(config.services) || typeof config.services !== "object") {
                     throw new Error("Services must be an object");
-                }
-
-                if (!config.version) {
-                    config.version = "3.8";
                 }
 
                 this.yamlDoc = doc;

@@ -31,17 +31,19 @@ export class Stack {
 
     protected static managedStackList: Map<string, Stack> = new Map();
 
-    constructor(server : DockgeServer, name : string, composeYAML? : string) {
+    constructor(server : DockgeServer, name : string, composeYAML? : string, skipFSOperations = false) {
         this.name = name;
         this.server = server;
         this._composeYAML = composeYAML;
 
-        // Check if compose file name is different from compose.yaml
-        const supportedFileNames = [ "compose.yaml", "compose.yml", "docker-compose.yml", "docker-compose.yaml" ];
-        for (const filename of supportedFileNames) {
-            if (fs.existsSync(path.join(this.path, filename))) {
-                this._composeFileName = filename;
-                break;
+        if (!skipFSOperations) {
+            // Check if compose file name is different from compose.yaml
+            const supportedFileNames = [ "compose.yaml", "compose.yml", "docker-compose.yml", "docker-compose.yaml" ];
+            for (const filename of supportedFileNames) {
+                if (fs.existsSync(path.join(this.path, filename))) {
+                    this._composeFileName = filename;
+                    break;
+                }
             }
         }
     }
@@ -189,6 +191,7 @@ export class Stack {
         let stacksDir = server.stacksDir;
         let stackList : Map<string, Stack>;
 
+        // Use cached stack list?
         if (useCacheForManaged && this.managedStackList.size > 0) {
             stackList = this.managedStackList;
         } else {
@@ -218,22 +221,19 @@ export class Stack {
             this.managedStackList = new Map(stackList);
         }
 
-        // Also get the list from `docker compose ls --all --format json`
+        // Get status from docker compose ls
         let res = childProcess.execSync("docker compose ls --all --format json");
         let composeList = JSON.parse(res.toString());
 
         for (let composeStack of composeList) {
-
-            // Skip the dockge stack
-            // TODO: Could be self managed?
-            if (composeStack.Name === "dockge") {
-                continue;
-            }
-
             let stack = stackList.get(composeStack.Name);
 
             // This stack probably is not managed by Dockge, but we still want to show it
             if (!stack) {
+                // Skip the dockge stack if it is not managed by Dockge
+                if (composeStack.Name === "dockge") {
+                    continue;
+                }
                 stack = new Stack(server, composeStack.Name);
                 stackList.set(composeStack.Name, stack);
             }
@@ -281,23 +281,34 @@ export class Stack {
         }
     }
 
-    static getStack(server: DockgeServer, stackName: string) : Stack {
+    static getStack(server: DockgeServer, stackName: string, skipFSOperations = false) : Stack {
         let dir = path.join(server.stacksDir, stackName);
 
-        if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
-            // Maybe it is a stack managed by docker compose directly
-            let stackList = this.getStackList(server);
-            let stack = stackList.get(stackName);
+        if (!skipFSOperations) {
+            if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
+                // Maybe it is a stack managed by docker compose directly
+                let stackList = this.getStackList(server, true);
+                let stack = stackList.get(stackName);
 
-            if (stack) {
-                return stack;
-            } else {
-                // Really not found
-                throw new ValidationError("Stack not found");
+                if (stack) {
+                    return stack;
+                } else {
+                    // Really not found
+                    throw new ValidationError("Stack not found");
+                }
             }
+        } else {
+            //log.debug("getStack", "Skip FS operations");
         }
 
-        let stack = new Stack(server, stackName);
+        let stack : Stack;
+
+        if (!skipFSOperations) {
+            stack = new Stack(server, stackName);
+        } else {
+            stack = new Stack(server, stackName, undefined, true);
+        }
+
         stack._status = UNKNOWN;
         stack._configFilePath = path.resolve(dir);
         return stack;
@@ -330,6 +341,15 @@ export class Stack {
         return exitCode;
     }
 
+    async down(socket: DockgeSocket) : Promise<number> {
+        const terminalName = getComposeTerminalName(this.name);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to down, please check the terminal output for more information.");
+        }
+        return exitCode;
+    }
+
     async update(socket: DockgeSocket) {
         const terminalName = getComposeTerminalName(this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "pull" ], this.path);
@@ -354,10 +374,19 @@ export class Stack {
     async joinCombinedTerminal(socket: DockgeSocket) {
         const terminalName = getCombinedTerminalName(this.name);
         const terminal = Terminal.getOrCreateTerminal(this.server, terminalName, "docker", [ "compose", "logs", "-f", "--tail", "100" ], this.path);
+        terminal.enableKeepAlive = true;
         terminal.rows = COMBINED_TERMINAL_ROWS;
         terminal.cols = COMBINED_TERMINAL_COLS;
         terminal.join(socket);
         terminal.start();
+    }
+
+    async leaveCombinedTerminal(socket: DockgeSocket) {
+        const terminalName = getCombinedTerminalName(this.name);
+        const terminal = Terminal.getTerminal(terminalName);
+        if (terminal) {
+            terminal.leave(socket);
+        }
     }
 
     async joinContainerTerminal(socket: DockgeSocket, serviceName: string, shell : string = "sh", index: number = 0) {
@@ -377,11 +406,11 @@ export class Stack {
     async getServiceStatusList() {
         let statusList = new Map<string, number>();
 
-        let res = childProcess.execSync("docker compose ps --format json", {
+        let res = childProcess.spawnSync("docker", [ "compose", "ps", "--format", "json" ], {
             cwd: this.path,
         });
 
-        let lines = res.toString().split("\n");
+        let lines = res.stdout.toString().split("\n");
 
         for (let line of lines) {
             try {

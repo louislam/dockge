@@ -7,13 +7,21 @@ const languageList = {
     "es": "Español",
     "de": "Deutsch",
     "fr": "Français",
+    "pl-PL": "Polski",
     "pt": "Português",
+    "pt-BR": "Português-Brasil",
+    "sl": "Slovenščina",
     "tr": "Türkçe",
     "zh-CN": "简体中文",
     "zh-TW": "繁體中文(台灣)",
     "ur": "Urdu",
     "ko-KR": "한국어",
     "ru": "Русский",
+    "cs-CZ": "Čeština",
+    "ar": "العربية",
+    "th":"ไทย",
+    "it-IT":"Italiano",
+    "sv-SE":"Svenska"
 };
 
 let messages = {

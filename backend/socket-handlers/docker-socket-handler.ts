@@ -75,7 +75,9 @@ export class DockerSocketHandler extends SocketHandler {
 
                 const stack = Stack.getStack(server, stackName);
 
-                stack.joinCombinedTerminal(socket);
+                if (stack.isManagedByDockge) {
+                    stack.joinCombinedTerminal(socket);
+                }
 
                 callback({
                     ok: true,
@@ -187,6 +189,27 @@ export class DockerSocketHandler extends SocketHandler {
             }
         });
 
+        // down stack
+        socket.on("downStack", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = Stack.getStack(server, stackName);
+                await stack.down(socket);
+                callback({
+                    ok: true,
+                    msg: "Downed"
+                });
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
         // Services status
         socket.on("serviceStatusList", async (stackName : unknown, callback) => {
             try {
@@ -196,7 +219,7 @@ export class DockerSocketHandler extends SocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
-                const stack = Stack.getStack(server, stackName);
+                const stack = Stack.getStack(server, stackName, true);
                 const serviceStatusList = Object.fromEntries(await stack.getServiceStatusList());
                 callback({
                     ok: true,

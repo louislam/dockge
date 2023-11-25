@@ -140,9 +140,26 @@ export class TerminalSocketHandler extends SocketHandler {
             }
         });
 
-        // Close Terminal
-        socket.on("terminalClose", async (terminalName : unknown, callback : unknown) => {
+        // Leave Combined Terminal
+        socket.on("leaveCombinedTerminal", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
 
+                log.debug("leaveCombinedTerminal", "Stack name: " + stackName);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string.");
+                }
+
+                const stack = Stack.getStack(server, stackName);
+                await stack.leaveCombinedTerminal(socket);
+
+                callback({
+                    ok: true,
+                });
+            } catch (e) {
+                callbackError(e, callback);
+            }
         });
 
         // TODO: Resize Terminal
