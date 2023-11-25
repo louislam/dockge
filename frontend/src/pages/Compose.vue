@@ -56,6 +56,13 @@
                 </button>
             </div>
 
+            <!-- URLs -->
+            <div v-if="urls.length > 0" class="mb-3">
+                <a v-for="(url, index) in urls" :key="index" target="_blank" :href="url.url">
+                    <span class="badge bg-secondary me-2">{{ url.display }}</span>
+                </a>
+            </div>
+
             <!-- Progress Terminal -->
             <transition name="slide-fade" appear>
                 <Terminal
@@ -79,6 +86,14 @@
                                 <label for="name" class="form-label">{{ $t("stackName") }}</label>
                                 <input id="name" v-model="stack.name" type="text" class="form-control" required @blur="stackNameToLowercase">
                                 <div class="form-text">{{ $t("Lowercase only") }}</div>
+                            </div>
+
+                            <!-- URLs -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    {{ $tc("url", 2) }}
+                                </label>
+                                <ArrayInput name="urls" :display-name="$t('url')" placeholder="https://" object-type="x-dockge" />
                             </div>
                         </div>
                     </div>
@@ -110,6 +125,20 @@
                     </div>
 
                     <button v-if="false && isEditMode && jsonConfig.services && Object.keys(jsonConfig.services).length > 0" class="btn btn-normal mb-3" @click="addContainer">{{ $t("addContainer") }}</button>
+
+                    <!-- General -->
+                    <div v-if="isEditMode">
+                        <h4 class="mb-3">{{ $t("Extra") }}</h4>
+                        <div class="shadow-box big-padding mb-3">
+                            <!-- URLs -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    {{ $tc("url", 2) }}
+                                </label>
+                                <ArrayInput name="urls" :display-name="$t('url')" placeholder="https://" object-type="x-dockge" />
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Combined Terminal Output -->
                     <div v-show="!isEditMode">
@@ -252,6 +281,34 @@ export default {
         };
     },
     computed: {
+
+        urls() {
+            if (!this.jsonConfig["x-dockge"] || !this.jsonConfig["x-dockge"].urls || !Array.isArray(this.jsonConfig["x-dockge"].urls)) {
+                return [];
+            }
+
+            let urls = [];
+            for (const url of this.jsonConfig["x-dockge"].urls) {
+                let display;
+                try {
+                    let obj = new URL(url);
+                    let pathname = obj.pathname;
+                    if (pathname === "/") {
+                        pathname = "";
+                    }
+                    display = obj.host + pathname + obj.search;
+                } catch (e) {
+                    display = url;
+                }
+
+                urls.push({
+                    display,
+                    url,
+                });
+            }
+            return urls;
+        },
+
         isAdd() {
             return this.$route.path === "/compose" && !this.submitted;
         },

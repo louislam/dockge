@@ -30,6 +30,10 @@ export default {
         displayName: {
             type: String,
             required: true,
+        },
+        objectType: {
+            type: String,
+            default: "service",
         }
     },
     data() {
@@ -41,8 +45,7 @@ export default {
         array() {
             // Create the array if not exists, it should be safe.
             if (!this.service[this.name]) {
-                // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-                this.service[this.name] = [];
+                return [];
             }
             return this.service[this.name];
         },
@@ -56,8 +59,24 @@ export default {
             return this.service[this.name] !== undefined;
         },
 
+        /**
+         * Not a good name, but it is used to get the object.
+         */
         service() {
-            return this.$parent.$parent.service;
+            if (this.objectType === "service") {
+                // Used in Container.vue
+                return this.$parent.$parent.service;
+            } else if (this.objectType === "x-dockge") {
+
+                if (!this.$parent.$parent.jsonConfig["x-dockge"]) {
+                    return {};
+                }
+
+                // Used in Compose.vue
+                return this.$parent.$parent.jsonConfig["x-dockge"];
+            } else {
+                return {};
+            }
         },
 
         valid() {
@@ -81,6 +100,19 @@ export default {
     },
     methods: {
         addField() {
+
+            // Create the object if not exists.
+            if (this.objectType === "x-dockge") {
+                if (!this.$parent.$parent.jsonConfig["x-dockge"]) {
+                    this.$parent.$parent.jsonConfig["x-dockge"] = {};
+                }
+            }
+
+            // Create the array if not exists.
+            if (!this.service[this.name]) {
+                this.service[this.name] = [];
+            }
+
             this.array.push("");
         },
         remove(index) {

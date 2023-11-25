@@ -91,5 +91,6 @@
     "Allowed commands:": "Allowed commands:",
     "Internal Networks": "Internal Networks",
     "External Networks": "External Networks",
-    "No External Networks": "No External Networks"
+    "No External Networks": "No External Networks",
+    "url": "URL | URLs"
 }
