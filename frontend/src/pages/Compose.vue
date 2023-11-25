@@ -41,7 +41,7 @@
                         {{ $t("stopStack") }}
                     </button>
 
-                    <BDropdown v-if="!isEditMode && active" right text="" variant="normal">
+                    <BDropdown right text="" variant="normal">
                         <BDropdownItem @click="downStack">
                             <font-awesome-icon icon="stop" class="me-1" />
                             {{ $t("downStack") }}

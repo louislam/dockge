@@ -3,6 +3,9 @@
         <div v-if="! $root.socketIO.connected && ! $root.socketIO.firstConnect" class="lost-connection">
             <div class="container-fluid">
                 {{ $root.socketIO.connectionErrorMsg }}
+                <div v-if="$root.socketIO.showReverseProxyGuide">
+                    {{ $t("reverseProxyMsg1") }} <a href="https://github.com/louislam/uptime-kuma/wiki/Reverse-Proxy" target="_blank">{{ $t("reverseProxyMsg2") }}</a>
+                </div>
             </div>
         </div>
 
@@ -82,6 +85,10 @@
         </header>
 
         <main>
+            <div v-if="$root.socketIO.connecting" class="container mt-5">
+                <h4>{{ $t("connecting...") }}</h4>
+            </div>
+
             <router-view v-if="$root.loggedIn" />
             <Login v-if="! $root.loggedIn && $root.allowLoginDialog" />
         </main>
