@@ -10,8 +10,6 @@ declare module 'vue' {
     About: typeof import('./src/components/settings/About.vue')['default']
     Appearance: typeof import('./src/components/settings/Appearance.vue')['default']
     ArrayInput: typeof import('./src/components/ArrayInput.vue')['default']
-    ArrayInputGeneral: typeof import('./src/components/ArrayInputGeneral.vue')['default']
-    ArrayInputXDockge: typeof import('./src/components/ArrayInputXDockge.vue')['default']
     ArraySelect: typeof import('./src/components/ArraySelect.vue')['default']
     BDropdown: typeof import('bootstrap-vue-next')['BDropdown']
     BDropdownItem: typeof import('bootstrap-vue-next')['BDropdownItem']
