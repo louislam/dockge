@@ -8,7 +8,7 @@
     "signedInDisp": "目前使用者：{0}",
     "signedInDispDisabled": "已停用身份驗證",
     "home": "首頁",
-    "console": "終端",
+    "console": "主控台",
     "registry": "映像倉庫",
     "compose": "Compose",
     "addFirstStackMsg": "組合您的第一個堆疊！",
