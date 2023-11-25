@@ -19,6 +19,7 @@ export default defineComponent({
                 initedSocketIO: false,
                 connectionErrorMsg: `${this.$t("Cannot connect to the socket server.")} ${this.$t("Reconnecting...")}`,
                 showReverseProxyGuide: true,
+                connecting: false,
             },
             info: {
 
@@ -103,12 +104,19 @@ export default defineComponent({
                 url = location.protocol + "//" + location.host;
             }
 
+            let connectingMsgTimeout = setTimeout(() => {
+                this.socketIO.connecting = true;
+            }, 1500);
+
             socket = io(url, {
-                transports: [ "websocket", "polling" ]
+                transports: [ "websocket" ]
             });
 
             socket.on("connect", () => {
                 console.log("Connected to the socket server");
+
+                clearTimeout(connectingMsgTimeout);
+                this.socketIO.connecting = false;
 
                 this.socketIO.connectCount++;
                 this.socketIO.connected = true;
@@ -143,10 +151,11 @@ export default defineComponent({
 
             socket.on("connect_error", (err) => {
                 console.error(`Failed to connect to the backend. Socket.io connect_error: ${err.message}`);
-                this.socketIO.connectionErrorMsg = `${this.$t("Cannot connect to the socket server.")} [${err}] ${this.$t("Reconnecting...")}`;
+                this.socketIO.connectionErrorMsg = `${this.$t("Cannot connect to the socket server.")} [${err}] ${this.$t("reconnecting...")}`;
                 this.socketIO.showReverseProxyGuide = true;
                 this.socketIO.connected = false;
                 this.socketIO.firstConnect = false;
+                this.socketIO.connecting = false;
             });
 
             // Custom Events
