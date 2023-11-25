@@ -25,15 +25,8 @@ RUN apt update && apt install --yes --no-install-recommends \
     && npm install pnpm -g \
     && pnpm install -g tsx
 
-# ensures that /var/run/docker.sock exists
-# changes the ownership of /var/run/docker.sock
-RUN touch /var/run/docker.sock && chown node:node /var/run/docker.sock
-
-# Full Base Image
-# MariaDB, Chromium and fonts
-#FROM base-slim AS base
-#ENV DOCKGE_ENABLE_EMBEDDED_MARIADB=1
-#RUN apt update && \
-#   apt --yes --no-install-recommends install mariadb-server && \
-#   rm -rf /var/lib/apt/lists/* && \
-#   apt --yes autoremove
+# Install docker rollout plugin \
+RUN mkdir -p ~/.docker/cli-plugins \
+    && curl https://raw.githubusercontent.com/wowu/docker-rollout/master/docker-rollout -o ~/.docker/cli-plugins/docker-rollout \
+    && chmod +x ~/.docker/cli-plugins/docker-rollout \
+    && docker rollout --help

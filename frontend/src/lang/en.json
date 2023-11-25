@@ -20,6 +20,7 @@
     "updateStack": "Update",
     "startStack": "Start",
     "downStack": "Stop & Down",
+    "rolloutStack": "Rollout Update (Zero Downtime)",
     "editStack": "Edit",
     "discardStack": "Discard",
     "saveStackDraft": "Save",

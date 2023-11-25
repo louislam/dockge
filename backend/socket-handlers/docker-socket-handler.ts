@@ -189,6 +189,28 @@ export class DockerSocketHandler extends SocketHandler {
             }
         });
 
+        // rolloutStack
+        socket.on("rolloutStack", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = Stack.getStack(server, stackName);
+                await stack.rollout(socket);
+                callback({
+                    ok: true,
+                    msg: "Rolled out"
+                });
+                server.sendStackList();
+                stack.joinCombinedTerminal(socket);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
         // down stack
         socket.on("downStack", async (stackName : unknown, callback) => {
             try {
