@@ -195,6 +195,7 @@ export class DockgeServer {
         // Create Socket.io
         this.io = new socketIO.Server(this.httpServer, {
             cors,
+            transports: [ "websocket" ],
         });
 
         this.io.on("connection", async (socket: Socket) => {
