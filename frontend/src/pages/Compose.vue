@@ -319,6 +319,12 @@ export default {
             },
             deep: true,
         },
+
+        $route(to, from) {
+            // Leave Combined Terminal
+            console.debug("leaveCombinedTerminal", from.params.stackName);
+            this.$root.getSocket().emit("leaveCombinedTerminal", this.stack.name, () => {});
+        }
     },
     mounted() {
         if (this.isAdd) {
@@ -361,7 +367,7 @@ export default {
             clearTimeout(serviceStatusTimeout);
             serviceStatusTimeout = setTimeout(async () => {
                 this.requestServiceStatus();
-            }, 2000);
+            }, 5000);
         },
 
         requestServiceStatus() {
@@ -542,10 +548,6 @@ export default {
 
                 if (Array.isArray(config.services) || typeof config.services !== "object") {
                     throw new Error("Services must be an object");
-                }
-
-                if (!config.version) {
-                    config.version = "3.8";
                 }
 
                 this.yamlDoc = doc;

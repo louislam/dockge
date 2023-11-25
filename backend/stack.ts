@@ -191,6 +191,7 @@ export class Stack {
         let stacksDir = server.stacksDir;
         let stackList : Map<string, Stack>;
 
+        // Use cached stack list?
         if (useCacheForManaged && this.managedStackList.size > 0) {
             stackList = this.managedStackList;
         } else {
@@ -220,22 +221,19 @@ export class Stack {
             this.managedStackList = new Map(stackList);
         }
 
-        // Also get the list from `docker compose ls --all --format json`
+        // Get status from docker compose ls
         let res = childProcess.execSync("docker compose ls --all --format json");
         let composeList = JSON.parse(res.toString());
 
         for (let composeStack of composeList) {
-
-            // Skip the dockge stack
-            // TODO: Could be self managed?
-            if (composeStack.Name === "dockge") {
-                continue;
-            }
-
             let stack = stackList.get(composeStack.Name);
 
             // This stack probably is not managed by Dockge, but we still want to show it
             if (!stack) {
+                // Skip the dockge stack if it is not managed by Dockge
+                if (composeStack.Name === "dockge") {
+                    continue;
+                }
                 stack = new Stack(server, composeStack.Name);
                 stackList.set(composeStack.Name, stack);
             }
@@ -300,7 +298,7 @@ export class Stack {
                 }
             }
         } else {
-            log.debug("getStack", "Skip FS operations");
+            //log.debug("getStack", "Skip FS operations");
         }
 
         let stack : Stack;
@@ -376,10 +374,19 @@ export class Stack {
     async joinCombinedTerminal(socket: DockgeSocket) {
         const terminalName = getCombinedTerminalName(this.name);
         const terminal = Terminal.getOrCreateTerminal(this.server, terminalName, "docker", [ "compose", "logs", "-f", "--tail", "100" ], this.path);
+        terminal.enableKeepAlive = true;
         terminal.rows = COMBINED_TERMINAL_ROWS;
         terminal.cols = COMBINED_TERMINAL_COLS;
         terminal.join(socket);
         terminal.start();
+    }
+
+    async leaveCombinedTerminal(socket: DockgeSocket) {
+        const terminalName = getCombinedTerminalName(this.name);
+        const terminal = Terminal.getTerminal(terminalName);
+        if (terminal) {
+            terminal.leave(socket);
+        }
     }
 
     async joinContainerTerminal(socket: DockgeSocket, serviceName: string, shell : string = "sh", index: number = 0) {

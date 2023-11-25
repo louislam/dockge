@@ -34,6 +34,9 @@ export class Terminal {
     protected _rows : number = TERMINAL_ROWS;
     protected _cols : number = TERMINAL_COLS;
 
+    public enableKeepAlive : boolean = false;
+    protected keepAliveInterval? : NodeJS.Timeout;
+
     constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
         this._name = name;
@@ -80,6 +83,25 @@ export class Terminal {
             return;
         }
 
+        if (this.enableKeepAlive) {
+            log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
+
+            // Close if there is no clients
+            this.keepAliveInterval = setInterval(() => {
+                const clients = this.server.io.sockets.adapter.rooms.get(this.name);
+                const numClients = clients ? clients.size : 0;
+
+                if (numClients === 0) {
+                    log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
+                    this.close();
+                } else {
+                    log.debug("Terminal", "Terminal " + this.name + " has " + numClients + " client(s)");
+                }
+            }, 60 * 1000);
+        } else {
+            log.debug("Terminal", "Keep alive disabled for terminal " + this.name);
+        }
+
         try {
             this._ptyProcess = pty.spawn(this.file, this.args, {
                 name: this.name,
@@ -100,6 +122,8 @@ export class Terminal {
             this._ptyProcess.onExit(this.exit);
         } catch (error) {
             if (error instanceof Error) {
+                clearInterval(this.keepAliveInterval);
+
                 log.error("Terminal", "Failed to start terminal: " + error.message);
                 const exitCode = Number(error.message.split(" ").pop());
                 this.exit({
@@ -121,6 +145,8 @@ export class Terminal {
 
         Terminal.terminalMap.delete(this.name);
         log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
+
+        clearInterval(this.keepAliveInterval);
 
         if (this.callback) {
             this.callback(res.exitCode);
@@ -158,7 +184,9 @@ export class Terminal {
     }
 
     close() {
-        this._ptyProcess?.kill();
+        clearInterval(this.keepAliveInterval);
+        // Send Ctrl+C to the terminal
+        this.ptyProcess?.write("\x03");
     }
 
     /**
@@ -192,6 +220,10 @@ export class Terminal {
             });
             terminal.start();
         });
+    }
+
+    public static getTerminalCount() {
+        return Terminal.terminalMap.size;
     }
 }
 
