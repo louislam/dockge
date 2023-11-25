@@ -323,6 +323,21 @@ export class Stack {
         return exitCode;
     }
 
+    async rollout(socket: DockgeSocket) {
+        let terminalName = getComposeTerminalName(this.name);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "pull" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to pull, please check the terminal output for more information.");
+        }
+
+        terminalName = getComposeTerminalName(this.name);
+        exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "rollout", this.name ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to rollout, please check the terminal output for more information.");
+        }
+        return exitCode;
+    }
+
     async stop(socket: DockgeSocket) : Promise<number> {
         const terminalName = getComposeTerminalName(this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "stop" ], this.path);

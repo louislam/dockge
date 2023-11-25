@@ -41,10 +41,14 @@
                         {{ $t("stopStack") }}
                     </button>
 
-                    <BDropdown v-if="!isEditMode && active" right text="" variant="normal">
-                        <BDropdownItem @click="downStack">
+                    <BDropdown v-if="!isEditMode || active" right text="" variant="normal">
+                        <BDropdownItem v-if="!isEditMode" @click="downStack">
                             <font-awesome-icon icon="stop" class="me-1" />
                             {{ $t("downStack") }}
+                        </BDropdownItem>
+                        <BDropdownItem v-if="active" @click="rolloutStack">
+                            <font-awesome-icon icon="paint-roller" class="me-1" />
+                            {{ $t("rolloutStack") }} <span class="badge bg-info">Beta</span>
                         </BDropdownItem>
                     </BDropdown>
                 </div>
@@ -481,6 +485,15 @@ export default {
             this.processing = true;
 
             this.$root.getSocket().emit("stopStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
+        rolloutStack() {
+            this.processing = true;
+
+            this.$root.getSocket().emit("rolloutStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
