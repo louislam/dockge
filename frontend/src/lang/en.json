@@ -91,5 +91,10 @@
     "Allowed commands:": "Allowed commands:",
     "Internal Networks": "Internal Networks",
     "External Networks": "External Networks",
-    "No External Networks": "No External Networks"
+    "No External Networks": "No External Networks",
+    "reverseProxyMsg1": "Using a Reverse Proxy?",
+    "reverseProxyMsg2": "Check how to config it for WebSocket",
+    "Cannot connect to the socket server.": "Cannot connect to the socket server.",
+    "reconnecting...": "Reconnecting...",
+    "connecting...": "Connecting to the socket server..."
 }
