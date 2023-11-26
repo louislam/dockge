@@ -12,5 +12,5 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           # Regex, /src/lang/*.json is not allowed to be changed, except for /src/lang/en.json
-          pattern: '^(?!src/lang/en\.json$)src/lang/.*\.json$'
+          pattern: '^(?!frontend/src/lang/en\.json$)frontend/src/lang/.*\.json$'
           trustedAuthors: UptimeKumaBot
