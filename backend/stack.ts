@@ -149,6 +149,12 @@ export class Stack {
 
         // Write or overwrite the compose.yaml
         fs.writeFileSync(path.join(dir, this._composeFileName), this.composeYAML);
+        if (process.env.PUID && process.env.PGID) {
+            const uid = Number(process.env.PUID);
+            const gid = Number(process.env.PGID);
+            fs.lchownSync(dir, uid, gid);
+            fs.chownSync(path.join(dir, this._composeFileName), uid, gid);
+        }
     }
 
     async deploy(socket? : DockgeSocket) : Promise<number> {

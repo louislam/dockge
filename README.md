@@ -92,6 +92,9 @@ services:
     environment:
       # Tell Dockge where is your stacks directory
       - DOCKGE_STACKS_DIR=/opt/stacks
+      # Both PUID and PGID must be set for it to do anything
+      - PUID=1000 # Set the stack file/dir ownership to this user
+      - PGID=1000 # Set the stack file/dir ownership to this group
 ```
 
 ## How to Update
