@@ -5,8 +5,6 @@ import { LimitQueue } from "./utils/limit-queue";
 import { DockgeSocket } from "./util-server";
 import {
     allowedCommandList, allowedRawKeys,
-    getComposeTerminalName,
-    getCryptoRandomInt,
     PROGRESS_TERMINAL_ROWS,
     TERMINAL_COLS,
     TERMINAL_ROWS
@@ -207,14 +205,20 @@ export class Terminal {
     }
 
     public static exec(server : DockgeServer, socket : DockgeSocket | undefined, terminalName : string, file : string, args : string | string[], cwd : string) : Promise<number> {
-        const terminal = new Terminal(server, terminalName, file, args, cwd);
-        terminal.rows = PROGRESS_TERMINAL_ROWS;
+        return new Promise((resolve, reject) => {
+            // check if terminal exists
+            if (Terminal.terminalMap.has(terminalName)) {
+                reject("Another operation is already running, please try again later.");
+                return;
+            }
 
-        if (socket) {
-            terminal.join(socket);
-        }
+            let terminal = new Terminal(server, terminalName, file, args, cwd);
+            terminal.rows = PROGRESS_TERMINAL_ROWS;
 
-        return new Promise((resolve) => {
+            if (socket) {
+                terminal.join(socket);
+            }
+
             terminal.onExit((exitCode : number) => {
                 resolve(exitCode);
             });
