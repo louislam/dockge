@@ -13,7 +13,7 @@
     "compose": "أنشاء كمبوز",
     "addFirstStackMsg": "أنشيء أول كمبوز!",
     "stackName": "اسم المكدسة",
-    "deployStack": "شنر",
+    "deployStack": "نشر",
     "deleteStack": "حذف",
     "stopStack": "إيقاف",
     "restartStack": "إعادة تشغيل",
