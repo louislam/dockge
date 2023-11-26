@@ -46,7 +46,7 @@
     "deleteContainer": "حذف",
     "addContainer": "أضافة حاوية",
     "addNetwork": "أضافة شبكة",
-    "disableauth.message1": "هل أنت متأكد أنك تريد  <strong>تعطيل المصادقة</strong>?",
+    "disableauth.message1": "هل أنت متأكد أنك تريد <strong>تعطيل المصادقة</strong>?",
     "disableauth.message2": "إنه مصمم للحالات <strong>التي تنوي فيها مصادقة الطرف الثالث</strong> أمام Dockge مثل Cloudflare Access, Authelia أو أي من آليات المصادقة الأخرى.",
     "passwordNotMatchMsg": "كلمة المرور المكررة غير متطابقة.",
     "autoGet": "الجلب التلقائي",
@@ -91,5 +91,13 @@
     "Allowed commands:": "الأوامر المسموح بها:",
     "Internal Networks": "الشبكات الداخلية",
     "External Networks": "الشبكات الخارجية",
-    "No External Networks": "لا توجد شبكات خارجية"
+    "No External Networks": "لا توجد شبكات خارجية",
+    "reverseProxyMsg1": "هل تستدخم خادم عكسي؟",
+    "reverseProxyMsg2": "تحقق كيف يتم إعداده لمقبس ويب",
+    "Cannot connect to the socket server.": "تعذر الاتصال بخادم المقبس.",
+    "reconnecting...": "إعادة الاتصال...",
+    "connecting...": "جاري الاتصال بخادم المقبس...",
+    "url": "رابط | روابط",
+    "extra": "إضافات"
+
 }
