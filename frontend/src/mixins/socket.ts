@@ -109,7 +109,7 @@ export default defineComponent({
             }, 1500);
 
             socket = io(url, {
-                transports: [ "websocket" ]
+                transports: [ "websocket", "polling" ]
             });
 
             socket.on("connect", () => {
