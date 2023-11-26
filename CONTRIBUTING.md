@@ -7,13 +7,15 @@ Here are some references:
 ### ✅ Usually accepted:
 - Bug fix
 - Security fix
-- Translation
+- Adding new language files (see [these instructions](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md))
+- Adding new language keys: `$t("...")`
 
 ### ⚠️ Discussion required:
 - Large pull requests
 - New features
 
 ### ❌ Won't be merged:
+- A dedicated PR for translating existing languages (see [these instructions](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md))
 - Do not pass the auto-test
 - Any breaking changes
 - Duplicated pull requests
