@@ -12,7 +12,7 @@
     "registry": "Registry",
     "compose": "Compose",
     "addFirstStackMsg": "Compose your first stack!",
-    "stackName" : "Stack Name",
+    "stackName": "Stack Name",
     "deployStack": "Deploy",
     "deleteStack": "Delete",
     "stopStack": "Stop",
@@ -23,7 +23,7 @@
     "editStack": "Edit",
     "discardStack": "Discard",
     "saveStackDraft": "Save",
-    "notAvailableShort" : "N/A",
+    "notAvailableShort": "N/A",
     "deleteStackMsg": "Are you sure you want to delete this stack?",
     "stackNotManagedByDockgeMsg": "This stack is not managed by Dockge.",
     "primaryHostname": "Primary Hostname",
@@ -95,8 +95,8 @@
     "reverseProxyMsg1": "Using a Reverse Proxy?",
     "reverseProxyMsg2": "Check how to config it for WebSocket",
     "Cannot connect to the socket server.": "Cannot connect to the socket server.",
-    "reconnecting...": "Reconnecting...",
-    "connecting...": "Connecting to the socket server...",
+    "reconnecting...": "Reconnecting…",
+    "connecting...": "Connecting to the socket server…",
     "url": "URL | URLs",
     "extra": "Extra"
 }
