@@ -92,11 +92,11 @@
     "External Networks": "Réseaux Externes",
     "No External Networks": "Aucun Réseau Externe",
     "reverseProxyMsg2": "Vérifier comment le configurer pour WebSocket",
-    "connecting...": "Connexion au serveur socket...",
+    "connecting...": "Connexion au serveur socket…",
     "url": "URL | URLs",
     "extra": "Supplémentaire",
     "downStack": "Arrêter et descendre",
     "reverseProxyMsg1": "Vous utilisez un proxy inverse ?",
     "Cannot connect to the socket server.": "Impossible de se connecter au serveur socket.",
-    "reconnecting...": "Reconnexion..."
+    "reconnecting...": "Reconnexion…"
 }
