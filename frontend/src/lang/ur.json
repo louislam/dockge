@@ -12,7 +12,7 @@
     "registry": "رجسٹری",
     "compose": "تحریر",
     "addFirstStackMsg": "اپنا پہلا اسٹیک کمپوز کریں!",
-    "stackName" : "اسٹیک کا نام",
+    "stackName": "اسٹیک کا نام",
     "deployStack": "تعینات",
     "deleteStack": "حذف کریں",
     "stopStack": "روکو",
@@ -22,7 +22,7 @@
     "editStack": "ترمیم",
     "discardStack": "رد کر دیں۔",
     "saveStackDraft": "محفوظ کریں۔",
-    "notAvailableShort" : "N / A",
+    "notAvailableShort": "N / A",
     "deleteStackMsg": "کیا آپ واقعی اس اسٹیک کو حذف کرنا چاہتے ہیں؟",
     "stackNotManagedByDockgeMsg": "یہ اسٹیک Dockge کے زیر انتظام نہیں ہے۔",
     "primaryHostname": "بنیادی میزبان نام",
@@ -90,5 +90,13 @@
     "Allowed commands:": "اجازت شدہ احکامات:",
     "Internal Networks": "اندرونی نیٹ ورکس",
     "External Networks": "بیرونی نیٹ ورکس",
-    "No External Networks": "کوئی بیرونی نیٹ ورک نہیں"
+    "No External Networks": "کوئی بیرونی نیٹ ورک نہیں",
+    "reverseProxyMsg1": "ایک ریورس پراکسی کا استعمال کرتے ہوئے؟",
+    "Cannot connect to the socket server.": "ساکٹ سرور سے منسلک نہیں ہو سکتا۔",
+    "reconnecting...": "دوبارہ منسلک ہو رہا ہے...",
+    "connecting...": "ساکٹ سرور سے منسلک ہو رہا ہے...",
+    "url": "یو آر ایل | یو آر ایل",
+    "extra": "اضافی",
+    "downStack": "اسٹاپ اینڈ ڈاؤن",
+    "reverseProxyMsg2": "اسے WebSocket کے لیے ترتیب دینے کا طریقہ چیک کریں"
 }

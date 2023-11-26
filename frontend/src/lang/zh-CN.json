@@ -12,7 +12,7 @@
     "registry": "镜像仓库",
     "compose": "Compose",
     "addFirstStackMsg": "组合你的第一个堆栈！",
-    "stackName" : "堆栈名称",
+    "stackName": "堆栈名称",
     "deployStack": "部署",
     "deleteStack": "删除",
     "stopStack": "停止",
@@ -22,7 +22,7 @@
     "editStack": "编辑",
     "discardStack": "放弃",
     "saveStackDraft": "保存",
-    "notAvailableShort" : "不可用",
+    "notAvailableShort": "不可用",
     "deleteStackMsg": "你确定要删除这个堆栈吗?",
     "stackNotManagedByDockgeMsg": "这个堆栈不由Dockge管理",
     "primaryHostname": "主机名",
@@ -90,5 +90,10 @@
     "Allowed commands:": "允许使用的指令:",
     "Internal Networks": "内部网络",
     "External Networks": "外部网络",
-    "No External Networks": "无外部网络"
+    "No External Networks": "无外部网络",
+    "reconnecting...": "重连中...",
+    "reverseProxyMsg2": "检查如何配置WebSocket",
+    "reverseProxyMsg1": "正在使用反向代理？",
+    "connecting...": "正在连接到socket服务器...",
+    "Cannot connect to the socket server.": "无法连接到socket服务器。"
 }
