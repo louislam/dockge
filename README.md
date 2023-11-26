@@ -98,8 +98,7 @@ services:
 
 ```bash
 cd /opt/dockge
-docker compose pull
-docker compose up -d
+docker compose pull && docker compose up -d
 ```
 
 ## Screenshots
