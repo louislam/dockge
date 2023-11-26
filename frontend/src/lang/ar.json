@@ -94,9 +94,9 @@
     "No External Networks": "لا توجد شبكات خارجية",
     "reverseProxyMsg2": "تحقق كيف يتم إعداده لمقبس ويب",
     "Cannot connect to the socket server.": "تعذر الاتصال بخادم المقبس.",
-    "reconnecting...": "إعادة الاتصال...",
+    "reconnecting...": "إعادة الاتصال…",
     "url": "رابط | روابط",
     "extra": "إضافات",
     "reverseProxyMsg1": "هل تستدخم خادم عكسي؟",
-    "connecting...": "جاري الاتصال بخادم المقبس..."
+    "connecting...": "جاري الاتصال بخادم المقبس…"
 }
