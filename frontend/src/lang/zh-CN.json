@@ -97,5 +97,6 @@
     "connecting...": "正在连接到socket服务器...",
     "Cannot connect to the socket server.": "无法连接到socket服务器。",
     "url": "网址 | 网址",
-    "extra": "额外"
+    "extra": "额外",
+    "downStack": "停止并删除"
 }
