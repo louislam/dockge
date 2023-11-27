@@ -1,1 +1,21 @@
-{}
+{
+    "Create your admin account": "Creați-vă contul de administrator",
+    "PasswordsDoNotMatch": "Parolele nu se potrivesc.",
+    "Repeat Password": "Repetați parola",
+    "signedInDisp": "Conectat ca {0}",
+    "signedInDispDisabled": "Autentificare dezactivată.",
+    "Create": "Creează",
+    "home": "Acasă",
+    "console": "Consolă",
+    "registry": "Registru",
+    "compose": "Compune",
+    "addFirstStackMsg": "Compune prima ta stivă!",
+    "stackName": "Nume stivă",
+    "deployStack": "Lansează",
+    "deleteStack": "Șterge",
+    "stopStack": "Oprește",
+    "restartStack": "Repornire",
+    "updateStack": "Actualizare",
+    "languageName": "Română",
+    "authIncorrectCreds": "Numele de utilizator sau parola incorectă."
+}
