@@ -48,14 +48,14 @@ Requirements:
 - Default Port: 5001
 
 ```
-# Create a directory that stores your stacks and stores dockge's compose.yaml
+# Create directories that store your stacks and stores Dockge's stack
 mkdir -p /opt/stacks /opt/dockge
 cd /opt/dockge
 
 # Download the compose.yaml
 curl https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml --output compose.yaml
 
-# Start the Server
+# Start the server
 docker compose up -d
 
 # If you are using docker-compose V1 or Podman
@@ -66,33 +66,21 @@ Dockge is now running on http://localhost:5001
 
 ### Advanced
 
-If you want to store your stacks in another directory, you can change the `DOCKGE_STACKS_DIR` environment variable and volumes.
+If you want to store your stacks in another directory, you can generate your compose.yaml file by using the following URL with custom query strings.
 
-```yaml
-version: "3.8"
-services:
-  dockge:
-    image: louislam/dockge:1
-    restart: unless-stopped
-    ports:
-      # Host Port : Container Port
-      - 5001:5001
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./data:/app/data
-        
-      # If you want to use private registries, you need to share the auth file with Dockge:
-      # - /root/.docker/:/root/.docker
-
-      # Your stacks directory in the host (The paths inside container must be the same as the host)
-      # ⚠️⚠️ If you did it wrong, your data could end up be written into a wrong path.
-      # ✔️✔️✔️✔️ CORRECT: - /my-stacks:/my-stacks (Both paths match)
-      # ❌❌❌❌ WRONG: - /docker:/my-stacks (Both paths do not match)
-      - /opt/stacks:/opt/stacks
-    environment:
-      # Tell Dockge where is your stacks directory
-      - DOCKGE_STACKS_DIR=/opt/stacks
 ```
+# Download your compose.yaml
+curl "https://dockge.kuma.pet/compose.yaml?port=5001&stacksPath=/opt/stacks" --output compose.yaml
+```
+
+- port=`5001`
+- stacksPath=`/opt/stacks`
+
+Interactive compose.yaml generator is available on: 
+https://dockge.kuma.pet
+
+You can also view compose.yaml here: 
+https://github.com/louislam/dockge/blob/master/compose.yaml
 
 ## How to Update
 
