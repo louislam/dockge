@@ -1,9 +1,7 @@
+# Due to the bug of #145, Node.js's version cannot be changed, unless upstream is fixed.
 FROM node:18.17.1-bookworm-slim
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-
-# COPY --from=docker:dind /usr/local/bin/docker /usr/local/bin/
-
 RUN apt update && apt install --yes --no-install-recommends \
     curl \
     ca-certificates \
