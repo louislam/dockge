@@ -120,10 +120,10 @@ https://github.com/louislam/dockge/issues
 ### Ask for Help / Discussions
 https://github.com/louislam/dockge/discussions
 
-## Translation
+### Translation
 If you want to translate Dockge into your language, please read [Translation Guide](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md)
 
-## Create a Pull Request
+### Create a Pull Request
 
 Be sure to read the [guide](https://github.com/louislam/dockge/blob/master/CONTRIBUTING.md), as we don't accept all types of pull requests and don't want to waste your time.
 
