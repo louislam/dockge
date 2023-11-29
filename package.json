@@ -19,7 +19,8 @@
         "build:docker-nightly": "pnpm run build:frontend && docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:nightly --target nightly -f ./docker/Dockerfile . --push",
         "start-docker": "docker run --rm -p 5001:5001 --name dockge louislam/dockge:latest",
         "mark-as-nightly": "tsx ./extra/mark-as-nightly.ts",
-        "reformat-changelog": "tsx ./extra/reformat-changelog.ts"
+        "reformat-changelog": "tsx ./extra/reformat-changelog.ts",
+        "reset-password": "tsx ./extra/reset-password.ts"
     },
     "dependencies": {
         "@homebridge/node-pty-prebuilt-multiarch": "~0.11.11",
