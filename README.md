@@ -34,12 +34,18 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
 ## 🔧 How to Install
 
 Requirements:
-- [Docker CE](https://docs.docker.com/engine/install/) 20+ is recommended / Podman
-- (Docker only) [Docker Compose Plugin](https://docs.docker.com/compose/install/linux/)
+- [Docker](https://docs.docker.com/engine/install/) 20+ / Podman
 - (Podman only) podman-docker (Debian: `apt install podman-docker`)
 - OS:
-  - As long as you can run Docker CE / Podman, it should be fine, but:
-  - Debian/Raspbian Buster or lower is not supported, please upgrade to Bullseye or higher
+  - Major Linux distros that can run Docker/Podman such as:
+     - ✅ Ubuntu
+     - ✅ Debian (Bullseye or newer)
+     - ✅ Raspbian (Bullseye or newer)
+     - ✅ CentOS
+     - ✅ Fedora
+     - ✅ ArchLinux
+  - ❌ Debian/Raspbian Buster or lower is not supported
+  - ❌ Windows (Will be supported later)
 - Arch: armv7, arm64, amd64 (a.k.a x86_64)
 
 ### Basic
@@ -79,9 +85,6 @@ curl "https://dockge.kuma.pet/compose.yaml?port=5001&stacksPath=/opt/stacks" --o
 Interactive compose.yaml generator is available on: 
 https://dockge.kuma.pet
 
-You can also view compose.yaml here: 
-https://github.com/louislam/dockge/blob/master/compose.yaml
-
 ## How to Update
 
 ```bash
@@ -109,7 +112,7 @@ docker compose pull && docker compose up -d
 If you love this project, please consider giving it a ⭐.
 
 
-## 🗣️
+## 🗣️ Community and Contribution
 
 ### Bug Report
 https://github.com/louislam/dockge/issues
@@ -118,8 +121,11 @@ https://github.com/louislam/dockge/issues
 https://github.com/louislam/dockge/discussions
 
 ## Translation
-
 If you want to translate Dockge into your language, please read [Translation Guide](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md)
+
+## Create a Pull Request
+
+Be sure to read the [guide](https://github.com/louislam/dockge/blob/master/CONTRIBUTING.md), as we don't accept all types of pull requests and don't want to waste your time.
 
 ## FAQ
 
@@ -142,17 +148,18 @@ Yes, you can. However, you need to move your compose file into the stacks direct
 3. In Dockge, click the " Scan Stacks Folder" button in the top-right corner's dropdown menu
 4. Now you should see your stack in the list
 
-## More Ideas?
+#### Is Dockge a Portainer replcement?
 
-- Stats
-- File manager
-- App store for yaml templates
-- Get app icons
-- Switch Docker context
-- Support Dockerfile and build
-- Support Docker swarm
+Yes or no. Portainer provides a lot of Docker features. While Dockge is currently only focusing on docker-compose with a better user interface and better user experience.
 
+If you want to manage your container with docker-compose only, the answer may be yes.
 
-# Others
+If you still need to manage something like docker networks, signle containers, the answer may be no.
+
+#### Can I install both Dockge and Portainer?
+
+Yes, you can.
+
+## Others
 
 Dockge is built on top of [Compose V2](https://docs.docker.com/compose/migrate/). `compose.yaml`  also known as `docker-compose.yml`.
