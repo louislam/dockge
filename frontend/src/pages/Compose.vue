@@ -165,7 +165,7 @@
                         {{ yamlError }}
                     </div>
                     <!-- ENV editor -->
-                    <h6 class="mb-3">{{ $tc("Template Variables", 2) }}</h6>
+                    <h6 class="mb-3">.env</h6>
                     <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
                         <prism-editor
                             ref="editor"
@@ -619,11 +619,11 @@ export default {
                         greedy: true
                     },
                     "keyword": {
-                        pattern: /^[^ :]*(?=:)/m,
+                        pattern: /^[^ :=]*(?=[:=])/m,
                         greedy: true
                     },
                     "value": {
-                        pattern: /(?<=:).*?((?= #)|$)/m,
+                        pattern: /(?<=[:=]).*?((?= #)|$)/m,
                         greedy: true,
                         inside: {
                             "string": [

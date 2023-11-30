@@ -98,6 +98,5 @@
     "reconnecting...": "Reconnecting...",
     "connecting...": "Connecting to the socket server...",
     "url": "URL | URLs",
-    "extra": "Extra",
-    "Template Variables": "Template Variables"
+    "extra": "Extra"
 }
