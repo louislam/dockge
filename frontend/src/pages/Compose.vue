@@ -245,11 +245,12 @@ services:
     ports:
       - "8080:80"
 `;
+const envDefault = "# VARIABLE: value #comment";
 
 let yamlErrorTimeout = null;
 
 let serviceStatusTimeout = null;
-let symbol = {
+let prismjsSymbolDefinition = {
     "symbol": {
         pattern: /(?<!\$)\$(\{[^{}]*\}|\w+)/,
     }
@@ -411,7 +412,7 @@ export default {
                 composeENV = this.$root.envTemplate;
                 this.$root.envTemplate = "";
             } else {
-                composeENV = "";
+                composeENV = envDefault;
             }
 
             // Default Values
@@ -604,7 +605,7 @@ export default {
         highlighterYAML(code) {
             if (!languages.yaml_with_symbols) {
                 languages.yaml_with_symbols = languages.insertBefore("yaml", "punctuation", {
-                    "symbol": symbol["symbol"]
+                    "symbol": prismjsSymbolDefinition["symbol"]
                 });
             }
             return highlight(code, languages.yaml_with_symbols);
@@ -631,7 +632,7 @@ export default {
                                 },
                                 {
                                     pattern: /^ *".*?(?<!\\)"|^.*$/m,
-                                    inside: symbol
+                                    inside: prismjsSymbolDefinition
                                 },
                             ],
                         },
