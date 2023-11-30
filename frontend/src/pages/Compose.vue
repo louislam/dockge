@@ -154,7 +154,7 @@
                             ref="editor"
                             v-model="stack.composeYAML"
                             class="yaml-editor"
-                            :highlight="highlighter"
+                            :highlight="highlighterYAML"
                             line-numbers :readonly="!isEditMode"
                             @input="yamlCodeChange"
                             @focus="editorFocus = true"
@@ -163,6 +163,19 @@
                     </div>
                     <div v-if="isEditMode" class="mb-3">
                         {{ yamlError }}
+                    </div>
+                    <!-- ENV editor -->
+                    <h6 class="mb-3">{{ $tc("Template Variables", 2) }}</h6>
+                    <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
+                        <prism-editor
+                            ref="editor"
+                            v-model="stack.composeENV"
+                            class="env-editor"
+                            :highlight="highlighterENV"
+                            line-numbers :readonly="!isEditMode"
+                            @focus="editorFocus = true"
+                            @blur="editorFocus = false"
+                        ></prism-editor>
                     </div>
 
                     <div v-if="isEditMode">
@@ -236,6 +249,11 @@ services:
 let yamlErrorTimeout = null;
 
 let serviceStatusTimeout = null;
+let symbol = {
+    "symbol": {
+        pattern: /(?<!\$)\$(\{[^{}]*\}|\w+)/,
+    }
+};
 
 export default {
     components: {
@@ -381,19 +399,26 @@ export default {
             this.isEditMode = true;
 
             let composeYAML;
+            let composeENV;
 
             if (this.$root.composeTemplate) {
                 composeYAML = this.$root.composeTemplate;
                 this.$root.composeTemplate = "";
-
             } else {
                 composeYAML = template;
+            }
+            if (this.$root.envTemplate) {
+                composeENV = this.$root.envTemplate;
+                this.$root.envTemplate = "";
+            } else {
+                composeENV = "";
             }
 
             // Default Values
             this.stack = {
                 name: "",
                 composeYAML,
+                composeENV,
                 isManagedByDockge: true,
             };
 
@@ -492,7 +517,7 @@ export default {
 
             this.bindTerminal(this.terminalName);
 
-            this.$root.getSocket().emit("deployStack", this.stack.name, this.stack.composeYAML, this.isAdd, (res) => {
+            this.$root.getSocket().emit("deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
@@ -506,7 +531,7 @@ export default {
         saveStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("saveStack", this.stack.name, this.stack.composeYAML, this.isAdd, (res) => {
+            this.$root.getSocket().emit("saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
@@ -576,8 +601,44 @@ export default {
             this.isEditMode = false;
         },
 
-        highlighter(code) {
-            return highlight(code, languages.yaml);
+        highlighterYAML(code) {
+            if (!languages.yaml_with_symbols) {
+                languages.yaml_with_symbols = languages.insertBefore("yaml", "punctuation", {
+                    "symbol": symbol["symbol"]
+                });
+            }
+            return highlight(code, languages.yaml_with_symbols);
+        },
+
+        highlighterENV(code) {
+            if (!languages.docker_env) {
+                languages.docker_env = {
+                    "comment": {
+                        pattern: /(^#| #).*$/m,
+                        greedy: true
+                    },
+                    "keyword": {
+                        pattern: /^[^ :]*(?=:)/m,
+                        greedy: true
+                    },
+                    "value": {
+                        pattern: /(?<=:).*?((?= #)|$)/m,
+                        greedy: true,
+                        inside: {
+                            "string": [
+                                {
+                                    pattern: /^ *'.*?(?<!\\)'/m,
+                                },
+                                {
+                                    pattern: /^ *".*?(?<!\\)"|^.*$/m,
+                                    inside: symbol
+                                },
+                            ],
+                        },
+                    },
+                };
+            }
+            return highlight(code, languages.docker_env);
         },
 
         yamlCodeChange() {
