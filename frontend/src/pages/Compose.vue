@@ -245,7 +245,7 @@ services:
     ports:
       - "8080:80"
 `;
-const envDefault = "# VARIABLE: value #comment";
+const envDefault = "# VARIABLE=value #comment";
 
 let yamlErrorTimeout = null;
 

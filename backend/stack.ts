@@ -32,7 +32,7 @@ export class Stack {
 
     protected static managedStackList: Map<string, Stack> = new Map();
 
-    constructor(server : DockgeServer, name : string, composeYAML? : string, skipFSOperations = false, composeENV? : string) {
+    constructor(server : DockgeServer, name : string, composeYAML? : string, composeENV? : string, skipFSOperations = false) {
         this.name = name;
         this.server = server;
         this._composeYAML = composeYAML;
@@ -322,7 +322,7 @@ export class Stack {
         if (!skipFSOperations) {
             stack = new Stack(server, stackName);
         } else {
-            stack = new Stack(server, stackName, undefined, true);
+            stack = new Stack(server, stackName, undefined, undefined, true);
         }
 
         stack._status = UNKNOWN;

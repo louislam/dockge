@@ -279,7 +279,7 @@ export class DockerSocketHandler extends SocketHandler {
             throw new ValidationError("isAdd must be a boolean");
         }
 
-        const stack = new Stack(server, name, composeYAML, false, composeENV);
+        const stack = new Stack(server, name, composeYAML, composeENV, false);
         stack.save(isAdd);
         return stack;
     }
