@@ -5,7 +5,7 @@
     "PasswordsDoNotMatch": "Пароль не совпадает.",
     "Repeat Password": "Повторите пароль",
     "Create": "Создать",
-    "signedInDisp": "Авторизлван как {0}",
+    "signedInDisp": "Авторизован как",
     "signedInDispDisabled": "Авторизация выключена.",
     "home": "Главная",
     "console": "Консоль",
