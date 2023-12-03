@@ -9,10 +9,10 @@ import composerize from "composerize";
 export class DockerSocketHandler extends SocketHandler {
     create(socket : DockgeSocket, server : DockgeServer) {
 
-        socket.on("deployStack", async (name : unknown, composeYAML : unknown, isAdd : unknown, callback) => {
+        socket.on("deployStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
             try {
                 checkLogin(socket);
-                const stack = this.saveStack(socket, server, name, composeYAML, isAdd);
+                const stack = this.saveStack(socket, server, name, composeYAML, composeENV, isAdd);
                 await stack.deploy(socket);
                 server.sendStackList();
                 callback({
@@ -25,10 +25,10 @@ export class DockerSocketHandler extends SocketHandler {
             }
         });
 
-        socket.on("saveStack", async (name : unknown, composeYAML : unknown, isAdd : unknown, callback) => {
+        socket.on("saveStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
             try {
                 checkLogin(socket);
-                this.saveStack(socket, server, name, composeYAML, isAdd);
+                this.saveStack(socket, server, name, composeYAML, composeENV, isAdd);
                 callback({
                     ok: true,
                     "msg": "Saved"
@@ -264,7 +264,7 @@ export class DockerSocketHandler extends SocketHandler {
         });
     }
 
-    saveStack(socket : DockgeSocket, server : DockgeServer, name : unknown, composeYAML : unknown, isAdd : unknown) : Stack {
+    saveStack(socket : DockgeSocket, server : DockgeServer, name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown) : Stack {
         // Check types
         if (typeof(name) !== "string") {
             throw new ValidationError("Name must be a string");
@@ -272,11 +272,14 @@ export class DockerSocketHandler extends SocketHandler {
         if (typeof(composeYAML) !== "string") {
             throw new ValidationError("Compose YAML must be a string");
         }
+        if (typeof(composeENV) !== "string") {
+            throw new ValidationError("Compose ENV must be a string");
+        }
         if (typeof(isAdd) !== "boolean") {
             throw new ValidationError("isAdd must be a boolean");
         }
 
-        const stack = new Stack(server, name, composeYAML);
+        const stack = new Stack(server, name, composeYAML, composeENV, false);
         stack.save(isAdd);
         return stack;
     }

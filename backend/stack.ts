@@ -23,6 +23,7 @@ export class Stack {
     name: string;
     protected _status: number = UNKNOWN;
     protected _composeYAML?: string;
+    protected _composeENV?: string;
     protected _configFilePath?: string;
     protected _composeFileName: string = "compose.yaml";
     protected server: DockgeServer;
@@ -31,10 +32,11 @@ export class Stack {
 
     protected static managedStackList: Map<string, Stack> = new Map();
 
-    constructor(server : DockgeServer, name : string, composeYAML? : string, skipFSOperations = false) {
+    constructor(server : DockgeServer, name : string, composeYAML? : string, composeENV? : string, skipFSOperations = false) {
         this.name = name;
         this.server = server;
         this._composeYAML = composeYAML;
+        this._composeENV = composeENV;
 
         if (!skipFSOperations) {
             // Check if compose file name is different from compose.yaml
@@ -53,6 +55,7 @@ export class Stack {
         return {
             ...obj,
             composeYAML: this.composeYAML,
+            composeENV: this.composeENV,
         };
     }
 
@@ -105,6 +108,17 @@ export class Stack {
         return this._composeYAML;
     }
 
+    get composeENV() : string {
+        if (this._composeENV === undefined) {
+            try {
+                this._composeENV = fs.readFileSync(path.join(this.path, ".env"), "utf-8");
+            } catch (e) {
+                this._composeENV = "";
+            }
+        }
+        return this._composeENV;
+    }
+
     get path() : string {
         return path.join(this.server.stacksDir, this.name);
     }
@@ -149,6 +163,8 @@ export class Stack {
 
         // Write or overwrite the compose.yaml
         fs.writeFileSync(path.join(dir, this._composeFileName), this.composeYAML);
+        // Write or overwrite the .env
+        fs.writeFileSync(path.join(dir, ".env"), this.composeENV);
     }
 
     async deploy(socket? : DockgeSocket) : Promise<number> {
@@ -306,7 +322,7 @@ export class Stack {
         if (!skipFSOperations) {
             stack = new Stack(server, stackName);
         } else {
-            stack = new Stack(server, stackName, undefined, true);
+            stack = new Stack(server, stackName, undefined, undefined, true);
         }
 
         stack._status = UNKNOWN;
