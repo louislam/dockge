@@ -1,5 +1,5 @@
 {
-    "languageName": "Engels",
+    "languageName": "Nederlands",
     "authIncorrectCreds": "Onjuiste gebruikersnaam of wachtwoord.",
     "PasswordsDoNotMatch": "Paswoorden komen niet overeen.",
     "Repeat Password": "Herhaal wachtwoord",
@@ -8,9 +8,9 @@
     "home": "Startpagina",
     "console": "Console",
     "registry": "Register",
-    "compose": "Compose",
+    "compose": "Samenstellen",
     "stackName": "Stack naam",
-    "deployStack": "Deploy",
+    "deployStack": "Opzetten",
     "deleteStack": "Verwijder",
     "stopStack": "Stop",
     "restartStack": "Herstart",
