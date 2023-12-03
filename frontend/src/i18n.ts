@@ -19,10 +19,14 @@ const languageList = {
     "ru": "Русский",
     "cs-CZ": "Čeština",
     "ar": "العربية",
-    "th":"ไทย",
-    "it-IT":"Italiano",
-    "sv-SE":"Svenska",
-    "uk-UA":"Українська"
+    "th": "ไทย",
+    "it-IT": "Italiano",
+    "sv-SE": "Svenska",
+    "uk-UA": "Українська",
+    "da": "Dansk",
+    "ja": "日本語",
+    "nl": "Nederlands",
+    "ro": "Română",
 };
 
 let messages = {
