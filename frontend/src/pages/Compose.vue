@@ -164,18 +164,21 @@
                     <div v-if="isEditMode" class="mb-3">
                         {{ yamlError }}
                     </div>
+
                     <!-- ENV editor -->
-                    <h6 class="mb-3">.env</h6>
-                    <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
-                        <prism-editor
-                            ref="editor"
-                            v-model="stack.composeENV"
-                            class="env-editor"
-                            :highlight="highlighterENV"
-                            line-numbers :readonly="!isEditMode"
-                            @focus="editorFocus = true"
-                            @blur="editorFocus = false"
-                        ></prism-editor>
+                    <div v-if="isEditMode">
+                        <h4 class="mb-3">.env</h4>
+                        <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
+                            <prism-editor
+                                ref="editor"
+                                v-model="stack.composeENV"
+                                class="env-editor"
+                                :highlight="highlighterENV"
+                                line-numbers :readonly="!isEditMode"
+                                @focus="editorFocus = true"
+                                @blur="editorFocus = false"
+                            ></prism-editor>
+                        </div>
                     </div>
 
                     <div v-if="isEditMode">
