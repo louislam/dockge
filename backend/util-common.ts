@@ -203,7 +203,7 @@ export function getContainerTerminalName(container : string) {
 }
 
 export function getContainerExecTerminalName(stackName : string, container : string, index : number) {
-    return "container-exec-" + container + "-" + index;
+    return "container-exec-" + stackName + "-" + container + "-" + index;
 }
 
 export function copyYAMLComments(doc : Document, src : Document) {

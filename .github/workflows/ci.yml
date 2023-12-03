@@ -14,8 +14,8 @@ jobs:
   ci:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        node: [20.x] # Can be changed
+        os: [ubuntu-latest, windows-latest, macos-latest, ARM64]
+        node: [18.17.1] # Can be changed
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Code
