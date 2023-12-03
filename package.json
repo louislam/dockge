@@ -41,6 +41,7 @@
         "knex": "~2.5.1",
         "limiter-es6-compat": "~2.1.2",
         "mysql2": "~3.6.3",
+        "promisify-child-process": "~4.1.2",
         "redbean-node": "~0.3.3",
         "socket.io": "~4.7.2",
         "socket.io-client": "~4.7.2",
