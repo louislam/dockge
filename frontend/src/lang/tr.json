@@ -12,7 +12,7 @@
     "registry": "Kayıt Defteri",
     "compose": "Compose",
     "addFirstStackMsg": "İlk yığınınızı oluşturun!",
-    "stackName" : "Yığın Adı",
+    "stackName": "Yığın Adı",
     "deployStack": "Dağıtmak",
     "deleteStack": "Sil",
     "stopStack": "Dudur",
@@ -22,7 +22,7 @@
     "editStack": "Düzenle",
     "discardStack": "Çıkar",
     "saveStackDraft": "Kaydet",
-    "notAvailableShort" : "N/A",
+    "notAvailableShort": "N/A",
     "deleteStackMsg": "Bu yığını silmek istediğinizden emin misiniz?",
     "stackNotManagedByDockgeMsg": "Bu yığın Dockge tarafından yönetilmemektedir.",
     "primaryHostname": "Birincil Ana Bilgisayar Adı",
@@ -90,5 +90,13 @@
     "Allowed commands:": "İzin verilen komutlar:",
     "Internal Networks": "İç Ağlar",
     "External Networks": "Dış Ağlar",
-    "No External Networks": "Dış Ağ Yok"
+    "No External Networks": "Dış Ağ Yok",
+    "extra": "Ekstra",
+    "reverseProxyMsg1": "Ters Proxy mi kullanıyorsunuz?",
+    "reverseProxyMsg2": "WebSocket için nasıl yapılandırma yapılacağını kontrol edin",
+    "reconnecting...": "Yeniden bağlanıyor…",
+    "connecting...": "Soket sunucusuna bağlanıyor…",
+    "url": "URL | URL’ler",
+    "Cannot connect to the socket server.": "Soket sunucusuna bağlanılamıyor.",
+    "downStack": "Durdur & Kapat"
 }

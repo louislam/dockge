@@ -1,12 +1,12 @@
 {
     "languageName": "繁體中文(台灣)",
     "Create your admin account": "建立您的管理員帳號",
-    "authIncorrectCreds": "使用者名稱或密碼錯誤",
+    "authIncorrectCreds": "使用者名稱或密碼錯誤。",
     "PasswordsDoNotMatch": "兩次輸入的密碼不一致。",
     "Repeat Password": "重複以確認密碼",
     "Create": "建立",
     "signedInDisp": "目前使用者：{0}",
-    "signedInDispDisabled": "已停用身份驗證",
+    "signedInDispDisabled": "已停用身份驗證。",
     "home": "首頁",
     "console": "主控台",
     "registry": "映像倉庫",
@@ -24,7 +24,7 @@
     "saveStackDraft": "儲存",
     "notAvailableShort": "不可用",
     "deleteStackMsg": "您確定要刪除這個堆疊嗎？",
-    "stackNotManagedByDockgeMsg": "這個堆疊不由 Dockge 管理",
+    "stackNotManagedByDockgeMsg": "這個堆疊不由 Dockge 管理。",
     "primaryHostname": "主機名稱",
     "general": "一般",
     "container": "容器 | 容器群組",
@@ -90,5 +90,13 @@
     "Allowed commands:": "允許使用的指令:",
     "Internal Networks": "內部網路",
     "External Networks": "外部網路",
-    "No External Networks": "無外部網路"
+    "No External Networks": "無外部網路",
+    "downStack": "停止",
+    "reverseProxyMsg1": "在使用反向代理吗？",
+    "reverseProxyMsg2": "點擊這裡了解如何為 WebSocket 配置反向代理",
+    "Cannot connect to the socket server.": "無法連接到 Socket 伺服器。",
+    "reconnecting...": "重新連線中…",
+    "connecting...": "連線至 Socket 伺服器中…",
+    "url": "網址 | 網址",
+    "extra": "額外"
 }
