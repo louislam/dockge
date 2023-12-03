@@ -1,5 +1,4 @@
-title: "❓ Ask for help"
-labels: [help] 
+labels: [help]
 body:
   - type: checkboxes
     id: no-duplicate-issues
