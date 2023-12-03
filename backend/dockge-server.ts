@@ -29,7 +29,7 @@ import { Stack } from "./stack";
 import { Cron } from "croner";
 import gracefulShutdown from "http-graceful-shutdown";
 import User from "./models/user";
-import childProcess from "child_process";
+import childProcessAsync from "promisify-child-process";
 import { Terminal } from "./terminal";
 
 export class DockgeServer {
@@ -483,7 +483,7 @@ export class DockgeServer {
         return jwtSecretBean;
     }
 
-    sendStackList(useCache = false) {
+    async sendStackList(useCache = false) {
         let roomList = this.io.sockets.adapter.rooms.keys();
         let map : Map<string, object> | undefined;
 
@@ -494,7 +494,7 @@ export class DockgeServer {
                 // Get the list only if there is a room
                 if (!map) {
                     map = new Map();
-                    let stackList = Stack.getStackList(this, useCache);
+                    let stackList = await Stack.getStackList(this, useCache);
 
                     for (let [ stackName, stack ] of stackList) {
                         map.set(stackName, stack.toSimpleJSON());
@@ -510,8 +510,8 @@ export class DockgeServer {
         }
     }
 
-    sendStackStatusList() {
-        let statusList = Stack.getStatusList();
+    async sendStackStatusList() {
+        let statusList = await Stack.getStatusList();
 
         let roomList = this.io.sockets.adapter.rooms.keys();
 
@@ -529,8 +529,15 @@ export class DockgeServer {
         }
     }
 
-    getDockerNetworkList() : string[] {
-        let res = childProcess.spawnSync("docker", [ "network", "ls", "--format", "{{.Name}}" ]);
+    async getDockerNetworkList() : Promise<string[]> {
+        let res = await childProcessAsync.spawn("docker", [ "network", "ls", "--format", "{{.Name}}" ], {
+            encoding: "utf-8",
+        });
+
+        if (!res.stdout) {
+            return [];
+        }
+
         let list = res.stdout.toString().split("\n");
 
         // Remove empty string item

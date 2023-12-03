@@ -56,6 +56,9 @@ dependencies:
   mysql2:
     specifier: ~3.6.3
     version: 3.6.3
+  promisify-child-process:
+    specifier: ~4.1.2
+    version: 4.1.2
   redbean-node:
     specifier: ~0.3.3
     version: 0.3.3(mysql2@3.6.3)
@@ -3886,6 +3889,11 @@ packages:
       retry: 0.12.0
     dev: false
     optional: true
+
+  /promisify-child-process@4.1.2:
+    resolution: {integrity: sha512-APnkIgmaHNJpkAn7k+CrJSi9WMuff5ctYFbD0CO2XIPkM8yO7d/ShouU2clywbpHV/DUsyc4bpJCsNgddNtx4g==}
+    engines: {node: '>=8'}
+    dev: false
 
   /proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
