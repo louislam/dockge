@@ -101,7 +101,7 @@ export class TerminalSocketHandler extends SocketHandler {
                 log.debug("interactiveTerminal", "Service name: " + serviceName);
 
                 // Get stack
-                const stack = Stack.getStack(server, stackName);
+                const stack = await Stack.getStack(server, stackName);
                 stack.joinContainerTerminal(socket, serviceName, shell);
 
                 callback({
@@ -151,7 +151,7 @@ export class TerminalSocketHandler extends SocketHandler {
                     throw new ValidationError("Stack name must be a string.");
                 }
 
-                const stack = Stack.getStack(server, stackName);
+                const stack = await Stack.getStack(server, stackName);
                 await stack.leaveCombinedTerminal(socket);
 
                 callback({
