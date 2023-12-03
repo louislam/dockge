@@ -12,7 +12,7 @@
     "registry": "Registro",
     "compose": "Compose",
     "addFirstStackMsg": "Componi il tuo primo stack!",
-    "stackName" : "Nome dello stack",
+    "stackName": "Nome dello stack",
     "deployStack": "Deploy",
     "deleteStack": "Cancella",
     "stopStack": "Stop",
@@ -23,7 +23,7 @@
     "editStack": "Modifica",
     "discardStack": "Annulla",
     "saveStackDraft": "Salva",
-    "notAvailableShort" : "N/D",
+    "notAvailableShort": "N/D",
     "deleteStackMsg": "Sei sicuro di voler eliminare questo stack?",
     "stackNotManagedByDockgeMsg": "Questo stack non è gestito da Dockge.",
     "primaryHostname": "Hostname primario",
@@ -91,5 +91,11 @@
     "Allowed commands:": "Comandi permessi:",
     "Internal Networks": "Reti interne",
     "External Networks": "Reti esterne",
-    "No External Networks": "Nessuna rete esterna"
+    "No External Networks": "Nessuna rete esterna",
+    "reverseProxyMsg1": "Utilizzando un proxy inverso?",
+    "reverseProxyMsg2": "Controlla come configurarlo per WebSocket",
+    "Cannot connect to the socket server.": "Impossibile connettersi al server socket.",
+    "connecting...": "Connessione al server socket…",
+    "extra": "Extra",
+    "reconnecting...": "Riconnessione…"
 }
