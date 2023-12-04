@@ -99,6 +99,15 @@ export class Stack {
 
         // Check YAML format
         yaml.parse(this.composeYAML);
+
+        let lines = this.composeENV.split("\n");
+
+        // Check if the .env is able to pass docker-compose
+        // Prevent "setenv: The parameter is incorrect"
+        // It only happens when there is one line and it doesn't contain "="
+        if (lines.length === 1 && !lines[0].includes("=")) {
+            throw new ValidationError("Invalid .env format");
+        }
     }
 
     get composeYAML() : string {

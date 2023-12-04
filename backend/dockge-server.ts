@@ -32,6 +32,8 @@ import User from "./models/user";
 import childProcessAsync from "promisify-child-process";
 import { Terminal } from "./terminal";
 
+import "dotenv/config";
+
 export class DockgeServer {
     app : Express;
     httpServer : http.Server;
