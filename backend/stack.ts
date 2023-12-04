@@ -167,8 +167,11 @@ export class Stack {
 
         // Write or overwrite the compose.yaml
         fs.writeFileSync(path.join(dir, this._composeFileName), this.composeYAML);
+
         // Write or overwrite the .env
-        fs.writeFileSync(path.join(dir, ".env"), this.composeENV);
+        if (this.composeENV.trim() !== "") {
+            fs.writeFileSync(path.join(dir, ".env"), this.composeENV);
+        }
     }
 
     async deploy(socket? : DockgeSocket) : Promise<number> {
