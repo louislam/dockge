@@ -234,7 +234,7 @@ export class DockerSocketHandler extends SocketHandler {
         socket.on("getDockerNetworkList", async (callback) => {
             try {
                 checkLogin(socket);
-                const dockerNetworkList = server.getDockerNetworkList();
+                const dockerNetworkList = await server.getDockerNetworkList();
                 callback({
                     ok: true,
                     dockerNetworkList,
