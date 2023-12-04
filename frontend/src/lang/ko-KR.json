@@ -90,5 +90,13 @@
     "Allowed commands:": "허용된 명령어:",
     "Internal Networks": "내부 네트워크",
     "External Networks": "외부 네트워크",
-    "No External Networks": "외부 네트워크 없음"
+    "No External Networks": "외부 네트워크 없음",
+    "reverseProxyMsg2": "여기서 WebSocket을 위한 설정을 확인해 보세요",
+    "downStack": "정지 & Down",
+    "reverseProxyMsg1": "리버스 프록시를 사용하고 계신가요?",
+    "Cannot connect to the socket server.": "소켓 서버에 연결하지 못했습니다.",
+    "connecting...": "소켓 서버에 연결하는 중…",
+    "extra": "기타",
+    "url": "URL | URL",
+    "reconnecting...": "재연결 중…"
 }

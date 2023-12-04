@@ -17,7 +17,7 @@
     "editStack": "編集",
     "discardStack": "破棄",
     "saveStackDraft": "保存",
-    "stackNotManagedByDockgeMsg": "このスタックはDockageによって管理されていません。",
+    "stackNotManagedByDockgeMsg": "このスタックはDockgeによって管理されていません。",
     "general": "一般",
     "scanFolder": "スタックフォルダをスキャン",
     "dockerImage": "イメージ",
