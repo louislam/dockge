@@ -5,6 +5,7 @@ import { log } from "./log";
 import { ERROR_TYPE_VALIDATION } from "./util-common";
 import { R } from "redbean-node";
 import { verifyPassword } from "./password-hash";
+import fs from "fs";
 
 export interface JWTDecoded {
     username : string;
@@ -81,4 +82,10 @@ export async function doubleCheckPassword(socket : DockgeSocket, currentPassword
     }
 
     return user;
+}
+
+export function fileExists(file : string) {
+    return fs.promises.access(file, fs.constants.F_OK)
+        .then(() => true)
+        .catch(() => false);
 }

@@ -1,8 +1,8 @@
 import { DockgeServer } from "./dockge-server";
-import fs from "fs";
+import fs, { promises as fsAsync } from "fs";
 import { log } from "./log";
 import yaml from "yaml";
-import { DockgeSocket, ValidationError } from "./util-server";
+import { DockgeSocket, fileExists, ValidationError } from "./util-server";
 import path from "path";
 import {
     COMBINED_TERMINAL_COLS,
@@ -105,7 +105,7 @@ export class Stack {
         // Check if the .env is able to pass docker-compose
         // Prevent "setenv: The parameter is incorrect"
         // It only happens when there is one line and it doesn't contain "="
-        if (lines.length === 1 && !lines[0].includes("=")) {
+        if (lines.length === 1 && !lines[0].includes("=") && lines[0].length > 0) {
             throw new ValidationError("Invalid .env format");
         }
     }
@@ -155,31 +155,34 @@ export class Stack {
      * Save the stack to the disk
      * @param isAdd
      */
-    save(isAdd : boolean) {
+    async save(isAdd : boolean) {
         this.validate();
 
         let dir = this.path;
 
         // Check if the name is used if isAdd
         if (isAdd) {
-            if (fs.existsSync(dir)) {
+            if (await fileExists(dir)) {
                 throw new ValidationError("Stack name already exists");
             }
 
             // Create the stack folder
-            fs.mkdirSync(dir);
+            await fsAsync.mkdir(dir);
         } else {
-            if (!fs.existsSync(dir)) {
+            if (!await fileExists(dir)) {
                 throw new ValidationError("Stack not found");
             }
         }
 
         // Write or overwrite the compose.yaml
-        fs.writeFileSync(path.join(dir, this._composeFileName), this.composeYAML);
+        await fsAsync.writeFile(path.join(dir, this._composeFileName), this.composeYAML);
+
+        const envPath = path.join(dir, ".env");
 
         // Write or overwrite the .env
-        if (this.composeENV.trim() !== "") {
-            fs.writeFileSync(path.join(dir, ".env"), this.composeENV);
+        // If .env is not existing and the composeENV is empty, we don't need to write it
+        if (await fileExists(envPath) || this.composeENV.trim() !== "") {
+            await fsAsync.writeFile(envPath, this.composeENV);
         }
     }
 
@@ -200,7 +203,7 @@ export class Stack {
         }
 
         // Remove the stack folder
-        fs.rmSync(this.path, {
+        await fsAsync.rm(this.path, {
             recursive: true,
             force: true
         });
@@ -230,12 +233,12 @@ export class Stack {
             stackList = new Map<string, Stack>();
 
             // Scan the stacks directory, and get the stack list
-            let filenameList = fs.readdirSync(stacksDir);
+            let filenameList = await fsAsync.readdir(stacksDir);
 
             for (let filename of filenameList) {
                 try {
                     // Check if it is a directory
-                    let stat = fs.statSync(path.join(stacksDir, filename));
+                    let stat = await fsAsync.stat(path.join(stacksDir, filename));
                     if (!stat.isDirectory()) {
                         continue;
                     }
@@ -326,7 +329,7 @@ export class Stack {
         let dir = path.join(server.stacksDir, stackName);
 
         if (!skipFSOperations) {
-            if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
+            if (!await fileExists(dir) || !(await fsAsync.stat(dir)).isDirectory()) {
                 // Maybe it is a stack managed by docker compose directly
                 let stackList = await this.getStackList(server, true);
                 let stack = stackList.get(stackName);
