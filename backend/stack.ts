@@ -297,7 +297,12 @@ export class Stack {
         let res = await childProcessAsync.spawn("docker", [ "compose", "ls", "--all", "--format", "json" ], {
             encoding: "utf-8",
         });
-        let composeList = JSON.parse(res.toString());
+
+        if (!res.stdout) {
+            return statusList;
+        }
+
+        let composeList = JSON.parse(res.stdout.toString());
 
         for (let composeStack of composeList) {
             statusList.set(composeStack.Name, this.statusConvert(composeStack.Status));
