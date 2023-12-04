@@ -12,7 +12,7 @@ export class DockerSocketHandler extends SocketHandler {
         socket.on("deployStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
             try {
                 checkLogin(socket);
-                const stack = this.saveStack(socket, server, name, composeYAML, composeENV, isAdd);
+                const stack = await this.saveStack(socket, server, name, composeYAML, composeENV, isAdd);
                 await stack.deploy(socket);
                 server.sendStackList();
                 callback({
@@ -264,7 +264,7 @@ export class DockerSocketHandler extends SocketHandler {
         });
     }
 
-    saveStack(socket : DockgeSocket, server : DockgeServer, name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown) : Stack {
+    async saveStack(socket : DockgeSocket, server : DockgeServer, name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown) : Promise<Stack> {
         // Check types
         if (typeof(name) !== "string") {
             throw new ValidationError("Name must be a string");
@@ -280,7 +280,7 @@ export class DockerSocketHandler extends SocketHandler {
         }
 
         const stack = new Stack(server, name, composeYAML, composeENV, false);
-        stack.save(isAdd);
+        await stack.save(isAdd);
         return stack;
     }
 
