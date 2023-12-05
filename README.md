@@ -131,7 +131,7 @@ Be sure to read the [guide](https://github.com/louislam/dockge/blob/master/CONTR
 
 #### "Dockge"?
 
-"Dockge" is a coinage word which is created by myself. I hope it sounds like `Dodge`.
+"Dockge" is a coinage word which is created by myself. I originally hoped it sounds like `Dodge`, but apparently many people called it `Dockage`, it is also acceptable.
 
 The naming idea came from Twitch emotes like `sadge`, `bedge` or `wokege`. They all end in `-ge`.
 
