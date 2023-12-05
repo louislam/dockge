@@ -92,7 +92,7 @@
     "External Networks": "外部網路",
     "No External Networks": "無外部網路",
     "downStack": "停止",
-    "reverseProxyMsg1": "在使用反向代理吗？",
+    "reverseProxyMsg1": "在使用反向代理嗎？",
     "reverseProxyMsg2": "點擊這裡了解如何為 WebSocket 配置反向代理",
     "Cannot connect to the socket server.": "無法連接到 Socket 伺服器。",
     "reconnecting...": "重新連線中…",
