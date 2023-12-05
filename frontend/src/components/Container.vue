@@ -241,12 +241,46 @@ export default defineComponent({
     },
     methods: {
         parsePort(port) {
+            port = this.interpretField(port);
             let hostname = this.$root.info.primaryHostname || location.hostname;
             return parseDockerPort(port, hostname);
         },
         remove() {
             delete this.jsonObject.services[this.name];
         },
+        getEnvFileValue(key, defaultValue) {
+            let pattern = RegExp(`^${key}\\s*[=:]\\s*(?<value>.*(?=\\s#)|.*$)`, "mgi");
+            let match = pattern.exec(this.$parent.$parent.stack.composeENV);
+            let value = defaultValue;
+            if (match) {
+                value = match[1].trim(); // remove outer whitespace
+                // If wrapped in quotes, remove and unescape matching quotes
+                match = /^(['"])(.*(?<!\\))\1$/.exec(value);
+                if (match) {
+                    value = match[2].replace("\\" + match[1], match[1]);
+                }
+            }
+            return value;
+        },
+        interpretField(value) {
+            let pattern = /(?<!\$)\$(?:\{(?<fullname>.*?)\}|(?<name>\w+))/g;
+            let match;
+            while ((match = pattern.exec(value)) !== null) {
+                pattern.lastIndex = 0;
+                let name = match.groups.name;
+                let defaultValue = "";
+                if (!name) {
+                    name = match.groups.fullname.match(/^\w+/)[0];
+                    let defaultValueMatch = match.groups.fullname.match(/-(.*)$/);
+                    if (defaultValueMatch) {
+                        defaultValue = defaultValueMatch[1];
+                    }
+                }
+                let envValue = this.getEnvFileValue(name, defaultValue);
+                value = value.substring(0, match.index) + envValue + value.substring(match.index + match[0].length);
+            }
+            return value;
+        }
     }
 });
 </script>
