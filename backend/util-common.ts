@@ -340,3 +340,51 @@ export function parseDockerPort(input : string, defaultHostname : string = "loca
         display: display,
     };
 }
+
+/**
+ * Finds the value of a variable in the contents of the .env file
+ * @param key ENV Var to search for
+ * @param defaultValue Default
+ * @param fromEnv The contents, not the path
+ * @returns string value
+ */
+export function getEnvFileValue(key : string, defaultValue : string, fromEnv : string) {
+    let pattern = RegExp(`^${key}\\s*[=:]\\s*(?<value>.*(?=\\s#)|.*$)`, "mgi");
+    let match = pattern.exec(fromEnv);
+    let value = defaultValue;
+    if (match) {
+        value = match[1].trim(); // remove outer whitespace
+        // If wrapped in quotes, remove and unescape matching quotes
+        match = /^(['"])(.*(?<!\\))\1$/.exec(value);
+        if (match) {
+            value = match[2].replace("\\" + match[1], match[1]);
+        }
+    }
+    return value;
+}
+
+/**
+ * Replaces the $TOKEN's in a string with the values from .env or their specified default value
+ * @param value String the $TOKEN's
+ * @param fromEnv Contents of .env file
+ * @returns string with tokens replaced with values
+ */
+export function interpretField(value : string, fromEnv : string) {
+    let pattern = /(?<!\$)\$(?:\{(?<fullname>.*?)\}|(?<name>\w+))/g;
+    let match;
+    while ((match = pattern.exec(value)) !== null) {
+        pattern.lastIndex = 0;
+        let name = match.groups?.name;
+        let defaultValue = "";
+        if (!name) {
+            name = match.groups?.fullname.match(/^\w+/)![0];
+            let defaultValueMatch = match.groups?.fullname.match(/-(.*)$/);
+            if (defaultValueMatch) {
+                defaultValue = defaultValueMatch[1];
+            }
+        }
+        let envValue = getEnvFileValue(name!, defaultValue, fromEnv);
+        value = value.substring(0, match.index) + envValue + value.substring(match.index + match[0].length);
+    }
+    return value;
+}
