@@ -196,7 +196,7 @@ export class DockgeServer {
             cors,
             allowRequest: (req, callback) => {
                 let isOriginValid = true;
-                const bypass = isDev || process.env.UPTIME_KUMA_WS_ORIGIN_CHECK === "bypass";
+                const bypass = isDev;
 
                 if (!bypass) {
                     let host = req.headers.host;
