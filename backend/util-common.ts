@@ -1,13 +1,17 @@
 /*
  * Common utilities for backend and frontend
  */
-import { Document } from "yaml";
+import yaml, { Document, Pair, Scalar } from "yaml";
+import dotenv, { DotenvParseOutput } from "dotenv";
+// @ts-ignore
+import envsub from "envsub";
 
 // Init dayjs
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import relativeTime from "dayjs/plugin/relativeTime";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(relativeTime);
@@ -340,3 +344,71 @@ export function parseDockerPort(input : string, defaultHostname : string = "loca
         display: display,
     };
 }
+
+/**
+ * Traverse all values in the yaml and for each value, if there are template variables, replace it environment variables
+ * @param content Yaml string
+ * @param env Environment variables
+ * @returns string Yaml string with environment variables replaced
+ */
+export function renderYAML(content : string, env : DotenvParseOutput) : string {
+    const doc = yaml.parseDocument(content);
+    if (doc.contents) {
+        // @ts-ignore
+        for (const item of doc.contents.items) {
+            traverseYAML(item, env);
+        }
+    }
+    return doc.toString();
+}
+
+export function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
+    // @ts-ignore
+    if (pair.value && pair.value.items) {
+        // @ts-ignore
+        for (const item of pair.value.items) {
+            if (item instanceof Pair) {
+                traverseYAML(item, env);
+            } else if (item instanceof Scalar) {
+                item.value = "CAN_READ!";
+            }
+        }
+    // @ts-ignore
+    } else if (pair.value && typeof(pair.value.value) === "string") {
+        // @ts-ignore
+        pair.value.value = "CAN_READ!";
+    }
+}
+
+const config = dotenv.parse(`TEST=123
+`);
+
+let test = renderYAML(`
+x-dockge:
+  icon: null
+  author: null
+  repo: ""
+  a: 1\${C}
+  urls:
+    - https://louislam.net:3000/test.php?aaa=232&bbb=23
+    - http://uptime.kuma.pet
+    - ""
+version: "3.8"
+services:
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - 8080\${C:-:}80
+    environment: []
+    networks: []
+    depends_on: []
+  nginx2:
+    image: nginx:latest
+    restart: unless-stopped
+networks:
+  asdsd: {}
+`, config);
+
+console.log(test);
+
