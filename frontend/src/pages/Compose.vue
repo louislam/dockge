@@ -622,7 +622,7 @@ export default {
                         greedy: true
                     },
                     "keyword": {
-                        pattern: /^[^ :=]*(?=[:=])/m,
+                        pattern: /^\w*(?=[:=])/m,
                         greedy: true
                     },
                     "value": {
