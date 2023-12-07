@@ -194,6 +194,39 @@ export class DockgeServer {
         // Create Socket.io
         this.io = new socketIO.Server(this.httpServer, {
             cors,
+            allowRequest: (req, callback) => {
+                let isOriginValid = true;
+                const bypass = isDev || process.env.UPTIME_KUMA_WS_ORIGIN_CHECK === "bypass";
+
+                if (!bypass) {
+                    let host = req.headers.host;
+
+                    // If this is set, it means the request is from the browser
+                    let origin = req.headers.origin;
+
+                    // If this is from the browser, check if the origin is allowed
+                    if (origin) {
+                        try {
+                            let originURL = new URL(origin);
+
+                            if (host !== originURL.hostname) {
+                                isOriginValid = false;
+                                log.error("auth", `Origin (${origin}) does not match host (${host}), IP: ${req.socket.remoteAddress}`);
+                            }
+                        } catch (e) {
+                            // Invalid origin url, probably not from browser
+                            isOriginValid = false;
+                            log.error("auth", `Invalid origin url (${origin}), IP: ${req.socket.remoteAddress}`);
+                        }
+                    } else {
+                        log.info("auth", `Origin is not set, IP: ${req.socket.remoteAddress}`);
+                    }
+                } else {
+                    log.debug("auth", "Origin check is bypassed");
+                }
+
+                callback(null, isOriginValid);
+            }
         });
 
         this.io.on("connection", async (socket: Socket) => {
