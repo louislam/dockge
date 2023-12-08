@@ -148,13 +148,13 @@ Yes, you can. However, you need to move your compose file into the stacks direct
 3. In Dockge, click the " Scan Stacks Folder" button in the top-right corner's dropdown menu
 4. Now you should see your stack in the list
 
-#### Is Dockge a Portainer replcement?
+#### Is Dockge a Portainer replacement?
 
 Yes or no. Portainer provides a lot of Docker features. While Dockge is currently only focusing on docker-compose with a better user interface and better user experience.
 
 If you want to manage your container with docker-compose only, the answer may be yes.
 
-If you still need to manage something like docker networks, signle containers, the answer may be no.
+If you still need to manage something like docker networks, single containers, the answer may be no.
 
 #### Can I install both Dockge and Portainer?
 
