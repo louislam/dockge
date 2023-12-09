@@ -209,7 +209,7 @@ export class DockgeServer {
                         try {
                             let originURL = new URL(origin);
 
-                            if (host !== originURL.hostname) {
+                            if (host !== originURL.host) {
                                 isOriginValid = false;
                                 log.error("auth", `Origin (${origin}) does not match host (${host}), IP: ${req.socket.remoteAddress}`);
                             }
