@@ -2,15 +2,15 @@
  * Common utilities for backend and frontend
  */
 import yaml, { Document, Pair, Scalar } from "yaml";
-import dotenv, { DotenvParseOutput } from "dotenv";
-// @ts-ignore
-import envsub from "envsub";
+import { DotenvParseOutput } from "dotenv";
 
 // Init dayjs
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import relativeTime from "dayjs/plugin/relativeTime";
+// @ts-ignore
+import { replaceVariablesSync } from "@inventage/envsubst";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -345,13 +345,18 @@ export function parseDockerPort(input : string, defaultHostname : string = "loca
     };
 }
 
+export function envsubst(string : string, variables : LooseObject) : string {
+    return replaceVariablesSync(string, variables)[0];
+}
+
 /**
  * Traverse all values in the yaml and for each value, if there are template variables, replace it environment variables
+ * Emulates the behavior of how docker-compose handles environment variables in yaml files
  * @param content Yaml string
  * @param env Environment variables
  * @returns string Yaml string with environment variables replaced
  */
-export function renderYAML(content : string, env : DotenvParseOutput) : string {
+export function envsubstYAML(content : string, env : DotenvParseOutput) : string {
     const doc = yaml.parseDocument(content);
     if (doc.contents) {
         // @ts-ignore
@@ -362,7 +367,12 @@ export function renderYAML(content : string, env : DotenvParseOutput) : string {
     return doc.toString();
 }
 
-export function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
+/**
+ * Used for envsubstYAML(...)
+ * @param pair
+ * @param env
+ */
+function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
     // @ts-ignore
     if (pair.value && pair.value.items) {
         // @ts-ignore
@@ -370,45 +380,12 @@ export function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
             if (item instanceof Pair) {
                 traverseYAML(item, env);
             } else if (item instanceof Scalar) {
-                item.value = "CAN_READ!";
+                item.value = envsubst(item.value, env);
             }
         }
     // @ts-ignore
     } else if (pair.value && typeof(pair.value.value) === "string") {
         // @ts-ignore
-        pair.value.value = "CAN_READ!";
+        pair.value.value = envsubst(pair.value.value, env);
     }
 }
-
-const config = dotenv.parse(`TEST=123
-`);
-
-let test = renderYAML(`
-x-dockge:
-  icon: null
-  author: null
-  repo: ""
-  a: 1\${C}
-  urls:
-    - https://louislam.net:3000/test.php?aaa=232&bbb=23
-    - http://uptime.kuma.pet
-    - ""
-version: "3.8"
-services:
-  nginx:
-    image: nginx:latest
-    restart: unless-stopped
-    ports:
-      - 8080\${C:-:}80
-    environment: []
-    networks: []
-    depends_on: []
-  nginx2:
-    image: nginx:latest
-    restart: unless-stopped
-networks:
-  asdsd: {}
-`, config);
-
-console.log(test);
-

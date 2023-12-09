@@ -9,7 +9,7 @@
                 <div v-if="!isEditMode">
                     <span class="badge me-1" :class="bgStyle">{{ status }}</span>
 
-                    <a v-for="port in service.ports" :key="port" :href="parsePort(port).url" target="_blank">
+                    <a v-for="port in envsubstService.ports" :key="port" :href="parsePort(port).url" target="_blank">
                         <span class="badge me-1 bg-secondary">{{ parsePort(port).display }}</span>
                     </a>
                 </div>
@@ -213,16 +213,29 @@ export default defineComponent({
         jsonObject() {
             return this.$parent.$parent.jsonConfig;
         },
+
+        envsubstJSONConfig() {
+            return this.$parent.$parent.envsubstJSONConfig;
+        },
+
+        envsubstService() {
+            if (!this.envsubstJSONConfig.services[this.name]) {
+                return {};
+            }
+            return this.envsubstJSONConfig.services[this.name];
+        },
+
         imageName() {
-            if (this.service.image) {
-                return this.service.image.split(":")[0];
+            if (this.envsubstService.image) {
+                return this.envsubstService.image.split(":")[0];
             } else {
                 return "";
             }
         },
+
         imageTag() {
-            if (this.service.image) {
-                let tag = this.service.image.split(":")[1];
+            if (this.envsubstService.image) {
+                let tag = this.envsubstService.image.split(":")[1];
 
                 if (tag) {
                     return tag;

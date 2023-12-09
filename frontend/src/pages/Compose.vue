@@ -231,7 +231,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
-    copyYAMLComments,
+    copyYAMLComments, envsubstYAML,
     getCombinedTerminalName,
     getComposeTerminalName,
     PROGRESS_TERMINAL_ROWS,
@@ -239,6 +239,7 @@ import {
 } from "../../../backend/util-common";
 import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
+import dotenv from "dotenv";
 
 const template = `version: "3.8"
 services:
@@ -277,6 +278,7 @@ export default {
         return {
             editorFocus: false,
             jsonConfig: {},
+            envsubstJSONConfig: {},
             yamlError: "",
             processing: true,
             showProgressTerminal: false,
@@ -645,27 +647,40 @@ export default {
             return highlight(code, languages.docker_env);
         },
 
+        yamlToJSON(yaml) {
+            let doc = parseDocument(yaml);
+            if (doc.errors.length > 0) {
+                throw doc.errors[0];
+            }
+
+            const config = doc.toJS() ?? {};
+
+            // Check data types
+            // "services" must be an object
+            if (!config.services) {
+                config.services = {};
+            }
+
+            if (Array.isArray(config.services) || typeof config.services !== "object") {
+                throw new Error("Services must be an object");
+            }
+
+            return {
+                config,
+                doc,
+            };
+        },
+
         yamlCodeChange() {
             try {
-                let doc = parseDocument(this.stack.composeYAML);
-                if (doc.errors.length > 0) {
-                    throw doc.errors[0];
-                }
-
-                const config = doc.toJS() ?? {};
-
-                // Check data types
-                // "services" must be an object
-                if (!config.services) {
-                    config.services = {};
-                }
-
-                if (Array.isArray(config.services) || typeof config.services !== "object") {
-                    throw new Error("Services must be an object");
-                }
+                let { config, doc } = this.yamlToJSON(this.stack.composeYAML);
 
                 this.yamlDoc = doc;
                 this.jsonConfig = config;
+
+                let env = dotenv.parse(this.stack.composeENV);
+                let envYAML = envsubstYAML(this.stack.composeYAML, env);
+                this.envsubstJSONConfig = this.yamlToJSON(envYAML).config;
 
                 clearTimeout(yamlErrorTimeout);
                 this.yamlError = "";
