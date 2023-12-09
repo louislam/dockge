@@ -202,6 +202,10 @@ export default defineComponent({
                     }
                 }
             });
+
+            socket.on("refresh", () => {
+                location.reload();
+            });
         },
 
         /**

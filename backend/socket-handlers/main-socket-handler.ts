@@ -211,6 +211,8 @@ export class MainSocketHandler extends SocketHandler {
                 let user = await doubleCheckPassword(socket, password.currentPassword);
                 await user.resetPassword(password.newPassword);
 
+                server.disconnectAllSocketClient(user.id, socket.id);
+
                 callback({
                     ok: true,
                     msg: "Password has been updated successfully.",

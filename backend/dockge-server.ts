@@ -605,9 +605,33 @@ export class DockgeServer {
     }
 
     /**
-     * Final function called before application exits
+     * Force connected sockets of a user to refresh and disconnect.
+     * Used for resetting password.
+     * @param {string} userID
+     * @param {string?} currentSocketID
      */
-    finalFunction() {
-        log.info("server", "Graceful shutdown successful!");
+    disconnectAllSocketClient(userID: number, currentSocketID? : string) {
+        for (const rawSocket of this.io.sockets.sockets.values()) {
+            let socket = rawSocket as DockgeSocket;
+            if (socket.userID === userID && socket.id !== currentSocketID) {
+                try {
+                    socket.emit("refresh");
+                    socket.disconnect();
+                } catch (e) {
+
+                }
+            }
+        }
     }
+
+    isSSL() {
+        return this.config.sslKey && this.config.sslCert;
+    }
+
+    getLocalWebSocketURL() {
+        const protocol = this.isSSL() ? "wss" : "ws";
+        const host = this.config.hostname || "localhost";
+        return `${protocol}://${host}:${this.config.port}`;
+    }
+
 }

@@ -17,6 +17,11 @@ export interface LooseObject {
     [key: string]: any
 }
 
+export interface BaseRes {
+    ok: boolean;
+    msg?: string;
+}
+
 let randomBytes : (numBytes: number) => Uint8Array;
 initRandomBytes();
 
