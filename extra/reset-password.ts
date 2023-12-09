@@ -48,6 +48,8 @@ export const main = async () => {
                     // Reset all sessions by reset jwt secret
                     await server.initJWTSecret();
 
+                    console.log("Password reset successfully.");
+
                     // Disconnect all other socket clients of the user
                     await disconnectAllSocketClients(user.username, password);
 
@@ -56,7 +58,6 @@ export const main = async () => {
                     console.log("Passwords do not match, please try again.");
                 }
             }
-            console.log("Password reset successfully.");
         }
     } catch (e) {
         if (e instanceof Error) {

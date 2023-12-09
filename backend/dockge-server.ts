@@ -610,7 +610,7 @@ export class DockgeServer {
      * @param {string} userID
      * @param {string?} currentSocketID
      */
-    disconnectAllSocketClient(userID: number, currentSocketID? : string) {
+    disconnectAllSocketClients(userID: number, currentSocketID? : string) {
         for (const rawSocket of this.io.sockets.sockets.values()) {
             let socket = rawSocket as DockgeSocket;
             if (socket.userID === userID && socket.id !== currentSocketID) {

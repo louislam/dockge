@@ -211,7 +211,7 @@ export class MainSocketHandler extends SocketHandler {
                 let user = await doubleCheckPassword(socket, password.currentPassword);
                 await user.resetPassword(password.newPassword);
 
-                server.disconnectAllSocketClient(user.id, socket.id);
+                server.disconnectAllSocketClients(user.id, socket.id);
 
                 callback({
                     ok: true,
@@ -279,6 +279,18 @@ export class MainSocketHandler extends SocketHandler {
                         ok: false,
                         msg: e.message,
                     });
+                }
+            }
+        });
+
+        // Disconnect all other socket clients of the user
+        socket.on("disconnectOtherSocketClients", async () => {
+            try {
+                checkLogin(socket);
+                server.disconnectAllSocketClients(socket.userID, socket.id);
+            } catch (e) {
+                if (e instanceof Error) {
+                    log.warn("disconnectOtherSocketClients", e.message);
                 }
             }
         });
