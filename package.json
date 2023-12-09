@@ -25,6 +25,7 @@
     },
     "dependencies": {
         "@homebridge/node-pty-prebuilt-multiarch": "~0.11.11",
+        "@inventage/envsubst": "^0.16.0",
         "@louislam/sqlite3": "~15.1.6",
         "bcryptjs": "~2.4.3",
         "check-password-strength": "~2.0.7",
@@ -48,7 +49,7 @@
         "socket.io-client": "~4.7.2",
         "timezones-list": "~3.0.2",
         "ts-command-line-args": "~2.5.1",
-        "tsx": "~3.14.0",
+        "tsx": "~4.6.2",
         "type-fest": "~4.3.3",
         "yaml": "~2.3.4"
     },

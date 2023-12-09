@@ -1,13 +1,17 @@
 /*
  * Common utilities for backend and frontend
  */
-import { Document } from "yaml";
+import yaml, { Document, Pair, Scalar } from "yaml";
+import { DotenvParseOutput } from "dotenv";
 
 // Init dayjs
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import relativeTime from "dayjs/plugin/relativeTime";
+// @ts-ignore
+import { replaceVariablesSync } from "@inventage/envsubst";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(relativeTime);
@@ -339,4 +343,49 @@ export function parseDockerPort(input : string, defaultHostname : string = "loca
         url: protocol + "://" + hostname + ":" + portInt,
         display: display,
     };
+}
+
+export function envsubst(string : string, variables : LooseObject) : string {
+    return replaceVariablesSync(string, variables)[0];
+}
+
+/**
+ * Traverse all values in the yaml and for each value, if there are template variables, replace it environment variables
+ * Emulates the behavior of how docker-compose handles environment variables in yaml files
+ * @param content Yaml string
+ * @param env Environment variables
+ * @returns string Yaml string with environment variables replaced
+ */
+export function envsubstYAML(content : string, env : DotenvParseOutput) : string {
+    const doc = yaml.parseDocument(content);
+    if (doc.contents) {
+        // @ts-ignore
+        for (const item of doc.contents.items) {
+            traverseYAML(item, env);
+        }
+    }
+    return doc.toString();
+}
+
+/**
+ * Used for envsubstYAML(...)
+ * @param pair
+ * @param env
+ */
+function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
+    // @ts-ignore
+    if (pair.value && pair.value.items) {
+        // @ts-ignore
+        for (const item of pair.value.items) {
+            if (item instanceof Pair) {
+                traverseYAML(item, env);
+            } else if (item instanceof Scalar) {
+                item.value = envsubst(item.value, env);
+            }
+        }
+    // @ts-ignore
+    } else if (pair.value && typeof(pair.value.value) === "string") {
+        // @ts-ignore
+        pair.value.value = envsubst(pair.value.value, env);
+    }
 }
