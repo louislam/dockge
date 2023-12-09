@@ -98,5 +98,6 @@
     "reconnecting...": "Reconnecting…",
     "connecting...": "Connecting to the socket server…",
     "url": "URL | URLs",
-    "extra": "Extra"
+    "extra": "Extra",
+    "newUpdate": "New Update"
 }

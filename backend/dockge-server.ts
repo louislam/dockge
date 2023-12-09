@@ -341,6 +341,7 @@ export class DockgeServer {
                 this.sendStackList(true);
             });
 
+            checkVersion.startInterval();
         });
 
         gracefulShutdown(this.httpServer, {
