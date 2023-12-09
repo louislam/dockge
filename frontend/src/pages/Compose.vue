@@ -374,6 +374,17 @@ export default {
             },
             deep: true,
         },
+
+        "stack.composeENV": {
+            handler() {
+                if (this.editorFocus) {
+                    console.debug("env code changed");
+                    this.yamlCodeChange();
+                }
+            },
+            deep: true,
+        },
+
         jsonConfig: {
             handler() {
                 if (!this.editorFocus) {
