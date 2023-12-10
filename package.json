@@ -45,6 +45,7 @@
         "knex": "~2.5.1",
         "limiter-es6-compat": "~2.1.2",
         "mysql2": "~3.6.5",
+        "node-windows": "1.0.0-beta.8",
         "promisify-child-process": "~4.1.2",
         "redbean-node": "~0.3.3",
         "socket.io": "~4.7.2",
@@ -56,8 +57,6 @@
         "yaml": "~2.3.4"
     },
     "devDependencies": {
-        "concurrently": "^8.2.2",
-        "wait-on": "^7.2.0",
         "@actions/github": "^6.0.0",
         "@fontsource/jetbrains-mono": "^5.0.18",
         "@fortawesome/fontawesome-svg-core": "6.4.2",
@@ -75,6 +74,7 @@
         "@vitejs/plugin-vue": "~4.5.2",
         "bootstrap": "5.3.2",
         "bootstrap-vue-next": "~0.14.10",
+        "concurrently": "^8.2.2",
         "cross-env": "~7.0.3",
         "eslint": "~8.50.0",
         "eslint-plugin-jsdoc": "~46.8.2",
@@ -93,6 +93,7 @@
         "vue-qrcode": "~2.2.0",
         "vue-router": "~4.2.5",
         "vue-toastification": "2.0.0-rc.5",
+        "wait-on": "^7.2.0",
         "xterm": "5.4.0-beta.37",
         "xterm-addon-web-links": "~0.9.0"
     }
