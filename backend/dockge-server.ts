@@ -606,6 +606,13 @@ export class DockgeServer {
     }
 
     /**
+     * Final function called before application exits
+     */
+    finalFunction() {
+        log.info("server", "Graceful shutdown successful!");
+    }
+
+    /**
      * Force connected sockets of a user to refresh and disconnect.
      * Used for resetting password.
      * @param {string} userID
