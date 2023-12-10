@@ -10,6 +10,7 @@
         "lint": "eslint \"**/*.{ts,vue}\"",
         "check-ts": "tsc --noEmit",
         "start": "tsx ./backend/index.ts",
+        "dev": "concurrently -k -r \"wait-on tcp:5000 && pnpm run dev:backend \" \"pnpm run dev:frontend\"",
         "dev:backend": "cross-env NODE_ENV=development tsx watch --inspect ./backend/index.ts",
         "dev:frontend": "cross-env NODE_ENV=development vite --host --config ./frontend/vite.config.ts",
         "release-final": "tsx ./extra/test-docker.ts && tsx extra/update-version.ts && pnpm run build:frontend && npm run build:docker",
@@ -54,6 +55,8 @@
         "yaml": "~2.3.4"
     },
     "devDependencies": {
+        "concurrently": "^8.2.2",
+        "wait-on": "^7.2.0",
         "@actions/github": "^6.0.0",
         "@fontsource/jetbrains-mono": "^5.0.18",
         "@fortawesome/fontawesome-svg-core": "6.4.2",
