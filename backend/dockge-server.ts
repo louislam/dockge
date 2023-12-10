@@ -194,6 +194,39 @@ export class DockgeServer {
         // Create Socket.io
         this.io = new socketIO.Server(this.httpServer, {
             cors,
+            allowRequest: (req, callback) => {
+                let isOriginValid = true;
+                const bypass = isDev;
+
+                if (!bypass) {
+                    let host = req.headers.host;
+
+                    // If this is set, it means the request is from the browser
+                    let origin = req.headers.origin;
+
+                    // If this is from the browser, check if the origin is allowed
+                    if (origin) {
+                        try {
+                            let originURL = new URL(origin);
+
+                            if (host !== originURL.host) {
+                                isOriginValid = false;
+                                log.error("auth", `Origin (${origin}) does not match host (${host}), IP: ${req.socket.remoteAddress}`);
+                            }
+                        } catch (e) {
+                            // Invalid origin url, probably not from browser
+                            isOriginValid = false;
+                            log.error("auth", `Invalid origin url (${origin}), IP: ${req.socket.remoteAddress}`);
+                        }
+                    } else {
+                        log.info("auth", `Origin is not set, IP: ${req.socket.remoteAddress}`);
+                    }
+                } else {
+                    log.debug("auth", "Origin check is bypassed");
+                }
+
+                callback(null, isOriginValid);
+            }
         });
 
         this.io.on("connection", async (socket: Socket) => {
@@ -578,4 +611,35 @@ export class DockgeServer {
     finalFunction() {
         log.info("server", "Graceful shutdown successful!");
     }
+
+    /**
+     * Force connected sockets of a user to refresh and disconnect.
+     * Used for resetting password.
+     * @param {string} userID
+     * @param {string?} currentSocketID
+     */
+    disconnectAllSocketClients(userID: number, currentSocketID? : string) {
+        for (const rawSocket of this.io.sockets.sockets.values()) {
+            let socket = rawSocket as DockgeSocket;
+            if (socket.userID === userID && socket.id !== currentSocketID) {
+                try {
+                    socket.emit("refresh");
+                    socket.disconnect();
+                } catch (e) {
+
+                }
+            }
+        }
+    }
+
+    isSSL() {
+        return this.config.sslKey && this.config.sslCert;
+    }
+
+    getLocalWebSocketURL() {
+        const protocol = this.isSSL() ? "wss" : "ws";
+        const host = this.config.hostname || "localhost";
+        return `${protocol}://${host}:${this.config.port}`;
+    }
+
 }

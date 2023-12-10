@@ -4,6 +4,8 @@ import readline from "readline";
 import { User } from "../backend/models/user";
 import { DockgeServer } from "../backend/dockge-server";
 import { log } from "../backend/log";
+import { io } from "socket.io-client";
+import { BaseRes } from "../backend/util-common";
 
 console.log("== Dockge Reset Password Tool ==");
 
@@ -12,11 +14,10 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
+const server = new DockgeServer();
+
 export const main = async () => {
-    const server = new DockgeServer();
-
     // Check if
-
     console.log("Connecting the database");
     try {
         await Database.init(server);
@@ -47,12 +48,16 @@ export const main = async () => {
                     // Reset all sessions by reset jwt secret
                     await server.initJWTSecret();
 
+                    console.log("Password reset successfully.");
+
+                    // Disconnect all other socket clients of the user
+                    await disconnectAllSocketClients(user.username, password);
+
                     break;
                 } else {
                     console.log("Passwords do not match, please try again.");
                 }
             }
-            console.log("Password reset successfully.");
         }
     } catch (e) {
         if (e instanceof Error) {
@@ -75,6 +80,47 @@ function question(question : string) : Promise<string> {
     return new Promise((resolve) => {
         rl.question(question, (answer) => {
             resolve(answer);
+        });
+    });
+}
+
+function disconnectAllSocketClients(username : string, password : string) : Promise<void> {
+    return new Promise((resolve) => {
+        const url = server.getLocalWebSocketURL();
+
+        console.log("Connecting to " + url + " to disconnect all other socket clients");
+
+        // Disconnect all socket connections
+        const socket = io(url, {
+            transports: [ "websocket" ],
+            reconnection: false,
+            timeout: 5000,
+        });
+        socket.on("connect", () => {
+            socket.emit("login", {
+                username,
+                password,
+            }, (res : BaseRes) => {
+                if (res.ok) {
+                    console.log("Logged in.");
+                    socket.emit("disconnectOtherSocketClients");
+                } else {
+                    console.warn("Login failed.");
+                    console.warn("Please restart the server to disconnect all sessions.");
+                }
+                socket.close();
+            });
+        });
+
+        socket.on("connect_error", function () {
+            // The localWebSocketURL is not guaranteed to be working for some complicated Uptime Kuma setup
+            // Ask the user to restart the server manually
+            console.warn("Failed to connect to " + url);
+            console.warn("Please restart the server to disconnect all sessions manually.");
+            resolve();
+        });
+        socket.on("disconnect", () => {
+            resolve();
         });
     });
 }
