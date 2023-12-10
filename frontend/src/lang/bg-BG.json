@@ -12,7 +12,7 @@
     "registry": "Регистър",
     "compose": "Compose",
     "addFirstStackMsg": "Създайте вашия първи стак!",
-    "stackName" : "Име на стак",
+    "stackName": "Име на стак",
     "deployStack": "Разположи",
     "deleteStack": "Изтрий",
     "stopStack": "Спри",
@@ -22,7 +22,7 @@
     "editStack": "Редактирай",
     "discardStack": "Отхвърли",
     "saveStackDraft": "Запази",
-    "notAvailableShort" : "N/A",
+    "notAvailableShort": "N/A",
     "deleteStackMsg": "Сигурни ли сте, че желаете да изтриете този стак?",
     "stackNotManagedByDockgeMsg": "Този стак не се управлява от Dockge.",
     "primaryHostname": "Основно име на хост",
@@ -90,5 +90,13 @@
     "Allowed commands:": "Позволени команди:",
     "Internal Networks": "Вътрешни мрежи",
     "External Networks": "Външни мрежи",
-    "No External Networks": "Не са налични външни мрежи"
+    "No External Networks": "Не са налични външни мрежи",
+    "reverseProxyMsg2": "Проверете как да го конфигурирате за WebSocket",
+    "downStack": "Спри и изключи",
+    "reverseProxyMsg1": "Използвате ревърс прокси?",
+    "Cannot connect to the socket server.": "Не може да се свърже със сокет сървъра.",
+    "url": "URL адрес | URL адреси",
+    "extra": "Допълнително",
+    "reconnecting...": "Повторно свързване…",
+    "connecting...": "Свързване със сокет сървъра…"
 }
