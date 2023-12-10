@@ -10,10 +10,10 @@
     "home": "Home",
     "console": "Console",
     "registry": "Registro",
-    "compose": "Compose",
+    "compose": "Componi",
     "addFirstStackMsg": "Componi il tuo primo stack!",
     "stackName": "Nome dello stack",
-    "deployStack": "Deploy",
+    "deployStack": "Rilascia",
     "deleteStack": "Cancella",
     "stopStack": "Stop",
     "restartStack": "Riavvia",
@@ -75,7 +75,7 @@
     "Also check beta release": "Controlla anche le release in beta",
     "Remember me": "Ricordami",
     "Login": "Login",
-    "Username": "Username",
+    "Username": "Nome Utente",
     "Password": "Password",
     "Settings": "Impostazioni",
     "Logout": "Logout",
@@ -97,5 +97,6 @@
     "Cannot connect to the socket server.": "Impossibile connettersi al server socket.",
     "connecting...": "Connessione al server socket…",
     "extra": "Extra",
-    "reconnecting...": "Riconnessione…"
+    "reconnecting...": "Riconnessione…",
+    "url": "Indirizzo | Indirizzi"
 }
