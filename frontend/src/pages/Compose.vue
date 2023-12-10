@@ -299,12 +299,12 @@ export default {
     computed: {
 
         urls() {
-            if (!this.jsonConfig["x-dockge"] || !this.jsonConfig["x-dockge"].urls || !Array.isArray(this.jsonConfig["x-dockge"].urls)) {
+            if (!this.envsubstJSONConfig["x-dockge"] || !this.envsubstJSONConfig["x-dockge"].urls || !Array.isArray(this.envsubstJSONConfig["x-dockge"].urls)) {
                 return [];
             }
 
             let urls = [];
-            for (const url of this.jsonConfig["x-dockge"].urls) {
+            for (const url of this.envsubstJSONConfig["x-dockge"].urls) {
                 let display;
                 try {
                     let obj = new URL(url);
