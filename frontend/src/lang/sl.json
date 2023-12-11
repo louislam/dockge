@@ -90,5 +90,10 @@
     "Allowed commands:": "Dovoljeni ukazi:",
     "Internal Networks": "Notranja omrežja",
     "External Networks": "Zunanja omrežja",
-    "No External Networks": "Ni zunanjih omrežij"
+    "No External Networks": "Ni zunanjih omrežij",
+    "downStack": "Ustavi & Odstrani",
+    "connecting...": "Povezovanje s strežnikom…",
+    "reverseProxyMsg1": "Uporabljate obratni proxy?",
+    "extra": "Dodatno",
+    "reconnecting...": "Ponovna povezava …"
 }
