@@ -91,5 +91,12 @@
     "Allowed commands:": "คำสั่งที่อนุญาต:",
     "Internal Networks": "เครือข่ายภายใน",
     "External Networks": "เครือข่ายภายนอก",
-    "No External Networks": "ไม่มีเครือข่ายภายนอก"
+    "No External Networks": "ไม่มีเครือข่ายภายนอก",
+    "reverseProxyMsg2": "ตรวจสอบวิธีกำหนดค่าสำหรับ WebSocket",
+    "Cannot connect to the socket server.": "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ socket ได้",
+    "reverseProxyMsg1": "ใช้ Reverse Proxy หรือไม่?",
+    "connecting...": "กำลังเชื่อมต่อกับเซิร์ฟเวอร์ socket…",
+    "url": "URL | URLs",
+    "extra": "พิเศษ",
+    "reconnecting...": "กำลังเชื่อมต่อใหม่…"
 }
