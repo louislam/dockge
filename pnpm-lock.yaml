@@ -86,6 +86,9 @@ dependencies:
   type-fest:
     specifier: ~4.3.3
     version: 4.3.3
+  xterm-addon-fit:
+    specifier: ^0.8.0
+    version: 0.8.0(xterm@5.4.0-beta.37)
   yaml:
     specifier: ~2.3.4
     version: 2.3.4
@@ -5524,6 +5527,14 @@ packages:
     engines: {node: '>=0.4.0'}
     dev: false
 
+  /xterm-addon-fit@0.8.0(xterm@5.4.0-beta.37):
+    resolution: {integrity: sha512-yj3Np7XlvxxhYF/EJ7p3KHaMt6OdwQ+HDu573Vx1lRXsVxOcnVJs51RgjZOouIZOczTsskaS+CpXspK81/DLqw==}
+    peerDependencies:
+      xterm: ^5.0.0
+    dependencies:
+      xterm: 5.4.0-beta.37
+    dev: false
+
   /xterm-addon-web-links@0.9.0(xterm@5.4.0-beta.37):
     resolution: {integrity: sha512-LIzi4jBbPlrKMZF3ihoyqayWyTXAwGfu4yprz1aK2p71e9UKXN6RRzVONR0L+Zd+Ik5tPVI9bwp9e8fDTQh49Q==}
     peerDependencies:
@@ -5534,7 +5545,6 @@ packages:
 
   /xterm@5.4.0-beta.37:
     resolution: {integrity: sha512-ys+mXqLFrJc7khmYN/MgBnfLv38NgXfkwkEXsCZKHGqn3h2xUBvTvsrSEWO3NQeDPLj4zMr1RwqTblMK9St3BA==}
-    dev: true
 
   /y18n@4.0.3:
     resolution: {integrity: sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==}

@@ -6,6 +6,7 @@
 
 <script>
 import { Terminal } from "xterm";
+import { FitAddon } from 'xterm-addon-fit';
 import { WebLinksAddon } from "xterm-addon-web-links";
 import { TERMINAL_COLS, TERMINAL_ROWS } from "../../../backend/util-common";
 
@@ -58,7 +59,7 @@ export default {
             default: "displayOnly",
         }
     },
-    emits: [ "has-data" ],
+    emits: ["has-data"],
     data() {
         return {
             first: true,
@@ -83,7 +84,6 @@ export default {
             cols: this.cols,
             rows: this.rows,
         });
-
         if (this.mode === "mainTerminal") {
             this.mainTerminalConfig();
         } else if (this.mode === "interactive") {
@@ -95,6 +95,9 @@ export default {
         // Bind to a div
         this.terminal.open(this.$refs.terminal);
         this.terminal.focus();
+
+        // Fit the terminal width to the div container size.
+        this.updateTerminalSize();
 
         // Notify parent component when data is received
         this.terminal.onCursorMove(() => {
@@ -208,7 +211,22 @@ export default {
                     }
                 });
             });
-        }
+        },
+
+        /**
+         * Update the terminal size to fit the container size.
+         *
+         * If the terminalFitAddOn is not created, creates it, loads it and then fit the terminal to the appropriate size.
+         *
+         * Todo: This method is called when the terminal is mounted, but it is not called when the terminal is resized.
+         */
+        updateTerminalSize() {
+            if (!Object.hasOwn(this, "terminalFitAddOn")) {
+                this.terminalFitAddOn = new FitAddon();
+                this.terminal.loadAddon(this.terminalFitAddOn);
+            }
+            this.terminalFitAddOn.fit();
+        },
     }
 };
 </script>
