@@ -6,7 +6,7 @@
 
 <script>
 import { Terminal } from "xterm";
-import { FitAddon } from 'xterm-addon-fit';
+import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "xterm-addon-web-links";
 import { TERMINAL_COLS, TERMINAL_ROWS } from "../../../backend/util-common";
 
@@ -59,7 +59,7 @@ export default {
             default: "displayOnly",
         }
     },
-    emits: ["has-data"],
+    emits: [ "has-data" ],
     data() {
         return {
             first: true,
