@@ -10,23 +10,23 @@ import {
     allowedRawKeys,
     getComposeTerminalName, getContainerExecTerminalName,
     isDev,
-    PROGRESS_TERMINAL_ROWS,
+    PROGRESS_TERMINAL_ROWS
 } from "../util-common";
 import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
 import { Stack } from "../stack";
 
 export class TerminalSocketHandler extends SocketHandler {
-    create(socket: DockgeSocket, server: DockgeServer) {
+    create(socket : DockgeSocket, server : DockgeServer) {
 
-        socket.on("terminalInput", async (terminalName: unknown, cmd: unknown, errorCallback) => {
+        socket.on("terminalInput", async (terminalName : unknown, cmd : unknown, errorCallback) => {
             try {
                 checkLogin(socket);
 
-                if (typeof terminalName !== "string") {
+                if (typeof(terminalName) !== "string") {
                     throw new Error("Terminal name must be a string.");
                 }
 
-                if (typeof cmd !== "string") {
+                if (typeof(cmd) !== "string") {
                     throw new Error("Command must be a string.");
                 }
 
@@ -35,9 +35,7 @@ export class TerminalSocketHandler extends SocketHandler {
                     //log.debug("terminalInput", "Terminal found, writing to terminal.");
                     terminal.write(cmd);
                 } else {
-                    throw new Error(
-                        "Terminal not found or it is not a Interactive Terminal."
-                    );
+                    throw new Error("Terminal not found or it is not a Interactive Terminal.");
                 }
             } catch (e) {
                 if (e instanceof Error) {
@@ -57,7 +55,7 @@ export class TerminalSocketHandler extends SocketHandler {
                 // TODO: Reset the name here, force one main terminal for now
                 terminalName = "console";
 
-                if (typeof terminalName !== "string") {
+                if (typeof(terminalName) !== "string") {
                     throw new ValidationError("Terminal name must be a string.");
                 }
 
@@ -87,30 +85,20 @@ export class TerminalSocketHandler extends SocketHandler {
             try {
                 checkLogin(socket);
 
-                if (typeof stackName !== "string") {
-                    throw new ValidationError(
-                        "Stack name must be a string."
-                    );
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string.");
                 }
 
-                if (typeof serviceName !== "string") {
-                    throw new ValidationError(
-                        "Service name must be a string."
-                    );
+                if (typeof(serviceName) !== "string") {
+                    throw new ValidationError("Service name must be a string.");
                 }
 
-                if (typeof shell !== "string") {
+                if (typeof(shell) !== "string") {
                     throw new ValidationError("Shell must be a string.");
                 }
 
-                log.debug(
-                    "interactiveTerminal",
-                    "Stack name: " + stackName
-                );
-                log.debug(
-                    "interactiveTerminal",
-                    "Service name: " + serviceName
-                );
+                log.debug("interactiveTerminal", "Stack name: " + stackName);
+                log.debug("interactiveTerminal", "Service name: " + serviceName);
 
                 // Get stack
                 const stack = await Stack.getStack(server, stackName);
@@ -137,7 +125,7 @@ export class TerminalSocketHandler extends SocketHandler {
                     throw new ValidationError("Terminal name must be a string.");
                 }
 
-                let buffer: string = Terminal.getTerminal(terminalName)?.getBuffer() ?? "";
+                let buffer : string = Terminal.getTerminal(terminalName)?.getBuffer() ?? "";
 
                 if (!buffer) {
                     log.debug("console", "No buffer found.");
@@ -153,16 +141,14 @@ export class TerminalSocketHandler extends SocketHandler {
         });
 
         // Leave Combined Terminal
-        socket.on("leaveCombinedTerminal", async (stackName: unknown, callback) => {
+        socket.on("leaveCombinedTerminal", async (stackName : unknown, callback) => {
             try {
                 checkLogin(socket);
 
                 log.debug("leaveCombinedTerminal", "Stack name: " + stackName);
 
                 if (typeof(stackName) !== "string") {
-                    throw new ValidationError(
-                        "Stack name must be a string."
-                    );
+                    throw new ValidationError("Stack name must be a string.");
                 }
 
                 const stack = await Stack.getStack(server, stackName);
