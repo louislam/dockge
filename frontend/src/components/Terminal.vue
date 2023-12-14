@@ -96,8 +96,6 @@ export default {
         this.terminal.open(this.$refs.terminal);
         this.terminal.focus();
 
-        // Fit the terminal width to the div container size.
-
         // Notify parent component when data is received
         this.terminal.onCursorMove(() => {
             console.debug("onData triggered");
@@ -124,7 +122,7 @@ export default {
                 }
             });
         }
-
+        // Fit the terminal width to the div container size after terminal is created.
         this.updateTerminalSize();
     },
 
