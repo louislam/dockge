@@ -136,7 +136,7 @@ export class Terminal {
      * Exit event handler
      * @param res
      */
-    protected exit = (res : {exitCode: number; signal?: number | undefined;}) => {
+    protected exit = (res : {exitCode: number, signal?: number | undefined}) => {
         this.server.io.to(this.name).emit("terminalExit", this.name, res.exitCode);
 
         // Remove room
