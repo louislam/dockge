@@ -4,10 +4,11 @@ import * as pty from "@homebridge/node-pty-prebuilt-multiarch";
 import { LimitQueue } from "./utils/limit-queue";
 import { DockgeSocket } from "./util-server";
 import {
-    allowedCommandList, allowedRawKeys,
+    allowedCommandList,
+    allowedRawKeys,
     PROGRESS_TERMINAL_ROWS,
     TERMINAL_COLS,
-    TERMINAL_ROWS
+    TERMINAL_ROWS,
 } from "./util-common";
 import { sync as commandExistsSync } from "command-exists";
 import { log } from "./log";
@@ -16,26 +17,31 @@ import { log } from "./log";
  * Terminal for running commands, no user interaction
  */
 export class Terminal {
+    protected static terminalMap: Map<string, Terminal> = new Map();
 
-    protected static terminalMap : Map<string, Terminal> = new Map();
+    protected _ptyProcess?: pty.IPty;
+    protected server: DockgeServer;
+    protected buffer: LimitQueue<string> = new LimitQueue(100);
+    protected _name: string;
 
-    protected _ptyProcess? : pty.IPty;
-    protected server : DockgeServer;
-    protected buffer : LimitQueue<string> = new LimitQueue(100);
-    protected _name : string;
+    protected file: string;
+    protected args: string | string[];
+    protected cwd: string;
+    protected callback?: (exitCode: number) => void;
 
-    protected file : string;
-    protected args : string | string[];
-    protected cwd : string;
-    protected callback? : (exitCode : number) => void;
+    protected _rows: number = TERMINAL_ROWS;
+    protected _cols: number = TERMINAL_COLS;
 
-    protected _rows : number = TERMINAL_ROWS;
-    protected _cols : number = TERMINAL_COLS;
+    public enableKeepAlive: boolean = false;
+    protected keepAliveInterval?: NodeJS.Timeout;
 
-    public enableKeepAlive : boolean = false;
-    protected keepAliveInterval? : NodeJS.Timeout;
-
-    constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
+    constructor(
+        server: DockgeServer,
+        name: string,
+        file: string,
+        args: string | string[],
+        cwd: string
+    ) {
         this.server = server;
         this._name = name;
         //this._name = "terminal-" + Date.now() + "-" + getCryptoRandomInt(0, 1000000);
@@ -50,28 +56,36 @@ export class Terminal {
         return this._rows;
     }
 
-    set rows(rows : number) {
+    set rows(rows: number) {
         this._rows = rows;
         try {
             this.ptyProcess?.resize(this.cols, this.rows);
         } catch (e) {
             if (e instanceof Error) {
-                log.debug("Terminal", "Failed to resize terminal: " + e.message);
+                log.debug(
+                    "Terminal",
+                    "Failed to resize terminal: " + e.message
+                );
             }
         }
     }
 
     get cols() {
+        log.debug("Terminal", `Terminal cols: ${this._cols}`);
         return this._cols;
     }
 
-    set cols(cols : number) {
+    set cols(cols: number) {
         this._cols = cols;
+        log.debug("Terminal", `Terminal cols: ${cols}`);
         try {
             this.ptyProcess?.resize(this.cols, this.rows);
         } catch (e) {
             if (e instanceof Error) {
-                log.debug("Terminal", "Failed to resize terminal: " + e.message);
+                log.debug(
+                    "Terminal",
+                    "Failed to resize terminal: " + e.message
+                );
             }
         }
     }
@@ -82,22 +96,40 @@ export class Terminal {
         }
 
         if (this.enableKeepAlive) {
-            log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
+            log.debug(
+                "Terminal",
+                "Keep alive enabled for terminal " + this.name
+            );
 
             // Close if there is no clients
             this.keepAliveInterval = setInterval(() => {
-                const clients = this.server.io.sockets.adapter.rooms.get(this.name);
+                const clients = this.server.io.sockets.adapter.rooms.get(
+                    this.name
+                );
                 const numClients = clients ? clients.size : 0;
 
                 if (numClients === 0) {
-                    log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
+                    log.debug(
+                        "Terminal",
+                        "Terminal " + this.name + " has no client, closing..."
+                    );
                     this.close();
                 } else {
-                    log.debug("Terminal", "Terminal " + this.name + " has " + numClients + " client(s)");
+                    log.debug(
+                        "Terminal",
+                        "Terminal " +
+                            this.name +
+                            " has " +
+                            numClients +
+                            " client(s)"
+                    );
                 }
             }, 60 * 1000);
         } else {
-            log.debug("Terminal", "Keep alive disabled for terminal " + this.name);
+            log.debug(
+                "Terminal",
+                "Keep alive disabled for terminal " + this.name
+            );
         }
 
         try {
@@ -112,7 +144,9 @@ export class Terminal {
             this._ptyProcess.onData((data) => {
                 this.buffer.pushItem(data);
                 if (this.server.io) {
-                    this.server.io.to(this.name).emit("terminalWrite", this.name, data);
+                    this.server.io
+                        .to(this.name)
+                        .emit("terminalWrite", this.name, data);
                 }
             });
 
@@ -122,7 +156,10 @@ export class Terminal {
             if (error instanceof Error) {
                 clearInterval(this.keepAliveInterval);
 
-                log.error("Terminal", "Failed to start terminal: " + error.message);
+                log.error(
+                    "Terminal",
+                    "Failed to start terminal: " + error.message
+                );
                 const exitCode = Number(error.message.split(" ").pop());
                 this.exit({
                     exitCode,
@@ -135,14 +172,22 @@ export class Terminal {
      * Exit event handler
      * @param res
      */
-    protected exit = (res : {exitCode: number, signal?: number | undefined}) => {
-        this.server.io.to(this.name).emit("terminalExit", this.name, res.exitCode);
+    protected exit = (res: {
+        exitCode: number;
+        signal?: number | undefined;
+    }) => {
+        this.server.io
+            .to(this.name)
+            .emit("terminalExit", this.name, res.exitCode);
 
         // Remove room
         this.server.io.in(this.name).socketsLeave(this.name);
 
         Terminal.terminalMap.delete(this.name);
-        log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
+        log.debug(
+            "Terminal",
+            "Terminal " + this.name + " exited with code " + res.exitCode
+        );
 
         clearInterval(this.keepAliveInterval);
 
@@ -151,15 +196,15 @@ export class Terminal {
         }
     };
 
-    public onExit(callback : (exitCode : number) => void) {
+    public onExit(callback: (exitCode: number) => void) {
         this.callback = callback;
     }
 
-    public join(socket : DockgeSocket) {
+    public join(socket: DockgeSocket) {
         socket.join(this.name);
     }
 
-    public leave(socket : DockgeSocket) {
+    public leave(socket: DockgeSocket) {
         socket.leave(this.name);
     }
 
@@ -174,7 +219,7 @@ export class Terminal {
     /**
      * Get the terminal output string
      */
-    getBuffer() : string {
+    getBuffer(): string {
         if (this.buffer.length === 0) {
             return "";
         }
@@ -191,11 +236,17 @@ export class Terminal {
      * Get a running and non-exited terminal
      * @param name
      */
-    public static getTerminal(name : string) : Terminal | undefined {
+    public static getTerminal(name: string): Terminal | undefined {
         return Terminal.terminalMap.get(name);
     }
 
-    public static getOrCreateTerminal(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) : Terminal {
+    public static getOrCreateTerminal(
+        server: DockgeServer,
+        name: string,
+        file: string,
+        args: string | string[],
+        cwd: string
+    ): Terminal {
         // Since exited terminal will be removed from the map, it is safe to get the terminal from the map
         let terminal = Terminal.getTerminal(name);
         if (!terminal) {
@@ -204,11 +255,20 @@ export class Terminal {
         return terminal;
     }
 
-    public static exec(server : DockgeServer, socket : DockgeSocket | undefined, terminalName : string, file : string, args : string | string[], cwd : string) : Promise<number> {
+    public static exec(
+        server: DockgeServer,
+        socket: DockgeSocket | undefined,
+        terminalName: string,
+        file: string,
+        args: string | string[],
+        cwd: string
+    ): Promise<number> {
         return new Promise((resolve, reject) => {
             // check if terminal exists
             if (Terminal.terminalMap.has(terminalName)) {
-                reject("Another operation is already running, please try again later.");
+                reject(
+                    "Another operation is already running, please try again later."
+                );
                 return;
             }
 
@@ -219,7 +279,7 @@ export class Terminal {
                 terminal.join(socket);
             }
 
-            terminal.onExit((exitCode : number) => {
+            terminal.onExit((exitCode: number) => {
                 resolve(exitCode);
             });
             terminal.start();
@@ -236,7 +296,7 @@ export class Terminal {
  * Mainly used for container exec
  */
 export class InteractiveTerminal extends Terminal {
-    public write(input : string) {
+    public write(input: string) {
         this.ptyProcess?.write(input);
     }
 
@@ -250,7 +310,7 @@ export class InteractiveTerminal extends Terminal {
  * User interactive terminal that use bash or powershell with limited commands such as docker, ls, cd, dir
  */
 export class MainTerminal extends InteractiveTerminal {
-    constructor(server : DockgeServer, name : string) {
+    constructor(server: DockgeServer, name: string) {
         let shell;
 
         if (os.platform() === "win32") {
@@ -265,7 +325,7 @@ export class MainTerminal extends InteractiveTerminal {
         super(server, name, shell, [], server.stacksDir);
     }
 
-    public write(input : string) {
+    public write(input: string) {
         // For like Ctrl + C
         if (allowedRawKeys.includes(input)) {
             super.write(input);

@@ -97,8 +97,7 @@ export default {
         this.terminal.focus();
 
         // Fit the terminal width to the div container size.
-        this.updateTerminalSize();
-
+        
         // Notify parent component when data is received
         this.terminal.onCursorMove(() => {
             console.debug("onData triggered");
@@ -126,6 +125,7 @@ export default {
             });
         }
 
+        this.updateTerminalSize();
     },
 
     unmounted() {
@@ -217,9 +217,8 @@ export default {
         /**
          * Update the terminal size to fit the container size.
          *
-         * If the terminalFitAddOn is not created, creates it, loads it and then fit the terminal to the appropriate size.
-         *
-         * Todo: This method is called when the terminal is mounted, but it is not called when the terminal is resized.
+         * If the terminalFitAddOn is not created, creates it, loads it and then fits the terminal to the appropriate size.
+         * It then addes an event listener to the window object to listen for resize events and calls the fit method of the terminalFitAddOn.
          */
         updateTerminalSize() {
             if (!Object.hasOwn(this, "terminalFitAddOn")) {
@@ -228,13 +227,15 @@ export default {
                 window.addEventListener("resize", this.onResizeEvent);
             }
             this.terminalFitAddOn.fit();
-            console.log("Cols:", this.terminal.cols);
         },
         /**
          * Handles the resize event of the terminal component.
          */
         onResizeEvent() {
             this.terminalFitAddOn.fit();
+            let rows = this.terminal.rows;
+            let cols = this.terminal.cols;
+            this.$root.getSocket().emit("terminalResize", this.name, rows, cols);
         }
     }
 };
