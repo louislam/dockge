@@ -229,12 +229,15 @@ export class TerminalSocketHandler extends SocketHandler {
                         terminal.rows = rows;
                         terminal.cols = cols;
                     } else {
-                        throw new Error("Terminal not found.");
+                        throw new Error(`${terminalName} Terminal not found.`);
                     }
-                } catch (e: Error) {
+                } catch (e) {
                     log.debug(
                         "terminalResize",
-                        `Error on ${terminalName}: ${e?.message}`
+                        // Added to prevent the lint error when adding the type
+                        // and ts type checker saying type is unknown.
+                        // @ts-ignore
+                        `Error on ${terminalName}: ${e.message}`
                     );
                 }
             }
