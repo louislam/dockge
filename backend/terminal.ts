@@ -137,9 +137,7 @@ export class Terminal {
      * @param res
      */
     protected exit = (res : {exitCode: number; signal?: number | undefined;}) => {
-        this.server.io
-            .to(this.name)
-            .emit("terminalExit", this.name, res.exitCode);
+        this.server.io.to(this.name).emit("terminalExit", this.name, res.exitCode);
 
         // Remove room
         this.server.io.in(this.name).socketsLeave(this.name);
