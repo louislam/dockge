@@ -59,7 +59,7 @@ export default {
             default: "displayOnly",
         }
     },
-    emits: ["has-data"],
+    emits: [ "has-data" ],
     data() {
         return {
             first: true,
@@ -97,7 +97,7 @@ export default {
         this.terminal.focus();
 
         // Fit the terminal width to the div container size.
-        
+
         // Notify parent component when data is received
         this.terminal.onCursorMove(() => {
             console.debug("onData triggered");
