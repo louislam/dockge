@@ -4,11 +4,10 @@ import * as pty from "@homebridge/node-pty-prebuilt-multiarch";
 import { LimitQueue } from "./utils/limit-queue";
 import { DockgeSocket } from "./util-server";
 import {
-    allowedCommandList,
-    allowedRawKeys,
+    allowedCommandList, allowedRawKeys,
     PROGRESS_TERMINAL_ROWS,
     TERMINAL_COLS,
-    TERMINAL_ROWS,
+    TERMINAL_ROWS
 } from "./util-common";
 import { sync as commandExistsSync } from "command-exists";
 import { log } from "./log";
@@ -17,6 +16,7 @@ import { log } from "./log";
  * Terminal for running commands, no user interaction
  */
 export class Terminal {
+
     protected static terminalMap: Map<string, Terminal> = new Map();
 
     protected _ptyProcess?: pty.IPty;
@@ -35,13 +35,7 @@ export class Terminal {
     public enableKeepAlive: boolean = false;
     protected keepAliveInterval?: NodeJS.Timeout;
 
-    constructor(
-        server: DockgeServer,
-        name: string,
-        file: string,
-        args: string | string[],
-        cwd: string
-    ) {
+    constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
         this._name = name;
         //this._name = "terminal-" + Date.now() + "-" + getCryptoRandomInt(0, 1000000);
@@ -56,36 +50,29 @@ export class Terminal {
         return this._rows;
     }
 
-    set rows(rows: number) {
+    set rows(rows : number) {
         this._rows = rows;
         try {
             this.ptyProcess?.resize(this.cols, this.rows);
         } catch (e) {
             if (e instanceof Error) {
-                log.debug(
-                    "Terminal",
-                    "Failed to resize terminal: " + e.message
-                );
+                log.debug("Terminal", "Failed to resize terminal: " + e.message);
             }
         }
     }
 
     get cols() {
-        log.debug("Terminal", `Terminal cols: ${this._cols}`);
         return this._cols;
     }
 
-    set cols(cols: number) {
+    set cols(cols : number) {
         this._cols = cols;
-        log.debug("Terminal", `Terminal cols: ${cols}`);
+        log.debug("Terminal", `Terminal cols: ${this._cols}`); // Added to check if cols is being set when changing terminal size.
         try {
             this.ptyProcess?.resize(this.cols, this.rows);
         } catch (e) {
             if (e instanceof Error) {
-                log.debug(
-                    "Terminal",
-                    "Failed to resize terminal: " + e.message
-                );
+                log.debug("Terminal", "Failed to resize terminal: " + e.message);
             }
         }
     }
@@ -96,10 +83,7 @@ export class Terminal {
         }
 
         if (this.enableKeepAlive) {
-            log.debug(
-                "Terminal",
-                "Keep alive enabled for terminal " + this.name
-            );
+            log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
 
             // Close if there is no clients
             this.keepAliveInterval = setInterval(() => {
@@ -109,20 +93,10 @@ export class Terminal {
                 const numClients = clients ? clients.size : 0;
 
                 if (numClients === 0) {
-                    log.debug(
-                        "Terminal",
-                        "Terminal " + this.name + " has no client, closing..."
-                    );
+                    log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
                     this.close();
                 } else {
-                    log.debug(
-                        "Terminal",
-                        "Terminal " +
-                            this.name +
-                            " has " +
-                            numClients +
-                            " client(s)"
-                    );
+                    log.debug("Terminal", "Terminal " + this.name + " has " + numClients + " client(s)");
                 }
             }, 60 * 1000);
         } else {
@@ -156,10 +130,7 @@ export class Terminal {
             if (error instanceof Error) {
                 clearInterval(this.keepAliveInterval);
 
-                log.error(
-                    "Terminal",
-                    "Failed to start terminal: " + error.message
-                );
+                log.error("Terminal", "Failed to start terminal: " + error.message);
                 const exitCode = Number(error.message.split(" ").pop());
                 this.exit({
                     exitCode,
@@ -184,10 +155,7 @@ export class Terminal {
         this.server.io.in(this.name).socketsLeave(this.name);
 
         Terminal.terminalMap.delete(this.name);
-        log.debug(
-            "Terminal",
-            "Terminal " + this.name + " exited with code " + res.exitCode
-        );
+        log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
 
         clearInterval(this.keepAliveInterval);
 
@@ -196,15 +164,15 @@ export class Terminal {
         }
     };
 
-    public onExit(callback: (exitCode: number) => void) {
+    public onExit(callback : (exitCode : number) => void) {
         this.callback = callback;
     }
 
-    public join(socket: DockgeSocket) {
+    public join(socket : DockgeSocket) {
         socket.join(this.name);
     }
 
-    public leave(socket: DockgeSocket) {
+    public leave(socket : DockgeSocket) {
         socket.leave(this.name);
     }
 
@@ -219,7 +187,7 @@ export class Terminal {
     /**
      * Get the terminal output string
      */
-    getBuffer(): string {
+    getBuffer() : string {
         if (this.buffer.length === 0) {
             return "";
         }
@@ -236,17 +204,11 @@ export class Terminal {
      * Get a running and non-exited terminal
      * @param name
      */
-    public static getTerminal(name: string): Terminal | undefined {
+    public static getTerminal(name : string) : Terminal | undefined {
         return Terminal.terminalMap.get(name);
     }
 
-    public static getOrCreateTerminal(
-        server: DockgeServer,
-        name: string,
-        file: string,
-        args: string | string[],
-        cwd: string
-    ): Terminal {
+    public static getOrCreateTerminal(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) : Terminal {
         // Since exited terminal will be removed from the map, it is safe to get the terminal from the map
         let terminal = Terminal.getTerminal(name);
         if (!terminal) {
@@ -255,20 +217,11 @@ export class Terminal {
         return terminal;
     }
 
-    public static exec(
-        server: DockgeServer,
-        socket: DockgeSocket | undefined,
-        terminalName: string,
-        file: string,
-        args: string | string[],
-        cwd: string
-    ): Promise<number> {
+    public static exec(server : DockgeServer, socket : DockgeSocket | undefined, terminalName : string, file : string, args : string | string[], cwd : string) : Promise<number> {
         return new Promise((resolve, reject) => {
             // check if terminal exists
             if (Terminal.terminalMap.has(terminalName)) {
-                reject(
-                    "Another operation is already running, please try again later."
-                );
+                reject("Another operation is already running, please try again later.");
                 return;
             }
 
