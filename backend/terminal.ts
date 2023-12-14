@@ -17,23 +17,23 @@ import { log } from "./log";
  */
 export class Terminal {
 
-    protected static terminalMap: Map<string, Terminal> = new Map();
+    protected static terminalMap : Map<string, Terminal> = new Map();
 
-    protected _ptyProcess?: pty.IPty;
-    protected server: DockgeServer;
-    protected buffer: LimitQueue<string> = new LimitQueue(100);
-    protected _name: string;
+    protected _ptyProcess? : pty.IPty;
+    protected server : DockgeServer;
+    protected buffer : LimitQueue<string> = new LimitQueue(100);
+    protected _name : string;
 
-    protected file: string;
-    protected args: string | string[];
-    protected cwd: string;
-    protected callback?: (exitCode: number) => void;
+    protected file : string;
+    protected args : string | string[];
+    protected cwd : string;
+    protected callback? : (exitCode : number) => void;
 
-    protected _rows: number = TERMINAL_ROWS;
-    protected _cols: number = TERMINAL_COLS;
+    protected _rows : number = TERMINAL_ROWS;
+    protected _cols : number = TERMINAL_COLS;
 
-    public enableKeepAlive: boolean = false;
-    protected keepAliveInterval?: NodeJS.Timeout;
+    public enableKeepAlive : boolean = false;
+    protected keepAliveInterval? : NodeJS.Timeout;
 
     constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
@@ -87,9 +87,7 @@ export class Terminal {
 
             // Close if there is no clients
             this.keepAliveInterval = setInterval(() => {
-                const clients = this.server.io.sockets.adapter.rooms.get(
-                    this.name
-                );
+                const clients = this.server.io.sockets.adapter.rooms.get(this.name);
                 const numClients = clients ? clients.size : 0;
 
                 if (numClients === 0) {
@@ -100,10 +98,7 @@ export class Terminal {
                 }
             }, 60 * 1000);
         } else {
-            log.debug(
-                "Terminal",
-                "Keep alive disabled for terminal " + this.name
-            );
+            log.debug("Terminal", "Keep alive disabled for terminal " + this.name);
         }
 
         try {
@@ -118,9 +113,7 @@ export class Terminal {
             this._ptyProcess.onData((data) => {
                 this.buffer.pushItem(data);
                 if (this.server.io) {
-                    this.server.io
-                        .to(this.name)
-                        .emit("terminalWrite", this.name, data);
+                    this.server.io.to(this.name).emit("terminalWrite", this.name, data);
                 }
             });
 
@@ -143,10 +136,7 @@ export class Terminal {
      * Exit event handler
      * @param res
      */
-    protected exit = (res: {
-        exitCode: number;
-        signal?: number | undefined;
-    }) => {
+    protected exit = (res : {exitCode: number; signal?: number | undefined;}) => {
         this.server.io
             .to(this.name)
             .emit("terminalExit", this.name, res.exitCode);
@@ -232,7 +222,7 @@ export class Terminal {
                 terminal.join(socket);
             }
 
-            terminal.onExit((exitCode: number) => {
+            terminal.onExit((exitCode : number) => {
                 resolve(exitCode);
             });
             terminal.start();
@@ -249,7 +239,7 @@ export class Terminal {
  * Mainly used for container exec
  */
 export class InteractiveTerminal extends Terminal {
-    public write(input: string) {
+    public write(input : string) {
         this.ptyProcess?.write(input);
     }
 
@@ -263,7 +253,7 @@ export class InteractiveTerminal extends Terminal {
  * User interactive terminal that use bash or powershell with limited commands such as docker, ls, cd, dir
  */
 export class MainTerminal extends InteractiveTerminal {
-    constructor(server: DockgeServer, name: string) {
+    constructor(server : DockgeServer, name : string) {
         let shell;
 
         if (os.platform() === "win32") {
@@ -278,7 +268,7 @@ export class MainTerminal extends InteractiveTerminal {
         super(server, name, shell, [], server.stacksDir);
     }
 
-    public write(input: string) {
+    public write(input : string) {
         // For like Ctrl + C
         if (allowedRawKeys.includes(input)) {
             super.write(input);
