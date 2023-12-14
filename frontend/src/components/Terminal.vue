@@ -84,6 +84,7 @@ export default {
             cols: this.cols,
             rows: this.rows,
         });
+
         if (this.mode === "mainTerminal") {
             this.mainTerminalConfig();
         } else if (this.mode === "interactive") {
