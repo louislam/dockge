@@ -59,7 +59,7 @@ export default {
             default: "displayOnly",
         }
     },
-    emits: [ "has-data" ],
+    emits: ["has-data"],
     data() {
         return {
             first: true,
@@ -129,6 +129,7 @@ export default {
     },
 
     unmounted() {
+        window.removeEventListener("resize", this.onResizeEvent); // Remove the resize event listener from the window object.
         this.$root.unbindTerminal(this.name);
         this.terminal.dispose();
     },
@@ -224,9 +225,17 @@ export default {
             if (!Object.hasOwn(this, "terminalFitAddOn")) {
                 this.terminalFitAddOn = new FitAddon();
                 this.terminal.loadAddon(this.terminalFitAddOn);
+                window.addEventListener("resize", this.onResizeEvent);
             }
             this.terminalFitAddOn.fit();
+            console.log("Cols:", this.terminal.cols);
         },
+        /**
+         * Handles the resize event of the terminal component.
+         */
+        onResizeEvent() {
+            this.terminalFitAddOn.fit();
+        }
     }
 };
 </script>
