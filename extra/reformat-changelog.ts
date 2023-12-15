@@ -9,17 +9,23 @@ const template = `
 >
 
 ### 🆕 New Features
+-
 
 ### ⬆️ Improvements
+-
 
 ### 🐛 Bug Fixes
+-
 
 ### 🦎 Translation Contributions
+-
 
 ### ⬆️ Security Fixes
+-
 
 ### Others
 - Other small changes, code refactoring and comment/doc updates in this repo:
+-
 
 Please let me know if your username is missing, if your pull request has been merged in this version, or your commit has been included in one of the pull requests.
 `;
