@@ -116,7 +116,12 @@ export const allowedRawKeys = [
     "\u0003", // Ctrl + C
 ];
 
-export const acceptedComposeFileNames = [ "compose.yaml", "compose.yml", "docker-compose.yml", "docker-compose.yaml" ];
+export const acceptedComposeFileNames = [
+    "compose.yaml",
+    "docker-compose.yaml",
+    "docker-compose.yml",
+    "compose.yml",
+];
 
 /**
  * Generate a decimal integer number from a string
