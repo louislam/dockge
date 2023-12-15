@@ -41,8 +41,7 @@ export class Stack {
 
         if (!skipFSOperations) {
             // Check if compose file name is different from compose.yaml
-            const supportedFileNames = [ "compose.yaml", "compose.yml", "docker-compose.yml", "docker-compose.yaml" ];
-            for (const filename of supportedFileNames) {
+            for (const filename of acceptedComposeFileNames) {
                 if (fs.existsSync(path.join(this.path, filename))) {
                     this._composeFileName = filename;
                     break;
