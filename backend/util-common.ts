@@ -116,6 +116,13 @@ export const allowedRawKeys = [
     "\u0003", // Ctrl + C
 ];
 
+export const acceptedComposeFileNames = [
+    "compose.yaml",
+    "docker-compose.yaml",
+    "docker-compose.yml",
+    "compose.yml",
+];
+
 /**
  * Generate a decimal integer number from a string
  * @param str Input
@@ -385,7 +392,11 @@ function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
             if (item instanceof Pair) {
                 traverseYAML(item, env);
             } else if (item instanceof Scalar) {
-                item.value = envsubst(item.value, env);
+                let value = item.value as unknown;
+
+                if (typeof(value) === "string") {
+                    item.value = envsubst(value, env);
+                }
             }
         }
     // @ts-ignore
