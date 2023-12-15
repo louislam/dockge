@@ -223,16 +223,21 @@ export class Stack {
         }
     }
 
+    /**
+     * Checks if a compose file exists in the specified directory.
+     * @async
+     * @static
+     * @param {string} stacksDir - The directory of the stack.
+     * @param {string} filename - The name of the directory to check for the compose file.
+     * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether any compose file exists.
+     */
     static async composeFileExists(stacksDir : string, filename : string) : Promise<boolean> {
         let filenamePath = path.join(stacksDir, filename);
         // Check if any compose file exists
         let composeFileExistsList = await Promise.all(acceptedComposeFileNames.map(async (composeFileName) => {
-            try {
-                return await fsAsync.stat(path.join(filenamePath, composeFileName))
-                    .then((stat) => stat.isFile());
-            } catch (e) {
-                return false;
-            }
+            return await fsAsync.stat(path.join(filenamePath, composeFileName))
+                .then((stat) => stat.isFile())
+                .catch(() => false);
         }));
         log.debug("getStackList", `${filename}: ${composeFileExistsList.includes(true)}`);
         return composeFileExistsList.includes(true);
