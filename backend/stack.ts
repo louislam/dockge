@@ -233,13 +233,13 @@ export class Stack {
     static async composeFileExists(stacksDir : string, filename : string) : Promise<boolean> {
         let filenamePath = path.join(stacksDir, filename);
         // Check if any compose file exists
-        let composeFileExistsList = await Promise.all(acceptedComposeFileNames.map(async (composeFileName) => {
-            return await fsAsync.stat(path.join(filenamePath, composeFileName))
-                .then((stat) => stat.isFile())
-                .catch(() => false);
-        }));
-        log.debug("getStackList", `${filename}: ${composeFileExistsList.includes(true)}`);
-        return composeFileExistsList.includes(true);
+        for (const filename of acceptedComposeFileNames) {
+            let composeFile = path.join(filenamePath, filename);
+            if (await fileExists(composeFile)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static async getStackList(server : DockgeServer, useCacheForManaged = false) : Promise<Map<string, Stack>> {
@@ -263,7 +263,7 @@ export class Stack {
                         continue;
                     }
                     // If no compose file exists, skip it
-                    if (await Stack.composeFileExists(stacksDir, filename) === false) {
+                    if (!await Stack.composeFileExists(stacksDir, filename)) {
                         continue;
                     }
                     let stack = await this.getStack(server, filename);
