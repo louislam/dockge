@@ -5,6 +5,7 @@ import yaml from "yaml";
 import { DockgeSocket, fileExists, ValidationError } from "./util-server";
 import path from "path";
 import {
+    acceptedComposeFileNames,
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
     CREATED_FILE,
@@ -40,8 +41,7 @@ export class Stack {
 
         if (!skipFSOperations) {
             // Check if compose file name is different from compose.yaml
-            const supportedFileNames = [ "compose.yaml", "compose.yml", "docker-compose.yml", "docker-compose.yaml" ];
-            for (const filename of supportedFileNames) {
+            for (const filename of acceptedComposeFileNames) {
                 if (fs.existsSync(path.join(this.path, filename))) {
                     this._composeFileName = filename;
                     break;
@@ -222,6 +222,26 @@ export class Stack {
         }
     }
 
+    /**
+     * Checks if a compose file exists in the specified directory.
+     * @async
+     * @static
+     * @param {string} stacksDir - The directory of the stack.
+     * @param {string} filename - The name of the directory to check for the compose file.
+     * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether any compose file exists.
+     */
+    static async composeFileExists(stacksDir : string, filename : string) : Promise<boolean> {
+        let filenamePath = path.join(stacksDir, filename);
+        // Check if any compose file exists
+        for (const filename of acceptedComposeFileNames) {
+            let composeFile = path.join(filenamePath, filename);
+            if (await fileExists(composeFile)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     static async getStackList(server : DockgeServer, useCacheForManaged = false) : Promise<Map<string, Stack>> {
         let stacksDir = server.stacksDir;
         let stackList : Map<string, Stack>;
@@ -240,6 +260,10 @@ export class Stack {
                     // Check if it is a directory
                     let stat = await fsAsync.stat(path.join(stacksDir, filename));
                     if (!stat.isDirectory()) {
+                        continue;
+                    }
+                    // If no compose file exists, skip it
+                    if (!await Stack.composeFileExists(stacksDir, filename)) {
                         continue;
                     }
                     let stack = await this.getStack(server, filename);
