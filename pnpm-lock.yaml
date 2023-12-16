@@ -133,6 +133,12 @@ devDependencies:
   '@vitejs/plugin-vue':
     specifier: ~4.5.2
     version: 4.5.2(vite@5.0.7)(vue@3.3.11)
+  '@xterm/addon-fit':
+    specifier: beta
+    version: 0.9.0-beta.17(@xterm/xterm@5.4.0-beta.17)
+  '@xterm/xterm':
+    specifier: beta
+    version: 5.4.0-beta.17
   bootstrap:
     specifier: 5.3.2
     version: 5.3.2(@popperjs/core@2.11.8)
@@ -196,12 +202,9 @@ devDependencies:
   wait-on:
     specifier: ^7.2.0
     version: 7.2.0
-  xterm:
-    specifier: 5.4.0-beta.37
-    version: 5.4.0-beta.37
   xterm-addon-web-links:
     specifier: ~0.9.0
-    version: 0.9.0(xterm@5.4.0-beta.37)
+    version: 0.9.0(xterm@5.3.0)
 
 packages:
 
@@ -1567,6 +1570,18 @@ packages:
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
+    dev: true
+
+  /@xterm/addon-fit@0.9.0-beta.17(@xterm/xterm@5.4.0-beta.17):
+    resolution: {integrity: sha512-4jYMsbyferF29hF0vCaQj6CQlT2A6ML6DhLZdi6cCZI5qn60mGUXZfDeO/Qoq2nmyK/PBrPyFYSOzWapSy45Zg==}
+    peerDependencies:
+      '@xterm/xterm': ^5.0.0
+    dependencies:
+      '@xterm/xterm': 5.4.0-beta.17
+    dev: true
+
+  /@xterm/xterm@5.4.0-beta.17:
+    resolution: {integrity: sha512-EhQsTHeO7VhCOnYLdrowWAqEbmZKf6k6Z/Rd3GriikB394jivux6OBcJbt7QdewIOAKqFah53d4rNXfz3/6mwQ==}
     dev: true
 
   /abbrev@1.1.1:
@@ -5524,16 +5539,16 @@ packages:
     engines: {node: '>=0.4.0'}
     dev: false
 
-  /xterm-addon-web-links@0.9.0(xterm@5.4.0-beta.37):
+  /xterm-addon-web-links@0.9.0(xterm@5.3.0):
     resolution: {integrity: sha512-LIzi4jBbPlrKMZF3ihoyqayWyTXAwGfu4yprz1aK2p71e9UKXN6RRzVONR0L+Zd+Ik5tPVI9bwp9e8fDTQh49Q==}
     peerDependencies:
       xterm: ^5.0.0
     dependencies:
-      xterm: 5.4.0-beta.37
+      xterm: 5.3.0
     dev: true
 
-  /xterm@5.4.0-beta.37:
-    resolution: {integrity: sha512-ys+mXqLFrJc7khmYN/MgBnfLv38NgXfkwkEXsCZKHGqn3h2xUBvTvsrSEWO3NQeDPLj4zMr1RwqTblMK9St3BA==}
+  /xterm@5.3.0:
+    resolution: {integrity: sha512-8QqjlekLUFTrU6x7xck1MsPzPA571K5zNqWm0M0oroYEWVOptZ0+ubQSkQ3uxIEhcIHRujJy6emDWX4A7qyFzg==}
     dev: true
 
   /y18n@4.0.3:

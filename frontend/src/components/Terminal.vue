@@ -5,7 +5,8 @@
 </template>
 
 <script>
-import { Terminal } from "xterm";
+import { Terminal } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "xterm-addon-web-links";
 import { TERMINAL_COLS, TERMINAL_ROWS } from "../../../backend/util-common";
 
@@ -122,10 +123,12 @@ export default {
                 }
             });
         }
-
+        // Fit the terminal width to the div container size after terminal is created.
+        this.updateTerminalSize();
     },
 
     unmounted() {
+        window.removeEventListener("resize", this.onResizeEvent); // Remove the resize event listener from the window object.
         this.$root.unbindTerminal(this.name);
         this.terminal.dispose();
     },
@@ -208,6 +211,30 @@ export default {
                     }
                 });
             });
+        },
+
+        /**
+         * Update the terminal size to fit the container size.
+         *
+         * If the terminalFitAddOn is not created, creates it, loads it and then fits the terminal to the appropriate size.
+         * It then addes an event listener to the window object to listen for resize events and calls the fit method of the terminalFitAddOn.
+         */
+        updateTerminalSize() {
+            if (!Object.hasOwn(this, "terminalFitAddOn")) {
+                this.terminalFitAddOn = new FitAddon();
+                this.terminal.loadAddon(this.terminalFitAddOn);
+                window.addEventListener("resize", this.onResizeEvent);
+            }
+            this.terminalFitAddOn.fit();
+        },
+        /**
+         * Handles the resize event of the terminal component.
+         */
+        onResizeEvent() {
+            this.terminalFitAddOn.fit();
+            let rows = this.terminal.rows;
+            let cols = this.terminal.cols;
+            this.$root.getSocket().emit("terminalResize", this.name, rows, cols);
         }
     }
 };

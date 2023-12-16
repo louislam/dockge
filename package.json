@@ -55,8 +55,6 @@
         "yaml": "~2.3.4"
     },
     "devDependencies": {
-        "concurrently": "^8.2.2",
-        "wait-on": "^7.2.0",
         "@actions/github": "^6.0.0",
         "@fontsource/jetbrains-mono": "^5.0.18",
         "@fortawesome/fontawesome-svg-core": "6.4.2",
@@ -71,8 +69,11 @@
         "@typescript-eslint/eslint-plugin": "~6.8.0",
         "@typescript-eslint/parser": "~6.8.0",
         "@vitejs/plugin-vue": "~4.5.2",
+        "@xterm/addon-fit": "beta",
+        "@xterm/xterm": "beta",
         "bootstrap": "5.3.2",
         "bootstrap-vue-next": "~0.14.10",
+        "concurrently": "^8.2.2",
         "cross-env": "~7.0.3",
         "eslint": "~8.50.0",
         "eslint-plugin-jsdoc": "~46.8.2",
@@ -90,7 +91,7 @@
         "vue-qrcode": "~2.2.0",
         "vue-router": "~4.2.5",
         "vue-toastification": "2.0.0-rc.5",
-        "xterm": "5.4.0-beta.37",
+        "wait-on": "^7.2.0",
         "xterm-addon-web-links": "~0.9.0"
     }
 }

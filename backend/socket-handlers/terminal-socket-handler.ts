@@ -162,9 +162,44 @@ export class TerminalSocketHandler extends SocketHandler {
             }
         });
 
-        // TODO: Resize Terminal
-        socket.on("terminalResize", async (rows : unknown) => {
+        // Resize Terminal
+        socket.on(
+            "terminalResize",
+            async (terminalName: unknown, rows: unknown, cols: unknown) => {
+                log.info("terminalResize", `Terminal: ${terminalName}`);
+                try {
+                    checkLogin(socket);
+                    if (typeof terminalName !== "string") {
+                        throw new Error("Terminal name must be a string.");
+                    }
 
-        });
+                    if (typeof rows !== "number") {
+                        throw new Error("Command must be a number.");
+                    }
+                    if (typeof cols !== "number") {
+                        throw new Error("Command must be a number.");
+                    }
+
+                    let terminal = Terminal.getTerminal(terminalName);
+
+                    // log.info("terminal", terminal);
+                    if (terminal instanceof Terminal) {
+                        //log.debug("terminalInput", "Terminal found, writing to terminal.");
+                        terminal.rows = rows;
+                        terminal.cols = cols;
+                    } else {
+                        throw new Error(`${terminalName} Terminal not found.`);
+                    }
+                } catch (e) {
+                    log.debug(
+                        "terminalResize",
+                        // Added to prevent the lint error when adding the type
+                        // and ts type checker saying type is unknown.
+                        // @ts-ignore
+                        `Error on ${terminalName}: ${e.message}`
+                    );
+                }
+            }
+        );
     }
 }

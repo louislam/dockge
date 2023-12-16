@@ -67,6 +67,7 @@ export class Terminal {
 
     set cols(cols : number) {
         this._cols = cols;
+        log.debug("Terminal", `Terminal cols: ${this._cols}`); // Added to check if cols is being set when changing terminal size.
         try {
             this.ptyProcess?.resize(this.cols, this.rows);
         } catch (e) {
