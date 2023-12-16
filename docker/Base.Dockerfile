@@ -2,6 +2,14 @@
 FROM node:18.17.1-bookworm-slim
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+
+
+# TARGETPLATFORM: linux/amd64, linux/arm64, linux/arm/v7
+ARG TARGETPLATFORM
+
+# TARGETARCH: amd64, arm64, arm/v7
+ARG TARGETARCH
+
 RUN apt update && apt install --yes --no-install-recommends \
     curl \
     ca-certificates \
@@ -18,7 +26,12 @@ RUN apt update && apt install --yes --no-install-recommends \
     && apt update \
     && apt --yes --no-install-recommends install \
          docker-ce-cli \
-         docker-compose-plugin \
     && rm -rf /var/lib/apt/lists/* \
     && npm install pnpm -g \
     && pnpm install -g tsx
+
+# Download docker-compose, as the repo's docker-compose is not up-to-date.
+COPY ./extra/download-docker-compose.ts ./extra/download-docker-compose.ts
+ARG DOCKER_COMPOSE_VERSION="2.23.3"
+RUN tsx ./extra/download-docker-compose.ts ${TARGETPLATFORM} ${DOCKER_COMPOSE_VERSION} \
+    && docker compose version
