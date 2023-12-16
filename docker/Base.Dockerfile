@@ -26,7 +26,6 @@ RUN apt update && apt install --yes --no-install-recommends \
     && apt update \
     && apt --yes --no-install-recommends install \
          docker-ce-cli \
-         docker-compose-plugin \
     && rm -rf /var/lib/apt/lists/* \
     && npm install pnpm -g \
     && pnpm install -g tsx
