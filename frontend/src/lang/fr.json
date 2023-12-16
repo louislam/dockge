@@ -98,5 +98,6 @@
     "downStack": "Arrêter et désactiver",
     "reverseProxyMsg1": "Utilisez vous un proxy inverse ?",
     "Cannot connect to the socket server.": "Impossible de se connecter au serveur socket.",
-    "reconnecting...": "Reconnexion…"
+    "reconnecting...": "Reconnexion…",
+    "newUpdate": "Nouvelle mise à jour"
 }
