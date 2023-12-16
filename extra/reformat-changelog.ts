@@ -1,6 +1,10 @@
 // Generate on GitHub
 const input = `
-* Add Korean translation by @Alanimdeo in https://github.com/louislam/dockge/pull/86
+* Fixed envsubst issue by @louislam in https://github.com/louislam/dockge/pull/301
+* Fix: Only adding folders to stack with a compose file. by @Ozy-Viking in https://github.com/louislam/dockge/pull/299
+* Terminal text cols adjusts to terminal container.  by @Ozy-Viking in https://github.com/louislam/dockge/pull/285
+* Update Docker Dompose plugin to 2.23.3 by @louislam in https://github.com/louislam/dockge/pull/303
+* Translations update from Kuma Weblate by @UptimeKumaBot in https://github.com/louislam/dockge/pull/302
 `;
 
 const template = `
@@ -25,7 +29,7 @@ const template = `
 
 ### Others
 - Other small changes, code refactoring and comment/doc updates in this repo:
--
+- 
 
 Please let me know if your username is missing, if your pull request has been merged in this version, or your commit has been included in one of the pull requests.
 `;
