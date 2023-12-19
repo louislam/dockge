@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { getContainerExecTerminalName } from "../../../backend/util-common";
+import { getContainerExecTerminalName } from "../../../common/util-common";
 
 export default {
     components: {
@@ -37,7 +37,9 @@ export default {
             return getContainerExecTerminalName(this.stackName, this.serviceName, 0);
         },
         sh() {
-            return {
+            let endpoint = this.$route.params.endpoint;
+
+            let data = {
                 name: "containerTerminal",
                 params: {
                     stackName: this.stackName,
@@ -45,6 +47,13 @@ export default {
                     type: "sh",
                 },
             };
+
+            if (endpoint) {
+                data.name = "containerTerminalEndpoint";
+                data.params.endpoint = endpoint;
+            }
+
+            return data;
         },
     },
     mounted() {

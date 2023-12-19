@@ -35,15 +35,22 @@ const routes = [
                                 component: Compose,
                             },
                             {
-                                path: "/compose/:stackName",
-                                name: "compose",
+                                path: "/compose/:stackName/:endpoint",
                                 component: Compose,
-                                props: true,
+                            },
+                            {
+                                path: "/compose/:stackName",
+                                component: Compose,
                             },
                             {
                                 path: "/terminal/:stackName/:serviceName/:type",
                                 component: ContainerTerminal,
                                 name: "containerTerminal",
+                            },
+                            {
+                                path: "/terminal/:stackName/:serviceName/:type/:endpoint",
+                                component: ContainerTerminal,
+                                name: "containerTerminalEndpoint",
                             },
                         ]
                     },

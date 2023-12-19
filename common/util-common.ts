@@ -206,20 +206,20 @@ export function getCryptoRandomInt(min: number, max: number):number {
     }
 }
 
-export function getComposeTerminalName(stack : string) {
-    return "compose-" + stack;
+export function getComposeTerminalName(endpoint : string, stack : string) {
+    return "compose-" + endpoint + "-" + stack;
 }
 
-export function getCombinedTerminalName(stack : string) {
-    return "combined-" + stack;
+export function getCombinedTerminalName(endpoint : string, stack : string) {
+    return "combined-" + endpoint + "-" + stack;
 }
 
-export function getContainerTerminalName(container : string) {
-    return "container-" + container;
+export function getContainerTerminalName(endpoint : string, container : string) {
+    return "container-" + endpoint + "-" + container;
 }
 
-export function getContainerExecTerminalName(stackName : string, container : string, index : number) {
-    return "container-exec-" + stackName + "-" + container + "-" + index;
+export function getContainerExecTerminalName(endpoint : string, stackName : string, container : string, index : number) {
+    return "container-exec-" + endpoint + "-" + stackName + "-" + container + "-" + index;
 }
 
 export function copyYAMLComments(doc : Document, src : Document) {

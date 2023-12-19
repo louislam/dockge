@@ -22,7 +22,7 @@
 
 <script>
 
-import { allowedCommandList } from "../../../backend/util-common";
+import { allowedCommandList } from "../../../common/util-common";
 
 export default {
     components: {

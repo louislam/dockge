@@ -3,6 +3,7 @@ import { Socket } from "socket.io-client";
 import { defineComponent } from "vue";
 import jwtDecode from "jwt-decode";
 import { Terminal } from "@xterm/xterm";
+import { AgentSocket } from "../../../common/agent-socket";
 
 let socket : Socket;
 
@@ -28,16 +29,29 @@ export default defineComponent({
             loggedIn: false,
             allowLoginDialog: false,
             username: null,
+            instanceList: {} as Record<string, any>,
             stackList: {},
             composeTemplate: "",
         };
     },
     computed: {
+
+        completeStackList() {
+            let list : Record<string, any> = this.stackList;
+            for (let endpoint in this.instanceList) {
+                let instance = this.instanceList[endpoint];
+                for (let stackName in instance.stackList) {
+                    list[stackName + "_" + endpoint] = instance.stackList[stackName];
+                }
+            }
+            return list;
+        },
+
         usernameFirstChar() {
             if (typeof this.username == "string" && this.username.length >= 1) {
                 return this.username.charAt(0).toUpperCase();
             } else {
-                return "🐻";
+                return "🐬";
             }
         },
 
@@ -110,6 +124,12 @@ export default defineComponent({
 
             socket = io(url, {
                 transports: [ "websocket", "polling" ]
+            });
+
+            // Handling events from agents
+            let agentSocket = new AgentSocket();
+            socket.on("agent", (eventName : unknown, ...args : unknown[]) => {
+                agentSocket.call(eventName, ...args);
             });
 
             socket.on("connect", () => {
@@ -186,9 +206,20 @@ export default defineComponent({
                 terminal.write(data);
             });
 
-            socket.on("stackList", (res) => {
+            agentSocket.on("stackList", (res) => {
+                console.log(res);
+
                 if (res.ok) {
-                    this.stackList = res.stackList;
+                    if (!res.endpoint) {
+                        this.stackList = res.stackList;
+                    } else {
+                        if (!this.instanceList[res.endpoint]) {
+                            this.instanceList[res.endpoint] = {
+                                stackList: {},
+                            };
+                        }
+                        this.instanceList[res.endpoint].stackList = res.stackList;
+                    }
                 }
             });
 
@@ -218,6 +249,10 @@ export default defineComponent({
 
         getSocket() : Socket {
             return socket;
+        },
+
+        emitAgent(endpoint : string, eventName : string, ...args : unknown[]) {
+            this.getSocket().emit("agent", endpoint, eventName, ...args);
         },
 
         /**

@@ -8,7 +8,7 @@ import {
     PROGRESS_TERMINAL_ROWS,
     TERMINAL_COLS,
     TERMINAL_ROWS
-} from "./util-common";
+} from "../common/util-common";
 import { sync as commandExistsSync } from "command-exists";
 import { log } from "./log";
 

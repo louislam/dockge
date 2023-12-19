@@ -1,6 +1,6 @@
 // Console colors
 // https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
-import { intHash, isDev } from "./util-common";
+import { intHash, isDev } from "../common/util-common";
 import dayjs from "dayjs";
 
 export const CONSOLE_STYLE_Reset = "\x1b[0m";

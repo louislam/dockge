@@ -5,7 +5,7 @@ import { User } from "../backend/models/user";
 import { DockgeServer } from "../backend/dockge-server";
 import { log } from "../backend/log";
 import { io } from "socket.io-client";
-import { BaseRes } from "../backend/util-common";
+import { BaseRes } from "../common/util-common";
 
 console.log("== Dockge Reset Password Tool ==");
 

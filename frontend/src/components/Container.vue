@@ -137,7 +137,7 @@
 <script>
 import { defineComponent } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { parseDockerPort } from "../../../backend/util-common";
+import { parseDockerPort } from "../../../common/util-common";
 
 export default defineComponent({
     components: {

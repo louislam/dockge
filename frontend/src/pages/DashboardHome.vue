@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { statusNameShort } from "../../../backend/util-common";
+import { statusNameShort } from "../../../common/util-common";
 
 export default {
     components: {

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { MainRouter } from "./routers/main-router";
 import * as fs from "node:fs";
 import { PackageJson } from "type-fest";
@@ -17,11 +18,11 @@ import { Settings } from "./settings";
 import checkVersion from "./check-version";
 import dayjs from "dayjs";
 import { R } from "redbean-node";
-import { genSecret, isDev } from "./util-common";
+import { genSecret, isDev, LooseObject } from "../common/util-common";
 import { generatePasswordHash } from "./password-hash";
 import { Bean } from "redbean-node/dist/bean";
 import { Arguments, Config, DockgeSocket } from "./util-server";
-import { DockerSocketHandler } from "./socket-handlers/docker-socket-handler";
+import { DockerSocketHandler } from "./agent-socket-handlers/docker-socket-handler";
 import expressStaticGzip from "express-static-gzip";
 import path from "path";
 import { TerminalSocketHandler } from "./socket-handlers/terminal-socket-handler";
@@ -30,9 +31,10 @@ import { Cron } from "croner";
 import gracefulShutdown from "http-graceful-shutdown";
 import User from "./models/user";
 import childProcessAsync from "promisify-child-process";
-import { Terminal } from "./terminal";
-
-import "dotenv/config";
+import { DockgeInstanceManager } from "./dockge-instance-manager";
+import { AgentProxySocketHandler } from "./socket-handlers/agent-proxy-socket-handler";
+import { AgentSocketHandler } from "./agent-socket-handler";
+import { AgentSocket } from "../common/agent-socket";
 
 export class DockgeServer {
     app : Express;
@@ -54,8 +56,13 @@ export class DockgeServer {
      */
     socketHandlerList : SocketHandler[] = [
         new MainSocketHandler(),
-        new DockerSocketHandler(),
         new TerminalSocketHandler(),
+    ];
+
+    agentProxySocketHandler = new AgentProxySocketHandler();
+
+    agentSocketHandlerList : AgentSocketHandler[] = [
+        new DockerSocketHandler(),
     ];
 
     /**
@@ -230,19 +237,51 @@ export class DockgeServer {
         });
 
         this.io.on("connection", async (socket: Socket) => {
-            log.info("server", "Socket connected!");
+            let dockgeSocket = socket as DockgeSocket;
+            dockgeSocket.instanceManager = new DockgeInstanceManager(dockgeSocket);
+            dockgeSocket.emitAgent = (event : string, ...args : unknown[]) => {
+                let obj = args[0];
+                if (typeof(obj) === "object") {
+                    let obj2 = obj as LooseObject;
+                    obj2.endpoint = dockgeSocket.endpoint;
+                }
+                dockgeSocket.emit("agent", event, ...args);
+            };
 
-            this.sendInfo(socket, true);
+            if (typeof(socket.request.headers.endpoint) === "string") {
+                dockgeSocket.endpoint = socket.request.headers.endpoint;
+            } else {
+                dockgeSocket.endpoint = "";
+            }
+
+            if (dockgeSocket.endpoint) {
+                log.info("server", "Socket connected (agent), as endpoint " + dockgeSocket.endpoint);
+            } else {
+                log.info("server", "Socket connected (direct)");
+            }
+
+            this.sendInfo(dockgeSocket, true);
 
             if (this.needSetup) {
                 log.info("server", "Redirect to setup page");
-                socket.emit("setup");
+                dockgeSocket.emit("setup");
             }
 
-            // Create socket handlers
+            // Create socket handlers (original, no agent support)
             for (const socketHandler of this.socketHandlerList) {
-                socketHandler.create(socket as DockgeSocket, this);
+                socketHandler.create(dockgeSocket, this);
             }
+
+            // Create Agent Socket
+            let agentSocket = new AgentSocket();
+
+            // Create agent socket handlers
+            for (const socketHandler of this.agentSocketHandlerList) {
+                socketHandler.create(dockgeSocket, this, agentSocket);
+            }
+
+            // Create agent proxy socket handlers
+            this.agentProxySocketHandler.create2(dockgeSocket, this, agentSocket);
 
             // ***************************
             // Better do anything after added all socket handlers here
@@ -251,11 +290,17 @@ export class DockgeServer {
             log.debug("auth", "check auto login");
             if (await Settings.get("disableAuth")) {
                 log.info("auth", "Disabled Auth: auto login to admin");
-                this.afterLogin(socket as DockgeSocket, await R.findOne("user") as User);
-                socket.emit("autoLogin");
+                this.afterLogin(dockgeSocket, await R.findOne("user") as User);
+                dockgeSocket.emit("autoLogin");
             } else {
                 log.debug("auth", "need auth");
             }
+
+            // Socket disconnect
+            dockgeSocket.on("disconnect", () => {
+                log.info("server", "Socket disconnected!");
+                dockgeSocket.instanceManager.disconnectAll();
+            });
 
         });
 
@@ -265,7 +310,7 @@ export class DockgeServer {
 
         if (isDev) {
             setInterval(() => {
-                log.debug("terminal", "Terminal count: " + Terminal.getTerminalCount());
+                //log.debug("terminal", "Terminal count: " + Terminal.getTerminalCount());
             }, 5000);
         }
     }
@@ -281,6 +326,9 @@ export class DockgeServer {
         } catch (e) {
             log.error("server", e);
         }
+
+        // Also connect to other dockge instances
+        socket.instanceManager.connectAll();
     }
 
     /**
@@ -519,26 +567,34 @@ export class DockgeServer {
         return jwtSecretBean;
     }
 
+    /**
+     * Send stack list to all connected sockets
+     * @param useCache
+     */
     async sendStackList(useCache = false) {
-        let roomList = this.io.sockets.adapter.rooms.keys();
-        let map : Map<string, object> | undefined;
+        let socketList = this.io.sockets.sockets.values();
 
-        for (let room of roomList) {
+        let stackList;
+
+        for (let socket of socketList) {
+            let dockgeSocket = socket as DockgeSocket;
+
             // Check if the room is a number (user id)
-            if (Number(room)) {
+            if (dockgeSocket.userID) {
 
-                // Get the list only if there is a room
-                if (!map) {
-                    map = new Map();
-                    let stackList = await Stack.getStackList(this, useCache);
-
-                    for (let [ stackName, stack ] of stackList) {
-                        map.set(stackName, stack.toSimpleJSON());
-                    }
+                // Get the list only if there is a logged in user
+                if (!stackList) {
+                    stackList = await Stack.getStackList(this, useCache);
                 }
 
-                log.debug("server", "Send stack list to room " + room);
-                this.io.to(room).emit("stackList", {
+                let map : Map<string, object> = new Map();
+
+                for (let [ stackName, stack ] of stackList) {
+                    map.set(stackName, stack.toSimpleJSON(dockgeSocket.endpoint));
+                }
+
+                log.debug("server", "Send stack list");
+                dockgeSocket.emitAgent("stackList", {
                     ok: true,
                     stackList: Object.fromEntries(map),
                 });

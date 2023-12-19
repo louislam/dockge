@@ -11,7 +11,7 @@ import {
     getComposeTerminalName, getContainerExecTerminalName,
     isDev,
     PROGRESS_TERMINAL_ROWS
-} from "../util-common";
+} from "../../common/util-common";
 import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
 import { Stack } from "../stack";
 

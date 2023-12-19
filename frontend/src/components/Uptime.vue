@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { statusColor, statusNameShort } from "../../../backend/util-common";
+import { statusColor, statusNameShort } from "../../../common/util-common";
 
 export default {
     props: {

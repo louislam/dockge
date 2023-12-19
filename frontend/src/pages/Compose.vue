@@ -236,7 +236,7 @@ import {
     getComposeTerminalName,
     PROGRESS_TERMINAL_ROWS,
     RUNNING
-} from "../../../backend/util-common";
+} from "../../../common/util-common";
 import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
 import dotenv from "dotenv";
@@ -349,18 +349,22 @@ export default {
             if (!this.stack.name) {
                 return "";
             }
-            return getComposeTerminalName(this.stack.name);
+            return getComposeTerminalName(this.endpoint, this.stack.name);
         },
 
         combinedTerminalName() {
             if (!this.stack.name) {
                 return "";
             }
-            return getCombinedTerminalName(this.stack.name);
+            return getCombinedTerminalName(this.endpoint, this.stack.name);
         },
 
         networks() {
             return this.jsonConfig.networks;
+        },
+
+        endpoint() {
+            return this.$route.params.endpoint || "";
         }
 
     },
@@ -462,7 +466,7 @@ export default {
         },
 
         requestServiceStatus() {
-            this.$root.getSocket().emit("serviceStatusList", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "serviceStatusList", this.stack.name, (res) => {
                 if (res.ok) {
                     this.serviceStatusList = res.serviceStatusList;
                 }
@@ -490,7 +494,7 @@ export default {
 
         loadStack() {
             this.processing = true;
-            this.$root.getSocket().emit("getStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "getStack", this.stack.name, (res) => {
                 if (res.ok) {
                     this.stack = res.stack;
                     this.yamlCodeChange();
