@@ -315,7 +315,7 @@ export class DockgeServer {
 
         if (isDev) {
             setInterval(() => {
-                //log.debug("terminal", "Terminal count: " + Terminal.getTerminalCount());
+                log.debug("terminal", "Terminal count: " + Terminal.getTerminalCount());
             }, 5000);
         }
     }
