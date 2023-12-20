@@ -7,7 +7,7 @@
                 <router-link :to="sh" class="btn btn-normal me-2">Switch to sh</router-link>
             </div>
 
-            <Terminal class="terminal" :rows="20" mode="interactive" :name="terminalName" :stack-name="stackName" :service-name="serviceName" :shell="shell"></Terminal>
+            <Terminal class="terminal" :rows="20" mode="interactive" :name="terminalName" :stack-name="stackName" :service-name="serviceName" :shell="shell" :endpoint="endpoint"></Terminal>
         </div>
     </transition>
 </template>
@@ -26,6 +26,9 @@ export default {
     computed: {
         stackName() {
             return this.$route.params.stackName;
+        },
+        endpoint() {
+            // TODO
         },
         shell() {
             return this.$route.params.type;

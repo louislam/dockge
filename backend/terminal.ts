@@ -35,6 +35,8 @@ export class Terminal {
     public enableKeepAlive : boolean = false;
     protected keepAliveInterval? : NodeJS.Timeout;
 
+    protected socketList : DockgeSocket[] = [];
+
     constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
         this._name = name;
@@ -87,8 +89,7 @@ export class Terminal {
 
             // Close if there is no clients
             this.keepAliveInterval = setInterval(() => {
-                const clients = this.server.io.sockets.adapter.rooms.get(this.name);
-                const numClients = clients ? clients.size : 0;
+                const numClients = this.socketList.length;
 
                 if (numClients === 0) {
                     log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
@@ -112,8 +113,9 @@ export class Terminal {
             // On Data
             this._ptyProcess.onData((data) => {
                 this.buffer.pushItem(data);
-                if (this.server.io) {
-                    this.server.io.to(this.name).emit("terminalWrite", this.name, data);
+
+                for (const socket of this.socketList) {
+                    socket.emitAgent("terminalWrite", this.name, data);
                 }
             });
 
@@ -137,10 +139,12 @@ export class Terminal {
      * @param res
      */
     protected exit = (res : {exitCode: number, signal?: number | undefined}) => {
-        this.server.io.to(this.name).emit("terminalExit", this.name, res.exitCode);
+        for (const socket of this.socketList) {
+            socket.emitAgent("terminalExit", this.name, res.exitCode);
+        }
 
-        // Remove room
-        this.server.io.in(this.name).socketsLeave(this.name);
+        // Remove all clients
+        this.socketList = [];
 
         Terminal.terminalMap.delete(this.name);
         log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
@@ -157,11 +161,14 @@ export class Terminal {
     }
 
     public join(socket : DockgeSocket) {
-        socket.join(this.name);
+        this.socketList.push(socket);
     }
 
     public leave(socket : DockgeSocket) {
-        socket.leave(this.name);
+        const index = this.socketList.indexOf(socket);
+        if (index !== -1) {
+            this.socketList.splice(index, 1);
+        }
     }
 
     public get ptyProcess() {

@@ -65,6 +65,10 @@ export default {
         editorFocus() {
             return this.$parent.$parent.editorFocus;
         },
+
+        endpoint() {
+            return this.$parent.$parent.endpoint;
+        },
     },
     watch: {
         "jsonConfig.networks": {
@@ -134,7 +138,7 @@ export default {
         },
 
         loadExternalNetworkList() {
-            this.$root.getSocket().emit("getDockerNetworkList", (res) => {
+            this.$root.emitAgent(this.endpoint, "getDockerNetworkList", (res) => {
                 if (res.ok) {
                     this.externalNetworkList = res.dockerNetworkList.filter((n) => {
                         // Filter out this stack networks

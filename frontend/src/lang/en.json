@@ -99,5 +99,7 @@
     "connecting...": "Connecting to the socket server…",
     "url": "URL | URLs",
     "extra": "Extra",
-    "newUpdate": "New Update"
+    "newUpdate": "New Update",
+    "dockgeAgent": "Dockge Agent | Dockge Agents",
+    "currentEndpoint": "Current"
 }

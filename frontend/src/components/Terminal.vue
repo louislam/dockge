@@ -24,6 +24,11 @@ export default {
             require: true,
         },
 
+        endpoint: {
+            type: String,
+            require: true,
+        },
+
         // Require if mode is interactive
         stackName: {
             type: String,
@@ -134,15 +139,15 @@ export default {
     },
 
     methods: {
-        bind(name) {
+        bind(endpoint, name) {
             // Workaround: normally this.name should be set, but it is not sometimes, so we use the parameter, but eventually this.name and name must be the same name
             if (name) {
                 this.$root.unbindTerminal(name);
-                this.$root.bindTerminal(name, this.terminal);
+                this.$root.bindTerminal(endpoint, name, this.terminal);
                 console.debug("Terminal bound via parameter: " + name);
             } else if (this.name) {
                 this.$root.unbindTerminal(this.name);
-                this.$root.bindTerminal(this.name, this.terminal);
+                this.$root.bindTerminal(this.endpoint, this.name, this.terminal);
                 console.debug("Terminal bound: " + this.name);
             } else {
                 console.debug("Terminal name not set");

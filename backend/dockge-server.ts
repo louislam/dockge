@@ -25,7 +25,7 @@ import { Arguments, Config, DockgeSocket } from "./util-server";
 import { DockerSocketHandler } from "./agent-socket-handlers/docker-socket-handler";
 import expressStaticGzip from "express-static-gzip";
 import path from "path";
-import { TerminalSocketHandler } from "./socket-handlers/terminal-socket-handler";
+import { TerminalSocketHandler } from "./agent-socket-handlers/terminal-socket-handler";
 import { Stack } from "./stack";
 import { Cron } from "croner";
 import gracefulShutdown from "http-graceful-shutdown";
@@ -52,17 +52,20 @@ export class DockgeServer {
     ];
 
     /**
-     * List of socket handlers
+     * List of socket handlers (no agent support)
      */
     socketHandlerList : SocketHandler[] = [
         new MainSocketHandler(),
-        new TerminalSocketHandler(),
     ];
 
     agentProxySocketHandler = new AgentProxySocketHandler();
 
+    /**
+     * List of socket handlers (support agent)
+     */
     agentSocketHandlerList : AgentSocketHandler[] = [
         new DockerSocketHandler(),
+        new TerminalSocketHandler(),
     ];
 
     /**

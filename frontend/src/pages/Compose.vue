@@ -70,6 +70,7 @@
                     ref="progressTerminal"
                     class="mb-3 terminal"
                     :name="terminalName"
+                    :endpoint="endpoint"
                     :rows="progressTerminalRows"
                     @has-data="showProgressTerminal = true; submitted = true;"
                 ></Terminal>
@@ -86,6 +87,15 @@
                                 <label for="name" class="form-label">{{ $t("stackName") }}</label>
                                 <input id="name" v-model="stack.name" type="text" class="form-control" required @blur="stackNameToLowercase">
                                 <div class="form-text">{{ $t("Lowercase only") }}</div>
+                            </div>
+
+                            <!-- Endpoint -->
+                            <div class="mt-3">
+                                <label for="name" class="form-label">{{ $t("dockgeAgent") }}</label>
+                                <select v-model="stack.endpoint" class="form-select">
+                                    <option value="">{{ $t("currentEndpoint") }}</option>
+                                    <option value="rs-debian:5001">rs-debian:5001</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -139,6 +149,7 @@
                             ref="combinedTerminal"
                             class="mb-3 terminal"
                             :name="combinedTerminalName"
+                            :endpoint="endpoint"
                             :rows="combinedTerminalRows"
                             :cols="combinedTerminalCols"
                             style="height: 350px;"
@@ -411,7 +422,7 @@ export default {
         $route(to, from) {
             // Leave Combined Terminal
             console.debug("leaveCombinedTerminal", from.params.stackName);
-            this.$root.getSocket().emit("leaveCombinedTerminal", this.stack.name, () => {});
+            this.$root.emitAgent(this.endpoint, "leaveCombinedTerminal", this.stack.name, () => {});
         }
     },
     mounted() {
@@ -441,6 +452,7 @@ export default {
                 composeYAML,
                 composeENV,
                 isManagedByDockge: true,
+                endpoint: "",
             };
 
             this.yamlCodeChange();
@@ -489,7 +501,7 @@ export default {
         },
 
         bindTerminal() {
-            this.$refs.progressTerminal?.bind(this.terminalName);
+            this.$refs.progressTerminal?.bind(this.endpoint, this.terminalName);
         },
 
         loadStack() {
@@ -536,9 +548,9 @@ export default {
                 }
             }
 
-            this.bindTerminal(this.terminalName);
+            this.bindTerminal();
 
-            this.$root.getSocket().emit("deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+            this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
@@ -552,7 +564,7 @@ export default {
         saveStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+            this.$root.emitAgent(this.stack.endpoint, "saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
@@ -566,7 +578,7 @@ export default {
         startStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("startStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "startStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
@@ -575,7 +587,7 @@ export default {
         stopStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("stopStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "stopStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
@@ -584,7 +596,7 @@ export default {
         downStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("downStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "downStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
@@ -593,7 +605,7 @@ export default {
         restartStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("restartStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "restartStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
@@ -602,14 +614,14 @@ export default {
         updateStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("updateStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "updateStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
         },
 
         deleteDialog() {
-            this.$root.getSocket().emit("deleteStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "deleteStack", this.stack.name, (res) => {
                 this.$root.toastRes(res);
                 if (res.ok) {
                     this.$router.push("/");

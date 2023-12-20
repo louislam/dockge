@@ -5,19 +5,34 @@
                 {{ $t("home") }}
             </h1>
 
-            <div class="shadow-box big-padding text-center mb-4">
-                <div class="row">
-                    <div class="col">
-                        <h3>{{ $t("active") }}</h3>
-                        <span class="num active">{{ activeNum }}</span>
+            <div class="row first-row">
+                <div class="col-md-6">
+                    <div class="shadow-box big-padding text-center mb-4">
+                        <div class="row">
+                            <div class="col">
+                                <h3>{{ $t("active") }}</h3>
+                                <span class="num active">{{ activeNum }}</span>
+                            </div>
+                            <div class="col">
+                                <h3>{{ $t("exited") }}</h3>
+                                <span class="num exited">{{ exitedNum }}</span>
+                            </div>
+                            <div class="col">
+                                <h3>{{ $t("inactive") }}</h3>
+                                <span class="num inactive">{{ inactiveNum }}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col">
-                        <h3>{{ $t("exited") }}</h3>
-                        <span class="num exited">{{ exitedNum }}</span>
-                    </div>
-                    <div class="col">
-                        <h3>{{ $t("inactive") }}</h3>
-                        <span class="num inactive">{{ inactiveNum }}</span>
+                </div>
+                <div class="col-md-6">
+                    <div class="shadow-box big-padding">
+                        <h3 class="mb-3">{{ $tc("dockgeAgent", 2) }} </h3>
+
+                        <div class="mb-3">
+                            Current
+                        </div>
+
+                        <button class="btn btn-normal">Add Agent</button>
                     </div>
                 </div>
             </div>
@@ -27,7 +42,7 @@
                 <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required placeholder="docker run ..."></textarea>
             </div>
 
-            <button class="btn-normal btn" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
+            <button class="btn-normal btn mb-4" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
         </div>
     </transition>
     <router-view ref="child" />
@@ -230,4 +245,9 @@ table {
     font-family: 'JetBrains Mono', monospace;
     font-size: 15px;
 }
+
+.first-row .shadow-box {
+
+}
+
 </style>

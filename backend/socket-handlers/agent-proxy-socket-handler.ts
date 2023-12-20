@@ -3,6 +3,7 @@ import { DockgeServer } from "../dockge-server";
 import { log } from "../log";
 import { checkLogin, DockgeSocket } from "../util-server";
 import { AgentSocket } from "../../common/agent-socket";
+import { ALL_ENDPOINTS } from "../../common/util-common";
 
 export class AgentProxySocketHandler extends SocketHandler {
 
@@ -14,19 +15,22 @@ export class AgentProxySocketHandler extends SocketHandler {
 
                 // Check Type
                 if (typeof(endpoint) !== "string") {
-                    throw new Error("Endpoint must be a string");
+                    throw new Error("Endpoint must be a string: " + endpoint);
                 }
                 if (typeof(eventName) !== "string") {
                     throw new Error("Event name must be a string");
                 }
 
-                log.debug("agent", "Proxying request to " + endpoint + " for " + eventName);
+                if (endpoint === ALL_ENDPOINTS) {      // Send to all endpoints
+                    log.debug("agent", "Sending to all endpoints: " + eventName);
+                    socket.instanceManager.emitToAllEndpoints(eventName, ...args);
 
-                // Direct connection or matching endpoint
-                if (!endpoint || endpoint === socket.endpoint) {
-                    log.debug("agent", "Direct connection");
+                } else if (!endpoint || endpoint === socket.endpoint) {      // Direct connection or matching endpoint
+                    log.debug("agent", "Matched endpoint: " + eventName);
                     agentSocket.call(eventName, ...args);
+
                 } else {
+                    log.debug("agent", "Proxying request to " + endpoint + " for " + eventName);
                     socket.instanceManager.emitToEndpoint(endpoint, eventName, ...args);
                 }
             } catch (e) {

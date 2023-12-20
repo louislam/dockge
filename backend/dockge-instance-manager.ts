@@ -111,4 +111,11 @@ export class DockgeInstanceManager {
         client?.emit("agent", endpoint, eventName, ...args);
     }
 
+    emitToAllEndpoints(eventName: string, ...args : unknown[]) {
+        log.debug("INSTANCEMANAGER", "Emitting event to all endpoints");
+        for (let endpoint in this.instanceSocketList) {
+            this.emitToEndpoint(endpoint, eventName, ...args);
+        }
+    }
+
 }

@@ -197,7 +197,10 @@ export default defineComponent({
                 this.$router.push("/setup");
             });
 
-            socket.on("terminalWrite", (terminalName, data) => {
+            agentSocket.on("terminalWrite", (terminalName, data) => {
+
+                console.log(terminalName, data);
+
                 const terminal = terminalMap.get(terminalName);
                 if (!terminal) {
                     //console.error("Terminal not found: " + terminalName);
@@ -345,9 +348,9 @@ export default defineComponent({
 
         },
 
-        bindTerminal(terminalName : string, terminal : Terminal) {
+        bindTerminal(endpoint : string, terminalName : string, terminal : Terminal) {
             // Load terminal, get terminal screen
-            socket.emit("terminalJoin", terminalName, (res) => {
+            this.emitAgent(endpoint, "terminalJoin", terminalName, (res) => {
                 if (res.ok) {
                     terminal.write(res.buffer);
                     terminalMap.set(terminalName, terminal);

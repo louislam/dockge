@@ -58,7 +58,7 @@ export default {
             if (this.stack.endpoint) {
                 return this.stack.endpoint;
             } else {
-                return "Default";
+                return "Current";
             }
         },
         url() {
