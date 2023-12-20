@@ -29,17 +29,35 @@ export default defineComponent({
             loggedIn: false,
             allowLoginDialog: false,
             username: null,
-            instanceList: {} as Record<string, any>,
-            stackList: {},
             composeTemplate: "",
+
+            stackList: {},
+
+            // All stack list from all agents
+            allAgentStackList: {} as Record<string, any>,
+
+            // online / offline / connecting
+            agentStatusList: {
+
+            },
+
+            // Agent List
+            agentList: {
+
+            },
         };
     },
     computed: {
 
         completeStackList() {
-            let list : Record<string, any> = this.stackList;
-            for (let endpoint in this.instanceList) {
-                let instance = this.instanceList[endpoint];
+            let list : Record<string, any> = {};
+
+            for (let stackName in this.stackList) {
+                list[stackName + "_"] = this.stackList[stackName];
+            }
+
+            for (let endpoint in this.allAgentStackList) {
+                let instance = this.allAgentStackList[endpoint];
                 for (let stackName in instance.stackList) {
                     list[stackName + "_" + endpoint] = instance.stackList[stackName];
                 }
@@ -79,6 +97,15 @@ export default defineComponent({
 
     },
     watch: {
+
+        "socketIO.connected"() {
+            if (this.socketIO.connected) {
+                this.agentStatusList[""] = "online";
+            } else {
+                this.agentStatusList[""] = "offline";
+            }
+        },
+
         remember() {
             localStorage.remember = (this.remember) ? "1" : "0";
         },
@@ -122,9 +149,7 @@ export default defineComponent({
                 this.socketIO.connecting = true;
             }, 1500);
 
-            socket = io(url, {
-                transports: [ "websocket", "polling" ]
-            });
+            socket = io(url);
 
             // Handling events from agents
             let agentSocket = new AgentSocket();
@@ -198,9 +223,6 @@ export default defineComponent({
             });
 
             agentSocket.on("terminalWrite", (terminalName, data) => {
-
-                console.log(terminalName, data);
-
                 const terminal = terminalMap.get(terminalName);
                 if (!terminal) {
                     //console.error("Terminal not found: " + terminalName);
@@ -210,18 +232,16 @@ export default defineComponent({
             });
 
             agentSocket.on("stackList", (res) => {
-                console.log(res);
-
                 if (res.ok) {
                     if (!res.endpoint) {
                         this.stackList = res.stackList;
                     } else {
-                        if (!this.instanceList[res.endpoint]) {
-                            this.instanceList[res.endpoint] = {
+                        if (!this.allAgentStackList[res.endpoint]) {
+                            this.allAgentStackList[res.endpoint] = {
                                 stackList: {},
                             };
                         }
-                        this.instanceList[res.endpoint].stackList = res.stackList;
+                        this.allAgentStackList[res.endpoint].stackList = res.stackList;
                     }
                 }
             });
@@ -234,6 +254,17 @@ export default defineComponent({
                             stackObj.status = res.stackStatusList[stackName];
                         }
                     }
+                }
+            });
+
+            socket.on("agentStatus", (res) => {
+                this.agentStatusList[res.endpoint] = res.status;
+            });
+
+            socket.on("agentList", (res) => {
+                console.log(res);
+                if (res.ok) {
+                    this.agentList = res.agentList;
                 }
             });
 

@@ -6,7 +6,8 @@
             </h1>
 
             <div class="row first-row">
-                <div class="col-md-6">
+                <!-- Left -->
+                <div class="col-md-7">
                     <div class="shadow-box big-padding text-center mb-4">
                         <div class="row">
                             <div class="col">
@@ -23,26 +24,47 @@
                             </div>
                         </div>
                     </div>
+
+                    <h2 class="mb-3">{{ $t("Docker Run") }}</h2>
+                    <div class="mb-3">
+                        <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required placeholder="docker run ..."></textarea>
+                    </div>
+
+                    <button class="btn-normal btn mb-4" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
                 </div>
-                <div class="col-md-6">
+                <!-- Right -->
+                <div class="col-md-5">
                     <div class="shadow-box big-padding">
-                        <h3 class="mb-3">{{ $tc("dockgeAgent", 2) }} </h3>
+                        <h4 class="mb-3">{{ $tc("dockgeAgent", 2) }} <span class="badge bg-warning" style="font-size: 12px;">beta</span></h4>
 
                         <div class="mb-3">
                             Current
                         </div>
 
-                        <button class="btn btn-normal">Add Agent</button>
+                        <button v-if="!showAgentForm" class="btn btn-normal" @click="showAgentForm = !showAgentForm">Add Agent</button>
+
+                        <!-- Add Agent Form -->
+                        <form v-if="showAgentForm" @submit.prevent="addAgent">
+                            <div class="mb-3">
+                                <label for="url" class="form-label">{{ $t("dockgeURL") }}</label>
+                                <input id="url" v-model="agent.url" type="text" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="username" class="form-label">{{ $t("Username") }}</label>
+                                <input id="username" v-model="agent.username" type="text" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">{{ $t("Password") }}</label>
+                                <input id="password" v-model="agent.password" type="password" class="form-control" required autocomplete="new-password">
+                            </div>
+
+                            <button type="submit" class="btn btn-normal">Add Agent</button>
+                        </form>
                     </div>
                 </div>
             </div>
-
-            <h2 class="mb-3">{{ $t("Docker Run") }}</h2>
-            <div class="mb-3">
-                <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required placeholder="docker run ..."></textarea>
-            </div>
-
-            <button class="btn-normal btn mb-4" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
         </div>
     </transition>
     <router-view ref="child" />
@@ -73,6 +95,12 @@ export default {
             importantHeartBeatListLength: 0,
             displayedRecords: [],
             dockerRunCommand: "",
+            showAgentForm: false,
+            agent: {
+                url: "http://",
+                username: "",
+                password: "",
+            }
         };
     },
 
@@ -112,6 +140,12 @@ export default {
     },
 
     methods: {
+
+        addAgent() {
+            alert(123);
+
+            this.showAgentForm = false;
+        },
 
         getStatusNum(statusName) {
             let num = 0;

@@ -345,7 +345,7 @@ export default {
          * @return {*}
          */
         globalStack() {
-            return this.$root.stackList[this.stack.name];
+            return this.$root.completeStackList[this.stack.name + "_" + this.endpoint];
         },
 
         status() {

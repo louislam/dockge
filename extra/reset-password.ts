@@ -92,7 +92,6 @@ function disconnectAllSocketClients(username : string, password : string) : Prom
 
         // Disconnect all socket connections
         const socket = io(url, {
-            transports: [ "websocket" ],
             reconnection: false,
             timeout: 5000,
         });

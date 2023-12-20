@@ -31,10 +31,11 @@ import { Cron } from "croner";
 import gracefulShutdown from "http-graceful-shutdown";
 import User from "./models/user";
 import childProcessAsync from "promisify-child-process";
-import { DockgeInstanceManager } from "./dockge-instance-manager";
+import { AgentManager } from "./agent-manager";
 import { AgentProxySocketHandler } from "./socket-handlers/agent-proxy-socket-handler";
 import { AgentSocketHandler } from "./agent-socket-handler";
 import { AgentSocket } from "../common/agent-socket";
+import { ManageAgentSocketHandler } from "./socket-handlers/manage-agent-socket-handler";
 
 export class DockgeServer {
     app : Express;
@@ -56,6 +57,7 @@ export class DockgeServer {
      */
     socketHandlerList : SocketHandler[] = [
         new MainSocketHandler(),
+        new ManageAgentSocketHandler(),
     ];
 
     agentProxySocketHandler = new AgentProxySocketHandler();
@@ -206,7 +208,7 @@ export class DockgeServer {
             cors,
             allowRequest: (req, callback) => {
                 let isOriginValid = true;
-                const bypass = isDev;
+                const bypass = isDev || process.env.UPTIME_KUMA_WS_ORIGIN_CHECK === "bypass";
 
                 if (!bypass) {
                     let host = req.headers.host;
@@ -241,14 +243,14 @@ export class DockgeServer {
 
         this.io.on("connection", async (socket: Socket) => {
             let dockgeSocket = socket as DockgeSocket;
-            dockgeSocket.instanceManager = new DockgeInstanceManager(dockgeSocket);
+            dockgeSocket.instanceManager = new AgentManager(dockgeSocket);
             dockgeSocket.emitAgent = (event : string, ...args : unknown[]) => {
                 let obj = args[0];
                 if (typeof(obj) === "object") {
                     let obj2 = obj as LooseObject;
                     obj2.endpoint = dockgeSocket.endpoint;
                 }
-                dockgeSocket.emit("agent", event, ...args);
+                this.io.to(dockgeSocket.userID + "").emit("agent", event, ...args);
             };
 
             if (typeof(socket.request.headers.endpoint) === "string") {
@@ -329,6 +331,8 @@ export class DockgeServer {
         } catch (e) {
             log.error("server", e);
         }
+
+        socket.instanceManager.sendAgentList();
 
         // Also connect to other dockge instances
         socket.instanceManager.connectAll();
@@ -601,25 +605,6 @@ export class DockgeServer {
                     ok: true,
                     stackList: Object.fromEntries(map),
                 });
-            }
-        }
-    }
-
-    async sendStackStatusList() {
-        let statusList = await Stack.getStatusList();
-
-        let roomList = this.io.sockets.adapter.rooms.keys();
-
-        for (let room of roomList) {
-            // Check if the room is a number (user id)
-            if (Number(room)) {
-                log.debug("server", "Send stack status list to room " + room);
-                this.io.to(room).emit("stackStatusList", {
-                    ok: true,
-                    stackStatusList: Object.fromEntries(statusList),
-                });
-            } else {
-                log.debug("server", "Skip sending stack status list to room " + room);
             }
         }
     }

@@ -101,5 +101,9 @@
     "extra": "Extra",
     "newUpdate": "New Update",
     "dockgeAgent": "Dockge Agent | Dockge Agents",
-    "currentEndpoint": "Current"
+    "currentEndpoint": "Current",
+    "dockgeURL": "Dockge URL (e.g. http://127.0.0.1:5001)",
+    "agentOnline": "Online",
+    "agentOffline": "Offline",
+    "agentConnecting": "Connecting"
 }
