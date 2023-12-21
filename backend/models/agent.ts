@@ -1,7 +1,6 @@
 import { BeanModel } from "redbean-node/dist/bean-model";
 import { R } from "redbean-node";
 import { LooseObject } from "../../common/util-common";
-import User from "./user";
 
 export class Agent extends BeanModel {
 
@@ -23,7 +22,6 @@ export class Agent extends BeanModel {
         return {
             url: this.url,
             username: this.username,
-            password: this.password,
             endpoint: this.endpoint,
         };
     }

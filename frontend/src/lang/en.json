@@ -105,5 +105,7 @@
     "dockgeURL": "Dockge URL (e.g. http://127.0.0.1:5001)",
     "agentOnline": "Online",
     "agentOffline": "Offline",
-    "agentConnecting": "Connecting"
+    "connecting": "Connecting",
+    "connect": "Connect",
+    "addAgent": "Add Agent"
 }

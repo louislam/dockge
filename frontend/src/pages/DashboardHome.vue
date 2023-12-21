@@ -8,6 +8,7 @@
             <div class="row first-row">
                 <!-- Left -->
                 <div class="col-md-7">
+                    <!-- Stats -->
                     <div class="shadow-box big-padding text-center mb-4">
                         <div class="row">
                             <div class="col">
@@ -25,6 +26,7 @@
                         </div>
                     </div>
 
+                    <!-- Docker Run -->
                     <h2 class="mb-3">{{ $t("Docker Run") }}</h2>
                     <div class="mb-3">
                         <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required placeholder="docker run ..."></textarea>
@@ -34,20 +36,32 @@
                 </div>
                 <!-- Right -->
                 <div class="col-md-5">
+                    <!-- Agent List -->
                     <div class="shadow-box big-padding">
                         <h4 class="mb-3">{{ $tc("dockgeAgent", 2) }} <span class="badge bg-warning" style="font-size: 12px;">beta</span></h4>
 
-                        <div class="mb-3">
-                            Current
+                        <div v-for="(agent, endpoint) in $root.agentList" :key="endpoint" class="mb-3">
+                            <!-- Agent Status -->
+                            <template v-if="$root.agentStatusList[endpoint]">
+                                <span v-if="$root.agentStatusList[endpoint] === 'online'" class="badge bg-primary me-2">{{ $t("agentOnline") }}</span>
+                                <span v-else-if="$root.agentStatusList[endpoint] === 'offline'" class="badge bg-danger me-2">{{ $t("agentOffline") }}</span>
+                                <span v-else class="badge bg-secondary me-2">{{ $t($root.agentStatusList[endpoint]) }}</span>
+                            </template>
+
+                            <!-- Agent Display Name -->
+                            <span v-if="endpoint === ''">{{ $t("currentEndpoint") }}</span>
+                            <span v-else>{{ endpoint }}</span>
+
+                            <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="removeAgent(agent.url)" />
                         </div>
 
-                        <button v-if="!showAgentForm" class="btn btn-normal" @click="showAgentForm = !showAgentForm">Add Agent</button>
+                        <button v-if="!showAgentForm" class="btn btn-normal" @click="showAgentForm = !showAgentForm">{{ $t("addAgent") }}</button>
 
                         <!-- Add Agent Form -->
                         <form v-if="showAgentForm" @submit.prevent="addAgent">
                             <div class="mb-3">
                                 <label for="url" class="form-label">{{ $t("dockgeURL") }}</label>
-                                <input id="url" v-model="agent.url" type="text" class="form-control" required>
+                                <input id="url" v-model="agent.url" type="url" class="form-control" required placeholder="http://">
                             </div>
 
                             <div class="mb-3">
@@ -60,7 +74,7 @@
                                 <input id="password" v-model="agent.password" type="password" class="form-control" required autocomplete="new-password">
                             </div>
 
-                            <button type="submit" class="btn btn-normal">Add Agent</button>
+                            <button type="submit" class="btn btn-normal">{{ $t("connect") }}</button>
                         </form>
                     </div>
                 </div>
@@ -142,16 +156,29 @@ export default {
     methods: {
 
         addAgent() {
-            alert(123);
+            this.$root.getSocket().emit("addAgent", this.agent, (res) => {
+                if (res.ok) {
+                    this.$root.toastRes(res);
+                    this.showAgentForm = false;
+                }
+            });
 
             this.showAgentForm = false;
+        },
+
+        removeAgent(url) {
+            this.$root.getSocket().emit("removeAgent", url, (res) => {
+                if (res.ok) {
+                    this.$root.toastRes(res);
+                }
+            });
         },
 
         getStatusNum(statusName) {
             let num = 0;
 
-            for (let stackName in this.$root.stackList) {
-                const stack = this.$root.stackList[stackName];
+            for (let stackName in this.$root.completeStackList) {
+                const stack = this.$root.completeStackList[stackName];
                 if (statusNameShort(stack.status) === statusName) {
                     num += 1;
                 }
@@ -282,6 +309,11 @@ table {
 
 .first-row .shadow-box {
 
+}
+
+.remove-agent {
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.3);
 }
 
 </style>

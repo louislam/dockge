@@ -139,10 +139,19 @@ export class AgentManager {
     async sendAgentList() {
         let list = await Agent.getAgentList();
         let result : Record<string, LooseObject> = {};
+
+        // Myself
+        result[""] = {
+            url: "",
+            username: "",
+            endpoint: "",
+        };
+
         for (let endpoint in list) {
             let agent = list[endpoint];
             result[endpoint] = agent.toJSON();
         }
+
         this.socket.emit("agentList", {
             ok: true,
             agentList: result,
