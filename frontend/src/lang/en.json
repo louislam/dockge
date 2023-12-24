@@ -108,5 +108,8 @@
     "connecting": "Connecting",
     "connect": "Connect",
     "addAgent": "Add Agent",
-    "agentAddedSuccessfully": "Agent added successfully."
+    "agentAddedSuccessfully": "Agent added successfully.",
+    "agentRemovedSuccessfully": "Agent removed successfully.",
+    "removeAgent": "Remove Agent",
+    "removeAgentMsg": "Are you sure you want to remove this agent?"
 }

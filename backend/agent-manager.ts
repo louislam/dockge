@@ -12,7 +12,7 @@ import { R } from "redbean-node";
 export class AgentManager {
 
     protected socket : DockgeSocket;
-    protected instanceSocketList : Record<string, SocketClient> = {};
+    protected agentSocketList : Record<string, SocketClient> = {};
 
     constructor(socket: DockgeSocket) {
         this.socket = socket;
@@ -27,7 +27,7 @@ export class AgentManager {
                 reject(new Error("Invalid Dockge URL"));
             }
 
-            if (this.instanceSocketList[endpoint]) {
+            if (this.agentSocketList[endpoint]) {
                 reject(new Error("The Dockge URL already exists"));
             }
 
@@ -80,10 +80,20 @@ export class AgentManager {
 
     /**
      *
-     * @param endpoint
+     * @param url
      */
-    remove(endpoint : string) {
+    async remove(url : string) {
+        let bean = await R.findOne("agent", " url = ? ", [
+            url,
+        ]);
 
+        if (bean) {
+            await R.trash(bean);
+            let endpoint = bean.endpoint;
+            delete this.agentSocketList[endpoint];
+        } else {
+            throw new Error("Agent not found");
+        }
     }
 
     connect(url : string, username : string, password : string) {
@@ -100,7 +110,7 @@ export class AgentManager {
             return;
         }
 
-        if (this.instanceSocketList[endpoint]) {
+        if (this.agentSocketList[endpoint]) {
             log.debug("agent-manager", "Already connected to the socket server: " + endpoint);
             return;
         }
@@ -171,11 +181,11 @@ export class AgentManager {
             }
         });
 
-        this.instanceSocketList[endpoint] = client;
+        this.agentSocketList[endpoint] = client;
     }
 
     disconnect(endpoint : string) {
-        let client = this.instanceSocketList[endpoint];
+        let client = this.agentSocketList[endpoint];
         client?.disconnect();
     }
 
@@ -198,14 +208,14 @@ export class AgentManager {
     }
 
     disconnectAll() {
-        for (let endpoint in this.instanceSocketList) {
+        for (let endpoint in this.agentSocketList) {
             this.disconnect(endpoint);
         }
     }
 
     emitToEndpoint(endpoint: string, eventName: string, ...args : unknown[]) {
         log.debug("agent-manager", "Emitting event to endpoint: " + endpoint);
-        let client = this.instanceSocketList[endpoint];
+        let client = this.agentSocketList[endpoint];
         if (!client) {
             log.error("agent-manager", "Socket client not found for endpoint: " + endpoint);
             throw new Error("Socket client not found for endpoint: " + endpoint);
@@ -215,7 +225,7 @@ export class AgentManager {
 
     emitToAllEndpoints(eventName: string, ...args : unknown[]) {
         log.debug("agent-manager", "Emitting event to all endpoints");
-        for (let endpoint in this.instanceSocketList) {
+        for (let endpoint in this.agentSocketList) {
             this.emitToEndpoint(endpoint, eventName, ...args);
         }
     }

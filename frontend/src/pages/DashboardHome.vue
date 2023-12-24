@@ -53,7 +53,13 @@
                             <span v-else>{{ endpoint }}</span>
 
                             <!-- Remove Button -->
-                            <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="removeAgent(agent.url)" />
+                            <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="showRemoveAgentDialog[agent.url] = !showRemoveAgentDialog[agent.url]" />
+
+                            <!-- Remoe Agent Dialog -->
+                            <BModal v-model="showRemoveAgentDialog[agent.url]" :okTitle="$t('removeAgent')" okVariant="danger" @ok="removeAgent(agent.url)">
+                                <p>{{ agent.url }}</p>
+                                {{ $t("removeAgentMsg") }}
+                            </BModal>
                         </div>
 
                         <button v-if="!showAgentForm" class="btn btn-normal" @click="showAgentForm = !showAgentForm">{{ $t("addAgent") }}</button>
@@ -114,6 +120,7 @@ export default {
             displayedRecords: [],
             dockerRunCommand: "",
             showAgentForm: false,
+            showRemoveAgentDialog: {},
             connectingAgent: false,
             agent: {
                 url: "http://",
@@ -167,6 +174,11 @@ export default {
 
                 if (res.ok) {
                     this.showAgentForm = false;
+                    this.agent = {
+                        url: "http://",
+                        username: "",
+                        password: "",
+                    };
                 }
 
                 this.connectingAgent = false;
@@ -177,6 +189,12 @@ export default {
             this.$root.getSocket().emit("removeAgent", url, (res) => {
                 if (res.ok) {
                     this.$root.toastRes(res);
+
+                    let urlObj = new URL(url);
+                    let endpoint = urlObj.host;
+
+                    // Remove the stack list and status list of the removed agent
+                    delete this.$root.allAgentStackList[endpoint];
                 }
             });
         },
