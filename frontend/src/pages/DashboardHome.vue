@@ -52,6 +52,7 @@
                             <span v-if="endpoint === ''">{{ $t("currentEndpoint") }}</span>
                             <span v-else>{{ endpoint }}</span>
 
+                            <!-- Remove Button -->
                             <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="removeAgent(agent.url)" />
                         </div>
 
@@ -74,7 +75,10 @@
                                 <input id="password" v-model="agent.password" type="password" class="form-control" required autocomplete="new-password">
                             </div>
 
-                            <button type="submit" class="btn btn-normal">{{ $t("connect") }}</button>
+                            <button type="submit" class="btn btn-primary" :disabled="connectingAgent">
+                                <template v-if="connectingAgent">{{ $t("connecting") }}</template>
+                                <template v-else>{{ $t("connect") }}</template>
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -110,6 +114,7 @@ export default {
             displayedRecords: [],
             dockerRunCommand: "",
             showAgentForm: false,
+            connectingAgent: false,
             agent: {
                 url: "http://",
                 username: "",
@@ -156,14 +161,16 @@ export default {
     methods: {
 
         addAgent() {
+            this.connectingAgent = true;
             this.$root.getSocket().emit("addAgent", this.agent, (res) => {
+                this.$root.toastRes(res);
+
                 if (res.ok) {
-                    this.$root.toastRes(res);
                     this.showAgentForm = false;
                 }
-            });
 
-            this.showAgentForm = false;
+                this.connectingAgent = false;
+            });
         },
 
         removeAgent(url) {

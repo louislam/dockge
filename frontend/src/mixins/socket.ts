@@ -259,6 +259,10 @@ export default defineComponent({
 
             socket.on("agentStatus", (res) => {
                 this.agentStatusList[res.endpoint] = res.status;
+
+                if (res.msg) {
+                    this.toastError(res.msg);
+                }
             });
 
             socket.on("agentList", (res) => {

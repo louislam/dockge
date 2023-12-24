@@ -251,7 +251,7 @@ export class DockgeServer {
                     let obj2 = obj as LooseObject;
                     obj2.endpoint = dockgeSocket.endpoint;
                 }
-                this.io.to(dockgeSocket.userID + "").emit("agent", event, ...args);
+                dockgeSocket.emit("agent", event, ...args);
             };
 
             if (typeof(socket.request.headers.endpoint) === "string") {
@@ -601,7 +601,7 @@ export class DockgeServer {
                     map.set(stackName, stack.toSimpleJSON(dockgeSocket.endpoint));
                 }
 
-                log.debug("server", "Send stack list");
+                log.debug("server", "Send stack list to user: " + dockgeSocket.id + " (" + dockgeSocket.endpoint + ")");
                 dockgeSocket.emitAgent("stackList", {
                     ok: true,
                     stackList: Object.fromEntries(map),

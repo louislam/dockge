@@ -60,12 +60,14 @@ export function callbackError(error : unknown, callback : unknown) {
         callback({
             ok: false,
             msg: error.message,
+            msgi18n: true,
         });
     } else if (error instanceof ValidationError) {
         callback({
             ok: false,
             type: ERROR_TYPE_VALIDATION,
             msg: error.message,
+            msgi18n: true,
         });
     } else {
         log.debug("console", "Unknown error: " + error);

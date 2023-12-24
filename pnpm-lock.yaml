@@ -68,6 +68,9 @@ dependencies:
   redbean-node:
     specifier: ~0.3.3
     version: 0.3.3(mysql2@3.6.5)
+  semver:
+    specifier: ^7.5.4
+    version: 7.5.4
   socket.io:
     specifier: ~4.7.2
     version: 4.7.2
@@ -124,6 +127,9 @@ devDependencies:
   '@types/jsonwebtoken':
     specifier: ~9.0.5
     version: 9.0.5
+  '@types/semver':
+    specifier: ^7.5.6
+    version: 7.5.6
   '@typescript-eslint/eslint-plugin':
     specifier: ~6.8.0
     version: 6.8.0(@typescript-eslint/parser@6.8.0)(eslint@8.50.0)(typescript@5.2.2)

@@ -107,5 +107,6 @@
     "agentOffline": "Offline",
     "connecting": "Connecting",
     "connect": "Connect",
-    "addAgent": "Add Agent"
+    "addAgent": "Add Agent",
+    "agentAddedSuccessfully": "Agent added successfully."
 }

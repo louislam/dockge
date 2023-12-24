@@ -2,7 +2,9 @@ import { DockgeSocket } from "./util-server";
 import { io, Socket as SocketClient } from "socket.io-client";
 import { log } from "./log";
 import { Agent } from "./models/agent";
-import { LooseObject } from "../common/util-common";
+import { isDev, LooseObject } from "../common/util-common";
+import semver from "semver";
+import { R } from "redbean-node";
 
 /**
  * Dockge Instance Manager
@@ -14,6 +16,74 @@ export class AgentManager {
 
     constructor(socket: DockgeSocket) {
         this.socket = socket;
+    }
+
+    test(url : string, username : string, password : string) : Promise<void> {
+        return new Promise((resolve, reject) => {
+            let obj = new URL(url);
+            let endpoint = obj.host;
+
+            if (!endpoint) {
+                reject(new Error("Invalid Dockge URL"));
+            }
+
+            if (this.instanceSocketList[endpoint]) {
+                reject(new Error("The Dockge URL already exists"));
+            }
+
+            let client = io(url, {
+                reconnection: false,
+                extraHeaders: {
+                    endpoint,
+                }
+            });
+
+            client.on("connect", () => {
+                client.emit("login", {
+                    username: username,
+                    password: password,
+                }, (res : LooseObject) => {
+                    if (res.ok) {
+                        resolve();
+                    } else {
+                        reject(new Error(res.msg));
+                    }
+                    client.disconnect();
+                });
+            });
+
+            client.on("connect_error", (err) => {
+                if (err.message === "xhr poll error") {
+                    reject(new Error("Unable to connect to the Dockge instance"));
+                } else {
+                    reject(err);
+                }
+                client.disconnect();
+            });
+        });
+    }
+
+    /**
+     *
+     * @param url
+     * @param username
+     * @param password
+     */
+    async add(url : string, username : string, password : string) : Promise<Agent> {
+        let bean = R.dispense("agent") as Agent;
+        bean.url = url;
+        bean.username = username;
+        bean.password = password;
+        await R.store(bean);
+        return bean;
+    }
+
+    /**
+     *
+     * @param endpoint
+     */
+    remove(endpoint : string) {
+
     }
 
     connect(url : string, username : string, password : string) {
@@ -48,7 +118,7 @@ export class AgentManager {
             client.emit("login", {
                 username: username,
                 password: password,
-            }, (res) => {
+            }, (res : LooseObject) => {
                 if (res.ok) {
                     log.info("agent-manager", "Logged in to the socket server: " + endpoint);
                     this.socket.emit("agentStatus", {
@@ -65,9 +135,9 @@ export class AgentManager {
             });
         });
 
-        client.on("error", (err) => {
+        client.on("connect_error", (err) => {
             log.error("agent-manager", "Error from the socket server: " + endpoint);
-            log.error("agent-manager", err);
+            log.debug("agent-manager", err);
             this.socket.emit("agentStatus", {
                 endpoint: endpoint,
                 status: "offline",
@@ -85,6 +155,20 @@ export class AgentManager {
         client.on("agent", (...args : unknown[]) => {
             log.debug("agent-manager", "Forward event");
             this.socket.emit("agent", ...args);
+        });
+
+        client.on("info", (res) => {
+            log.debug("agent-manager", res);
+
+            // Disconnect if the version is lower than 1.4.0
+            if (!isDev && semver.satisfies(res.version, "< 1.4.0")) {
+                this.socket.emit("agentStatus", {
+                    endpoint: endpoint,
+                    status: "offline",
+                    msg: `${endpoint}: Unsupported version: ` + res.version,
+                });
+                client.disconnect();
+            }
         });
 
         this.instanceSocketList[endpoint] = client;
