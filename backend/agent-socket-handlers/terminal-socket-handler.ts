@@ -7,11 +7,11 @@ import { AgentSocketHandler } from "../agent-socket-handler";
 import { AgentSocket } from "../../common/agent-socket";
 
 export class TerminalSocketHandler extends AgentSocketHandler {
-    create(s : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
+    create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
 
         agentSocket.on("terminalInput", async (terminalName : unknown, cmd : unknown, callback) => {
             try {
-                checkLogin(s);
+                checkLogin(socket);
 
                 if (typeof(terminalName) !== "string") {
                     throw new Error("Terminal name must be a string.");
@@ -36,7 +36,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
         // Main Terminal
         agentSocket.on("mainTerminal", async (terminalName : unknown, callback) => {
             try {
-                checkLogin(s);
+                checkLogin(socket);
 
                 // TODO: Reset the name here, force one main terminal for now
                 terminalName = "console";
@@ -55,7 +55,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                     log.debug("mainTerminal", "Terminal created");
                 }
 
-                terminal.join(s);
+                terminal.join(socket);
                 terminal.start();
 
                 callbackResult({
@@ -69,7 +69,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
         // Interactive Terminal for containers
         agentSocket.on("interactiveTerminal", async (stackName : unknown, serviceName : unknown, shell : unknown, callback) => {
             try {
-                checkLogin(s);
+                checkLogin(socket);
 
                 if (typeof(stackName) !== "string") {
                     throw new ValidationError("Stack name must be a string.");
@@ -88,7 +88,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
 
                 // Get stack
                 const stack = await Stack.getStack(server, stackName);
-                stack.joinContainerTerminal(s, serviceName, shell);
+                stack.joinContainerTerminal(socket, serviceName, shell);
 
                 callbackResult({
                     ok: true,
@@ -106,7 +106,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
             }
 
             try {
-                checkLogin(s);
+                checkLogin(socket);
                 if (typeof(terminalName) !== "string") {
                     throw new ValidationError("Terminal name must be a string.");
                 }
@@ -129,7 +129,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
         // Leave Combined Terminal
         agentSocket.on("leaveCombinedTerminal", async (stackName : unknown, callback) => {
             try {
-                checkLogin(s);
+                checkLogin(socket);
 
                 log.debug("leaveCombinedTerminal", "Stack name: " + stackName);
 
@@ -138,7 +138,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 }
 
                 const stack = await Stack.getStack(server, stackName);
-                await stack.leaveCombinedTerminal(s);
+                await stack.leaveCombinedTerminal(socket);
 
                 callbackResult({
                     ok: true,
@@ -152,7 +152,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
         agentSocket.on("terminalResize", async (terminalName: unknown, rows: unknown, cols: unknown) => {
             log.info("terminalResize", `Terminal: ${terminalName}`);
             try {
-                checkLogin(s);
+                checkLogin(socket);
                 if (typeof terminalName !== "string") {
                     throw new Error("Terminal name must be a string.");
                 }
