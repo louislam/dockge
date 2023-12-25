@@ -40,7 +40,7 @@
                     <div class="shadow-box big-padding">
                         <h4 class="mb-3">{{ $tc("dockgeAgent", 2) }} <span class="badge bg-warning" style="font-size: 12px;">beta</span></h4>
 
-                        <div v-for="(agent, endpoint) in $root.agentList" :key="endpoint" class="mb-3">
+                        <div v-for="(agent, endpoint) in $root.agentList" :key="endpoint" class="mb-3 agent">
                             <!-- Agent Status -->
                             <template v-if="$root.agentStatusList[endpoint]">
                                 <span v-if="$root.agentStatusList[endpoint] === 'online'" class="badge bg-primary me-2">{{ $t("agentOnline") }}</span>
@@ -50,7 +50,7 @@
 
                             <!-- Agent Display Name -->
                             <span v-if="endpoint === ''">{{ $t("currentEndpoint") }}</span>
-                            <span v-else>{{ endpoint }}</span>
+                            <a v-else :href="agent.url" target="_blank">{{ endpoint }}</a>
 
                             <!-- Remove Button -->
                             <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="showRemoveAgentDialog[agent.url] = !showRemoveAgentDialog[agent.url]" />
@@ -339,6 +339,12 @@ table {
 .remove-agent {
     cursor: pointer;
     color: rgba(255, 255, 255, 0.3);
+}
+
+.agent {
+    a {
+        text-decoration: none;
+    }
 }
 
 </style>
