@@ -34,7 +34,7 @@ export default defineComponent({
             stackList: {},
 
             // All stack list from all agents
-            allAgentStackList: {} as Record<string, any>,
+            allAgentStackList: {} as Record<string, object>,
 
             // online / offline / connecting
             agentStatusList: {
@@ -54,7 +54,7 @@ export default defineComponent({
         },
 
         completeStackList() {
-            let list : Record<string, any> = {};
+            let list : Record<string, object> = {};
 
             for (let stackName in this.stackList) {
                 list[stackName + "_"] = this.stackList[stackName];
