@@ -2,7 +2,12 @@
     <transition name="slide-fade" appear>
         <div>
             <h1 v-if="isAdd" class="mb-3">Compose</h1>
-            <h1 v-else class="mb-3"><Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}</h1>
+            <h1 v-else class="mb-3">
+                <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
+                <span v-if="$root.agentCount > 1" class="agent-name">
+                    ({{ endpointDisplay }})
+                </span>
+            </h1>
 
             <div v-if="stack.isManagedByDockge" class="mb-3">
                 <div class="btn-group me-2" role="group">
@@ -310,6 +315,10 @@ export default {
     },
     computed: {
 
+        endpointDisplay() {
+            return this.$root.endpointDisplayFunction(this.endpoint);
+        },
+
         urls() {
             if (!this.envsubstJSONConfig["x-dockge"] || !this.envsubstJSONConfig["x-dockge"].urls || !Array.isArray(this.envsubstJSONConfig["x-dockge"].urls)) {
                 return [];
@@ -428,9 +437,7 @@ export default {
         },
 
         $route(to, from) {
-            // Leave Combined Terminal
-            console.debug("leaveCombinedTerminal", from.params.stackName);
-            this.$root.emitAgent(this.endpoint, "leaveCombinedTerminal", this.stack.name, () => {});
+
         }
     },
     mounted() {
@@ -473,11 +480,9 @@ export default {
         this.requestServiceStatus();
     },
     unmounted() {
-        this.stopServiceStatusTimeout = true;
-        clearTimeout(serviceStatusTimeout);
+
     },
     methods: {
-
         startServiceStatusTimeout() {
             clearTimeout(serviceStatusTimeout);
             serviceStatusTimeout = setTimeout(async () => {
@@ -499,13 +504,25 @@ export default {
         exitConfirm(next) {
             if (this.isEditMode) {
                 if (confirm("You are currently editing a stack. Are you sure you want to leave?")) {
+                    this.exitAction();
                     next();
                 } else {
                     next(false);
                 }
             } else {
+                this.exitAction();
                 next();
             }
+        },
+
+        exitAction() {
+            console.log("exitAction");
+            this.stopServiceStatusTimeout = true;
+            clearTimeout(serviceStatusTimeout);
+
+            // Leave Combined Terminal
+            console.debug("leaveCombinedTerminal", this.endpoint, this.stack.name);
+            this.$root.emitAgent(this.endpoint, "leaveCombinedTerminal", this.stack.name, () => {});
         },
 
         bindTerminal() {
@@ -774,6 +791,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "../styles/vars.scss";
+
 .terminal {
     height: 200px;
 }
@@ -784,5 +803,10 @@ export default {
     &.edit-mode {
         background-color: #2c2f38 !important;
     }
+}
+
+.agent-name {
+    font-size: 13px;
+    color: $dark-font-color3;
 }
 </style>

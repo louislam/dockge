@@ -293,7 +293,7 @@ function copyYAMLCommentsItems(items : any, srcItems : any) {
  * @param input
  * @param hostname
  */
-export function parseDockerPort(input : string, hostname) {
+export function parseDockerPort(input : string, hostname : string) {
     let port;
     let display;
 

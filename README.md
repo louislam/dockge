@@ -19,7 +19,7 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
   - Update Docker Images
 - ⌨️ Interactive Editor for `compose.yaml`
 - 🦦 Interactive Web Terminal
-- 🕷️ (1.4.0 NEW!) Multiple agents support - You can manage multiple stacks from different Docker hosts in one single interface
+- 🕷️ (1.4.0 🆕) Multiple agents support - You can manage multiple stacks from different Docker hosts in one single interface
 - 🏪 Convert `docker run ...` commands into `compose.yaml`
 - 📙 File based structure - Dockge won't kidnap your compose files, they are stored on your drive as usual. You can interact with them using normal `docker compose` commands
    <img src="https://github.com/louislam/dockge/assets/1336778/cc071864-592e-4909-b73a-343a57494002" width=300 />

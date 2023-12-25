@@ -31,7 +31,7 @@ export class AgentProxySocketHandler extends SocketHandler {
 
                 } else {
                     log.debug("agent", "Proxying request to " + endpoint + " for " + eventName);
-                    socket.instanceManager.emitToEndpoint(endpoint, eventName, ...args);
+                    await socket.instanceManager.emitToEndpoint(endpoint, eventName, ...args);
                 }
             } catch (e) {
                 if (e instanceof Error) {

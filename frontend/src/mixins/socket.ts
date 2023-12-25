@@ -49,6 +49,10 @@ export default defineComponent({
     },
     computed: {
 
+        agentCount() {
+            return Object.keys(this.agentList).length;
+        },
+
         completeStackList() {
             let list : Record<string, any> = {};
 
@@ -125,6 +129,15 @@ export default defineComponent({
 
     },
     methods: {
+
+        endpointDisplayFunction(endpoint : string) {
+            if (endpoint) {
+                return endpoint;
+            } else {
+                return this.$t("currentEndpoint");
+            }
+        },
+
         /**
          * Initialize connection to socket server
          * @param bypass Should the check for if we

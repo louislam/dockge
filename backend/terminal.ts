@@ -34,6 +34,7 @@ export class Terminal {
 
     public enableKeepAlive : boolean = false;
     protected keepAliveInterval? : NodeJS.Timeout;
+    protected kickDisconnectedClientsInterval? : NodeJS.Timeout;
 
     protected socketList : Record<string, DockgeSocket> = {};
 
@@ -83,6 +84,16 @@ export class Terminal {
         if (this._ptyProcess) {
             return;
         }
+
+        this.kickDisconnectedClientsInterval = setInterval(() => {
+            for (const socketID in this.socketList) {
+                const socket = this.socketList[socketID];
+                if (!socket.connected) {
+                    log.debug("Terminal", "Kicking disconnected client " + socket.id + " from terminal " + this.name);
+                    this.leave(socket);
+                }
+            }
+        }, 60 * 1000);
 
         if (this.enableKeepAlive) {
             log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
@@ -152,6 +163,7 @@ export class Terminal {
         log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
 
         clearInterval(this.keepAliveInterval);
+        clearInterval(this.kickDisconnectedClientsInterval);
 
         if (this.callback) {
             this.callback(res.exitCode);
