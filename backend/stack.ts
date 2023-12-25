@@ -15,9 +15,10 @@ import {
     PROGRESS_TERMINAL_ROWS,
     RUNNING, TERMINAL_ROWS,
     UNKNOWN
-} from "./util-common";
+} from "../common/util-common";
 import { InteractiveTerminal, Terminal } from "./terminal";
 import childProcessAsync from "promisify-child-process";
+import { Settings } from "./settings";
 
 export class Stack {
 
@@ -50,22 +51,41 @@ export class Stack {
         }
     }
 
-    toJSON() : object {
-        let obj = this.toSimpleJSON();
+    async toJSON(endpoint : string) : Promise<object> {
+
+        // Since we have multiple agents now, embed primary hostname in the stack object too.
+        let primaryHostname = await Settings.get("primaryHostname");
+        if (!primaryHostname) {
+            if (!endpoint) {
+                primaryHostname = "localhost";
+            } else {
+                // Use the endpoint as the primary hostname
+                try {
+                    primaryHostname = (new URL("https://" + endpoint).hostname);
+                } catch (e) {
+                    // Just in case if the endpoint is in a incorrect format
+                    primaryHostname = "localhost";
+                }
+            }
+        }
+
+        let obj = this.toSimpleJSON(endpoint);
         return {
             ...obj,
             composeYAML: this.composeYAML,
             composeENV: this.composeENV,
+            primaryHostname,
         };
     }
 
-    toSimpleJSON() : object {
+    toSimpleJSON(endpoint : string) : object {
         return {
             name: this.name,
             status: this._status,
             tags: [],
             isManagedByDockge: this.isManagedByDockge,
             composeFileName: this._composeFileName,
+            endpoint,
         };
     }
 
@@ -186,8 +206,8 @@ export class Stack {
         }
     }
 
-    async deploy(socket? : DockgeSocket) : Promise<number> {
-        const terminalName = getComposeTerminalName(this.name);
+    async deploy(socket : DockgeSocket) : Promise<number> {
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "up", "-d", "--remove-orphans" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to deploy, please check the terminal output for more information.");
@@ -195,8 +215,8 @@ export class Stack {
         return exitCode;
     }
 
-    async delete(socket?: DockgeSocket) : Promise<number> {
-        const terminalName = getComposeTerminalName(this.name);
+    async delete(socket: DockgeSocket) : Promise<number> {
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down", "--remove-orphans" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to delete, please check the terminal output for more information.");
@@ -388,7 +408,7 @@ export class Stack {
     }
 
     async start(socket: DockgeSocket) {
-        const terminalName = getComposeTerminalName(this.name);
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "up", "-d", "--remove-orphans" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to start, please check the terminal output for more information.");
@@ -397,7 +417,7 @@ export class Stack {
     }
 
     async stop(socket: DockgeSocket) : Promise<number> {
-        const terminalName = getComposeTerminalName(this.name);
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "stop" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to stop, please check the terminal output for more information.");
@@ -406,7 +426,7 @@ export class Stack {
     }
 
     async restart(socket: DockgeSocket) : Promise<number> {
-        const terminalName = getComposeTerminalName(this.name);
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "restart" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to restart, please check the terminal output for more information.");
@@ -415,7 +435,7 @@ export class Stack {
     }
 
     async down(socket: DockgeSocket) : Promise<number> {
-        const terminalName = getComposeTerminalName(this.name);
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to down, please check the terminal output for more information.");
@@ -424,7 +444,7 @@ export class Stack {
     }
 
     async update(socket: DockgeSocket) {
-        const terminalName = getComposeTerminalName(this.name);
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "pull" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to pull, please check the terminal output for more information.");
@@ -445,7 +465,7 @@ export class Stack {
     }
 
     async joinCombinedTerminal(socket: DockgeSocket) {
-        const terminalName = getCombinedTerminalName(this.name);
+        const terminalName = getCombinedTerminalName(socket.endpoint, this.name);
         const terminal = Terminal.getOrCreateTerminal(this.server, terminalName, "docker", [ "compose", "logs", "-f", "--tail", "100" ], this.path);
         terminal.enableKeepAlive = true;
         terminal.rows = COMBINED_TERMINAL_ROWS;
@@ -455,7 +475,7 @@ export class Stack {
     }
 
     async leaveCombinedTerminal(socket: DockgeSocket) {
-        const terminalName = getCombinedTerminalName(this.name);
+        const terminalName = getCombinedTerminalName(socket.endpoint, this.name);
         const terminal = Terminal.getTerminal(terminalName);
         if (terminal) {
             terminal.leave(socket);
@@ -463,7 +483,7 @@ export class Stack {
     }
 
     async joinContainerTerminal(socket: DockgeSocket, serviceName: string, shell : string = "sh", index: number = 0) {
-        const terminalName = getContainerExecTerminalName(this.name, serviceName, index);
+        const terminalName = getContainerExecTerminalName(socket.endpoint, this.name, serviceName, index);
         let terminal = Terminal.getTerminal(terminalName);
 
         if (!terminal) {

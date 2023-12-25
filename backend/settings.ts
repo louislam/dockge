@@ -1,6 +1,6 @@
 import { R } from "redbean-node";
 import { log } from "./log";
-import { LooseObject } from "./util-common";
+import { LooseObject } from "../common/util-common";
 
 export class Settings {
 

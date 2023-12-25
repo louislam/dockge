@@ -7,8 +7,7 @@
 <script>
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
-import { WebLinksAddon } from "xterm-addon-web-links";
-import { TERMINAL_COLS, TERMINAL_ROWS } from "../../../backend/util-common";
+import { TERMINAL_COLS, TERMINAL_ROWS } from "../../../common/util-common";
 
 export default {
     /**
@@ -20,6 +19,11 @@ export default {
     },
     props: {
         name: {
+            type: String,
+            require: true,
+        },
+
+        endpoint: {
             type: String,
             require: true,
         },
@@ -110,14 +114,14 @@ export default {
 
         // Create a new Terminal
         if (this.mode === "mainTerminal") {
-            this.$root.getSocket().emit("mainTerminal", this.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "mainTerminal", this.name, (res) => {
                 if (!res.ok) {
                     this.$root.toastRes(res);
                 }
             });
         } else if (this.mode === "interactive") {
             console.debug("Create Interactive terminal:", this.name);
-            this.$root.getSocket().emit("interactiveTerminal", this.stackName, this.serviceName, this.shell, (res) => {
+            this.$root.emitAgent(this.endpoint, "interactiveTerminal", this.stackName, this.serviceName, this.shell, (res) => {
                 if (!res.ok) {
                     this.$root.toastRes(res);
                 }
@@ -134,15 +138,15 @@ export default {
     },
 
     methods: {
-        bind(name) {
+        bind(endpoint, name) {
             // Workaround: normally this.name should be set, but it is not sometimes, so we use the parameter, but eventually this.name and name must be the same name
             if (name) {
                 this.$root.unbindTerminal(name);
-                this.$root.bindTerminal(name, this.terminal);
+                this.$root.bindTerminal(endpoint, name, this.terminal);
                 console.debug("Terminal bound via parameter: " + name);
             } else if (this.name) {
                 this.$root.unbindTerminal(this.name);
-                this.$root.bindTerminal(this.name, this.terminal);
+                this.$root.bindTerminal(this.endpoint, this.name, this.terminal);
                 console.debug("Terminal bound: " + this.name);
             } else {
                 console.debug("Terminal name not set");
@@ -173,7 +177,7 @@ export default {
                     // Remove the input from the terminal
                     this.removeInput();
 
-                    this.$root.getSocket().emit("terminalInput", this.name, buffer + e.key, (err) => {
+                    this.$root.emitAgent(this.endpoint, "terminalInput", this.name, buffer + e.key, (err) => {
                         this.$root.toastError(err.msg);
                     });
 
@@ -192,7 +196,7 @@ export default {
                     // TODO
                 } else if (e.key === "\u0003") {      // Ctrl + C
                     console.debug("Ctrl + C");
-                    this.$root.getSocket().emit("terminalInput", this.name, e.key);
+                    this.$root.emitAgent(this.endpoint, "terminalInput", this.name, e.key);
                     this.removeInput();
                 } else {
                     this.cursorPosition++;
@@ -205,7 +209,7 @@ export default {
 
         interactiveTerminalConfig() {
             this.terminal.onKey(e => {
-                this.$root.getSocket().emit("terminalInput", this.name, e.key, (res) => {
+                this.$root.emitAgent(this.endpoint, "terminalInput", this.name, e.key, (res) => {
                     if (!res.ok) {
                         this.$root.toastRes(res);
                     }
@@ -234,7 +238,7 @@ export default {
             this.terminalFitAddOn.fit();
             let rows = this.terminal.rows;
             let cols = this.terminal.cols;
-            this.$root.getSocket().emit("terminalResize", this.name, rows, cols);
+            this.$root.emitAgent(this.endpoint, "terminalResize", this.name, rows, cols);
         }
     }
 };

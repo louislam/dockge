@@ -3,6 +3,7 @@ import { Socket } from "socket.io-client";
 import { defineComponent } from "vue";
 import jwtDecode from "jwt-decode";
 import { Terminal } from "@xterm/xterm";
+import { AgentSocket } from "../../../common/agent-socket";
 
 let socket : Socket;
 
@@ -28,16 +29,51 @@ export default defineComponent({
             loggedIn: false,
             allowLoginDialog: false,
             username: null,
-            stackList: {},
             composeTemplate: "",
+
+            stackList: {},
+
+            // All stack list from all agents
+            allAgentStackList: {} as Record<string, object>,
+
+            // online / offline / connecting
+            agentStatusList: {
+
+            },
+
+            // Agent List
+            agentList: {
+
+            },
         };
     },
     computed: {
+
+        agentCount() {
+            return Object.keys(this.agentList).length;
+        },
+
+        completeStackList() {
+            let list : Record<string, object> = {};
+
+            for (let stackName in this.stackList) {
+                list[stackName + "_"] = this.stackList[stackName];
+            }
+
+            for (let endpoint in this.allAgentStackList) {
+                let instance = this.allAgentStackList[endpoint];
+                for (let stackName in instance.stackList) {
+                    list[stackName + "_" + endpoint] = instance.stackList[stackName];
+                }
+            }
+            return list;
+        },
+
         usernameFirstChar() {
             if (typeof this.username == "string" && this.username.length >= 1) {
                 return this.username.charAt(0).toUpperCase();
             } else {
-                return "🐻";
+                return "🐬";
             }
         },
 
@@ -65,6 +101,15 @@ export default defineComponent({
 
     },
     watch: {
+
+        "socketIO.connected"() {
+            if (this.socketIO.connected) {
+                this.agentStatusList[""] = "online";
+            } else {
+                this.agentStatusList[""] = "offline";
+            }
+        },
+
         remember() {
             localStorage.remember = (this.remember) ? "1" : "0";
         },
@@ -84,6 +129,15 @@ export default defineComponent({
 
     },
     methods: {
+
+        endpointDisplayFunction(endpoint : string) {
+            if (endpoint) {
+                return endpoint;
+            } else {
+                return this.$t("currentEndpoint");
+            }
+        },
+
         /**
          * Initialize connection to socket server
          * @param bypass Should the check for if we
@@ -108,8 +162,12 @@ export default defineComponent({
                 this.socketIO.connecting = true;
             }, 1500);
 
-            socket = io(url, {
-                transports: [ "websocket", "polling" ]
+            socket = io(url);
+
+            // Handling events from agents
+            let agentSocket = new AgentSocket();
+            socket.on("agent", (eventName : unknown, ...args : unknown[]) => {
+                agentSocket.call(eventName, ...args);
             });
 
             socket.on("connect", () => {
@@ -177,7 +235,7 @@ export default defineComponent({
                 this.$router.push("/setup");
             });
 
-            socket.on("terminalWrite", (terminalName, data) => {
+            agentSocket.on("terminalWrite", (terminalName, data) => {
                 const terminal = terminalMap.get(terminalName);
                 if (!terminal) {
                     //console.error("Terminal not found: " + terminalName);
@@ -186,9 +244,18 @@ export default defineComponent({
                 terminal.write(data);
             });
 
-            socket.on("stackList", (res) => {
+            agentSocket.on("stackList", (res) => {
                 if (res.ok) {
-                    this.stackList = res.stackList;
+                    if (!res.endpoint) {
+                        this.stackList = res.stackList;
+                    } else {
+                        if (!this.allAgentStackList[res.endpoint]) {
+                            this.allAgentStackList[res.endpoint] = {
+                                stackList: {},
+                            };
+                        }
+                        this.allAgentStackList[res.endpoint].stackList = res.stackList;
+                    }
                 }
             });
 
@@ -200,6 +267,21 @@ export default defineComponent({
                             stackObj.status = res.stackStatusList[stackName];
                         }
                     }
+                }
+            });
+
+            socket.on("agentStatus", (res) => {
+                this.agentStatusList[res.endpoint] = res.status;
+
+                if (res.msg) {
+                    this.toastError(res.msg);
+                }
+            });
+
+            socket.on("agentList", (res) => {
+                console.log(res);
+                if (res.ok) {
+                    this.agentList = res.agentList;
                 }
             });
 
@@ -218,6 +300,10 @@ export default defineComponent({
 
         getSocket() : Socket {
             return socket;
+        },
+
+        emitAgent(endpoint : string, eventName : string, ...args : unknown[]) {
+            this.getSocket().emit("agent", endpoint, eventName, ...args);
         },
 
         /**
@@ -310,9 +396,9 @@ export default defineComponent({
 
         },
 
-        bindTerminal(terminalName : string, terminal : Terminal) {
+        bindTerminal(endpoint : string, terminalName : string, terminal : Terminal) {
             // Load terminal, get terminal screen
-            socket.emit("terminalJoin", terminalName, (res) => {
+            this.emitAgent(endpoint, "terminalJoin", terminalName, (res) => {
                 if (res.ok) {
                     terminal.write(res.buffer);
                     terminalMap.set(terminalName, terminal);

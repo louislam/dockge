@@ -99,5 +99,17 @@
     "connecting...": "Connecting to the socket server…",
     "url": "URL | URLs",
     "extra": "Extra",
-    "newUpdate": "New Update"
+    "newUpdate": "New Update",
+    "dockgeAgent": "Dockge Agent | Dockge Agents",
+    "currentEndpoint": "Current",
+    "dockgeURL": "Dockge URL (e.g. http://127.0.0.1:5001)",
+    "agentOnline": "Online",
+    "agentOffline": "Offline",
+    "connecting": "Connecting",
+    "connect": "Connect",
+    "addAgent": "Add Agent",
+    "agentAddedSuccessfully": "Agent added successfully.",
+    "agentRemovedSuccessfully": "Agent removed successfully.",
+    "removeAgent": "Remove Agent",
+    "removeAgentMsg": "Are you sure you want to remove this agent?"
 }

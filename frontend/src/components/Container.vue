@@ -137,7 +137,7 @@
 <script>
 import { defineComponent } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { parseDockerPort } from "../../../backend/util-common";
+import { parseDockerPort } from "../../../common/util-common";
 
 export default defineComponent({
     components: {
@@ -189,14 +189,34 @@ export default defineComponent({
         },
 
         terminalRouteLink() {
-            return {
-                name: "containerTerminal",
-                params: {
-                    stackName: this.stackName,
-                    serviceName: this.name,
-                    type: "bash",
-                },
-            };
+            if (this.endpoint) {
+                return {
+                    name: "containerTerminalEndpoint",
+                    params: {
+                        endpoint: this.endpoint,
+                        stackName: this.stackName,
+                        serviceName: this.name,
+                        type: "bash",
+                    },
+                };
+            } else {
+                return {
+                    name: "containerTerminal",
+                    params: {
+                        stackName: this.stackName,
+                        serviceName: this.name,
+                        type: "bash",
+                    },
+                };
+            }
+        },
+
+        endpoint() {
+            return this.$parent.$parent.endpoint;
+        },
+
+        stack() {
+            return this.$parent.$parent.stack;
         },
 
         stackName() {
@@ -254,8 +274,7 @@ export default defineComponent({
     },
     methods: {
         parsePort(port) {
-            let hostname = this.$root.info.primaryHostname || location.hostname;
-            return parseDockerPort(port, hostname);
+            return parseDockerPort(port, this.stack.primaryHostname);
         },
         remove() {
             delete this.jsonObject.services[this.name];

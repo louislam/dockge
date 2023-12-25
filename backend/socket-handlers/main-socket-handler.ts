@@ -1,3 +1,5 @@
+// @ts-ignore
+import composerize from "composerize";
 import { SocketHandler } from "../socket-handler.js";
 import { DockgeServer } from "../dockge-server";
 import { log } from "../log";
@@ -5,7 +7,14 @@ import { R } from "redbean-node";
 import { loginRateLimiter, twoFaRateLimiter } from "../rate-limiter";
 import { generatePasswordHash, needRehashPassword, shake256, SHAKE256_LENGTH, verifyPassword } from "../password-hash";
 import { User } from "../models/user";
-import { checkLogin, DockgeSocket, doubleCheckPassword, JWTDecoded } from "../util-server";
+import {
+    callbackError,
+    checkLogin,
+    DockgeSocket,
+    doubleCheckPassword,
+    JWTDecoded,
+    ValidationError
+} from "../util-server";
 import { passwordStrength } from "check-password-strength";
 import jwt from "jsonwebtoken";
 import { Settings } from "../settings";
@@ -262,8 +271,6 @@ export class MainSocketHandler extends SocketHandler {
                     await doubleCheckPassword(socket, currentPassword);
                 }
 
-                console.log(data);
-
                 await Settings.setSettings("general", data);
 
                 callback({
@@ -292,6 +299,25 @@ export class MainSocketHandler extends SocketHandler {
                 if (e instanceof Error) {
                     log.warn("disconnectOtherSocketClients", e.message);
                 }
+            }
+        });
+
+        // composerize
+        socket.on("composerize", async (dockerRunCommand : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(dockerRunCommand) !== "string") {
+                    throw new ValidationError("dockerRunCommand must be a string");
+                }
+
+                const composeTemplate = composerize(dockerRunCommand);
+                callback({
+                    ok: true,
+                    composeTemplate,
+                });
+            } catch (e) {
+                callbackError(e, callback);
             }
         });
     }

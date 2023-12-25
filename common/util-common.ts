@@ -43,6 +43,8 @@ async function initRandomBytes() {
     }
 }
 
+export const ALL_ENDPOINTS = "##ALL_DOCKGE_ENDPOINTS##";
+
 // Stack Status
 export const UNKNOWN = 0;
 export const CREATED_FILE = 1;
@@ -206,20 +208,20 @@ export function getCryptoRandomInt(min: number, max: number):number {
     }
 }
 
-export function getComposeTerminalName(stack : string) {
-    return "compose-" + stack;
+export function getComposeTerminalName(endpoint : string, stack : string) {
+    return "compose-" + endpoint + "-" + stack;
 }
 
-export function getCombinedTerminalName(stack : string) {
-    return "combined-" + stack;
+export function getCombinedTerminalName(endpoint : string, stack : string) {
+    return "combined-" + endpoint + "-" + stack;
 }
 
-export function getContainerTerminalName(container : string) {
-    return "container-" + container;
+export function getContainerTerminalName(endpoint : string, container : string) {
+    return "container-" + endpoint + "-" + container;
 }
 
-export function getContainerExecTerminalName(stackName : string, container : string, index : number) {
-    return "container-exec-" + stackName + "-" + container + "-" + index;
+export function getContainerExecTerminalName(endpoint : string, stackName : string, container : string, index : number) {
+    return "container-exec-" + endpoint + "-" + stackName + "-" + container + "-" + index;
 }
 
 export function copyYAMLComments(doc : Document, src : Document) {
@@ -289,10 +291,9 @@ function copyYAMLCommentsItems(items : any, srcItems : any) {
  *   - "127.0.0.1:5000-5010:5000-5010"
  *   - "6060:6060/udp"
  * @param input
- * @param defaultHostname
+ * @param hostname
  */
-export function parseDockerPort(input : string, defaultHostname : string = "localhost") {
-    let hostname = defaultHostname;
+export function parseDockerPort(input : string, hostname : string) {
     let port;
     let display;
 
@@ -405,3 +406,4 @@ function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
         pair.value.value = envsubst(pair.value.value, env);
     }
 }
+

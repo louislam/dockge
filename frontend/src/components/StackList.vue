@@ -43,7 +43,7 @@
             </div>
         </div>
         <div ref="stackList" class="stack-list" :class="{ scrollbar: scrollbar }" :style="stackListStyle">
-            <div v-if="Object.keys($root.stackList).length === 0" class="text-center mt-3">
+            <div v-if="Object.keys(sortedStackList).length === 0" class="text-center mt-3">
                 <router-link to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
             </div>
 
@@ -67,7 +67,7 @@
 <script>
 import Confirm from "../components/Confirm.vue";
 import StackListItem from "../components/StackListItem.vue";
-import { CREATED_FILE, CREATED_STACK, EXITED, RUNNING, UNKNOWN } from "../../../backend/util-common";
+import { CREATED_FILE, CREATED_STACK, EXITED, RUNNING, UNKNOWN } from "../../../common/util-common";
 
 export default {
     components: {
@@ -120,7 +120,7 @@ export default {
          * @returns {Array} The sorted list of stacks.
          */
         sortedStackList() {
-            let result = Object.values(this.$root.stackList);
+            let result = Object.values(this.$root.completeStackList);
 
             result = result.filter(stack => {
                 // filter by search text
@@ -160,6 +160,7 @@ export default {
                     return 1;
                 }
 
+                // sort by status
                 if (m1.status !== m2.status) {
                     if (m2.status === RUNNING) {
                         return 1;

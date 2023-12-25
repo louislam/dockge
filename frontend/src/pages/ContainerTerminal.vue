@@ -7,13 +7,13 @@
                 <router-link :to="sh" class="btn btn-normal me-2">Switch to sh</router-link>
             </div>
 
-            <Terminal class="terminal" :rows="20" mode="interactive" :name="terminalName" :stack-name="stackName" :service-name="serviceName" :shell="shell"></Terminal>
+            <Terminal class="terminal" :rows="20" mode="interactive" :name="terminalName" :stack-name="stackName" :service-name="serviceName" :shell="shell" :endpoint="endpoint"></Terminal>
         </div>
     </transition>
 </template>
 
 <script>
-import { getContainerExecTerminalName } from "../../../backend/util-common";
+import { getContainerExecTerminalName } from "../../../common/util-common";
 
 export default {
     components: {
@@ -27,6 +27,9 @@ export default {
         stackName() {
             return this.$route.params.stackName;
         },
+        endpoint() {
+            return this.$route.params.endpoint || "";
+        },
         shell() {
             return this.$route.params.type;
         },
@@ -34,10 +37,12 @@ export default {
             return this.$route.params.serviceName;
         },
         terminalName() {
-            return getContainerExecTerminalName(this.stackName, this.serviceName, 0);
+            return getContainerExecTerminalName(this.endpoint, this.stackName, this.serviceName, 0);
         },
         sh() {
-            return {
+            let endpoint = this.$route.params.endpoint;
+
+            let data = {
                 name: "containerTerminal",
                 params: {
                     stackName: this.stackName,
@@ -45,6 +50,13 @@ export default {
                     type: "sh",
                 },
             };
+
+            if (endpoint) {
+                data.name = "containerTerminalEndpoint";
+                data.params.endpoint = endpoint;
+            }
+
+            return data;
         },
     },
     mounted() {

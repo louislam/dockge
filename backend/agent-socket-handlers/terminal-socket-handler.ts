@@ -1,24 +1,15 @@
-import { SocketHandler } from "../socket-handler.js";
 import { DockgeServer } from "../dockge-server";
-import { callbackError, checkLogin, DockgeSocket, ValidationError } from "../util-server";
+import { callbackError, callbackResult, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { log } from "../log";
-import yaml from "yaml";
-import path from "path";
-import fs from "fs";
-import {
-    allowedCommandList,
-    allowedRawKeys,
-    getComposeTerminalName, getContainerExecTerminalName,
-    isDev,
-    PROGRESS_TERMINAL_ROWS
-} from "../util-common";
 import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
 import { Stack } from "../stack";
+import { AgentSocketHandler } from "../agent-socket-handler";
+import { AgentSocket } from "../../common/agent-socket";
 
-export class TerminalSocketHandler extends SocketHandler {
-    create(socket : DockgeSocket, server : DockgeServer) {
+export class TerminalSocketHandler extends AgentSocketHandler {
+    create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
 
-        socket.on("terminalInput", async (terminalName : unknown, cmd : unknown, errorCallback) => {
+        agentSocket.on("terminalInput", async (terminalName : unknown, cmd : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -38,17 +29,12 @@ export class TerminalSocketHandler extends SocketHandler {
                     throw new Error("Terminal not found or it is not a Interactive Terminal.");
                 }
             } catch (e) {
-                if (e instanceof Error) {
-                    errorCallback({
-                        ok: false,
-                        msg: e.message,
-                    });
-                }
+                callbackError(e, callback);
             }
         });
 
         // Main Terminal
-        socket.on("mainTerminal", async (terminalName : unknown, callback) => {
+        agentSocket.on("mainTerminal", async (terminalName : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -59,29 +45,29 @@ export class TerminalSocketHandler extends SocketHandler {
                     throw new ValidationError("Terminal name must be a string.");
                 }
 
-                log.debug("deployStack", "Terminal name: " + terminalName);
+                log.debug("mainTerminal", "Terminal name: " + terminalName);
 
                 let terminal = Terminal.getTerminal(terminalName);
 
                 if (!terminal) {
                     terminal = new MainTerminal(server, terminalName);
                     terminal.rows = 50;
-                    log.debug("deployStack", "Terminal created");
+                    log.debug("mainTerminal", "Terminal created");
                 }
 
                 terminal.join(socket);
                 terminal.start();
 
-                callback({
+                callbackResult({
                     ok: true,
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
         });
 
         // Interactive Terminal for containers
-        socket.on("interactiveTerminal", async (stackName : unknown, serviceName : unknown, shell : unknown, callback) => {
+        agentSocket.on("interactiveTerminal", async (stackName : unknown, serviceName : unknown, shell : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -104,16 +90,16 @@ export class TerminalSocketHandler extends SocketHandler {
                 const stack = await Stack.getStack(server, stackName);
                 stack.joinContainerTerminal(socket, serviceName, shell);
 
-                callback({
+                callbackResult({
                     ok: true,
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
         });
 
         // Join Output Terminal
-        socket.on("terminalJoin", async (terminalName : unknown, callback) => {
+        agentSocket.on("terminalJoin", async (terminalName : unknown, callback) => {
             if (typeof(callback) !== "function") {
                 log.debug("console", "Callback is not a function.");
                 return;
@@ -141,7 +127,7 @@ export class TerminalSocketHandler extends SocketHandler {
         });
 
         // Leave Combined Terminal
-        socket.on("leaveCombinedTerminal", async (stackName : unknown, callback) => {
+        agentSocket.on("leaveCombinedTerminal", async (stackName : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -154,52 +140,48 @@ export class TerminalSocketHandler extends SocketHandler {
                 const stack = await Stack.getStack(server, stackName);
                 await stack.leaveCombinedTerminal(socket);
 
-                callback({
+                callbackResult({
                     ok: true,
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
         });
 
         // Resize Terminal
-        socket.on(
-            "terminalResize",
-            async (terminalName: unknown, rows: unknown, cols: unknown) => {
-                log.info("terminalResize", `Terminal: ${terminalName}`);
-                try {
-                    checkLogin(socket);
-                    if (typeof terminalName !== "string") {
-                        throw new Error("Terminal name must be a string.");
-                    }
+        agentSocket.on("terminalResize", async (terminalName: unknown, rows: unknown, cols: unknown) => {
+            log.info("terminalResize", `Terminal: ${terminalName}`);
+            try {
+                checkLogin(socket);
+                if (typeof terminalName !== "string") {
+                    throw new Error("Terminal name must be a string.");
+                }
 
-                    if (typeof rows !== "number") {
-                        throw new Error("Command must be a number.");
-                    }
-                    if (typeof cols !== "number") {
-                        throw new Error("Command must be a number.");
-                    }
+                if (typeof rows !== "number") {
+                    throw new Error("Command must be a number.");
+                }
+                if (typeof cols !== "number") {
+                    throw new Error("Command must be a number.");
+                }
 
-                    let terminal = Terminal.getTerminal(terminalName);
+                let terminal = Terminal.getTerminal(terminalName);
 
-                    // log.info("terminal", terminal);
-                    if (terminal instanceof Terminal) {
-                        //log.debug("terminalInput", "Terminal found, writing to terminal.");
-                        terminal.rows = rows;
-                        terminal.cols = cols;
-                    } else {
-                        throw new Error(`${terminalName} Terminal not found.`);
-                    }
-                } catch (e) {
-                    log.debug(
-                        "terminalResize",
+                // log.info("terminal", terminal);
+                if (terminal instanceof Terminal) {
+                    //log.debug("terminalInput", "Terminal found, writing to terminal.");
+                    terminal.rows = rows;
+                    terminal.cols = cols;
+                } else {
+                    throw new Error(`${terminalName} Terminal not found.`);
+                }
+            } catch (e) {
+                log.debug("terminalResize",
                         // Added to prevent the lint error when adding the type
                         // and ts type checker saying type is unknown.
                         // @ts-ignore
                         `Error on ${terminalName}: ${e.message}`
-                    );
-                }
+                );
             }
-        );
+        });
     }
 }

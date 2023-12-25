@@ -15,14 +15,14 @@
                 </p>
             </div>
 
-            <Terminal class="terminal" :rows="20" mode="mainTerminal" name="console"></Terminal>
+            <Terminal class="terminal" :rows="20" mode="mainTerminal" name="console" :endpoint="endpoint"></Terminal>
         </div>
     </transition>
 </template>
 
 <script>
 
-import { allowedCommandList } from "../../../backend/util-common";
+import { allowedCommandList } from "../../../common/util-common";
 
 export default {
     components: {
@@ -31,6 +31,11 @@ export default {
         return {
             allowedCommandList,
         };
+    },
+    computed: {
+        endpoint() {
+            return this.$route.params.endpoint || "";
+        },
     },
     mounted() {
 

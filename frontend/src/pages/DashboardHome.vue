@@ -5,36 +5,97 @@
                 {{ $t("home") }}
             </h1>
 
-            <div class="shadow-box big-padding text-center mb-4">
-                <div class="row">
-                    <div class="col">
-                        <h3>{{ $t("active") }}</h3>
-                        <span class="num active">{{ activeNum }}</span>
+            <div class="row first-row">
+                <!-- Left -->
+                <div class="col-md-7">
+                    <!-- Stats -->
+                    <div class="shadow-box big-padding text-center mb-4">
+                        <div class="row">
+                            <div class="col">
+                                <h3>{{ $t("active") }}</h3>
+                                <span class="num active">{{ activeNum }}</span>
+                            </div>
+                            <div class="col">
+                                <h3>{{ $t("exited") }}</h3>
+                                <span class="num exited">{{ exitedNum }}</span>
+                            </div>
+                            <div class="col">
+                                <h3>{{ $t("inactive") }}</h3>
+                                <span class="num inactive">{{ inactiveNum }}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col">
-                        <h3>{{ $t("exited") }}</h3>
-                        <span class="num exited">{{ exitedNum }}</span>
+
+                    <!-- Docker Run -->
+                    <h2 class="mb-3">{{ $t("Docker Run") }}</h2>
+                    <div class="mb-3">
+                        <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required placeholder="docker run ..."></textarea>
                     </div>
-                    <div class="col">
-                        <h3>{{ $t("inactive") }}</h3>
-                        <span class="num inactive">{{ inactiveNum }}</span>
+
+                    <button class="btn-normal btn mb-4" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
+                </div>
+                <!-- Right -->
+                <div class="col-md-5">
+                    <!-- Agent List -->
+                    <div class="shadow-box big-padding">
+                        <h4 class="mb-3">{{ $tc("dockgeAgent", 2) }} <span class="badge bg-warning" style="font-size: 12px;">beta</span></h4>
+
+                        <div v-for="(agent, endpoint) in $root.agentList" :key="endpoint" class="mb-3 agent">
+                            <!-- Agent Status -->
+                            <template v-if="$root.agentStatusList[endpoint]">
+                                <span v-if="$root.agentStatusList[endpoint] === 'online'" class="badge bg-primary me-2">{{ $t("agentOnline") }}</span>
+                                <span v-else-if="$root.agentStatusList[endpoint] === 'offline'" class="badge bg-danger me-2">{{ $t("agentOffline") }}</span>
+                                <span v-else class="badge bg-secondary me-2">{{ $t($root.agentStatusList[endpoint]) }}</span>
+                            </template>
+
+                            <!-- Agent Display Name -->
+                            <span v-if="endpoint === ''">{{ $t("currentEndpoint") }}</span>
+                            <a v-else :href="agent.url" target="_blank">{{ endpoint }}</a>
+
+                            <!-- Remove Button -->
+                            <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="showRemoveAgentDialog[agent.url] = !showRemoveAgentDialog[agent.url]" />
+
+                            <!-- Remoe Agent Dialog -->
+                            <BModal v-model="showRemoveAgentDialog[agent.url]" :okTitle="$t('removeAgent')" okVariant="danger" @ok="removeAgent(agent.url)">
+                                <p>{{ agent.url }}</p>
+                                {{ $t("removeAgentMsg") }}
+                            </BModal>
+                        </div>
+
+                        <button v-if="!showAgentForm" class="btn btn-normal" @click="showAgentForm = !showAgentForm">{{ $t("addAgent") }}</button>
+
+                        <!-- Add Agent Form -->
+                        <form v-if="showAgentForm" @submit.prevent="addAgent">
+                            <div class="mb-3">
+                                <label for="url" class="form-label">{{ $t("dockgeURL") }}</label>
+                                <input id="url" v-model="agent.url" type="url" class="form-control" required placeholder="http://">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="username" class="form-label">{{ $t("Username") }}</label>
+                                <input id="username" v-model="agent.username" type="text" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">{{ $t("Password") }}</label>
+                                <input id="password" v-model="agent.password" type="password" class="form-control" required autocomplete="new-password">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" :disabled="connectingAgent">
+                                <template v-if="connectingAgent">{{ $t("connecting") }}</template>
+                                <template v-else>{{ $t("connect") }}</template>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-
-            <h2 class="mb-3">{{ $t("Docker Run") }}</h2>
-            <div class="mb-3">
-                <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required placeholder="docker run ..."></textarea>
-            </div>
-
-            <button class="btn-normal btn" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
         </div>
     </transition>
     <router-view ref="child" />
 </template>
 
 <script>
-import { statusNameShort } from "../../../backend/util-common";
+import { statusNameShort } from "../../../common/util-common";
 
 export default {
     components: {
@@ -58,6 +119,14 @@ export default {
             importantHeartBeatListLength: 0,
             displayedRecords: [],
             dockerRunCommand: "",
+            showAgentForm: false,
+            showRemoveAgentDialog: {},
+            connectingAgent: false,
+            agent: {
+                url: "http://",
+                username: "",
+                password: "",
+            }
         };
     },
 
@@ -98,11 +167,43 @@ export default {
 
     methods: {
 
+        addAgent() {
+            this.connectingAgent = true;
+            this.$root.getSocket().emit("addAgent", this.agent, (res) => {
+                this.$root.toastRes(res);
+
+                if (res.ok) {
+                    this.showAgentForm = false;
+                    this.agent = {
+                        url: "http://",
+                        username: "",
+                        password: "",
+                    };
+                }
+
+                this.connectingAgent = false;
+            });
+        },
+
+        removeAgent(url) {
+            this.$root.getSocket().emit("removeAgent", url, (res) => {
+                if (res.ok) {
+                    this.$root.toastRes(res);
+
+                    let urlObj = new URL(url);
+                    let endpoint = urlObj.host;
+
+                    // Remove the stack list and status list of the removed agent
+                    delete this.$root.allAgentStackList[endpoint];
+                }
+            });
+        },
+
         getStatusNum(statusName) {
             let num = 0;
 
-            for (let stackName in this.$root.stackList) {
-                const stack = this.$root.stackList[stackName];
+            for (let stackName in this.$root.completeStackList) {
+                const stack = this.$root.completeStackList[stackName];
                 if (statusNameShort(stack.status) === statusName) {
                     num += 1;
                 }
@@ -230,4 +331,20 @@ table {
     font-family: 'JetBrains Mono', monospace;
     font-size: 15px;
 }
+
+.first-row .shadow-box {
+
+}
+
+.remove-agent {
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.agent {
+    a {
+        text-decoration: none;
+    }
+}
+
 </style>

@@ -2,7 +2,12 @@
     <transition name="slide-fade" appear>
         <div>
             <h1 v-if="isAdd" class="mb-3">Compose</h1>
-            <h1 v-else class="mb-3"><Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}</h1>
+            <h1 v-else class="mb-3">
+                <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
+                <span v-if="$root.agentCount > 1" class="agent-name">
+                    ({{ endpointDisplay }})
+                </span>
+            </h1>
 
             <div v-if="stack.isManagedByDockge" class="mb-3">
                 <div class="btn-group me-2" role="group">
@@ -70,6 +75,7 @@
                     ref="progressTerminal"
                     class="mb-3 terminal"
                     :name="terminalName"
+                    :endpoint="endpoint"
                     :rows="progressTerminalRows"
                     @has-data="showProgressTerminal = true; submitted = true;"
                 ></Terminal>
@@ -86,6 +92,16 @@
                                 <label for="name" class="form-label">{{ $t("stackName") }}</label>
                                 <input id="name" v-model="stack.name" type="text" class="form-control" required @blur="stackNameToLowercase">
                                 <div class="form-text">{{ $t("Lowercase only") }}</div>
+                            </div>
+
+                            <!-- Endpoint -->
+                            <div class="mt-3">
+                                <label for="name" class="form-label">{{ $t("dockgeAgent") }}</label>
+                                <select v-model="stack.endpoint" class="form-select">
+                                    <option v-for="(agent, endpoint) in $root.agentList" :key="endpoint" :value="endpoint" :disabled="$root.agentStatusList[endpoint] != 'online'">
+                                        ({{ $root.agentStatusList[endpoint] }}) {{ (endpoint) ? endpoint : $t("currentEndpoint") }}
+                                    </option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -139,6 +155,7 @@
                             ref="combinedTerminal"
                             class="mb-3 terminal"
                             :name="combinedTerminalName"
+                            :endpoint="endpoint"
                             :rows="combinedTerminalRows"
                             :cols="combinedTerminalCols"
                             style="height: 350px;"
@@ -236,7 +253,7 @@ import {
     getComposeTerminalName,
     PROGRESS_TERMINAL_ROWS,
     RUNNING
-} from "../../../backend/util-common";
+} from "../../../common/util-common";
 import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
 import dotenv from "dotenv";
@@ -298,6 +315,10 @@ export default {
     },
     computed: {
 
+        endpointDisplay() {
+            return this.$root.endpointDisplayFunction(this.endpoint);
+        },
+
         urls() {
             if (!this.envsubstJSONConfig["x-dockge"] || !this.envsubstJSONConfig["x-dockge"].urls || !Array.isArray(this.envsubstJSONConfig["x-dockge"].urls)) {
                 return [];
@@ -334,7 +355,7 @@ export default {
          * @return {*}
          */
         globalStack() {
-            return this.$root.stackList[this.stack.name];
+            return this.$root.completeStackList[this.stack.name + "_" + this.endpoint];
         },
 
         status() {
@@ -349,20 +370,31 @@ export default {
             if (!this.stack.name) {
                 return "";
             }
-            return getComposeTerminalName(this.stack.name);
+            return getComposeTerminalName(this.endpoint, this.stack.name);
         },
 
         combinedTerminalName() {
             if (!this.stack.name) {
                 return "";
             }
-            return getCombinedTerminalName(this.stack.name);
+            return getCombinedTerminalName(this.endpoint, this.stack.name);
         },
 
         networks() {
             return this.jsonConfig.networks;
-        }
+        },
 
+        endpoint() {
+            return this.stack.endpoint || this.$route.params.endpoint || "";
+        },
+
+        url() {
+            if (this.stack.endpoint) {
+                return `/compose/${this.stack.name}/${this.stack.endpoint}`;
+            } else {
+                return `/compose/${this.stack.name}`;
+            }
+        },
     },
     watch: {
         "stack.composeYAML": {
@@ -405,9 +437,7 @@ export default {
         },
 
         $route(to, from) {
-            // Leave Combined Terminal
-            console.debug("leaveCombinedTerminal", from.params.stackName);
-            this.$root.getSocket().emit("leaveCombinedTerminal", this.stack.name, () => {});
+
         }
     },
     mounted() {
@@ -437,6 +467,7 @@ export default {
                 composeYAML,
                 composeENV,
                 isManagedByDockge: true,
+                endpoint: "",
             };
 
             this.yamlCodeChange();
@@ -449,11 +480,9 @@ export default {
         this.requestServiceStatus();
     },
     unmounted() {
-        this.stopServiceStatusTimeout = true;
-        clearTimeout(serviceStatusTimeout);
+
     },
     methods: {
-
         startServiceStatusTimeout() {
             clearTimeout(serviceStatusTimeout);
             serviceStatusTimeout = setTimeout(async () => {
@@ -462,7 +491,7 @@ export default {
         },
 
         requestServiceStatus() {
-            this.$root.getSocket().emit("serviceStatusList", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "serviceStatusList", this.stack.name, (res) => {
                 if (res.ok) {
                     this.serviceStatusList = res.serviceStatusList;
                 }
@@ -475,22 +504,34 @@ export default {
         exitConfirm(next) {
             if (this.isEditMode) {
                 if (confirm("You are currently editing a stack. Are you sure you want to leave?")) {
+                    this.exitAction();
                     next();
                 } else {
                     next(false);
                 }
             } else {
+                this.exitAction();
                 next();
             }
         },
 
+        exitAction() {
+            console.log("exitAction");
+            this.stopServiceStatusTimeout = true;
+            clearTimeout(serviceStatusTimeout);
+
+            // Leave Combined Terminal
+            console.debug("leaveCombinedTerminal", this.endpoint, this.stack.name);
+            this.$root.emitAgent(this.endpoint, "leaveCombinedTerminal", this.stack.name, () => {});
+        },
+
         bindTerminal() {
-            this.$refs.progressTerminal?.bind(this.terminalName);
+            this.$refs.progressTerminal?.bind(this.endpoint, this.terminalName);
         },
 
         loadStack() {
             this.processing = true;
-            this.$root.getSocket().emit("getStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "getStack", this.stack.name, (res) => {
                 if (res.ok) {
                     this.stack = res.stack;
                     this.yamlCodeChange();
@@ -532,15 +573,15 @@ export default {
                 }
             }
 
-            this.bindTerminal(this.terminalName);
+            this.bindTerminal();
 
-            this.$root.getSocket().emit("deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+            this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
                 if (res.ok) {
                     this.isEditMode = false;
-                    this.$router.push("/compose/" + this.stack.name);
+                    this.$router.push(this.url);
                 }
             });
         },
@@ -548,13 +589,13 @@ export default {
         saveStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+            this.$root.emitAgent(this.stack.endpoint, "saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
                 if (res.ok) {
                     this.isEditMode = false;
-                    this.$router.push("/compose/" + this.stack.name);
+                    this.$router.push(this.url);
                 }
             });
         },
@@ -562,7 +603,7 @@ export default {
         startStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("startStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "startStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
@@ -571,7 +612,7 @@ export default {
         stopStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("stopStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "stopStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
@@ -580,7 +621,7 @@ export default {
         downStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("downStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "downStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
@@ -589,7 +630,7 @@ export default {
         restartStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("restartStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "restartStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
@@ -598,14 +639,14 @@ export default {
         updateStack() {
             this.processing = true;
 
-            this.$root.getSocket().emit("updateStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "updateStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
         },
 
         deleteDialog() {
-            this.$root.getSocket().emit("deleteStack", this.stack.name, (res) => {
+            this.$root.emitAgent(this.endpoint, "deleteStack", this.stack.name, (res) => {
                 this.$root.toastRes(res);
                 if (res.ok) {
                     this.$router.push("/");
@@ -750,6 +791,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "../styles/vars.scss";
+
 .terminal {
     height: 200px;
 }
@@ -760,5 +803,10 @@ export default {
     &.edit-mode {
         background-color: #2c2f38 !important;
     }
+}
+
+.agent-name {
+    font-size: 13px;
+    color: $dark-font-color3;
 }
 </style>

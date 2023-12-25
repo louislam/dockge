@@ -2,10 +2,11 @@ import { Socket } from "socket.io";
 import { Terminal } from "./terminal";
 import { randomBytes } from "crypto";
 import { log } from "./log";
-import { ERROR_TYPE_VALIDATION } from "./util-common";
+import { ERROR_TYPE_VALIDATION } from "../common/util-common";
 import { R } from "redbean-node";
 import { verifyPassword } from "./password-hash";
 import fs from "fs";
+import { AgentManager } from "./agent-manager";
 
 export interface JWTDecoded {
     username : string;
@@ -15,6 +16,9 @@ export interface JWTDecoded {
 export interface DockgeSocket extends Socket {
     userID: number;
     consoleTerminal? : Terminal;
+    instanceManager : AgentManager;
+    endpoint : string;
+    emitAgent : (eventName : string, ...args : unknown[]) => void;
 }
 
 // For command line arguments, so they are nullable
@@ -56,16 +60,26 @@ export function callbackError(error : unknown, callback : unknown) {
         callback({
             ok: false,
             msg: error.message,
+            msgi18n: true,
         });
     } else if (error instanceof ValidationError) {
         callback({
             ok: false,
             type: ERROR_TYPE_VALIDATION,
             msg: error.message,
+            msgi18n: true,
         });
     } else {
         log.debug("console", "Unknown error: " + error);
     }
+}
+
+export function callbackResult(result : unknown, callback : unknown) {
+    if (typeof(callback) !== "function") {
+        log.error("console", "Callback is not a function");
+        return;
+    }
+    callback(result);
 }
 
 export async function doubleCheckPassword(socket : DockgeSocket, currentPassword : unknown) {

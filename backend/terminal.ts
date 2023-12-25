@@ -8,7 +8,7 @@ import {
     PROGRESS_TERMINAL_ROWS,
     TERMINAL_COLS,
     TERMINAL_ROWS
-} from "./util-common";
+} from "../common/util-common";
 import { sync as commandExistsSync } from "command-exists";
 import { log } from "./log";
 
@@ -34,6 +34,9 @@ export class Terminal {
 
     public enableKeepAlive : boolean = false;
     protected keepAliveInterval? : NodeJS.Timeout;
+    protected kickDisconnectedClientsInterval? : NodeJS.Timeout;
+
+    protected socketList : Record<string, DockgeSocket> = {};
 
     constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
@@ -82,13 +85,22 @@ export class Terminal {
             return;
         }
 
+        this.kickDisconnectedClientsInterval = setInterval(() => {
+            for (const socketID in this.socketList) {
+                const socket = this.socketList[socketID];
+                if (!socket.connected) {
+                    log.debug("Terminal", "Kicking disconnected client " + socket.id + " from terminal " + this.name);
+                    this.leave(socket);
+                }
+            }
+        }, 60 * 1000);
+
         if (this.enableKeepAlive) {
             log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
 
             // Close if there is no clients
             this.keepAliveInterval = setInterval(() => {
-                const clients = this.server.io.sockets.adapter.rooms.get(this.name);
-                const numClients = clients ? clients.size : 0;
+                const numClients = Object.keys(this.socketList).length;
 
                 if (numClients === 0) {
                     log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
@@ -112,8 +124,10 @@ export class Terminal {
             // On Data
             this._ptyProcess.onData((data) => {
                 this.buffer.pushItem(data);
-                if (this.server.io) {
-                    this.server.io.to(this.name).emit("terminalWrite", this.name, data);
+
+                for (const socketID in this.socketList) {
+                    const socket = this.socketList[socketID];
+                    socket.emitAgent("terminalWrite", this.name, data);
                 }
             });
 
@@ -137,15 +151,19 @@ export class Terminal {
      * @param res
      */
     protected exit = (res : {exitCode: number, signal?: number | undefined}) => {
-        this.server.io.to(this.name).emit("terminalExit", this.name, res.exitCode);
+        for (const socketID in this.socketList) {
+            const socket = this.socketList[socketID];
+            socket.emitAgent("terminalExit", this.name, res.exitCode);
+        }
 
-        // Remove room
-        this.server.io.in(this.name).socketsLeave(this.name);
+        // Remove all clients
+        this.socketList = {};
 
         Terminal.terminalMap.delete(this.name);
         log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
 
         clearInterval(this.keepAliveInterval);
+        clearInterval(this.kickDisconnectedClientsInterval);
 
         if (this.callback) {
             this.callback(res.exitCode);
@@ -157,11 +175,11 @@ export class Terminal {
     }
 
     public join(socket : DockgeSocket) {
-        socket.join(this.name);
+        this.socketList[socket.id] = socket;
     }
 
     public leave(socket : DockgeSocket) {
-        socket.leave(this.name);
+        delete this.socketList[socket.id];
     }
 
     public get ptyProcess() {

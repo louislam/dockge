@@ -14,20 +14,17 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
 
 ## ⭐ Features
 
-- Manage `compose.yaml`
+- 🧑‍💼 Manage your `compose.yaml` files
   - Create/Edit/Start/Stop/Restart/Delete
   - Update Docker Images
-- Interactive Editor for `compose.yaml`
-- Interactive Web Terminal
-- Reactive
-   - Everything is just responsive. Progress (Pull/Up/Down) and terminal output are in real-time
-- Easy-to-use & fancy UI
-   - If you love Uptime Kuma's UI/UX, you will love this one too
-- Convert `docker run ...` commands into `compose.yaml`
-- File based structure
-   - Dockge won't kidnap your compose files, they are stored on your drive as usual. You can interact with them using normal `docker compose` commands
+- ⌨️ Interactive Editor for `compose.yaml`
+- 🦦 Interactive Web Terminal
+- 🕷️ (1.4.0 🆕) Multiple agents support - You can manage multiple stacks from different Docker hosts in one single interface
+- 🏪 Convert `docker run ...` commands into `compose.yaml`
+- 📙 File based structure - Dockge won't kidnap your compose files, they are stored on your drive as usual. You can interact with them using normal `docker compose` commands
    <img src="https://github.com/louislam/dockge/assets/1336778/cc071864-592e-4909-b73a-343a57494002" width=300 />
-
+- 🚄 Reactive - Everything is just responsive. Progress (Pull/Up/Down) and terminal output are in real-time
+- 🐣 Easy-to-use & fancy UI - If you love Uptime Kuma's UI/UX, you will love this one too
 
 ![](https://github.com/louislam/dockge/assets/1336778/89fc1023-b069-42c0-a01c-918c495f1a6a)
 
