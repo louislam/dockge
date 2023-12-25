@@ -112,10 +112,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.start(socket);
-                callback({
+                callbackResult({
                     ok: true,
                     msg: "Started"
-                });
+                }, callback);
                 server.sendStackList();
 
                 stack.joinCombinedTerminal(socket);
@@ -136,10 +136,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.stop(socket);
-                callback({
+                callbackResult({
                     ok: true,
                     msg: "Stopped"
-                });
+                }, callback);
                 server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
@@ -157,10 +157,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.restart(socket);
-                callback({
+                callbackResult({
                     ok: true,
                     msg: "Restarted"
-                });
+                }, callback);
                 server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
@@ -178,10 +178,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.update(socket);
-                callback({
+                callbackResult({
                     ok: true,
                     msg: "Updated"
-                });
+                }, callback);
                 server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
@@ -199,10 +199,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.down(socket);
-                callback({
+                callbackResult({
                     ok: true,
                     msg: "Downed"
-                });
+                }, callback);
                 server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
@@ -220,10 +220,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName, true);
                 const serviceStatusList = Object.fromEntries(await stack.getServiceStatusList());
-                callback({
+                callbackResult({
                     ok: true,
                     serviceStatusList,
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -234,10 +234,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
             try {
                 checkLogin(socket);
                 const dockerNetworkList = await server.getDockerNetworkList();
-                callback({
+                callbackResult({
                     ok: true,
                     dockerNetworkList,
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
