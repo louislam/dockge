@@ -59,6 +59,10 @@ const routes = [
                         component: Console,
                     },
                     {
+                        path: "/console/:endpoint",
+                        component: Console,
+                    },
+                    {
                         path: "/settings",
                         component: Settings,
                         children: [

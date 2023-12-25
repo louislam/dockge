@@ -147,7 +147,6 @@ export class AgentManager {
 
         client.on("connect_error", (err) => {
             log.error("agent-manager", "Error from the socket server: " + endpoint);
-            log.debug("agent-manager", err);
             this.socket.emit("agentStatus", {
                 endpoint: endpoint,
                 status: "offline",
@@ -163,7 +162,6 @@ export class AgentManager {
         });
 
         client.on("agent", (...args : unknown[]) => {
-            log.debug("agent-manager", "Forward event");
             this.socket.emit("agent", ...args);
         });
 
@@ -216,11 +214,18 @@ export class AgentManager {
     emitToEndpoint(endpoint: string, eventName: string, ...args : unknown[]) {
         log.debug("agent-manager", "Emitting event to endpoint: " + endpoint);
         let client = this.agentSocketList[endpoint];
+
         if (!client) {
             log.error("agent-manager", "Socket client not found for endpoint: " + endpoint);
             throw new Error("Socket client not found for endpoint: " + endpoint);
         }
-        client?.emit("agent", endpoint, eventName, ...args);
+
+        if (!client.connected) {
+            log.error("agent-manager", "Socket client not connected for endpoint: " + endpoint);
+            throw new Error("Socket client not connected for endpoint: " + endpoint);
+        }
+
+        client.emit("agent", endpoint, eventName, ...args);
     }
 
     emitToAllEndpoints(eventName: string, ...args : unknown[]) {

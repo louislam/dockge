@@ -74,6 +74,14 @@ export function callbackError(error : unknown, callback : unknown) {
     }
 }
 
+export function callbackResult(result : unknown, callback : unknown) {
+    if (typeof(callback) !== "function") {
+        log.error("console", "Callback is not a function");
+        return;
+    }
+    callback(result);
+}
+
 export async function doubleCheckPassword(socket : DockgeSocket, currentPassword : unknown) {
     if (typeof currentPassword !== "string") {
         throw new Error("Wrong data type?");

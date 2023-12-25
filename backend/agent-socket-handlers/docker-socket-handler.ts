@@ -1,6 +1,6 @@
 import { AgentSocketHandler } from "../agent-socket-handler";
 import { DockgeServer } from "../dockge-server";
-import { callbackError, checkLogin, DockgeSocket, ValidationError } from "../util-server";
+import { callbackError, callbackResult, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { Stack } from "../stack";
 import { AgentSocket } from "../../common/agent-socket";
 
@@ -14,10 +14,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 const stack = await this.saveStack(server, name, composeYAML, composeENV, isAdd);
                 await stack.deploy(socket);
                 server.sendStackList();
-                callback({
+                callbackResult({
                     ok: true,
                     msg: "Deployed",
-                });
+                }, callback);
                 stack.joinCombinedTerminal(socket);
             } catch (e) {
                 callbackError(e, callback);
@@ -27,11 +27,11 @@ export class DockerSocketHandler extends AgentSocketHandler {
         agentSocket.on("saveStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
             try {
                 checkLogin(socket);
-                this.saveStack(server, name, composeYAML, composeENV, isAdd);
-                callback({
+                await this.saveStack(server, name, composeYAML, composeENV, isAdd);
+                callbackResult({
                     ok: true,
                     "msg": "Saved"
-                });
+                }, callback);
                 server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
@@ -54,10 +54,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 }
 
                 server.sendStackList();
-                callback({
+                callbackResult({
                     ok: true,
                     msg: "Deleted"
-                });
+                }, callback);
 
             } catch (e) {
                 callbackError(e, callback);
@@ -78,10 +78,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     stack.joinCombinedTerminal(socket);
                 }
 
-                callback({
+                callbackResult({
                     ok: true,
-                    stack: stack.toJSON(socket.endpoint),
-                });
+                    stack: await stack.toJSON(socket.endpoint),
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -92,10 +92,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
             try {
                 checkLogin(socket);
                 server.sendStackList();
-                callback({
+                callbackResult({
                     ok: true,
                     msg: "Updated"
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }

@@ -28,7 +28,7 @@ export default {
             return this.$route.params.stackName;
         },
         endpoint() {
-            // TODO
+            return this.$route.params.endpoint || "";
         },
         shell() {
             return this.$route.params.type;
@@ -37,7 +37,7 @@ export default {
             return this.$route.params.serviceName;
         },
         terminalName() {
-            return getContainerExecTerminalName(this.stackName, this.serviceName, 0);
+            return getContainerExecTerminalName(this.endpoint, this.stackName, this.serviceName, 0);
         },
         sh() {
             let endpoint = this.$route.params.endpoint;

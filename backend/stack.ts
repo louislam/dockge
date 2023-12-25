@@ -18,6 +18,7 @@ import {
 } from "../common/util-common";
 import { InteractiveTerminal, Terminal } from "./terminal";
 import childProcessAsync from "promisify-child-process";
+import { Settings } from "./settings";
 
 export class Stack {
 
@@ -50,12 +51,30 @@ export class Stack {
         }
     }
 
-    toJSON(endpoint : string) : object {
+    async toJSON(endpoint : string) : Promise<object> {
+
+        // Since we have multiple agents now, embed primary hostname in the stack object too.
+        let primaryHostname = await Settings.get("primaryHostname");
+        if (!primaryHostname) {
+            if (!endpoint) {
+                primaryHostname = "localhost";
+            } else {
+                // Use the endpoint as the primary hostname
+                try {
+                    primaryHostname = (new URL("https://" + endpoint).hostname);
+                } catch (e) {
+                    // Just in case if the endpoint is in a incorrect format
+                    primaryHostname = "localhost";
+                }
+            }
+        }
+
         let obj = this.toSimpleJSON(endpoint);
         return {
             ...obj,
             composeYAML: this.composeYAML,
             composeENV: this.composeENV,
+            primaryHostname,
         };
     }
 

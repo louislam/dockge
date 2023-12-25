@@ -93,8 +93,9 @@
                             <div class="mt-3">
                                 <label for="name" class="form-label">{{ $t("dockgeAgent") }}</label>
                                 <select v-model="stack.endpoint" class="form-select">
-                                    <option value="">{{ $t("currentEndpoint") }}</option>
-                                    <option value="rs-debian:5001">rs-debian:5001</option>
+                                    <option v-for="(agent, endpoint) in $root.agentList" :key="endpoint" :value="endpoint" :disabled="$root.agentStatusList[endpoint] != 'online'">
+                                        ({{ $root.agentStatusList[endpoint] }}) {{ (endpoint) ? endpoint : $t("currentEndpoint") }}
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -375,9 +376,16 @@ export default {
         },
 
         endpoint() {
-            return this.$route.params.endpoint || "";
-        }
+            return this.stack.endpoint || this.$route.params.endpoint || "";
+        },
 
+        url() {
+            if (this.stack.endpoint) {
+                return `/compose/${this.stack.name}/${this.stack.endpoint}`;
+            } else {
+                return `/compose/${this.stack.name}`;
+            }
+        },
     },
     watch: {
         "stack.composeYAML": {
@@ -556,7 +564,7 @@ export default {
 
                 if (res.ok) {
                     this.isEditMode = false;
-                    this.$router.push("/compose/" + this.stack.name);
+                    this.$router.push(this.url);
                 }
             });
         },
@@ -570,7 +578,7 @@ export default {
 
                 if (res.ok) {
                     this.isEditMode = false;
-                    this.$router.push("/compose/" + this.stack.name);
+                    this.$router.push(this.url);
                 }
             });
         },

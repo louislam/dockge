@@ -35,7 +35,7 @@ export class Terminal {
     public enableKeepAlive : boolean = false;
     protected keepAliveInterval? : NodeJS.Timeout;
 
-    protected socketList : DockgeSocket[] = [];
+    protected socketList : Record<string, DockgeSocket> = {};
 
     constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
@@ -89,7 +89,7 @@ export class Terminal {
 
             // Close if there is no clients
             this.keepAliveInterval = setInterval(() => {
-                const numClients = this.socketList.length;
+                const numClients = Object.keys(this.socketList).length;
 
                 if (numClients === 0) {
                     log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
@@ -114,7 +114,8 @@ export class Terminal {
             this._ptyProcess.onData((data) => {
                 this.buffer.pushItem(data);
 
-                for (const socket of this.socketList) {
+                for (const socketID in this.socketList) {
+                    const socket = this.socketList[socketID];
                     socket.emitAgent("terminalWrite", this.name, data);
                 }
             });
@@ -139,12 +140,13 @@ export class Terminal {
      * @param res
      */
     protected exit = (res : {exitCode: number, signal?: number | undefined}) => {
-        for (const socket of this.socketList) {
+        for (const socketID in this.socketList) {
+            const socket = this.socketList[socketID];
             socket.emitAgent("terminalExit", this.name, res.exitCode);
         }
 
         // Remove all clients
-        this.socketList = [];
+        this.socketList = {};
 
         Terminal.terminalMap.delete(this.name);
         log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
@@ -161,14 +163,11 @@ export class Terminal {
     }
 
     public join(socket : DockgeSocket) {
-        this.socketList.push(socket);
+        this.socketList[socket.id] = socket;
     }
 
     public leave(socket : DockgeSocket) {
-        const index = this.socketList.indexOf(socket);
-        if (index !== -1) {
-            this.socketList.splice(index, 1);
-        }
+        delete this.socketList[socket.id];
     }
 
     public get ptyProcess() {

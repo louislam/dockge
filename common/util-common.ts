@@ -291,10 +291,9 @@ function copyYAMLCommentsItems(items : any, srcItems : any) {
  *   - "127.0.0.1:5000-5010:5000-5010"
  *   - "6060:6060/udp"
  * @param input
- * @param defaultHostname
+ * @param hostname
  */
-export function parseDockerPort(input : string, defaultHostname : string = "localhost") {
-    let hostname = defaultHostname;
+export function parseDockerPort(input : string, hostname) {
     let port;
     let display;
 
@@ -407,3 +406,4 @@ function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
         pair.value.value = envsubst(pair.value.value, env);
     }
 }
+

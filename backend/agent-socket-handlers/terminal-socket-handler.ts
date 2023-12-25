@@ -1,5 +1,5 @@
 import { DockgeServer } from "../dockge-server";
-import { callbackError, checkLogin, DockgeSocket, ValidationError } from "../util-server";
+import { callbackError, callbackResult, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { log } from "../log";
 import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
 import { Stack } from "../stack";
@@ -9,7 +9,7 @@ import { AgentSocket } from "../../common/agent-socket";
 export class TerminalSocketHandler extends AgentSocketHandler {
     create(s : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
 
-        agentSocket.on("terminalInput", async (terminalName : unknown, cmd : unknown, errorCallback) => {
+        agentSocket.on("terminalInput", async (terminalName : unknown, cmd : unknown, callback) => {
             try {
                 checkLogin(s);
 
@@ -29,12 +29,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                     throw new Error("Terminal not found or it is not a Interactive Terminal.");
                 }
             } catch (e) {
-                if (e instanceof Error) {
-                    errorCallback({
-                        ok: false,
-                        msg: e.message,
-                    });
-                }
+                callbackError(e, callback);
             }
         });
 
@@ -50,22 +45,22 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Terminal name must be a string.");
                 }
 
-                log.debug("deployStack", "Terminal name: " + terminalName);
+                log.debug("mainTerminal", "Terminal name: " + terminalName);
 
                 let terminal = Terminal.getTerminal(terminalName);
 
                 if (!terminal) {
                     terminal = new MainTerminal(server, terminalName);
                     terminal.rows = 50;
-                    log.debug("deployStack", "Terminal created");
+                    log.debug("mainTerminal", "Terminal created");
                 }
 
-                terminal.join(socket);
+                terminal.join(s);
                 terminal.start();
 
-                callback({
+                callbackResult({
                     ok: true,
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -74,7 +69,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
         // Interactive Terminal for containers
         agentSocket.on("interactiveTerminal", async (stackName : unknown, serviceName : unknown, shell : unknown, callback) => {
             try {
-                checkLogin(socket);
+                checkLogin(s);
 
                 if (typeof(stackName) !== "string") {
                     throw new ValidationError("Stack name must be a string.");
@@ -93,11 +88,11 @@ export class TerminalSocketHandler extends AgentSocketHandler {
 
                 // Get stack
                 const stack = await Stack.getStack(server, stackName);
-                stack.joinContainerTerminal(socket, serviceName, shell);
+                stack.joinContainerTerminal(s, serviceName, shell);
 
-                callback({
+                callbackResult({
                     ok: true,
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -145,9 +140,9 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 const stack = await Stack.getStack(server, stackName);
                 await stack.leaveCombinedTerminal(s);
 
-                callback({
+                callbackResult({
                     ok: true,
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -157,7 +152,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
         agentSocket.on("terminalResize", async (terminalName: unknown, rows: unknown, cols: unknown) => {
             log.info("terminalResize", `Terminal: ${terminalName}`);
             try {
-                checkLogin(socket);
+                checkLogin(s);
                 if (typeof terminalName !== "string") {
                     throw new Error("Terminal name must be a string.");
                 }
