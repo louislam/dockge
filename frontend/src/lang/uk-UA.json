@@ -99,5 +99,17 @@
     "url": "URL-адреса | URL-адреси",
     "reverseProxyMsg2": "Перевірте, як налаштувати його для WebSocket",
     "extra": "Додатково",
-    "newUpdate": "Оновлення"
+    "newUpdate": "Оновлення",
+    "currentEndpoint": "Поточний",
+    "agentOnline": "Онлайн",
+    "agentOffline": "Офлайн",
+    "connecting": "Підключення",
+    "connect": "Підключитися",
+    "addAgent": "Додати агент",
+    "removeAgent": "Видалити агент",
+    "dockgeAgent": "Dockge-агент | Dockge-агенти",
+    "dockgeURL": "Dockge URL (напр. http://127.0.0.1:5001)",
+    "agentRemovedSuccessfully": "Агент успішно видалено.",
+    "agentAddedSuccessfully": "Агент успішно додано.",
+    "removeAgentMsg": "Ви впевнені, що хочете видалити цей агент?"
 }
