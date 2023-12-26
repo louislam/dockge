@@ -19,7 +19,7 @@
     "restartStack": "Restart",
     "updateStack": "Update",
     "startStack": "Start",
-    "downStack": "Stop & Down",
+    "downStack": "Stop & Inactive",
     "editStack": "Edit",
     "discardStack": "Discard",
     "saveStackDraft": "Save",
