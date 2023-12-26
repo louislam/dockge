@@ -95,5 +95,9 @@
     "connecting...": "Povezovanje s strežnikom…",
     "reverseProxyMsg1": "Uporabljate obratni proxy?",
     "extra": "Dodatno",
-    "reconnecting...": "Ponovna povezava …"
+    "reconnecting...": "Ponovna povezava …",
+    "newUpdate": "Nova posodobitev",
+    "reverseProxyMsg2": "Preverite, kako ga konfigurirati za WebSocket",
+    "Cannot connect to the socket server.": "Ni mogoče vzpostaviti povezave s strežnikom vtičnic.",
+    "url": "URL | URL-ji"
 }

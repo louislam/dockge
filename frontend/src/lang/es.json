@@ -12,7 +12,7 @@
     "registry": "Registro",
     "compose": "Componer",
     "addFirstStackMsg": "¡Compón tu primera pila!",
-    "stackName" : "Nombre de la Pila",
+    "stackName": "Nombre de la Pila",
     "deployStack": "Desplegar",
     "deleteStack": "Eliminar",
     "stopStack": "Detener",
@@ -22,7 +22,7 @@
     "editStack": "Editar",
     "discardStack": "Descartar",
     "saveStackDraft": "Guardar",
-    "notAvailableShort" : "N/D",
+    "notAvailableShort": "N/D",
     "deleteStackMsg": "¿Estás seguro de que quieres eliminar esta pila?",
     "stackNotManagedByDockgeMsg": "Esta pila no está gestionada por Dockge.",
     "primaryHostname": "Nombre de Host Primario",
@@ -90,5 +90,14 @@
     "Allowed commands:": "Comandos permitidos:",
     "Internal Networks": "Redes Internas",
     "External Networks": "Redes Externas",
-    "No External Networks": "Sin Redes Externas"
+    "No External Networks": "Sin Redes Externas",
+    "reverseProxyMsg1": "¿Usando un proxy inverso?",
+    "reverseProxyMsg2": "Compruebe cómo configurarlo para WebSocket",
+    "newUpdate": "Nueva actualización",
+    "downStack": "Detener y finalizar",
+    "Cannot connect to the socket server.": "No se puede conectar al servidor del socket.",
+    "reconnecting...": "Reconectando…",
+    "connecting...": "Conectando al servidor del socket…",
+    "url": "URL | URLs",
+    "extra": "Extra"
 }

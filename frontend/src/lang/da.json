@@ -98,5 +98,6 @@
     "disableauth.message1": "Er du sikker på, at du vil <strong>deaktivere godkendelse</strong>?",
     "disableauth.message2": "Det er designet til scenarier <strong>hvor du har til hensigt at implementere tredjepartsgodkendelse</strong> foran Dockge såsom Cloudflare Access, Authelia eller andre godkendelsesmekanismer.",
     "Show update if available": "Vis opdatering, hvis tilgængelig",
-    "Lowercase only": "Kun små bogstaver"
+    "Lowercase only": "Kun små bogstaver",
+    "newUpdate": "Ny Opdatering"
 }

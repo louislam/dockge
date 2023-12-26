@@ -98,5 +98,6 @@
     "reverseProxyMsg2": "Kontrollera hur man konfigurerar webbsocket",
     "url": "URL | URLer",
     "extra": "Extra",
-    "reconnecting...": "Återansluter…"
+    "reconnecting...": "Återansluter…",
+    "newUpdate": "Ny uppdatering"
 }
