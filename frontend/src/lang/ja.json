@@ -34,7 +34,7 @@
     "primaryHostname": "主ホスト名",
     "container": "コンテナ",
     "dependsOn": "コンテナ依存関係",
-    "downStack": "停止して削除",
+    "downStack": "停止してInactive",
     "notAvailableShort": "N/A",
     "restartPolicyUnlessStopped": "手動で停止されるまで",
     "restartPolicyAlways": "常時",
