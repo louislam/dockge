@@ -99,5 +99,17 @@
     "Please use this option carefully!": "Mohon berhati - hati menggunakan opsi ini!",
     "Also check beta release": "Juga cek keluaran beta",
     "Allowed commands:": "Perintah yang diperbolehkan:",
-    "reverseProxyMsg2": "Lihat cara mengonfigurasinya untuk WebSocket"
+    "reverseProxyMsg2": "Lihat cara mengonfigurasinya untuk WebSocket",
+    "dockgeURL": "Alamat Dockge (cth. http://127.0.0.1:5001)",
+    "connecting": "Menghubungkan",
+    "addAgent": "Tambah Agen",
+    "agentAddedSuccessfully": "Agen sukses ditambahkan.",
+    "agentRemovedSuccessfully": "Agen sukses dihapus.",
+    "removeAgent": "Hapus Agen",
+    "connect": "Hubungkan",
+    "dockgeAgent": "Agen Dockge",
+    "currentEndpoint": "Sekarang",
+    "agentOnline": "Terhubung",
+    "agentOffline": "Terputus",
+    "removeAgentMsg": "Apakah anda yakin untuk menghapus agen ini?"
 }
