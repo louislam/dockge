@@ -98,5 +98,6 @@
     "extra": "Extra",
     "url": "URL / URLs",
     "reverseProxyMsg2": "Lerne wie dieser für WebSockets zu konfigurieren ist.",
-    "connecting...": "Verbindungsaufbau zum Socket Server…"
+    "connecting...": "Verbindungsaufbau zum Socket Server…",
+    "newUpdate": "Update verfügbar"
 }
