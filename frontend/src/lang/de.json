@@ -104,5 +104,12 @@
     "currentEndpoint": "Aktuell",
     "dockgeURL": "Dockge URL (z. B. http://127.0.0.1:5001)",
     "agentOnline": "Online",
-    "agentOffline": "Offline"
+    "agentOffline": "Offline",
+    "connecting": "Verbinden",
+    "connect": "Verbinde",
+    "addAgent": "Agent Hinzufügen",
+    "agentAddedSuccessfully": "Agent erfolgreich hinzugefügt.",
+    "agentRemovedSuccessfully": "Agent erfolgreich entfernt.",
+    "removeAgent": "Agent Entfernen",
+    "removeAgentMsg": "Bist Du sicher, dass Du diesen Agent entfernen möchtest?"
 }
