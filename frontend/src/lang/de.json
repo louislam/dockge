@@ -99,5 +99,10 @@
     "url": "URL / URLs",
     "reverseProxyMsg2": "Lerne wie dieser für WebSockets zu konfigurieren ist.",
     "connecting...": "Verbindungsaufbau zum Socket Server…",
-    "newUpdate": "Update verfügbar"
+    "newUpdate": "Neues Update",
+    "dockgeAgent": "Dockge Agent | Dockge Agenten",
+    "currentEndpoint": "Aktuell",
+    "dockgeURL": "Dockge URL (z. B. http://127.0.0.1:5001)",
+    "agentOnline": "Online",
+    "agentOffline": "Offline"
 }
