@@ -98,5 +98,7 @@
     "reconnecting...": "重新連線中…",
     "connecting...": "連線至 Socket 伺服器中…",
     "url": "網址 | 網址",
-    "extra": "額外"
+    "extra": "額外",
+    "newUpdate": "新版本",
+    "currentEndpoint": "目前"
 }
