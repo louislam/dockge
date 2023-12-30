@@ -274,7 +274,12 @@ export default defineComponent({
     },
     methods: {
         parsePort(port) {
-            return parseDockerPort(port, this.stack.primaryHostname);
+            if (this.stack.endpoint) {
+                return parseDockerPort(port, this.stack.endpoint.hostname);
+            } else {
+                let hostname = this.$root.info.primaryHostname || location.hostname;
+                return parseDockerPort(port, hostname);
+            }
         },
         remove() {
             delete this.jsonObject.services[this.name];
