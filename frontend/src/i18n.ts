@@ -28,6 +28,7 @@ const languageList = {
     "nl": "Nederlands",
     "ro": "Română",
     "id": "Bahasa Indonesia (Indonesian)",
+    "vi": "Tiếng Việt",
 };
 
 let messages = {
