@@ -19,7 +19,7 @@
     "restartStack": "Starta om",
     "updateStack": "Uppdatera",
     "startStack": "Starta",
-    "downStack": "Stoppa & Ner",
+    "downStack": "Stoppa & Inaktivera",
     "editStack": "Redigera",
     "discardStack": "Kasta",
     "saveStackDraft": "Spara",
@@ -99,5 +99,17 @@
     "url": "URL | URLer",
     "extra": "Extra",
     "reconnecting...": "Återansluter…",
-    "newUpdate": "Ny uppdatering"
+    "newUpdate": "Ny uppdatering",
+    "currentEndpoint": "Nuvarande",
+    "dockgeURL": "Dockge URL (ex. http://127.0.0.1:5001)",
+    "agentOnline": "On-line",
+    "agentOffline": "Off-line",
+    "connecting": "Ansluter",
+    "connect": "Ansluten",
+    "addAgent": "Lägg till agent",
+    "agentRemovedSuccessfully": "Agent borttagen.",
+    "removeAgent": "Ta bort agent",
+    "removeAgentMsg": "Är du säker att du vill ta bort denna agent?",
+    "dockgeAgent": "Dockge agenter | Dockge agenter",
+    "agentAddedSuccessfully": "Agent tillagd."
 }

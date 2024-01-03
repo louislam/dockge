@@ -95,9 +95,21 @@
     "connecting...": "Connexion au serveur socket…",
     "url": "URL | URLs",
     "extra": "Supplémentaire",
-    "downStack": "Arrêter et désactiver",
+    "downStack": "Arrêtez et rendre inactif",
     "reverseProxyMsg1": "Utilisez vous un proxy inverse ?",
     "Cannot connect to the socket server.": "Impossible de se connecter au serveur socket.",
     "reconnecting...": "Reconnexion…",
-    "newUpdate": "Nouvelle mise à jour"
+    "newUpdate": "Nouvelle mise à jour",
+    "dockgeURL": "URL de Dockge (e.g. http://127.0.0.1:5001)",
+    "agentOnline": "En ligne",
+    "agentOffline": "Hors ligne",
+    "connecting": "Connexion",
+    "addAgent": "Ajouter un agent",
+    "agentAddedSuccessfully": "Agent ajouté avec succès.",
+    "agentRemovedSuccessfully": "Agent supprimé avec succès.",
+    "removeAgent": "Supprimer l'agent",
+    "dockgeAgent": "Dockge Agent | Dockge Agents",
+    "currentEndpoint": "Actuel",
+    "connect": "Connecter",
+    "removeAgentMsg": "Êtes-vous sûr de vouloir supprimer cet agent ?"
 }

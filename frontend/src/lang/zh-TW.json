@@ -1,5 +1,5 @@
 {
-    "languageName": "繁體中文(台灣)",
+    "languageName": "繁體中文 (台灣)",
     "Create your admin account": "建立您的管理員帳號",
     "authIncorrectCreds": "使用者名稱或密碼錯誤。",
     "PasswordsDoNotMatch": "兩次輸入的密碼不一致。",
@@ -91,12 +91,14 @@
     "Internal Networks": "內部網路",
     "External Networks": "外部網路",
     "No External Networks": "無外部網路",
-    "downStack": "停止",
+    "downStack": "停止及未啟動化",
     "reverseProxyMsg1": "在使用反向代理嗎？",
     "reverseProxyMsg2": "點擊這裡了解如何為 WebSocket 配置反向代理",
     "Cannot connect to the socket server.": "無法連接到 Socket 伺服器。",
     "reconnecting...": "重新連線中…",
     "connecting...": "連線至 Socket 伺服器中…",
     "url": "網址 | 網址",
-    "extra": "額外"
+    "extra": "額外",
+    "newUpdate": "新版本",
+    "currentEndpoint": "目前"
 }
