@@ -275,7 +275,7 @@ export default defineComponent({
     methods: {
         parsePort(port) {
             if (this.stack.endpoint) {
-                return parseDockerPort(port, this.stack.endpoint.hostname);
+                return parseDockerPort(port, this.stack.primaryHostname);
             } else {
                 let hostname = this.$root.info.primaryHostname || location.hostname;
                 return parseDockerPort(port, hostname);
