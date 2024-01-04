@@ -36,7 +36,7 @@ textarea.form-control {
 }
 
 ::placeholder {
-    color: $dark-font-color3 !important;
+    color: $dark-font-color3;
 }
 
 .incident a,
@@ -422,9 +422,8 @@ optgroup {
 // Floating Label
 .form-floating > .form-control:focus ~ label::after, .form-floating > .form-control:not(:placeholder-shown) ~ label::after, .form-floating > .form-control-plaintext ~ label::after, .form-floating > .form-select ~ label::after {
     background-color: transparent;
-
-
 }
+
 .form-floating > label {
     .dark & {
         color: $dark-font-color3 !important;
