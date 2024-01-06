@@ -102,7 +102,7 @@
     "volume": "Volume | Volume",
     "updateStack": "Cập nhật",
     "network": "Mạng | Mạng",
-    "discardStack": "Loại bỏ",
+    "discardStack": "Huỷ",
     "stackNotManagedByDockgeMsg": "Stack này không được quản lý bởi Dockge.",
     "dependsOn": "Container Phụ Thuộc | Các Container Phụ Thuộc",
     "general": "Tổng Quan",
