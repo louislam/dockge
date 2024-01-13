@@ -98,5 +98,18 @@
     "Cannot connect to the socket server.": "无法连接到socket服务器。",
     "url": "网址 | 网址",
     "extra": "额外",
-    "downStack": "停止并置于非活动状态"
+    "downStack": "停止并置于非活动状态",
+    "newUpdate": "新版本",
+    "dockgeURL": "Dockge地址 (例如 http://127.0.0.1:5001)",
+    "agentOnline": "在线",
+    "agentOffline": "离线",
+    "connecting": "连接中",
+    "connect": "连接",
+    "dockgeAgent": "Dockge代理",
+    "currentEndpoint": "当前",
+    "addAgent": "添加代理",
+    "agentRemovedSuccessfully": "代理移除成功。",
+    "removeAgent": "移除代理",
+    "removeAgentMsg": "您确定要移除此代理？",
+    "agentAddedSuccessfully": "代理添加成功。"
 }
