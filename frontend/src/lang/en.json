@@ -111,5 +111,6 @@
     "agentAddedSuccessfully": "Agent added successfully.",
     "agentRemovedSuccessfully": "Agent removed successfully.",
     "removeAgent": "Remove Agent",
-    "removeAgentMsg": "Are you sure you want to remove this agent?"
+    "removeAgentMsg": "Are you sure you want to remove this agent?",
+    "GlobalEnv": "Global .env"
 }
