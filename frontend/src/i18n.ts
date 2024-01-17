@@ -30,6 +30,7 @@ const languageList = {
     "id": "Bahasa Indonesia (Indonesian)",
     "vi": "Tiếng Việt",
     "hu": "Magyar",
+    "ca": "Català",
 };
 
 let messages = {
