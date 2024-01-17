@@ -112,5 +112,6 @@
     "agentRemovedSuccessfully": "Agent removed successfully.",
     "removeAgent": "Remove Agent",
     "removeAgentMsg": "Are you sure you want to remove this agent?",
-    "GlobalEnv": "Global .env"
+    "GlobalEnv": "Global .env",
+    "LongSyntaxNotSupported": "Long syntax is not supported here. Please use the YAML editor."
 }
