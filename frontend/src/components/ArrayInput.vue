@@ -11,7 +11,7 @@
             <button class="btn btn-normal btn-sm mt-3" @click="addField">{{ $t("addListItem", [ displayName ]) }}</button>
         </div>
         <div v-else>
-            Long syntax is not supported here. Please use the YAML editor.
+            {{ $t("LongSyntaxNotSupported") }}
         </div>
     </div>
 </template>
