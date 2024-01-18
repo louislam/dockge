@@ -97,6 +97,20 @@
     "connecting...": "ساکٹ سرور سے منسلک ہو رہا ہے…",
     "url": "یو آر ایل | یو آر ایل",
     "extra": "اضافی",
-    "downStack": "اسٹاپ اینڈ ڈاؤن",
-    "reverseProxyMsg2": "اسے WebSocket کے لیے ترتیب دینے کا طریقہ چیک کریں"
+    "downStack": "روکیں اور غیر فعال",
+    "reverseProxyMsg2": "اسے WebSocket کے لیے ترتیب دینے کا طریقہ چیک کریں",
+    "newUpdate": "نئی تازہ کاری",
+    "dockgeAgent": "ڈاکج ایجنٹ | ڈاکج ایجنٹس",
+    "currentEndpoint": "کرنٹ",
+    "dockgeURL": "Dockge URL (جیسے http://127.0.0.1:5001)",
+    "agentOnline": "آن لائن",
+    "agentOffline": "آف لائن",
+    "connecting": "جڑ رہا ہے",
+    "connect": "جڑیں",
+    "addAgent": "ایجنٹ شامل کریں",
+    "agentAddedSuccessfully": "ایجنٹ کامیابی کے ساتھ شامل ہو گیا۔",
+    "agentRemovedSuccessfully": "ایجنٹ کو کامیابی سے ہٹا دیا گیا۔",
+    "removeAgent": "ایجنٹ کو ہٹا دیں",
+    "removeAgentMsg": "کیا آپ واقعی اس ایجنٹ کو ہٹانا چاہتے ہیں؟",
+    "LongSyntaxNotSupported": "لمبا نحو یہاں تعاون یافتہ نہیں ہے۔ براہ کرم YAML ایڈیٹر استعمال کریں۔"
 }
