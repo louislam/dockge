@@ -98,5 +98,12 @@
     "url": "رابط | روابط",
     "extra": "إضافات",
     "reverseProxyMsg1": "هل تستدخم خادم عكسي؟",
-    "connecting...": "جاري الاتصال بخادم المقبس…"
+    "connecting...": "جاري الاتصال بخادم المقبس…",
+    "newUpdate": "تحديث جديد",
+    "currentEndpoint": "السياق: الوكيل الحالي",
+    "dockgeURL": "رابط Dockge (مثلا http://127.0.0.1:5001)",
+    "agentOnline": "متصل",
+    "agentOffline": "غير متصل",
+    "connecting": "جاري الإتصال",
+    "connect": "ارتبط"
 }
