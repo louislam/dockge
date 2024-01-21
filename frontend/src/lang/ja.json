@@ -34,7 +34,7 @@
     "primaryHostname": "主ホスト名",
     "container": "コンテナ",
     "dependsOn": "コンテナ依存関係",
-    "downStack": "停止してInactive",
+    "downStack": "停止して非アクティブ化",
     "notAvailableShort": "N/A",
     "restartPolicyUnlessStopped": "手動で停止されるまで",
     "restartPolicyAlways": "常時",
@@ -94,5 +94,18 @@
     "I understand, please disable": "理解しました。無効化してください",
     "Lowercase only": "小文字のみ",
     "reverseProxyMsg1": "リバースプロキシを使用していますか？",
-    "connecting...": "ソケットサーバーに接続中…"
+    "connecting...": "ソケットサーバーに接続中…",
+    "newUpdate": "新しいバージョン",
+    "dockgeAgent": "Dockge エージェント",
+    "dockgeURL": "DockgeのURL (例: http://127.0.0.1:5001)",
+    "agentOnline": "オンライン",
+    "agentOffline": "オフライン",
+    "connecting": "接続中",
+    "connect": "接続",
+    "addAgent": "エージェントを追加",
+    "agentAddedSuccessfully": "エージェントが正常に追加されました。",
+    "agentRemovedSuccessfully": "エージェントは正常に削除されました。",
+    "removeAgent": "エージェントを削除",
+    "removeAgentMsg": "本当にこのエージェントを削除しますか?",
+    "url": "URL | URL"
 }

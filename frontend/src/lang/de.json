@@ -111,5 +111,6 @@
     "agentAddedSuccessfully": "Agent erfolgreich hinzugefügt.",
     "agentRemovedSuccessfully": "Agent erfolgreich entfernt.",
     "removeAgent": "Agent Entfernen",
-    "removeAgentMsg": "Bist Du sicher, dass Du diesen Agent entfernen möchtest?"
+    "removeAgentMsg": "Bist Du sicher, dass Du diesen Agent entfernen möchtest?",
+    "LongSyntaxNotSupported": "Lange Syntax wird nicht unterstützt. Bitte verwende den YAML-Editor."
 }
