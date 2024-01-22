@@ -111,5 +111,6 @@
     "removeAgent": "Ta bort agent",
     "removeAgentMsg": "Är du säker att du vill ta bort denna agent?",
     "dockgeAgent": "Dockge agenter | Dockge agenter",
-    "agentAddedSuccessfully": "Agent tillagd."
+    "agentAddedSuccessfully": "Agent tillagd.",
+    "LongSyntaxNotSupported": "Lång syntax stöds inte här. Använd YAML-redigeraren."
 }
