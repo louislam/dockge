@@ -111,5 +111,6 @@
     "currentEndpoint": "Sekarang",
     "agentOnline": "Terhubung",
     "agentOffline": "Terputus",
-    "removeAgentMsg": "Apakah anda yakin untuk menghapus agen ini?"
+    "removeAgentMsg": "Apakah anda yakin untuk menghapus agen ini?",
+    "LongSyntaxNotSupported": "Sintaks yang panjang tidak didukung di sini. Silakan gunakan editor YAML."
 }
