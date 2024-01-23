@@ -54,7 +54,7 @@ Requirements:
 
 ```
 # Create directories that store your stacks and stores Dockge's stack
-mkdir -p /opt/stacks /opt/dockge
+mkdir -p /opt/{stacks,dockge}
 cd /opt/dockge
 
 # Download the compose.yaml
@@ -149,7 +149,7 @@ Yes, you can. However, you need to move your compose file into the stacks direct
 
 #### Is Dockge a Portainer replacement?
 
-Yes or no. Portainer provides a lot of Docker features. While Dockge is currently only focusing on docker-compose with a better user interface and better user experience.
+Yes and no. Portainer provides a lot of Docker features. While Dockge is currently only focusing on docker-compose with a better user interface and better user experience.
 
 If you want to manage your container with docker-compose only, the answer may be yes.
 
