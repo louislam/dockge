@@ -76,12 +76,14 @@ export class AgentManager {
      * @param url
      * @param username
      * @param password
+     * @param friendlyname
      */
-    async add(url : string, username : string, password : string) : Promise<Agent> {
+    async add(url : string, username : string, password : string, friendlyname : string) : Promise<Agent> {
         let bean = R.dispense("agent") as Agent;
         bean.url = url;
         bean.username = username;
         bean.password = password;
+        bean.friendlyname = friendlyname;
         await R.store(bean);
         return bean;
     }
@@ -276,6 +278,7 @@ export class AgentManager {
             url: "",
             username: "",
             endpoint: "",
+            friendlyname: "",
         };
 
         for (let endpoint in list) {

@@ -49,8 +49,11 @@
                             </template>
 
                             <!-- Agent Display Name -->
-                            <span v-if="endpoint === ''">{{ $t("currentEndpoint") }}</span>
-                            <a v-else :href="agent.url" target="_blank">{{ endpoint }}</a>
+                            <template v-if="$root.agentStatusList[endpoint]">
+                                <span v-if="endpoint === '' && agent.friendlyname === ''" class="badge bg-secondary me-2">Controller</span>
+                                <span v-else-if="agent.friendlyname === ''" :href="agent.url">{{ endpoint }}</span>
+                                <span v-else :href="agent.url">{{ agent.friendlyname }}</span>
+                            </template>
 
                             <!-- Remove Button -->
                             <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="showRemoveAgentDialog[agent.url] = !showRemoveAgentDialog[agent.url]" />
@@ -79,6 +82,11 @@
                             <div class="mb-3">
                                 <label for="password" class="form-label">{{ $t("Password") }}</label>
                                 <input id="password" v-model="agent.password" type="password" class="form-control" required autocomplete="new-password">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="friendlyname" class="form-label">{{ $t("Friendly Name") }}</label>
+                                <input id="friendlyname" v-model="agent.friendlyname" type="text" class="form-control" optional>
                             </div>
 
                             <button type="submit" class="btn btn-primary" :disabled="connectingAgent">
@@ -126,6 +134,7 @@ export default {
                 url: "http://",
                 username: "",
                 password: "",
+                friendlyname: "",
             }
         };
     },

@@ -20,7 +20,7 @@ export class ManageAgentSocketHandler extends SocketHandler {
                 let data = requestData as LooseObject;
                 let manager = socket.instanceManager;
                 await manager.test(data.url, data.username, data.password);
-                await manager.add(data.url, data.username, data.password);
+                await manager.add(data.url, data.username, data.password, data.friendlyname);
 
                 // connect to the agent
                 manager.connect(data.url, data.username, data.password);
