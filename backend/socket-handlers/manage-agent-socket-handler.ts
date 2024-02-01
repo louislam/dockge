@@ -66,5 +66,31 @@ export class ManageAgentSocketHandler extends SocketHandler {
                 callbackError(e, callback);
             }
         });
+
+        // updateAgent
+        socket.on("updateAgent", async (friendlyname : unknown, updatedFriendlyName : unknown, callback : unknown) => {
+            try {
+                log.debug("manage-agent-socket-handler", "updateAgent");
+                checkLogin(socket);
+
+                if (typeof(updatedFriendlyName) !== "string") {
+                    throw new Error("FriendlyName must be a string");
+                }
+
+                let manager = socket.instanceManager;
+                await manager.update(friendlyname, updatedFriendlyName);
+
+                server.disconnectAllSocketClients(undefined, socket.id);
+                manager.sendAgentList();
+
+                callbackResult({
+                    ok: true,
+                    msg: "agentUpdatedSuccessfully",
+                    msgi18n: true,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
     }
 }

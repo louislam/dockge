@@ -77,6 +77,7 @@ export class AgentManager {
      * @param username
      * @param password
      * @param friendlyname
+     * @param updatedFriendlyName
      */
     async add(url : string, username : string, password : string, friendlyname : string) : Promise<Agent> {
         let bean = R.dispense("agent") as Agent;
@@ -103,6 +104,24 @@ export class AgentManager {
             delete this.agentSocketList[endpoint];
         } else {
             throw new Error("Agent not found");
+        }
+    }
+
+    /**
+     *
+     * @param friendlyname
+     * @param updatedFriendlyName
+     */
+
+    async update(friendlyname : string, updatedFriendlyName : string) {
+        let bean = await R.findOne("agent", " friendlyname = ? ", [
+            friendlyname,
+        ]);
+
+        if (bean) {
+            bean.friendlyname = updatedFriendlyName;
+        } else {
+            throw new Error("Friendly name could not be updated ");
         }
     }
 
@@ -279,6 +298,7 @@ export class AgentManager {
             username: "",
             endpoint: "",
             friendlyname: "",
+            updatedFriendlyName: "",
         };
 
         for (let endpoint in list) {
