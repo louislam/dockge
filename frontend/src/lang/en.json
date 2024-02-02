@@ -123,5 +123,10 @@
     "Restarted": "Restarted",
     "Downed": "Downed",
     "Switch to sh": "Switch to sh",
-    "terminal": "terminal"
+    "terminal": "Terminal",
+    "CurrentHostname": "(Unset: Follow current hostname)",
+    "New Container Name...": "New Container Name...",
+    "Network name...": "Network name...",
+    "Select a network...": "Select a network...",
+    "NoNetworksAvailable": "No networks available. You need to add internal networks or enable external networks in the right side first."
 }

@@ -112,7 +112,7 @@
                     <div v-if="isEditMode" class="input-group mb-3">
                         <input
                             v-model="newContainerName"
-                            placeholder="New Container Name..."
+                            :placeholder="$t(`New Container Name...`)"
                             class="form-control"
                             @keyup.enter="addContainer"
                         />
