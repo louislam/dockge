@@ -68,7 +68,7 @@ export class ManageAgentSocketHandler extends SocketHandler {
         });
 
         // updateAgent
-        socket.on("updateAgent", async (friendlyname : unknown, updatedFriendlyName : unknown, callback : unknown) => {
+        socket.on("updateAgent", async (friendlyname : string, updatedFriendlyName : string, callback : unknown) => {
             try {
                 log.debug("manage-agent-socket-handler", "updateAgent");
                 checkLogin(socket);
