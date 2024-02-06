@@ -114,15 +114,7 @@ export class AgentManager {
      */
 
     async update(friendlyname : string, updatedFriendlyName : string) {
-        let bean = await R.findOne("agent", " friendlyname = ? ", [
-            friendlyname,
-        ]);
-
-        if (bean) {
-            bean.friendlyname = updatedFriendlyName;
-        } else {
-            throw new Error("Friendly name could not be updated ");
-        }
+        await R.exec('UPDATE agent SET friendlyname = "' + updatedFriendlyName + '" WHERE friendlyname = "' + friendlyname + '"');
     }
 
     connect(url : string, username : string, password : string) {
