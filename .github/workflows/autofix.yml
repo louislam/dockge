@@ -1,0 +1,26 @@
+name: autofix.ci # needed to securely identify the workflow
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "pnpm"
+      - run: pnpm install
+      - name: Fix lint issues
+        run: pnpm fmt
+      - uses: autofix-ci/action@bee19d72e71787c12ca0f29de72f2833e437e4c9
+        with:
+          commit-message: "chore: apply automated fixes"
