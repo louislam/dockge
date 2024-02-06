@@ -56,7 +56,8 @@
                             </template>
 
                             <!-- Edit FriendlyName  -->
-                            <font-awesome-icon class="ms-2" icon="pen-to-square" @click="showEditAgentFriendlynameDialog[agent.friendlyname] = !showEditAgentFriendlynameDialog[agent.friendlyname]" />
+                            <font-awesome-icon v-if="agent.friendlyname === '' && agent.friendlyname === ''"/>
+                            <font-awesome-icon v-else class="ms-2" icon="pen-to-square" @click="showEditAgentFriendlynameDialog[agent.friendlyname] = !showEditAgentFriendlynameDialog[agent.friendlyname]"/>
 
                             <!-- Edit Dialog -->
                             <BModal v-model="showEditAgentFriendlynameDialog[agent.friendlyname]" :no-close-on-backdrop="true" :close-on-esc="true" :okTitle="$t('Update Friendlyname')" okVariant="info" @ok="updateFriendlyname(agent.friendlyname, agent.updatedFriendlyName)">
