@@ -114,7 +114,7 @@ export class AgentManager {
      */
 
     async update(friendlyname : string, updatedFriendlyName : string) {
-        await R.exec('UPDATE agent SET friendlyname = "' + updatedFriendlyName + '" WHERE friendlyname = "' + friendlyname + '"');
+        await R.exec("UPDATE agent SET friendlyname = " + updatedFriendlyName + " WHERE friendlyname = " + friendlyname + "");
     }
 
     connect(url : string, username : string, password : string) {
