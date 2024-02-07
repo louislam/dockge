@@ -111,5 +111,6 @@
     "agentAddedSuccessfully": "Agent succesfuld tilføjet.",
     "agentRemovedSuccessfully": "Agent succesfuld fjernet.",
     "removeAgent": "Fjern agent",
-    "removeAgentMsg": "Er du sikker på at du vil fjerne denne agent?"
+    "removeAgentMsg": "Er du sikker på at du vil fjerne denne agent?",
+    "LongSyntaxNotSupported": "Langt syntaks er ikke understøttet her. Forsøg venligst med YAML-editoren."
 }
