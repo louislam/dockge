@@ -38,10 +38,22 @@ export const main = async () => {
 
             console.log("Found user: " + user.username);
 
-            while (true) {
-                let password = await question("New Password: ");
-                let confirmPassword = await question("Confirm New Password: ");
+            let password = "";
+            let confirmPassword = " ";
 
+            while (true) {
+                if (process.env.PASSWORD) {
+                   console.log("Found password : " + process.env.PASSWORD) ;
+                   password = process.env.PASSWORD ;
+                   confirmPassword = process.env.PASSWORD ;
+                } else {
+                   console.log("No found password: " ) ;
+                   password = await question("New Password: ");
+                   confirmPassword = await question("Confirm New Password: ");
+                }
+
+                // console.log("Password to be set :" + password);
+            
                 if (password === confirmPassword) {
                     await User.resetPassword(user.id, password);
 
