@@ -53,7 +53,7 @@ export const main = async () => {
                 }
 
                 // console.log("Password to be set :" + password);
-            
+
                 if (password === confirmPassword) {
                     await User.resetPassword(user.id, password);
 
