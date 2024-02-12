@@ -31,6 +31,7 @@ const languageList = {
     "vi": "Tiếng Việt",
     "hu": "Magyar",
     "ca": "Català",
+    "ga": "Gaeilge",
 };
 
 let messages = {
