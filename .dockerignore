@@ -6,6 +6,7 @@ data
 stacks
 tmp
 /private
+.pnpm-store
 
 # Docker extra
 docker

@@ -1,0 +1,24 @@
+{
+    "name": "Dockge",
+    "build": {
+      "dockerfile": "Dockerfile",
+      "context": ".."
+    },
+    "runArgs": [
+      "-v", "/var/run/docker.sock:/var/run/docker.sock"
+    ],
+    "forwardPorts": [5000, 5001, 9229],
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "dbaeumer.vscode-eslint",
+          "ms-vscode.vscode-typescript-tslint-plugin",
+          "vue.volar",
+          "alexcvzz.vscode-sqlite"
+        ],
+        "settings": {
+          "terminal.integrated.shell.linux": "/bin/bash"
+        }
+      }
+    }
+}
