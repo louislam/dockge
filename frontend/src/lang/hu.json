@@ -111,5 +111,6 @@
     "Cannot connect to the socket server.": "A Socket csatlakozás nem elérhető.",
     "connecting...": "Csatlakozás a socket szerver-hez…",
     "url": "URL | URL-ek",
-    "dockgeURL": "Dockge URL (pl. http://127.0.0.1:5001)"
+    "dockgeURL": "Dockge URL (pl. http://127.0.0.1:5001)",
+    "LongSyntaxNotSupported": "A hosszú szintaxis itt nem támogatott. Használja a YAML szerkesztőt."
 }
