@@ -68,8 +68,7 @@ export const main = async () => {
                 console.log("Found password : " + process.env.PASSWORD) ;
                 password = process.env.PASSWORD ;
                 confirmPassword = process.env.PASSWORD ;
-            }
-            else {
+            } else {
                 console.log("No found password: " ) ;
                 password = await question("New Password: ");
                 confirmPassword = await question("Confirm New Password: ");
@@ -92,13 +91,13 @@ export const main = async () => {
                 break;
             }
             break;
-        }  
+        }
     } catch (e) {
         if (e instanceof Error) {
             console.error("Error: " + e.message);
         }
     }
-        
+
     await Database.close();
     rl.close();
 
@@ -131,17 +130,17 @@ function disconnectAllSocketClients(username : string, password : string) : Prom
         });
         socket.on("connect", () => {
             socket.emit("login", {
-        username,
-        password,
+                username,
+                password,
             }, (res : BaseRes) => {
-        if (res.ok) {
-            console.log("Logged in.");
-            socket.emit("disconnectOtherSocketClients");
-        } else {
-            console.warn("Login failed.");
-            console.warn("Please restart the server to disconnect all sessions.");
-        }
-        socket.close();
+                if (res.ok) {
+                    console.log("Logged in.");
+                    socket.emit("disconnectOtherSocketClients");
+                } else {
+                    console.warn("Login failed.");
+                    console.warn("Please restart the server to disconnect all sessions.");
+                }
+                socket.close();
             });
         });
 
