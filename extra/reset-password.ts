@@ -32,21 +32,21 @@ export const main = async () => {
     try {
         let user ;
         // No need to actually reset the password for testing, just make sure no connection problem. It is ok for now.
-        
+
         if (!process.env.TEST_BACKEND) {
             user = await R.findOne("user");
-                        
-            if (! user )  {
+
+            if (! user ) {
                 if ( !process.env.USER ) {
                     throw new Error("user not found or provided, have you installed? Try to set USER and PASSWORD variables ...");
                 } else {
                     console.log("Trying to initialise user : " + process.env.USER);
                     user = R.dispense("user");
-                    user.username = process.env.USER;        
+                    user.username = process.env.USER;
                     user.password = generatePasswordHash(process.env.PASSWORD);
-                    await R.store(user);                    
+                    await R.store(user);
                     console.log("User/Password set successfully");
-                    
+
                     // Reset all sessions by reset jwt secret
                     await server.initJWTSecret();
                     console.log("JWT reset successfully.");
@@ -56,49 +56,48 @@ export const main = async () => {
                     console.log("You may have to restart");
                     exit;
                 }
-                }
-            }
-
-            let password = "";
-            let confirmPassword = " ";
-
-
-            while (true) {
-
-                if (process.env.PASSWORD) {
-                   console.log("Found password : " + process.env.PASSWORD) ;
-                   password = process.env.PASSWORD ;
-                   confirmPassword = process.env.PASSWORD ;
-                }
-                else {
-                   console.log("No found password: " ) ;
-                   password = await question("New Password: ");
-                   confirmPassword = await question("Confirm New Password: ");
-                }
-
-                if (password === confirmPassword) {
-                    await User.resetPassword(user.id, password);
-                    console.log("Password reset successfully.");
-
-                    // Reset all sessions by reset jwt secret
-                    await server.initJWTSecret();
-
-                    console.log("JWT reset successfully.");
-
-                    // Disconnect all other socket clients of the user
-                    await disconnectAllSocketClients(user.username, password);
-
-                } else {
-                    console.log("Passwords do not match, please try again.");
-                    break;
-                }
-            break;
-            }  
-        } catch (e) {
-            if (e instanceof Error) {
-                console.error("Error: " + e.message);
             }
         }
+
+        let password = "";
+        let confirmPassword = " ";
+
+        while (true) {
+
+            if (process.env.PASSWORD) {
+                console.log("Found password : " + process.env.PASSWORD) ;
+                password = process.env.PASSWORD ;
+                confirmPassword = process.env.PASSWORD ;
+            }
+            else {
+                console.log("No found password: " ) ;
+                password = await question("New Password: ");
+                confirmPassword = await question("Confirm New Password: ");
+            }
+
+            if (password === confirmPassword) {
+                await User.resetPassword(user.id, password);
+                console.log("Password reset successfully.");
+
+                // Reset all sessions by reset jwt secret
+                await server.initJWTSecret();
+
+                console.log("JWT reset successfully.");
+
+                // Disconnect all other socket clients of the user
+                await disconnectAllSocketClients(user.username, password);
+
+            } else {
+                console.log("Passwords do not match, please try again.");
+                break;
+            }
+            break;
+        }  
+    } catch (e) {
+        if (e instanceof Error) {
+            console.error("Error: " + e.message);
+        }
+    }
         
     await Database.close();
     rl.close();
