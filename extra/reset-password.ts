@@ -30,33 +30,33 @@ export const main = async () => {
     }
 
     try {
-		let user ;
+        let user ;
         // No need to actually reset the password for testing, just make sure no connection problem. It is ok for now.
-		
+        
         if (!process.env.TEST_BACKEND) {
             user = await R.findOne("user");
-            				
+                        
             if (! user )  {
-				if ( !process.env.USER ) {
-                    throw new Error("user not found or provided, have you installed? Try to set USER env variable ...");
-				} else {
-					console.log("Trying to initialise user : " + process.env.USER);
-						user = R.dispense("user");
-						user.username = process.env.USER;	
-						user.password = generatePasswordHash(process.env.PASSWORD);
-						await R.store(user);						
-						console.log("User/Password set successfully");
-						
-						// Reset all sessions by reset jwt secret
-						await server.initJWTSecret();
-						console.log("JWT reset successfully.");
+                if ( !process.env.USER ) {
+                    throw new Error("user not found or provided, have you installed? Try to set USER and PASSWORD variables ...");
+                } else {
+                    console.log("Trying to initialise user : " + process.env.USER);
+                    user = R.dispense("user");
+                    user.username = process.env.USER;        
+                    user.password = generatePasswordHash(process.env.PASSWORD);
+                    await R.store(user);                    
+                    console.log("User/Password set successfully");
+                    
+                    // Reset all sessions by reset jwt secret
+                    await server.initJWTSecret();
+                    console.log("JWT reset successfully.");
 
-						// Disconnect all other socket clients of the user
-						await disconnectAllSocketClients(user.username, user.password);
-						console.log("You may have to restart");
-						exit;
-				}
-			}
+                    // Disconnect all other socket clients of the user
+                    await disconnectAllSocketClients(user.username, user.password);
+                    console.log("You may have to restart");
+                    exit;
+                }
+                }
             }
 
             let password = "";
@@ -65,41 +65,41 @@ export const main = async () => {
 
             while (true) {
 
-					if (process.env.PASSWORD) {
-					   console.log("Found password : " + process.env.PASSWORD) ;
-					   password = process.env.PASSWORD ;
-					   confirmPassword = process.env.PASSWORD ;
-					}
-					else {
-					   console.log("No found password: " ) ;
-					   password = await question("New Password: ");
-					   confirmPassword = await question("Confirm New Password: ");
-					}
+                if (process.env.PASSWORD) {
+                   console.log("Found password : " + process.env.PASSWORD) ;
+                   password = process.env.PASSWORD ;
+                   confirmPassword = process.env.PASSWORD ;
+                }
+                else {
+                   console.log("No found password: " ) ;
+                   password = await question("New Password: ");
+                   confirmPassword = await question("Confirm New Password: ");
+                }
 
-					if (password === confirmPassword) {
-						await User.resetPassword(user.id, password);
-						console.log("Password reset successfully.");
+                if (password === confirmPassword) {
+                    await User.resetPassword(user.id, password);
+                    console.log("Password reset successfully.");
 
-						// Reset all sessions by reset jwt secret
-						await server.initJWTSecret();
+                    // Reset all sessions by reset jwt secret
+                    await server.initJWTSecret();
 
-						console.log("JWT reset successfully.");
+                    console.log("JWT reset successfully.");
 
-						// Disconnect all other socket clients of the user
-						await disconnectAllSocketClients(user.username, password);
+                    // Disconnect all other socket clients of the user
+                    await disconnectAllSocketClients(user.username, password);
 
-					} else {
-						console.log("Passwords do not match, please try again.");
-						break;
-					}
-					break;
-				}  
-			} catch (e) {
-				if (e instanceof Error) {
-					console.error("Error: " + e.message);
-				}
-			}
-	
+                } else {
+                    console.log("Passwords do not match, please try again.");
+                    break;
+                }
+            break;
+            }  
+        } catch (e) {
+            if (e instanceof Error) {
+                console.error("Error: " + e.message);
+            }
+        }
+        
     await Database.close();
     rl.close();
 
@@ -132,17 +132,17 @@ function disconnectAllSocketClients(username : string, password : string) : Prom
         });
         socket.on("connect", () => {
             socket.emit("login", {
-                username,
-                password,
+        username,
+        password,
             }, (res : BaseRes) => {
-                if (res.ok) {
-                    console.log("Logged in.");
-                    socket.emit("disconnectOtherSocketClients");
-                } else {
-                    console.warn("Login failed.");
-                    console.warn("Please restart the server to disconnect all sessions.");
-                }
-                socket.close();
+        if (res.ok) {
+            console.log("Logged in.");
+            socket.emit("disconnectOtherSocketClients");
+        } else {
+            console.warn("Login failed.");
+            console.warn("Please restart the server to disconnect all sessions.");
+        }
+        socket.close();
             });
         });
 
