@@ -49,13 +49,25 @@
                             </template>
 
                             <!-- Agent Display Name -->
-                            <span v-if="endpoint === ''">{{ $t("currentEndpoint") }}</span>
-                            <a v-else :href="agent.url" target="_blank">{{ endpoint }}</a>
+                            <template v-if="$root.agentStatusList[endpoint]">
+                                <span v-if="endpoint === '' && agent.friendlyname === ''" class="badge bg-secondary me-2">Controller</span>
+                                <span v-else-if="agent.friendlyname === ''" :href="agent.url">{{ endpoint }}</span>
+                                <span v-else :href="agent.url">{{ agent.friendlyname }}</span>
+                            </template>
+
+                            <!-- Edit FriendlyName  -->
+                            <font-awesome-icon v-if="agent.friendlyname !== '' && agent.friendlyname !== ''" icon="pen-to-square" @click="showEditAgentFriendlynameDialog[agent.friendlyname] = !showEditAgentFriendlynameDialog[agent.friendlyname]" />
+
+                            <!-- Edit Dialog -->
+                            <BModal v-model="showEditAgentFriendlynameDialog[agent.friendlyname]" :no-close-on-backdrop="true" :close-on-esc="true" :okTitle="$t('Update Friendlyname')" okVariant="info" @ok="updateFriendlyname(agent.friendlyname, agent.updatedFriendlyName)">
+                                <label for="Update Friendlyname" class="form-label">Current value: {{ $t(agent.friendlyname) }}</label>
+                                <input id="updatedFriendlyName" v-model="agent.updatedFriendlyName" type="text" class="form-control" optional>
+                            </BModal>
 
                             <!-- Remove Button -->
                             <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="showRemoveAgentDialog[agent.url] = !showRemoveAgentDialog[agent.url]" />
 
-                            <!-- Remoe Agent Dialog -->
+                            <!-- Remove Agent Dialog -->
                             <BModal v-model="showRemoveAgentDialog[agent.url]" :okTitle="$t('removeAgent')" okVariant="danger" @ok="removeAgent(agent.url)">
                                 <p>{{ agent.url }}</p>
                                 {{ $t("removeAgentMsg") }}
@@ -79,6 +91,11 @@
                             <div class="mb-3">
                                 <label for="password" class="form-label">{{ $t("Password") }}</label>
                                 <input id="password" v-model="agent.password" type="password" class="form-control" required autocomplete="new-password">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="friendlyname" class="form-label">{{ $t("Friendly Name") }}</label>
+                                <input id="friendlyname" v-model="agent.friendlyname" type="text" class="form-control" optional>
                             </div>
 
                             <button type="submit" class="btn btn-primary" :disabled="connectingAgent">
@@ -121,11 +138,14 @@ export default {
             dockerRunCommand: "",
             showAgentForm: false,
             showRemoveAgentDialog: {},
+            showEditAgentFriendlynameDialog: {},
             connectingAgent: false,
             agent: {
                 url: "http://",
                 username: "",
                 password: "",
+                friendlyname: "",
+                updatedFriendlyName: "",
             }
         };
     },
@@ -195,6 +215,20 @@ export default {
 
                     // Remove the stack list and status list of the removed agent
                     delete this.$root.allAgentStackList[endpoint];
+                }
+            });
+        },
+
+        updateFriendlyname(friendlyname, updatedFriendlyName) {
+            //console.log(this.showEditAgentFriendlynameDialog.inputNewFriendlyName);
+            this.$root.getSocket().emit("updateAgent", friendlyname, updatedFriendlyName, (res) => {
+                this.$root.toastRes(res);
+
+                if (res.ok) {
+                    this.showAgentForm = false;
+                    this.agent = {
+                        updatedFriendlyName: "",
+                    };
                 }
             });
         },
@@ -286,7 +320,7 @@ export default {
             }
 
         },
-    },
+    }
 };
 </script>
 

@@ -23,6 +23,8 @@ export class Agent extends BeanModel {
             url: this.url,
             username: this.username,
             endpoint: this.endpoint,
+            friendlyname: this.friendlyname,
+            updatedFriendlyName: this.updatedFriendlyName
         };
     }
 
