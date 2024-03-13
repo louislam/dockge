@@ -35,6 +35,7 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
 Requirements:
 - [Docker](https://docs.docker.com/engine/install/) 20+ / Podman
 - (Podman only) podman-docker (Debian: `apt install podman-docker`)
+- (Podman only) podman-compose
 - OS:
   - Major Linux distros that can run Docker/Podman such as:
      - ✅ Ubuntu
