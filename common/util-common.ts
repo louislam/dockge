@@ -289,6 +289,7 @@ function copyYAMLCommentsItems(items : any, srcItems : any) {
  *   - "8000-9000:80"
  *   - "127.0.0.1:8001:8001"
  *   - "127.0.0.1:5000-5010:5000-5010"
+ *   - "0.0.0.0:8080->8080/tcp"
  *   - "6060:6060/udp"
  * @param input
  * @param hostname
@@ -298,8 +299,18 @@ export function parseDockerPort(input : string, hostname : string) {
     let display;
 
     const parts = input.split("/");
-    const part1 = parts[0];
+    let part1 = parts[0];
     let protocol = parts[1] || "tcp";
+
+    // coming from docker ps, split host part
+    const arrow = part1.indexOf("->");
+    if (arrow >= 0) {
+        part1 = part1.split("->")[0];
+        const colon = part1.indexOf(":");
+        if (colon >= 0) {
+            part1 = part1.split(":")[1];
+        }
+    }
 
     // Split the last ":"
     const lastColon = part1.lastIndexOf(":");
