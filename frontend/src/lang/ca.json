@@ -111,5 +111,6 @@
     "Please use this option carefully!": "Si us plau, utilitzeu aquesta opció amb cura!",
     "Enable Auth": "Habilitar autenticació",
     "I understand, please disable": "Ho entenc, si us plau deshabilita",
-    "Password": "Contrasenya"
+    "Password": "Contrasenya",
+    "LongSyntaxNotSupported": "La sintaxi llarga no està suportada aquí. Si us plau, fes servir l'editor YAML."
 }
