@@ -112,5 +112,15 @@
     "agentRemovedSuccessfully": "Agent removed successfully.",
     "removeAgent": "Remove Agent",
     "removeAgentMsg": "Are you sure you want to remove this agent?",
-    "LongSyntaxNotSupported": "Long syntax is not supported here. Please use the YAML editor."
+    "LongSyntaxNotSupported": "Long syntax is not supported here. Please use the YAML editor.",
+    "repositoryUrl": "Repository URL",
+    "branch": "Branch",
+    "gitAutoUpdate": "[GitOps] Auto Update",
+    "enableAutoUpdate": "Check periodically for updates",
+    "ManageWithGit": "Manage this stack with Git",
+    "webhook": "Webhook URL to trigger update",
+    "copy": "Copy",
+    "GitOps": "GitOps",
+    "GitConfig": "Git Configuration",
+    "gitSync": "Sync Repo"
 }
