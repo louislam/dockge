@@ -111,5 +111,6 @@
     "dockgeAgent": "Dockge 에이전트",
     "currentEndpoint": "현재",
     "connecting": "연결 중",
-    "agentRemovedSuccessfully": "에이전트를 성공적으로 삭제했습니다."
+    "agentRemovedSuccessfully": "에이전트를 성공적으로 삭제했습니다.",
+    "LongSyntaxNotSupported": "긴 문법은 여기서 지원되지 않습니다. YAML 에디터를 사용하세요."
 }

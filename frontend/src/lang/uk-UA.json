@@ -111,5 +111,6 @@
     "dockgeURL": "Dockge URL (напр. http://127.0.0.1:5001)",
     "agentRemovedSuccessfully": "Агент успішно видалено.",
     "agentAddedSuccessfully": "Агент успішно додано.",
-    "removeAgentMsg": "Ви впевнені, що хочете видалити цей агент?"
+    "removeAgentMsg": "Ви впевнені, що хочете видалити цей агент?",
+    "LongSyntaxNotSupported": "Довгий синтаксис тут не підтримується. Будь ласка, використовуйте редактор YAML."
 }

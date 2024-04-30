@@ -111,5 +111,6 @@
     "dockgeAgent": "Dockge Agent | Dockge Agents",
     "currentEndpoint": "Actuel",
     "connect": "Connecter",
-    "removeAgentMsg": "Êtes-vous sûr de vouloir supprimer cet agent ?"
+    "removeAgentMsg": "Êtes-vous sûr de vouloir supprimer cet agent ?",
+    "LongSyntaxNotSupported": "La syntaxe longue n'est pas prise en charge ici. Veuillez utiliser l'éditeur YAML."
 }
