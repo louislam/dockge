@@ -258,7 +258,7 @@ import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
 import dotenv from "dotenv";
 
-const template = `version: "3.8"
+const template = `
 services:
   nginx:
     image: nginx:latest
