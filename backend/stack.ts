@@ -19,6 +19,8 @@ import {
 import { InteractiveTerminal, Terminal } from "./terminal";
 import childProcessAsync from "promisify-child-process";
 import { Settings } from "./settings";
+import { execSync } from "child_process";
+import ini from "ini";
 
 export class Stack {
 
@@ -84,6 +86,10 @@ export class Stack {
             status: this._status,
             tags: [],
             isManagedByDockge: this.isManagedByDockge,
+            isGitRepo: this.isGitRepo,
+            gitUrl: this.gitUrl,
+            branch: this.branch,
+            webhook: this.webhook,
             composeFileName: this._composeFileName,
             endpoint,
         };
@@ -105,6 +111,39 @@ export class Stack {
 
     get isManagedByDockge() : boolean {
         return fs.existsSync(this.path) && fs.statSync(this.path).isDirectory();
+    }
+
+    get isGitRepo() : boolean {
+        return fs.existsSync(path.join(this.path, ".git")) && fs.statSync(path.join(this.path, ".git")).isDirectory();
+    }
+
+    get gitUrl() : string {
+        if (this.isGitRepo) {
+            const gitConfig = ini.parse(fs.readFileSync(path.join(this.path, ".git", "config"), "utf-8"));
+            return gitConfig["remote \"origin\""]?.url;
+        }
+        return "";
+    }
+
+    get branch() : string {
+        if (this.isGitRepo) {
+            try {
+                let stdout = execSync("git branch --show-current", { cwd: this.path });
+                return stdout.toString().trim();
+            } catch (error) {
+                return "";
+            }
+        }
+        return "";
+    }
+
+    get webhook() : string {
+        //TODO: refine this.
+        if (this.server.config.hostname) {
+            return `http://${this.server.config.hostname}:${this.server.config.port}/webhook/update/${this.name}`;
+        } else {
+            return `http://localhost:${this.server.config.port}/webhook/update/${this.name}`;
+        }
     }
 
     get status() : number {
@@ -445,6 +484,7 @@ export class Stack {
 
     async update(socket: DockgeSocket) {
         const terminalName = getComposeTerminalName(socket.endpoint, this.name);
+
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "pull" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to pull, please check the terminal output for more information.");
@@ -462,6 +502,54 @@ export class Stack {
             throw new Error("Failed to restart, please check the terminal output for more information.");
         }
         return exitCode;
+    }
+
+    async gitSync(socket?: DockgeSocket) {
+        const terminalName = socket ? getComposeTerminalName(socket.endpoint, this.name) : "";
+
+        if (!this.isGitRepo) {
+            throw new Error("This stack is not a git repository");
+        }
+
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "git", [ "pull", "--strategy-option", "theirs" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to sync, please check the terminal output for more information.");
+        }
+
+        // If the stack is not running, we don't need to restart it
+        await this.updateStatus();
+        log.debug("update", "Status: " + this.status);
+        if (this.status !== RUNNING) {
+            return exitCode;
+        }
+
+        exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "up", "-d", "--remove-orphans" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to restart, please check the terminal output for more information.");
+        }
+        return exitCode;
+    }
+
+    checkRemoteChanges() {
+        return new Promise((resolve, reject) => {
+            if (!this.isGitRepo) {
+                reject("This stack is not a git repository");
+                return;
+            }
+            //fetch remote changes and check if the current branch is behind
+            try {
+                const stdout = execSync("git fetch origin && git status -uno", { cwd: this.path }).toString();
+                if (stdout.includes("Your branch is behind")) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            } catch (error) {
+                log.error("checkRemoteChanges", error);
+                reject("Failed to check local status");
+                return;
+            }
+        });
     }
 
     async joinCombinedTerminal(socket: DockgeSocket) {

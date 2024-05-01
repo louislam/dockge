@@ -5,6 +5,9 @@
             <span>{{ stackName }}</span>
             <div v-if="$root.agentCount > 1" class="endpoint">{{ endpointDisplay }}</div>
         </div>
+        <div class="icon-container">
+            <font-awesome-icon :icon="stack.isGitRepo ? 'code-branch' : 'file'" />
+        </div>
     </router-link>
 </template>
 
@@ -176,6 +179,10 @@ export default {
 
 .dim {
     opacity: 0.5;
+}
+
+.icon-container {
+    margin-left: auto;
 }
 
 </style>

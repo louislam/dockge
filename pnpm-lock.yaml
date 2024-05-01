@@ -47,6 +47,9 @@ dependencies:
   http-graceful-shutdown:
     specifier: ~3.1.13
     version: 3.1.13
+  ini:
+    specifier: ^4.1.2
+    version: 4.1.2
   jsonwebtoken:
     specifier: ~9.0.2
     version: 9.0.2
@@ -124,6 +127,9 @@ devDependencies:
   '@types/express':
     specifier: ~4.17.21
     version: 4.17.21
+  '@types/ini':
+    specifier: ^4.1.0
+    version: 4.1.0
   '@types/jsonwebtoken':
     specifier: ~9.0.5
     version: 9.0.5
@@ -903,9 +909,6 @@ packages:
   /@louislam/sqlite3@15.1.6:
     resolution: {integrity: sha512-cVf7hcMrfywYnycatLvorngTFpL3BSWvEy7/NrEfcTyQX8xxj9fdeD553oCTv5fIAk85fluo6mzPq89V3YzrVA==}
     requiresBuild: true
-    peerDependenciesMeta:
-      node-gyp:
-        optional: true
     dependencies:
       '@mapbox/node-pre-gyp': 1.0.11
       node-addon-api: 4.3.0
@@ -1273,6 +1276,10 @@ packages:
 
   /@types/http-errors@2.0.4:
     resolution: {integrity: sha512-D0CFMMtydbJAegzOyHjtiKPLlvnm3iTZyZRSZoLq2mRhDdmLfIWOCYPfQJ4cu2erKghU++QvjcUjp/5h7hESpA==}
+    dev: true
+
+  /@types/ini@4.1.0:
+    resolution: {integrity: sha512-mTehMtc+xtnWBBvqizcqYCktKDBH2WChvx1GU3Sfe4PysFDXiNe+1YwtpVX1MDtCa4NQrSPw2+3HmvXHY3gt1w==}
     dev: true
 
   /@types/json-schema@7.0.15:
@@ -3303,6 +3310,11 @@ packages:
   /ini@1.3.8:
     resolution: {integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==}
     requiresBuild: true
+    dev: false
+
+  /ini@4.1.2:
+    resolution: {integrity: sha512-AMB1mvwR1pyBFY/nSevUX6y8nJWS63/SzUKD3JyQn97s4xgIdgQPT75IRouIiBAN4yLQBUShNYVW0+UG25daCw==}
+    engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dev: false
 
   /internal-slot@1.0.6:

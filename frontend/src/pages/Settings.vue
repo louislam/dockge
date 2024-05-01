@@ -80,6 +80,9 @@ export default {
                 appearance: {
                     title: this.$t("Appearance"),
                 },
+                gitOps: {
+                    title: this.$t("GitOps"),
+                },
                 security: {
                     title: this.$t("Security"),
                 },

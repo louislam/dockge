@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { MainRouter } from "./routers/main-router";
+import { WebhookRouter } from "./routers/webhook-router";
 import * as fs from "node:fs";
 import { PackageJson } from "type-fest";
 import { Database } from "./database";
@@ -21,7 +22,7 @@ import { R } from "redbean-node";
 import { genSecret, isDev, LooseObject } from "../common/util-common";
 import { generatePasswordHash } from "./password-hash";
 import { Bean } from "redbean-node/dist/bean";
-import { Arguments, Config, DockgeSocket } from "./util-server";
+import { Arguments, Config, DockgeSocket, ValidationError } from "./util-server";
 import { DockerSocketHandler } from "./agent-socket-handlers/docker-socket-handler";
 import expressStaticGzip from "express-static-gzip";
 import path from "path";
@@ -38,6 +39,8 @@ import { AgentSocket } from "../common/agent-socket";
 import { ManageAgentSocketHandler } from "./socket-handlers/manage-agent-socket-handler";
 import { Terminal } from "./terminal";
 
+const GIT_UPDATE_CHECKER_INTERVAL_MS = 1000 * 60 * 10;
+
 export class DockgeServer {
     app : Express;
     httpServer : http.Server;
@@ -45,12 +48,14 @@ export class DockgeServer {
     io : socketIO.Server;
     config : Config;
     indexHTML : string = "";
+    gitUpdateInterval? : NodeJS.Timeout;
 
     /**
      * List of express routers
      */
     routerList : Router[] = [
         new MainRouter(),
+        new WebhookRouter(),
     ];
 
     /**
@@ -203,6 +208,17 @@ export class DockgeServer {
                 origin: "*",
             };
         }
+
+        // add a middleware to handle errors
+        this.app.use((err : unknown, _req : express.Request, res : express.Response, _next : express.NextFunction) => {
+            if (err instanceof Error) {
+                res.status(500).json({ error: err.message });
+            } else if (err instanceof ValidationError) {
+                res.status(400).json({ error: err.message });
+            } else {
+                res.status(500).json({ error: "Unknown error: " + err });
+            }
+        });
 
         // Create Socket.io
         this.io = new socketIO.Server(this.httpServer, {
@@ -398,6 +414,7 @@ export class DockgeServer {
             });
 
             checkVersion.startInterval();
+            this.startGitUpdater();
         });
 
         gracefulShutdown(this.httpServer, {
@@ -608,6 +625,47 @@ export class DockgeServer {
                 });
             }
         }
+    }
+
+    /**
+     * Start the git updater. This checks for outdated stacks and updates them.
+     * @param useCache
+     */
+    async startGitUpdater(useCache = false) {
+        const check = async () => {
+            if (await Settings.get("gitAutoUpdate") !== true) {
+                return;
+            }
+
+            log.debug("git-updater", "checking for outdated stacks");
+
+            let socketList = this.io.sockets.sockets.values();
+
+            let stackList;
+            for (let socket of socketList) {
+                let dockgeSocket = socket as DockgeSocket;
+
+                // Get the list of stacks only once
+                if (!stackList) {
+                    stackList = await Stack.getStackList(this, useCache);
+                }
+
+                for (let [ stackName, stack ] of stackList) {
+
+                    if (stack.isGitRepo) {
+                        stack.checkRemoteChanges().then(async (outdated) => {
+                            if (outdated) {
+                                log.info("git-updater", `Stack  ${stackName} is outdated, Updating...`);
+                                await stack.update(dockgeSocket);
+                            }
+                        });
+                    }
+                }
+            }
+        };
+
+        await check();
+        this.gitUpdateInterval = setInterval(check, GIT_UPDATE_CHECKER_INTERVAL_MS);
     }
 
     async getDockerNetworkList() : Promise<string[]> {
