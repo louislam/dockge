@@ -100,7 +100,7 @@
     "Convert to Compose": "Converteer naar compose",
     "External Networks": "Externe netwerken",
     "newUpdate": "Nieuwe update",
-    "dockgeAgent": "Dockge Agent | Dockge Agents",
+    "dockgeAgent": "Dockge Agent | Dockge Agenten",
     "currentEndpoint": "Huidige",
     "dockgeURL": "Dockge Adres (bijv. http://127.0.0.1:5001)",
     "agentOnline": "Online",
@@ -111,5 +111,6 @@
     "agentAddedSuccessfully": "Agent toegevoegd.",
     "agentRemovedSuccessfully": "Agent verwijderd.",
     "removeAgent": "Verwijder agent",
-    "removeAgentMsg": "Weet je zeker dat je deze agent wilt verwijderen?"
+    "removeAgentMsg": "Weet je zeker dat je deze agent wilt verwijderen?",
+    "LongSyntaxNotSupported": "Lange syntax wordt hier niet ondersteund. Gebruik de YAML editor."
 }
