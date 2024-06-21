@@ -91,7 +91,7 @@
     "Internal Networks": "Notranja omrežja",
     "External Networks": "Zunanja omrežja",
     "No External Networks": "Ni zunanjih omrežij",
-    "downStack": "Ustavi & Odstrani",
+    "downStack": "Ustavi & Deaktiviraj",
     "connecting...": "Povezovanje s strežnikom…",
     "reverseProxyMsg1": "Uporabljate obratni proxy?",
     "extra": "Dodatno",
@@ -99,5 +99,18 @@
     "newUpdate": "Nova posodobitev",
     "reverseProxyMsg2": "Preverite, kako ga konfigurirati za WebSocket",
     "Cannot connect to the socket server.": "Ni mogoče vzpostaviti povezave s strežnikom vtičnic.",
-    "url": "URL | URL-ji"
+    "url": "URL | URL-ji",
+    "currentEndpoint": "Trenutni",
+    "dockgeURL": "Dockge URL (npr. http://127.0.0.1:5001)",
+    "agentOnline": "Aktivno",
+    "agentOffline": "Neaktivno",
+    "connecting": "Povezujem",
+    "connect": "Poveži",
+    "addAgent": "Dodaj agenta",
+    "dockgeAgent": "Dockge agent | Dockge agenti",
+    "agentAddedSuccessfully": "Agent dodan uspešno.",
+    "agentRemovedSuccessfully": "Agent uspešno odstranjen.",
+    "removeAgent": "Odstrani agent",
+    "removeAgentMsg": "Ali ste prepričani, da želite odstraniti agenta?",
+    "LongSyntaxNotSupported": "Long syntax-a ni podprta tukaj. Prosim uporabite YAML urejevalnik."
 }

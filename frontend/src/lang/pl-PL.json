@@ -111,5 +111,6 @@
     "connecting...": "Łączenie z socketem serwera…",
     "extra": "Ekstra",
     "url": "URL | URLe",
-    "reconnecting...": "Wznawianie połączenia…"
+    "reconnecting...": "Wznawianie połączenia…",
+    "LongSyntaxNotSupported": "Nieobsługiwana składnia. Użyj edytora YAML."
 }
