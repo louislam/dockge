@@ -355,7 +355,7 @@ export default {
         },
 
         updateAll() {
-            for (let stack of this.$root.completeStackList) {
+            for (let stack of Object.values(this.$root.completeStackList)) {
                 this.$root.emitAgent(stack.endpoint, "updateStack", stack.name, (res) => {
                     this.processing = false;
                     this.$root.toastRes(res);
