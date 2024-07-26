@@ -111,5 +111,6 @@
     "disableauth.message2": "Nó được thiết kế trong hoàn cảnh <strong>mà bạn dự định triển khai xác thực đăng nhập bên thứ ba</strong> trước Dockge như là Cloudflare Access, Authelia hay các phương thức xác minh đăng nhập khác.",
     "dockerImage": "Image",
     "Show update if available": "Hiển thị cập nhật nếu có",
-    "restartPolicyUnlessStopped": "Trừ Khi Dừng Lại"
+    "restartPolicyUnlessStopped": "Trừ Khi Dừng Lại",
+    "updateAll": "Cập Nhật Càc"
 }

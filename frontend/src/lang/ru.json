@@ -112,5 +112,6 @@
     "dockgeAgent": "Агент Dockge | Агенты Dockge",
     "dockgeURL": "URL-адрес Dockge (например: http://127.0.0.1:5001)",
     "agentRemovedSuccessfully": "Агент успешно удален.",
-    "LongSyntaxNotSupported": "Длинный синтаксис здесь не поддерживается. Пожалуйста, используйте редактор YAML."
+    "LongSyntaxNotSupported": "Длинный синтаксис здесь не поддерживается. Пожалуйста, используйте редактор YAML.",
+    "updateAll": "Обновить все"
 }

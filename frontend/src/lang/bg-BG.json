@@ -112,5 +112,6 @@
     "dockgeAgent": "Dockge агент | Dockge агенти",
     "connecting": "Свързване",
     "agentRemovedSuccessfully": "Агентът е премахнат успешно.",
-    "LongSyntaxNotSupported": "Дългият синтаксис не се поддържа тук. Моля, използвайте YAML редактора."
+    "LongSyntaxNotSupported": "Дългият синтаксис не се поддържа тук. Моля, използвайте YAML редактора.",
+    "updateAll": "Обнови всички"
 }

@@ -98,5 +98,6 @@
     "connecting...": "กำลังเชื่อมต่อกับเซิร์ฟเวอร์ socket…",
     "url": "URL | URLs",
     "extra": "พิเศษ",
-    "reconnecting...": "กำลังเชื่อมต่อใหม่…"
+    "reconnecting...": "กำลังเชื่อมต่อใหม่…",
+    "updateAll": "อัปเดตทุกอย่าง"
 }

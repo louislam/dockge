@@ -111,5 +111,6 @@
     "removeAgentMsg": "Estás seguro que deseas remover este agente?",
     "dockgeAgent": "Agentes Dockge",
     "connecting": "Conectando",
-    "agentRemovedSuccessfully": "Agente removido satisfactoriamente."
+    "agentRemovedSuccessfully": "Agente removido satisfactoriamente.",
+    "updateAll": "Actualizar todos"
 }

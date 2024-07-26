@@ -112,5 +112,6 @@
     "agentRemovedSuccessfully": "ایجنٹ کو کامیابی سے ہٹا دیا گیا۔",
     "removeAgent": "ایجنٹ کو ہٹا دیں",
     "removeAgentMsg": "کیا آپ واقعی اس ایجنٹ کو ہٹانا چاہتے ہیں؟",
-    "LongSyntaxNotSupported": "لمبا نحو یہاں تعاون یافتہ نہیں ہے۔ براہ کرم YAML ایڈیٹر استعمال کریں۔"
+    "LongSyntaxNotSupported": "لمبا نحو یہاں تعاون یافتہ نہیں ہے۔ براہ کرم YAML ایڈیٹر استعمال کریں۔",
+    "updateAll": "تمام تازہ کاری کو ہٹا دیں"
 }
