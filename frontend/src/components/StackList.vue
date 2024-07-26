@@ -355,10 +355,7 @@ export default {
         },
 
         updateAll() {
-            console.log("updateAll");
-            console.log(this.sortedStackList);
             for (let stack of this.sortedStackList) {
-                console.log(stack);
                 this.$root.emitAgent(stack.endpoint, "updateStack", stack.name, (res) => {
                     this.processing = false;
                     this.$root.toastRes(res);
