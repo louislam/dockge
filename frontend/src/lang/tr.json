@@ -111,6 +111,5 @@
     "agentAddedSuccessfully": "Aracı başarıyla eklendi.",
     "agentRemovedSuccessfully": "Aracı başarıyla kaldırıldı.",
     "removeAgent": "Aracıyı Kaldır",
-    "removeAgentMsg": "Bu aracıyı kaldırmak istediğinize emin misiniz?",
-    "updateAll": "Tut"
+    "removeAgentMsg": "Bu aracıyı kaldırmak istediğinize emin misiniz?"
 }

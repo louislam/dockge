@@ -111,6 +111,5 @@
     "currentEndpoint": "Sekarang",
     "agentOnline": "Terhubung",
     "agentOffline": "Terputus",
-    "removeAgentMsg": "Apakah anda yakin untuk menghapus agen ini?",
-    "updateAll": "Perbarui Semua"
+    "removeAgentMsg": "Apakah anda yakin untuk menghapus agen ini?"
 }

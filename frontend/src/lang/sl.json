@@ -99,6 +99,5 @@
     "newUpdate": "Nova posodobitev",
     "reverseProxyMsg2": "Preverite, kako ga konfigurirati za WebSocket",
     "Cannot connect to the socket server.": "Ni mogoče vzpostaviti povezave s strežnikom vtičnic.",
-    "url": "URL | URL-ji",
-    "updateAll": "Posodobi vse"
+    "url": "URL | URL-ji"
 }

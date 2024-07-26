@@ -111,6 +111,5 @@
     "url": "URL | URLs",
     "extra": "Extra",
     "reconnecting...": "Reconectando…",
-    "connecting...": "Conectando ao servidor de socket…",
-    "updateAll": "Atualizar tudo"
+    "connecting...": "Conectando ao servidor de socket…"
 }

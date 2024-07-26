@@ -111,6 +111,5 @@
     "agentAddedSuccessfully": "Agent toegevoegd.",
     "agentRemovedSuccessfully": "Agent verwijderd.",
     "removeAgent": "Verwijder agent",
-    "removeAgentMsg": "Weet je zeker dat je deze agent wilt verwijderen?",
-    "updateAll": "Update alles"
+    "removeAgentMsg": "Weet je zeker dat je deze agent wilt verwijderen?"
 }

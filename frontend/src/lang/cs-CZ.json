@@ -97,6 +97,5 @@
     "extra": "Extra",
     "reverseProxyMsg1": "Používáte Reverzní proxy server?",
     "reverseProxyMsg2": "Podívat se jak to nastavit pro WebSocket",
-    "Cannot connect to the socket server.": "Nelze se připojit k serveru .",
-    "updateAll": "Aktualizovat všechny"
+    "Cannot connect to the socket server.": "Nelze se připojit k serveru ."
 }

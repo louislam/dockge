@@ -98,6 +98,5 @@
     "Please use this option carefully!": "Vă rugăm să utilizați această opțiune cu atenție!",
     "Show update if available": "Afișează actualizarea dacă este disponibilă",
     "disableauth.message1": "Sigur doriți să <strong>dezactivați autentificarea</strong>?",
-    "disableauth.message2": "Este conceput pentru scenarii <strong>în care intenționați să implementați autentificarea terță</strong> în fața Dockge-lui, cum ar fi Cloudflare Access, Authelia sau alte mecanisme de autentificare.",
-    "updateAll": "Actualizează "
+    "disableauth.message2": "Este conceput pentru scenarii <strong>în care intenționați să implementați autentificarea terță</strong> în fața Dockge-lui, cum ar fi Cloudflare Access, Authelia sau alte mecanisme de autentificare."
 }

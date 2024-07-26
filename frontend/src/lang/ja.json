@@ -107,6 +107,5 @@
     "agentRemovedSuccessfully": "エージェントは正常に削除されました。",
     "removeAgent": "エージェントを削除",
     "removeAgentMsg": "本当にこのエージェントを削除しますか?",
-    "url": "URL | URL",
-    "updateAll": "全てのエージェントをアップデート"
+    "url": "URL | URL"
 }

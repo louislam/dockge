@@ -111,6 +111,5 @@
     "connecting...": "Łączenie z socketem serwera…",
     "extra": "Ekstra",
     "url": "URL | URLe",
-    "reconnecting...": "Wznawianie połączenia…",
-    "updateAll": "Zaktualizuj wszystkie"
+    "reconnecting...": "Wznawianie połączenia…"
 }

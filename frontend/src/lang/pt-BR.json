@@ -111,6 +111,5 @@
     "agentAddedSuccessfully": "Agente adicionado com sucesso.",
     "agentRemovedSuccessfully": "Agente removido com sucesso.",
     "removeAgent": "Remover Agente",
-    "removeAgentMsg": "Tem certeza de que deseja remover este agente?",
-    "updateAll": "Atualizar tudo"
+    "removeAgentMsg": "Tem certeza de que deseja remover este agente?"
 }

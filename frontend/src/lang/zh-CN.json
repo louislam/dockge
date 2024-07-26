@@ -112,6 +112,5 @@
     "removeAgent": "移除代理",
     "removeAgentMsg": "您确定要移除此代理？",
     "agentAddedSuccessfully": "代理添加成功。",
-    "LongSyntaxNotSupported": "此处不支持Long syntax，请使用YAML编辑器。",
-    "updateAll": "更新全部"
+    "LongSyntaxNotSupported": "此处不支持Long syntax，请使用YAML编辑器。"
 }
