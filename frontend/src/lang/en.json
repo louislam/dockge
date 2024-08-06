@@ -113,5 +113,6 @@
     "removeAgent": "Remove Agent",
     "removeAgentMsg": "Are you sure you want to remove this agent?",
     "LongSyntaxNotSupported": "Long syntax is not supported here. Please use the YAML editor.",
-    "Friendly Name": "Friendly Name"
+    "name": "Dockge Agent Display name",
+    "updatedName": "New Dockge Agent Display name"
 }
