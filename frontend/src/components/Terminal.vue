@@ -164,7 +164,6 @@ export default {
         mainTerminalConfig() {
             this.terminal.onKey(e => {
                 const code = e.key.charCodeAt(0);
-                console.debug("Encode: " + JSON.stringify(e.key));
 
                 if (e.key === "\r") {
                     // Return if no input
@@ -201,7 +200,6 @@ export default {
                 } else {
                     this.cursorPosition++;
                     this.terminalInputBuffer += e.key;
-                    console.log(this.terminalInputBuffer);
                     this.terminal.write(e.key);
                 }
             });
