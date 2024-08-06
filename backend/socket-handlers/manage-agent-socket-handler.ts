@@ -20,7 +20,7 @@ export class ManageAgentSocketHandler extends SocketHandler {
                 let data = requestData as LooseObject;
                 let manager = socket.instanceManager;
                 await manager.test(data.url, data.username, data.password);
-                await manager.add(data.url, data.username, data.password, data.friendlyname);
+                await manager.add(data.url, data.username, data.password, data.name);
 
                 // connect to the agent
                 manager.connect(data.url, data.username, data.password);
@@ -68,17 +68,13 @@ export class ManageAgentSocketHandler extends SocketHandler {
         });
 
         // updateAgent
-        socket.on("updateAgent", async (friendlyname : string, updatedFriendlyName : string, callback : unknown) => {
+        socket.on("updateAgent", async (name : string, updatedName : string, callback : unknown) => {
             try {
                 log.debug("manage-agent-socket-handler", "updateAgent");
                 checkLogin(socket);
 
-                if (typeof(updatedFriendlyName) !== "string") {
-                    throw new Error("FriendlyName must be a string");
-                }
-
                 let manager = socket.instanceManager;
-                await manager.update(friendlyname, updatedFriendlyName);
+                await manager.update(name, updatedName);
 
                 server.disconnectAllSocketClients(undefined, socket.id);
                 manager.sendAgentList();

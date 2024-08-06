@@ -50,18 +50,18 @@
 
                             <!-- Agent Display Name -->
                             <template v-if="$root.agentStatusList[endpoint]">
-                                <span v-if="endpoint === '' && agent.friendlyname === ''" class="badge bg-secondary me-2">Controller</span>
-                                <span v-else-if="agent.friendlyname === ''" :href="agent.url">{{ endpoint }}</span>
-                                <span v-else :href="agent.url">{{ agent.friendlyname }}</span>
+                                <span v-if="endpoint === '' && agent.name === ''" class="badge bg-secondary me-2">Controller</span>
+                                <span v-else-if="agent.name === ''" :href="agent.url">{{ endpoint }}</span>
+                                <span v-else :href="agent.url">{{ agent.name }}</span>
                             </template>
 
-                            <!-- Edit FriendlyName  -->
-                            <font-awesome-icon v-if="agent.friendlyname !== '' && agent.friendlyname !== ''" icon="pen-to-square" @click="showEditAgentFriendlynameDialog[agent.friendlyname] = !showEditAgentFriendlynameDialog[agent.friendlyname]" />
+                            <!-- Edit Name  -->
+                            <font-awesome-icon icon="pen-to-square" @click="showEditAgentNameDialog[agent.name] = !showEditAgentNameDialog[agent.Name]" />
 
                             <!-- Edit Dialog -->
-                            <BModal v-model="showEditAgentFriendlynameDialog[agent.friendlyname]" :no-close-on-backdrop="true" :close-on-esc="true" :okTitle="$t('Update Friendlyname')" okVariant="info" @ok="updateFriendlyname(agent.friendlyname, agent.updatedFriendlyName)">
-                                <label for="Update Friendlyname" class="form-label">Current value: {{ $t(agent.friendlyname) }}</label>
-                                <input id="updatedFriendlyName" v-model="agent.updatedFriendlyName" type="text" class="form-control" optional>
+                            <BModal v-model="showEditAgentNameDialog[agent.name]" :no-close-on-backdrop="true" :close-on-esc="true" :okTitle="$t('Update Name')" okVariant="info" @ok="updateName(agent.url, agent.updatedName)">
+                                <label for="Update Name" class="form-label">Current value: {{ $t(agent.name) }}</label>
+                                <input id="updatedName" v-model="agent.updatedName" type="text" class="form-control" optional>
                             </BModal>
 
                             <!-- Remove Button -->
@@ -94,8 +94,8 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="friendlyname" class="form-label">{{ $t("Friendly Name") }}</label>
-                                <input id="friendlyname" v-model="agent.friendlyname" type="text" class="form-control" optional>
+                                <label for="name" class="form-label">{{ $t("Friendly Name") }}</label>
+                                <input id="name" v-model="agent.name" type="text" class="form-control" optional>
                             </div>
 
                             <button type="submit" class="btn btn-primary" :disabled="connectingAgent">
@@ -138,14 +138,14 @@ export default {
             dockerRunCommand: "",
             showAgentForm: false,
             showRemoveAgentDialog: {},
-            showEditAgentFriendlynameDialog: {},
+            showEditAgentNameDialog: {},
             connectingAgent: false,
             agent: {
                 url: "http://",
                 username: "",
                 password: "",
-                friendlyname: "",
-                updatedFriendlyName: "",
+                name: "",
+                updatedName: "",
             }
         };
     },
@@ -219,15 +219,14 @@ export default {
             });
         },
 
-        updateFriendlyname(friendlyname, updatedFriendlyName) {
-            //console.log(this.showEditAgentFriendlynameDialog.inputNewFriendlyName);
-            this.$root.getSocket().emit("updateAgent", friendlyname, updatedFriendlyName, (res) => {
+        updateName(url, updatedName) {
+            this.$root.getSocket().emit("updateAgent", url, updatedName, (res) => {
                 this.$root.toastRes(res);
 
                 if (res.ok) {
                     this.showAgentForm = false;
                     this.agent = {
-                        updatedFriendlyName: "",
+                        updatedName: "",
                     };
                 }
             });

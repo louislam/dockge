@@ -133,10 +133,10 @@ export default defineComponent({
         endpointDisplayFunction(endpoint : string) {
             for (const [k, v] of Object.entries(this.$data.agentList)) {
                 if (endpoint) {
-                    if (endpoint === v["endpoint"] && v["friendlyname"] !== "") {
-                        return v["friendlyname"];
+                    if (endpoint === v["endpoint"] && v["name"] !== "") {
+                        return v["name"];
                     }
-                    if (endpoint === v["endpoint"] && v["friendlyname"] === "" ) {
+                    if (endpoint === v["endpoint"] && v["name"] === "" ) {
                         return endpoint;
                     }
                 }

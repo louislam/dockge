@@ -76,15 +76,15 @@ export class AgentManager {
      * @param url
      * @param username
      * @param password
-     * @param friendlyname
-     * @param updatedFriendlyName
+     * @param name
+     * @param updatedName
      */
-    async add(url : string, username : string, password : string, friendlyname : string) : Promise<Agent> {
+    async add(url: string, username: string, password: string, name: string): Promise<Agent> {
         let bean = R.dispense("agent") as Agent;
         bean.url = url;
         bean.username = username;
         bean.password = password;
-        bean.friendlyname = friendlyname;
+        bean.name = name;
         await R.store(bean);
         return bean;
     }
@@ -109,12 +109,19 @@ export class AgentManager {
 
     /**
      *
-     * @param friendlyname
-     * @param updatedFriendlyName
+     * @param url
+     * @param updatedName
      */
-
-    async update(friendlyname : string, updatedFriendlyName : string) {
-        await R.exec("UPDATE agent SET friendlyname = " + updatedFriendlyName + " WHERE friendlyname = " + friendlyname + "");
+    async update(url: string, updatedName: string) {
+        const agent = await R.findOne("agent", " url = ? ", [
+            url,
+        ]);
+        if (agent) {
+            agent.name = updatedName;
+            await R.store(agent);
+        } else {
+            throw new Error("Agent not found");
+        }
     }
 
     connect(url : string, username : string, password : string) {
@@ -289,8 +296,8 @@ export class AgentManager {
             url: "",
             username: "",
             endpoint: "",
-            friendlyname: "",
-            updatedFriendlyName: "",
+            name: "",
+            updatedName: "",
         };
 
         for (let endpoint in list) {
