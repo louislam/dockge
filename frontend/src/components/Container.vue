@@ -20,6 +20,20 @@
                         <font-awesome-icon icon="terminal" />
                         Bash
                     </router-link>
+                    <button v-if="status !== 'running'"
+                            class="btn btn-primary me-2"
+                            :disabled="processing"
+                            @click="startService">
+                        <font-awesome-icon icon="play" class="me-1" />
+                        Start
+                    </button>
+                    <button v-if="status === 'running'"
+                            class="btn btn-danger me-2"
+                            :disabled="processing"
+                            @click="stopService">
+                        <font-awesome-icon icon="stop" class="me-1" />
+                        Stop
+                    </button>
                 </div>
             </div>
         </div>
@@ -284,6 +298,12 @@ export default defineComponent({
         remove() {
             delete this.jsonObject.services[this.name];
         },
+        startService() {
+            this.$emit('start-service', this.name);
+        },
+        stopService() {
+            this.$emit('stop-service', this.name);
+        }
     }
 });
 </script>
