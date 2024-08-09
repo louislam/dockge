@@ -274,6 +274,25 @@ export class DockerSocketHandler extends AgentSocketHandler {
             }
         });
 
+        agentSocket.on('restartService', async (stackName: unknown, serviceName: unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof stackName !== 'string' || typeof serviceName !== 'string') {
+                    throw new Error('Invalid stackName or serviceName');
+                }
+
+                const stack = await Stack.getStack(server, stackName, true);
+                await stack.restartService(socket, serviceName);
+                callbackResult({
+                    ok: true,
+                    msg: `Service ${serviceName} restarted`
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
         // getExternalNetworkList
         agentSocket.on("getDockerNetworkList", async (callback) => {
             try {
