@@ -189,7 +189,29 @@ export default {
 
             return result;
         },
+        stackListByAgent() {
+            const stacksByAgent = new Map();
+            const stacks = this.$root.completeStackList;
+            
+           for (const key of Object.keys(stacks)) {
+                // Handle stacks with no suffix (from the current endpoint)
+                let [stackName, agent] = key.split("_");
+                const stackHasEndpoint = agent !== "";
+                agent = stackHasEndpoint ? agent: this.$t("currentEndpoint");   
+                
+                if (!stacksByAgent.has(agent)) {
+                    stacksByAgent.set(agent, []);
+                }
 
+                const stack = stacks[!stackHasEndpoint ? `${stackName}_` : `${stackName}_${agent}`]
+                stacksByAgent.get(agent).push(stack);
+            }
+          
+            // console.log(stacksByAgent);
+            // console.log(stacks);
+            return stacksByAgent;
+            
+        },
         isDarkTheme() {
             return document.body.classList.contains("dark");
         },
