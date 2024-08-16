@@ -43,8 +43,8 @@
             </div>
         </div>
 
-        <div v-if="searchText === '' && this.$root.agentCount > 1" :style="stackListStyle" ref="stackList" class="stack-list">
-            <AgentStackList :agentName="agentName" v-for="[agentName, stacks] in stackListByAgent">
+        <div v-if="searchText === '' && $root.agentCount > 1" ref="stackList" :style="stackListStyle" class="stack-list">
+            <AgentStackList v-for="[agentName, stacks] in stackListByAgent" :agentName="agentName" :key="agentName">
                 <StackListItem
                     v-for="(stack, index) in stacks"
                     :key="index"
@@ -52,8 +52,8 @@
                     :isSelectMode="selectMode"
                     :isSelected="isSelected"
                     :select="select"
-                    :deselect="deselect"/>
-                    
+                    :deselect="deselect"
+                />
             </AgentStackList>
         </div>
 
@@ -61,7 +61,7 @@
             <div v-if="Object.keys(sortedStackList).length === 0" class="text-center mt-3">
                 <router-link to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
             </div>
-            
+
             <StackListItem
                 v-for="(item, index) in sortedStackList"
                 :key="index"
@@ -83,7 +83,6 @@
 import Confirm from "../components/Confirm.vue";
 import StackListItem from "../components/StackListItem.vue";
 import { CREATED_FILE, CREATED_STACK, EXITED, RUNNING, UNKNOWN } from "../../../common/util-common";
-import AgentStackList from "./AgentStackList.vue";
 
 export default {
     components: {
@@ -212,21 +211,21 @@ export default {
         stackListByAgent() {
             const stacksByAgent = new Map();
             const stacks = this.$root.completeStackList;
-            
-           for (const key of Object.keys(stacks)) {
+
+            for (const key of Object.keys(stacks)) {
                 // Handle stacks with no suffix (from the current endpoint)
-                let [stackName, agent] = key.split("_");
+                let [ stackName, agent ] = key.split("_");
                 const stackHasEndpoint = agent !== "";
-                agent = stackHasEndpoint ? agent: this.$t("currentEndpoint");   
-                
+                agent = stackHasEndpoint ? agent : this.$t("currentEndpoint");
+
                 if (!stacksByAgent.has(agent)) {
                     stacksByAgent.set(agent, []);
                 }
 
-                const stack = stacks[!stackHasEndpoint ? `${stackName}_` : `${stackName}_${agent}`]
+                const stack = stacks[!stackHasEndpoint ? `${stackName}_` : `${stackName}_${agent}`];
                 stacksByAgent.get(agent).push(stack);
             }
-          
+
             return stacksByAgent;
         },
         isDarkTheme() {

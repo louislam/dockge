@@ -1,7 +1,7 @@
 <template>
     <div class="wrapper">
         <div class="group-header">
-            {{ agentName ?? this.$t("currentEndpoint") }}
+            {{ agentName }}
         </div>
 
         <slot />
@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 interface AgentStackListProps {
-    agentName?: string;
+    agentName: string;
 }
 
 defineProps<AgentStackListProps>();
@@ -20,7 +20,6 @@ defineProps<AgentStackListProps>();
 
 <style lang="scss" scoped>
 @import "../styles/vars.scss";
-
 
 .group-header {
     border-bottom: 1px solid #dee2e6;
