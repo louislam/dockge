@@ -42,11 +42,26 @@
                 </span>
             </div>
         </div>
-        <div ref="stackList" class="stack-list" :class="{ scrollbar: scrollbar }" :style="stackListStyle">
+
+        <div v-if="searchText === '' && this.$root.agentCount > 1" :style="stackListStyle" ref="stackList" class="stack-list">
+            <AgentStackList :agentName="agentName" v-for="[agentName, stacks] in stackListByAgent">
+                <StackListItem
+                    v-for="(stack, index) in stacks"
+                    :key="index"
+                    :stack="stack"
+                    :isSelectMode="selectMode"
+                    :isSelected="isSelected"
+                    :select="select"
+                    :deselect="deselect"/>
+                    
+            </AgentStackList>
+        </div>
+
+        <div v-else ref="stackList" class="stack-list" :class="{ scrollbar: scrollbar }" :style="stackListStyle">
             <div v-if="Object.keys(sortedStackList).length === 0" class="text-center mt-3">
                 <router-link to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
             </div>
-
+            
             <StackListItem
                 v-for="(item, index) in sortedStackList"
                 :key="index"
@@ -68,6 +83,7 @@
 import Confirm from "../components/Confirm.vue";
 import StackListItem from "../components/StackListItem.vue";
 import { CREATED_FILE, CREATED_STACK, EXITED, RUNNING, UNKNOWN } from "../../../common/util-common";
+import AgentStackList from "./AgentStackList.vue";
 
 export default {
     components: {
