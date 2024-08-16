@@ -189,6 +189,10 @@ export default {
 
             return result;
         },
+        /**
+         * Groups all stacks by it's agent
+         * @returns {Map<string, object} A map containing all agents with their stacks
+         */
         stackListByAgent() {
             const stacksByAgent = new Map();
             const stacks = this.$root.completeStackList;
@@ -207,10 +211,7 @@ export default {
                 stacksByAgent.get(agent).push(stack);
             }
           
-            // console.log(stacksByAgent);
-            // console.log(stacks);
             return stacksByAgent;
-            
         },
         isDarkTheme() {
             return document.body.classList.contains("dark");
