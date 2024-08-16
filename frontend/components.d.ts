@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     About: typeof import('./src/components/settings/About.vue')['default']
+    AgentStackList: typeof import('./src/components/AgentStackList.vue')['default']
     Appearance: typeof import('./src/components/settings/Appearance.vue')['default']
     ArrayInput: typeof import('./src/components/ArrayInput.vue')['default']
     ArraySelect: typeof import('./src/components/ArraySelect.vue')['default']
