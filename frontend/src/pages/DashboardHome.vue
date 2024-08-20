@@ -49,13 +49,25 @@
                             </template>
 
                             <!-- Agent Display Name -->
-                            <span v-if="endpoint === ''">{{ $t("currentEndpoint") }}</span>
-                            <a v-else :href="agent.url" target="_blank">{{ endpoint }}</a>
+                            <template v-if="$root.agentStatusList[endpoint]">
+                                <span v-if="endpoint === '' && agent.name === ''" class="badge bg-secondary me-2">Controller</span>
+                                <span v-else-if="agent.name === ''" :href="agent.url" class="me-2">{{ endpoint }}</span>
+                                <span v-else :href="agent.url" class="me-2">{{ agent.name }}</span>
+                            </template>
+
+                            <!-- Edit Name  -->
+                            <font-awesome-icon icon="pen-to-square" @click="showEditAgentNameDialog[agent.name] = !showEditAgentNameDialog[agent.Name]" />
+
+                            <!-- Edit Dialog -->
+                            <BModal v-model="showEditAgentNameDialog[agent.name]" :no-close-on-backdrop="true" :close-on-esc="true" :okTitle="$t('Update Name')" okVariant="info" @ok="updateName(agent.url, agent.updatedName)">
+                                <label for="Update Name" class="form-label">Current value: {{ $t(agent.name) }}</label>
+                                <input id="updatedName" v-model="agent.updatedName" type="text" class="form-control" optional>
+                            </BModal>
 
                             <!-- Remove Button -->
                             <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="showRemoveAgentDialog[agent.url] = !showRemoveAgentDialog[agent.url]" />
 
-                            <!-- Remoe Agent Dialog -->
+                            <!-- Remove Agent Dialog -->
                             <BModal v-model="showRemoveAgentDialog[agent.url]" :okTitle="$t('removeAgent')" okVariant="danger" @ok="removeAgent(agent.url)">
                                 <p>{{ agent.url }}</p>
                                 {{ $t("removeAgentMsg") }}
@@ -79,6 +91,11 @@
                             <div class="mb-3">
                                 <label for="password" class="form-label">{{ $t("Password") }}</label>
                                 <input id="password" v-model="agent.password" type="password" class="form-control" required autocomplete="new-password">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">{{ $t("Friendly Name") }}</label>
+                                <input id="name" v-model="agent.name" type="text" class="form-control" optional>
                             </div>
 
                             <button type="submit" class="btn btn-primary" :disabled="connectingAgent">
@@ -121,11 +138,14 @@ export default {
             dockerRunCommand: "",
             showAgentForm: false,
             showRemoveAgentDialog: {},
+            showEditAgentNameDialog: {},
             connectingAgent: false,
             agent: {
                 url: "http://",
                 username: "",
                 password: "",
+                name: "",
+                updatedName: "",
             }
         };
     },
@@ -195,6 +215,19 @@ export default {
 
                     // Remove the stack list and status list of the removed agent
                     delete this.$root.allAgentStackList[endpoint];
+                }
+            });
+        },
+
+        updateName(url, updatedName) {
+            this.$root.getSocket().emit("updateAgent", url, updatedName, (res) => {
+                this.$root.toastRes(res);
+
+                if (res.ok) {
+                    this.showAgentForm = false;
+                    this.agent = {
+                        updatedName: "",
+                    };
                 }
             });
         },
@@ -286,7 +319,7 @@ export default {
             }
 
         },
-    },
+    }
 };
 </script>
 
