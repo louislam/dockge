@@ -77,7 +77,6 @@ export class AgentManager {
      * @param username
      * @param password
      * @param name
-     * @param updatedName
      */
     async add(url: string, username: string, password: string, name: string): Promise<Agent> {
         let bean = R.dispense("agent") as Agent;

@@ -51,8 +51,8 @@
                             <!-- Agent Display Name -->
                             <template v-if="$root.agentStatusList[endpoint]">
                                 <span v-if="endpoint === '' && agent.name === ''" class="badge bg-secondary me-2">Controller</span>
-                                <span v-else-if="agent.name === ''" :href="agent.url">{{ endpoint }}</span>
-                                <span v-else :href="agent.url">{{ agent.name }}</span>
+                                <span v-else-if="agent.name === ''" :href="agent.url" class="me-2">{{ endpoint }}</span>
+                                <span v-else :href="agent.url" class="me-2">{{ agent.name }}</span>
                             </template>
 
                             <!-- Edit Name  -->
