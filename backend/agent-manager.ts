@@ -98,6 +98,8 @@ export class AgentManager {
         if (bean) {
             await R.trash(bean);
             let endpoint = bean.endpoint;
+            this.disconnect(endpoint);
+            this.sendAgentList();
             delete this.agentSocketList[endpoint];
         } else {
             throw new Error("Agent not found");
