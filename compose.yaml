@@ -1,6 +1,9 @@
 services:
   dockge:
     image: louislam/dockge:1
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     restart: unless-stopped
     ports:
       # Host Port : Container Port
