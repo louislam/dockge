@@ -27,7 +27,7 @@
         "reset-password": "tsx ./extra/reset-password.ts"
     },
     "dependencies": {
-        "@homebridge/node-pty-prebuilt-multiarch": "~0.11.14",
+        "@homebridge/node-pty-prebuilt-multiarch": "0.11.14",
         "@inventage/envsubst": "^0.16.0",
         "@louislam/sqlite3": "~15.1.6",
         "bcryptjs": "~2.4.3",
