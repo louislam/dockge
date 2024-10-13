@@ -1,5 +1,5 @@
 {
-    "languageName": "Español",
+    "languageName": "Inglés",
     "Create your admin account": "Crea tu cuenta de administrador",
     "authIncorrectCreds": "Nombre de usuario o contraseña incorrectos.",
     "PasswordsDoNotMatch": "Las contraseñas no coinciden.",
@@ -98,7 +98,7 @@
     "Cannot connect to the socket server.": "No se puede conectar al servidor del socket.",
     "reconnecting...": "Reconectando…",
     "connecting...": "Conectando al servidor del socket…",
-    "url": "URL | URLs",
+    "url": "Dirección URL | Direcciones URLs",
     "extra": "Addicional",
     "currentEndpoint": "Corriente",
     "dockgeURL": "URL de Dockge (ej. http://127.0.0.1:5001)",
@@ -111,5 +111,6 @@
     "removeAgentMsg": "Estás seguro que deseas remover este agente?",
     "dockgeAgent": "Agentes Dockge",
     "connecting": "Conectando",
-    "agentRemovedSuccessfully": "Agente removido satisfactoriamente."
+    "agentRemovedSuccessfully": "Agente removido satisfactoriamente.",
+    "LongSyntaxNotSupported": "Aquí no hay soporte para la sintaxis larga. Por favor use el editor de YAML."
 }
