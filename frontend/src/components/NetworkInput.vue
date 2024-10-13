@@ -3,7 +3,7 @@
         <h5>{{ $t("Internal Networks") }}</h5>
         <ul class="list-group">
             <li v-for="(networkRow, index) in networkList" :key="index" class="list-group-item">
-                <input v-model="networkRow.key" type="text" class="no-bg domain-input" placeholder="Network name..." />
+                <input v-model="networkRow.key" type="text" class="no-bg domain-input" :placeholder="$t(`Network name...`)" />
                 <font-awesome-icon icon="times" class="action remove ms-2 me-3 text-danger" @click="remove(index)" />
             </li>
         </ul>
