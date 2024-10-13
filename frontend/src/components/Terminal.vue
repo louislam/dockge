@@ -154,10 +154,12 @@ export default {
         },
 
         removeInput() {
-            const backspaceCount = 2 * this.terminalInputBuffer.length - this.cursorPosition;
+            const textAfterCursorLength = this.terminalInputBuffer.length - this.cursorPosition;
+            const spaces = " ".repeat(textAfterCursorLength);
+            const backspaceCount = this.terminalInputBuffer.length;
             const backspaces = "\b \b".repeat(backspaceCount);
             this.cursorPosition = 0;
-            this.terminal.write(backspaces);
+            this.terminal.write(spaces + backspaces);
             this.terminalInputBuffer = "";
         },
 
