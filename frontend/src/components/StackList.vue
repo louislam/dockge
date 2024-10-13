@@ -8,6 +8,7 @@
                 </button>
 
                 <div class="placeholder"></div>
+
                 <div class="search-wrapper">
                     <a v-if="searchText == ''" class="search-icon">
                         <font-awesome-icon icon="search" />
@@ -18,6 +19,12 @@
                     <form>
                         <input v-model="searchText" class="form-control search-input" autocomplete="off" />
                     </form>
+                </div>
+                <div class="update-all-wrapper">
+                    <button class="btn btn-primary" @click="updateAll">
+                        <font-awesome-icon icon="fa-cloud-arrow-down me-1" />
+                        {{ $t("updateAll") }}
+                    </button>
                 </div>
             </div>
 
@@ -346,6 +353,15 @@ export default {
 
             this.cancelSelectMode();
         },
+
+        updateAll() {
+            for (let stack of Object.values(this.$root.completeStackList)) {
+                this.$root.emitAgent(stack.endpoint, "updateStack", stack.name, (res) => {
+                    this.processing = false;
+                    this.$root.toastRes(res);
+                });
+            }
+        }
     },
 };
 </script>
@@ -417,7 +433,7 @@ export default {
 }
 
 .search-input {
-    max-width: 15em;
+    max-width: 10em;
 }
 
 .stack-item {
