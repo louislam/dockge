@@ -1,5 +1,4 @@
-# Due to the bug of #145, Node.js's version cannot be changed, unless upstream is fixed.
-FROM node:18.17.1-bookworm-slim
+FROM node:22-bookworm-slim
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN apt update && apt install --yes --no-install-recommends \
