@@ -253,7 +253,7 @@ export default {
 
 <style lang="scss">
 .terminal {
-    padding: 10px 15px;
+    background-color: black !important;
     height: 100%;
 }
 </style>
