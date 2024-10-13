@@ -94,7 +94,7 @@
     "Cannot connect to the socket server.": "Keine Verbindung zum Socket Server.",
     "reverseProxyMsg1": "Wird ein Reverse Proxy genutzt?",
     "reconnecting...": "Erneuter Verbindungsaufbau…",
-    "downStack": "Stopp & Inaktiv",
+    "downStack": "Stoppen & Deaktivieren",
     "extra": "Extra",
     "url": "URL / URLs",
     "reverseProxyMsg2": "Lerne wie dieser für WebSockets zu konfigurieren ist.",

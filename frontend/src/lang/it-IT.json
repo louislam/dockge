@@ -95,10 +95,10 @@
     "reverseProxyMsg1": "Stai usando Reverse Proxy?",
     "reverseProxyMsg2": "Verifica come configurarlo per il WebSocket",
     "Cannot connect to the socket server.": "impossibile collegarsi al socket server",
-    "connecting...": "Connessione al server socket…",
+    "connecting...": "connettendosi al socket server…",
     "extra": "Extra",
     "reconnecting...": "Riconnessione…",
-    "url": "Indirizzo | Indirizzi",
+    "url": "URL | URLs",
     "newUpdate": "Nuovo aggiornamento",
     "dockgeAgent": "Agente Dockge | Agenti Dockge",
     "currentEndpoint": "Corrente",
@@ -111,5 +111,6 @@
     "removeAgent": "Rimuovi Agente",
     "removeAgentMsg": "Sei sicuro di voler rimuovere questo agente?",
     "addAgent": "Aggungi Agente",
-    "agentAddedSuccessfully": "Agente aggiunto correttamente."
+    "agentAddedSuccessfully": "Agente aggiunto correttamente.",
+    "LongSyntaxNotSupported": "La sintassi lunga non è supportata qui. Utilizzare l'editor YAML."
 }
