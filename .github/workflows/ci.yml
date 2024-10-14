@@ -14,7 +14,7 @@ jobs:
   ci:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, ARM64]
+        os: [ubuntu-latest, windows-latest, macos-latest, ARM, ARM64]
         node: [22] # Can be changed
     runs-on: ${{ matrix.os }}
     steps:
