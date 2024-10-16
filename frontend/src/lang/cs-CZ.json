@@ -19,7 +19,7 @@
     "restartStack": "Restartovat",
     "updateStack": "Aktualizovat",
     "startStack": "Spustit",
-    "downStack": "Zastavit & Vypnout",
+    "downStack": "Zastavit & Zneaktivnit",
     "editStack": "Upravit",
     "discardStack": "Zahodit",
     "saveStackDraft": "Uložit",
@@ -97,5 +97,6 @@
     "extra": "Extra",
     "reverseProxyMsg1": "Používáte Reverzní proxy server?",
     "reverseProxyMsg2": "Podívat se jak to nastavit pro WebSocket",
-    "Cannot connect to the socket server.": "Nelze se připojit k serveru ."
+    "Cannot connect to the socket server.": "Nelze se připojit k serveru .",
+    "Lost connection to the socket server. Reconnecting...": "Ztraceno spojení se serverem. Obnovuji spojení..."
 }
