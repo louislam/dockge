@@ -129,6 +129,7 @@
                             :is-edit-mode="isEditMode"
                             :first="name === Object.keys(jsonConfig.services)[0]"
                             :status="serviceStatusList[name]"
+                            :active="active"
                         />
                     </div>
 
