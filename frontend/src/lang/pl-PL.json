@@ -112,5 +112,21 @@
     "extra": "Ekstra",
     "url": "URL | URLe",
     "reconnecting...": "Wznawianie połączenia…",
-    "LongSyntaxNotSupported": "Nieobsługiwana składnia. Użyj edytora YAML."
+    "LongSyntaxNotSupported": "Nieobsługiwana składnia. Użyj edytora YAML.",
+    "Saved": "Zapisano",
+    "Switch to sh": "Przełącz na sh",
+    "terminal": "Terminal",
+    "Restarted": "Zrestartowano",
+    "Deployed": "Wdrożono",
+    "Deleted": "Usunięto",
+    "Updated": "Zaktualizowano",
+    "Started": "Uruchomiono",
+    "Stopped": "Zatrzymano",
+    "Downed": "Położono",
+    "Lost connection to the socket server. Reconnecting...": "Utracono połączenie z socketem serwera. Ponawiam połączenie...",
+    "New Container Name...": "Nazwa nowego kontenera...",
+    "Network name...": "Nazwa sieci...",
+    "Select a network...": "Wybierz sieć...",
+    "NoNetworksAvailable": "Brak dostępnych sieci. Musisz najpierw dodać sieć wewnętrzną lub włączyć sieci zewnętrzne po prawej stronie.",
+    "CurrentHostname": "(Odznacze: Podążaj za aktualnym hostem)"
 }
