@@ -112,5 +112,20 @@
     "agentRemovedSuccessfully": "Agent erfolgreich entfernt.",
     "removeAgent": "Agent Entfernen",
     "removeAgentMsg": "Bist Du sicher, dass Du diesen Agent entfernen möchtest?",
-    "LongSyntaxNotSupported": "Lange Syntax wird nicht unterstützt. Bitte verwende den YAML-Editor."
+    "LongSyntaxNotSupported": "Lange Syntax wird nicht unterstützt. Bitte verwende den YAML-Editor.",
+    "Lost connection to the socket server. Reconnecting...": "Verbindung zu Socket Server verloren. Verbinden...",
+    "Saved": "Gespeichert",
+    "Deleted": "Gelöscht",
+    "Started": "Gestartet",
+    "Stopped": "Gestoppt",
+    "Restarted": "Neugestartet",
+    "New Container Name...": "Neuer Container Name...",
+    "Network name...": "Netzwerkname...",
+    "Select a network...": "Netzwerk auswählen...",
+    "Updated": "Aktualisiert",
+    "Deployed": "Deployed",
+    "Switch to sh": "Zu sh wechseln",
+    "terminal": "Terminal",
+    "CurrentHostname": "(nicht gesetzt: verwende aktuellen Hostname)",
+    "Downed": "Heruntergefahren"
 }
