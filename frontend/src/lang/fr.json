@@ -112,5 +112,21 @@
     "currentEndpoint": "Actuel",
     "connect": "Connecter",
     "removeAgentMsg": "Êtes-vous sûr de vouloir supprimer cet agent ?",
-    "LongSyntaxNotSupported": "La syntaxe longue n'est pas prise en charge ici. Veuillez utiliser l'éditeur YAML."
+    "LongSyntaxNotSupported": "La syntaxe longue n'est pas prise en charge ici. Veuillez utiliser l'éditeur YAML.",
+    "Saved": "Enregistré",
+    "Deployed": "Déployé",
+    "Deleted": "Supprimé",
+    "Updated": "Mis à jour",
+    "Started": "démarrer",
+    "Stopped": "Arrêté",
+    "Restarted": "Redémarré",
+    "Switch to sh": "Passer à sh",
+    "terminal": "Terminal",
+    "New Container Name...": "Nouveau nom du conteneur...",
+    "Network name...": "Nom du réseau...",
+    "Select a network...": "Sélectionnez un réseau...",
+    "Downed": "Abattu",
+    "Lost connection to the socket server. Reconnecting...": "Connexion au serveur socket perdue. Reconnexion...",
+    "CurrentHostname": "(Non défini : suivre le nom d'hôte actuel)",
+    "NoNetworksAvailable": "Aucun réseau disponible. Vous devez d'abord ajouter des réseaux internes ou activer les réseaux externes sur le côté droit."
 }

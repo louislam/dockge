@@ -112,5 +112,21 @@
     "dockgeAgent": "Dockge агент | Dockge агенти",
     "connecting": "Свързване",
     "agentRemovedSuccessfully": "Агентът е премахнат успешно.",
-    "LongSyntaxNotSupported": "Дългият синтаксис не се поддържа тук. Моля, използвайте YAML редактора."
+    "LongSyntaxNotSupported": "Дългият синтаксис не се поддържа тук. Моля, използвайте YAML редактора.",
+    "Started": "Стартиран",
+    "Updated": "Актуализиран",
+    "Deleted": "Изтрит",
+    "Deployed": "Внедрен",
+    "Stopped": "Спрян",
+    "Restarted": "Рестартиран",
+    "Switch to sh": "Превключи на \"sh\"",
+    "terminal": "Терминал",
+    "New Container Name...": "Ново име на контейнер...",
+    "Network name...": "Име на мрежата...",
+    "Select a network...": "Изберете мрежа...",
+    "Lost connection to the socket server. Reconnecting...": "Изгубена връзка със сокет сървъра. Повторно свързване...",
+    "Saved": "Запазено",
+    "Downed": "Свален",
+    "CurrentHostname": "(Не е зададено: Следвай текущото име на хост)",
+    "NoNetworksAvailable": "Няма налични мрежи. Първо трябва да добавите вътрешни мрежи или да активирате външни мрежи в дясната страна."
 }
