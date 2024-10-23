@@ -127,5 +127,6 @@
     "Switch to sh": "Zu sh wechseln",
     "terminal": "Terminal",
     "CurrentHostname": "(nicht gesetzt: verwende aktuellen Hostname)",
-    "Downed": "Heruntergefahren"
+    "Downed": "Heruntergefahren",
+    "NoNetworksAvailable": "Keine Netzwerke verfügbar. Du musst zunächst interne Netzwerke hinzufügen oder externe Netzwerke auf der rechten Seite aktivieren."
 }
