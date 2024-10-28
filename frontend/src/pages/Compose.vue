@@ -162,7 +162,7 @@
                             :endpoint="endpoint"
                             :rows="combinedTerminalRows"
                             :cols="combinedTerminalCols"
-                            style="height: 350px;"
+                            style="height: 315px;"
                         ></Terminal>
                     </div>
                 </div>
