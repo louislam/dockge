@@ -306,13 +306,13 @@ export default defineComponent({
             delete this.jsonObject.services[this.name];
         },
         startService() {
-            this.$emit('start-service', this.name);
+            this.$emit("start-service", this.name);
         },
         stopService() {
-            this.$emit('stop-service', this.name);
+            this.$emit("stop-service", this.name);
         },
         restartService() {
-            this.$emit('restart-service', this.name);
+            this.$emit("restart-service", this.name);
         }
 
     }

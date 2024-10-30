@@ -254,7 +254,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 stack.joinCombinedTerminal(socket); // Ensure the combined terminal is joined
                 callbackResult({
                     ok: true,
-                    msg: `Service ${serviceName} started`
+                    msg: "Service" + serviceName + " started"
                 }, callback);
                 server.sendStackList();
             } catch (e) {
@@ -275,7 +275,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 await stack.stopService(socket, serviceName);
                 callbackResult({
                     ok: true,
-                    msg: `Service ${serviceName} stopped`
+                    msg: "Service" + serviceName + " stopped"
                 }, callback);
                 server.sendStackList();
             } catch (e) {
@@ -283,19 +283,19 @@ export class DockerSocketHandler extends AgentSocketHandler {
             }
         });
 
-        agentSocket.on('restartService', async (stackName: unknown, serviceName: unknown, callback) => {
+        agentSocket.on("restartService", async (stackName: unknown, serviceName: unknown, callback) => {
             try {
                 checkLogin(socket);
 
-                if (typeof stackName !== 'string' || typeof serviceName !== 'string') {
-                    throw new Error('Invalid stackName or serviceName');
+                if (typeof stackName !== "string" || typeof serviceName !== "string") {
+                    throw new Error("Invalid stackName or serviceName");
                 }
 
                 const stack = await Stack.getStack(server, stackName, true);
                 await stack.restartService(socket, serviceName);
                 callbackResult({
                     ok: true,
-                    msg: `Service ${serviceName} restarted`
+                    msg: "Service" + serviceName + " restarted"
                 }, callback);
             } catch (e) {
                 callbackError(e, callback);
