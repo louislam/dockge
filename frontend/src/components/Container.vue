@@ -116,7 +116,7 @@
                     </label>
 
                     <div v-if="networkList.length === 0 && service.networks && service.networks.length > 0" class="text-warning mb-3">
-                        No networks available. You need to add internal networks or enable external networks in the right side first.
+                        {{ $t("NoNetworksAvailable") }}
                     </div>
 
                     <ArraySelect name="networks" :display-name="$t('network')" placeholder="Network Name" :options="networkList" />
@@ -127,7 +127,7 @@
                     <label class="form-label">
                         {{ $t("dependsOn") }}
                     </label>
-                    <ArrayInput name="depends_on" :display-name="$t('dependsOn')" placeholder="Container Name" />
+                    <ArrayInput name="depends_on" :display-name="$t('dependsOn')" :placeholder="$t(`containerName`)" />
                 </div>
             </div>
         </transition>

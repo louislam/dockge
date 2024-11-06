@@ -1,7 +1,7 @@
 <template>
     <transition name="slide-fade" appear>
         <div>
-            <h1 v-if="isAdd" class="mb-3">Compose</h1>
+            <h1 v-if="isAdd" class="mb-3">{{$t("compose")}}</h1>
             <h1 v-else class="mb-3">
                 <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
                 <span v-if="$root.agentCount > 1" class="agent-name">
@@ -112,7 +112,7 @@
                     <div v-if="isEditMode" class="input-group mb-3">
                         <input
                             v-model="newContainerName"
-                            placeholder="New Container Name..."
+                            :placeholder="$t(`New Container Name...`)"
                             class="form-control"
                             @keyup.enter="addContainer"
                         />
@@ -150,7 +150,7 @@
 
                     <!-- Combined Terminal Output -->
                     <div v-show="!isEditMode">
-                        <h4 class="mb-3">Terminal</h4>
+                        <h4 class="mb-3">{{$t("terminal")}}</h4>
                         <Terminal
                             ref="combinedTerminal"
                             class="mb-3 terminal"
@@ -158,7 +158,7 @@
                             :endpoint="endpoint"
                             :rows="combinedTerminalRows"
                             :cols="combinedTerminalCols"
-                            style="height: 350px;"
+                            style="height: 315px;"
                         ></Terminal>
                     </div>
                 </div>
@@ -258,7 +258,7 @@ import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
 import dotenv from "dotenv";
 
-const template = `version: "3.8"
+const template = `
 services:
   nginx:
     image: nginx:latest

@@ -47,7 +47,7 @@
                     <input
                         v-model="settings.primaryHostname"
                         class="form-control"
-                        placeholder="(Unset: Follow current hostname)"
+                        :placeholder="$t(`CurrentHostname`)"
                     />
                     <button class="btn btn-outline-primary" type="button" @click="autoGetPrimaryHostname">
                         {{ $t("autoGet") }}
