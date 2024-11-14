@@ -20,3 +20,4 @@ services:
     environment:
       # Tell Dockge where is your stacks directory
       - DOCKGE_STACKS_DIR=/opt/stacks
+      - DOCKGE_DOCKER_PATH=docker # or nerdctl

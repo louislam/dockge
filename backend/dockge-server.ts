@@ -45,6 +45,7 @@ export class DockgeServer {
     io : socketIO.Server;
     config : Config;
     indexHTML : string = "";
+    dockerPath : string = "";
 
     /**
      * List of express routers
@@ -79,6 +80,7 @@ export class DockgeServer {
     jwtSecret : string = "";
 
     stacksDir : string = "";
+
 
     /**
      *
@@ -136,7 +138,11 @@ export class DockgeServer {
             stacksDir: {
                 type: String,
                 optional: true,
-            }
+            },
+            dockerPath: {
+                type: String,
+                optional: true,
+            },
         });
 
         this.config = args as Config;
@@ -149,7 +155,9 @@ export class DockgeServer {
         this.config.hostname = args.hostname || process.env.DOCKGE_HOSTNAME || undefined;
         this.config.dataDir = args.dataDir || process.env.DOCKGE_DATA_DIR || "./data/";
         this.config.stacksDir = args.stacksDir || process.env.DOCKGE_STACKS_DIR || defaultStacksDir;
+        this.config.dockerPath = args.dockerPath || process.env.DOCKGE_DOCKER_PATH || "docker";
         this.stacksDir = this.config.stacksDir;
+        this.dockerPath = this.config.dockerPath;
 
         log.debug("server", this.config);
 
@@ -611,7 +619,7 @@ export class DockgeServer {
     }
 
     async getDockerNetworkList() : Promise<string[]> {
-        let res = await childProcessAsync.spawn("docker", [ "network", "ls", "--format", "{{.Name}}" ], {
+        let res = await childProcessAsync.spawn(this.dockerPath, [ "network", "ls", "--format", "{{.Name}}" ], {
             encoding: "utf-8",
         });
 

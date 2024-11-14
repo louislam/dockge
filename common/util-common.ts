@@ -109,6 +109,7 @@ export const ERROR_TYPE_VALIDATION = 1;
 
 export const allowedCommandList : string[] = [
     "docker",
+    "nerdctl",
     "ls",
     "cd",
     "dir",

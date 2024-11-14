@@ -30,6 +30,7 @@ export interface Arguments {
     hostname? : string;
     dataDir? : string;
     stacksDir? : string;
+    dockerPath? : string;
 }
 
 // Some config values are required
