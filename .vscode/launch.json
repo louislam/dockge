@@ -1,0 +1,51 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Dev with Debugger",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev"],
+            "port": 9229,
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "integratedTerminal",
+            "sourceMaps": true,
+            "smartStep": true
+        },
+        {
+            "name": "Launch Backend",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "ts-node",
+            "args": ["${workspaceFolder}/backend/dockge-server.ts"],
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "sourceMaps": true,
+            "smartStep": true
+        },
+        {
+            "name": "Launch Frontend",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/frontend",
+            "preLaunchTask": "npm: start"
+        },
+        {
+            "name": "Attach to Backend",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "restart": true,
+            "protocol": "inspector",
+            "sourceMaps": true,
+            "smartStep": true
+        }
+    ]
+}

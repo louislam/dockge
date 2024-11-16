@@ -48,7 +48,7 @@ export class DockgeServer {
     io : socketIO.Server;
     config : Config;
     indexHTML : string = "";
-    gitUpdateInterval? : NodeJS.Timeout;
+    gitUpdateInterval : NodeJS.Timeout | undefined;
 
     /**
      * List of express routers
@@ -665,7 +665,7 @@ export class DockgeServer {
         };
 
         await check();
-        this.gitUpdateInterval = setInterval(check, GIT_UPDATE_CHECKER_INTERVAL_MS);
+        this.gitUpdateInterval = setInterval(check, GIT_UPDATE_CHECKER_INTERVAL_MS) as NodeJS.Timeout;
     }
 
     async getDockerNetworkList() : Promise<string[]> {
@@ -701,6 +701,10 @@ export class DockgeServer {
     async shutdownFunction(signal : string | undefined) {
         log.info("server", "Shutdown requested");
         log.info("server", "Called signal: " + signal);
+
+        if (this.gitUpdateInterval) {
+            clearInterval(this.gitUpdateInterval);
+        }
 
         // TODO: Close all terminals?
 

@@ -473,9 +473,9 @@ export default {
 
         url() {
             if (this.stack.endpoint) {
-                return `/compose/${this.stack.name}/${this.stack.endpoint}`;
+                return `/compose/${encodeURIComponent(this.stack.name)}/${this.stack.endpoint}`;
             } else {
-                return `/compose/${this.stack.name}`;
+                return `/compose/${encodeURIComponent(this.stack.name)}`;
             }
         },
     },
