@@ -15,6 +15,7 @@ import Appearance from "./components/settings/Appearance.vue";
 import General from "./components/settings/General.vue";
 const Security = () => import("./components/settings/Security.vue");
 import About from "./components/settings/About.vue";
+import GitOps from "./components/settings/GitOps.vue";
 
 const routes = [
     {
@@ -75,13 +76,17 @@ const routes = [
                                 component: Appearance,
                             },
                             {
+                                path: "gitops",
+                                component: GitOps,
+                            },
+                            {
                                 path: "security",
                                 component: Security,
                             },
                             {
                                 path: "about",
                                 component: About,
-                            },
+                            }
                         ]
                     },
                 ]

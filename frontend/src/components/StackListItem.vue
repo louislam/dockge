@@ -5,6 +5,9 @@
             <span>{{ stackName }}</span>
             <div v-if="$root.agentCount > 1" class="endpoint">{{ endpointDisplay }}</div>
         </div>
+        <div class="icon-container">
+            <font-awesome-icon :icon="stack.isGitRepo ? 'code-branch' : 'file'" />
+        </div>
     </router-link>
 </template>
 
@@ -58,9 +61,9 @@ export default {
         },
         url() {
             if (this.stack.endpoint) {
-                return `/compose/${this.stack.name}/${this.stack.endpoint}`;
+                return `/compose/${encodeURIComponent(this.stack.name)}/${this.stack.endpoint}`;
             } else {
-                return `/compose/${this.stack.name}`;
+                return `/compose/${encodeURIComponent(this.stack.name)}`;
             }
         },
         depthMargin() {
@@ -176,6 +179,10 @@ export default {
 
 .dim {
     opacity: 0.5;
+}
+
+.icon-container {
+    margin-left: auto;
 }
 
 </style>

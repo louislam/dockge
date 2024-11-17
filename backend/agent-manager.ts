@@ -12,21 +12,20 @@ import dayjs, { Dayjs } from "dayjs";
  * One AgentManager per Socket connection
  */
 export class AgentManager {
-
-    protected socket : DockgeSocket;
-    protected agentSocketList : Record<string, SocketClient> = {};
-    protected agentLoggedInList : Record<string, boolean> = {};
-    protected _firstConnectTime : Dayjs = dayjs();
+    protected socket: DockgeSocket;
+    protected agentSocketList: Record<string, SocketClient> = {};
+    protected agentLoggedInList: Record<string, boolean> = {};
+    protected _firstConnectTime: Dayjs = dayjs();
 
     constructor(socket: DockgeSocket) {
         this.socket = socket;
     }
 
-    get firstConnectTime() : Dayjs {
+    get firstConnectTime(): Dayjs {
         return this._firstConnectTime;
     }
 
-    test(url : string, username : string, password : string) : Promise<void> {
+    test(url: string, username: string, password: string): Promise<void> {
         return new Promise((resolve, reject) => {
             let obj = new URL(url);
             let endpoint = obj.host;
@@ -43,26 +42,32 @@ export class AgentManager {
                 reconnection: false,
                 extraHeaders: {
                     endpoint,
-                }
+                },
             });
 
             client.on("connect", () => {
-                client.emit("login", {
-                    username: username,
-                    password: password,
-                }, (res : LooseObject) => {
-                    if (res.ok) {
-                        resolve();
-                    } else {
-                        reject(new Error(res.msg));
+                client.emit(
+                    "login",
+                    {
+                        username: username,
+                        password: password,
+                    },
+                    (res: LooseObject) => {
+                        if (res.ok) {
+                            resolve();
+                        } else {
+                            reject(new Error(res.msg));
+                        }
+                        client.disconnect();
                     }
-                    client.disconnect();
-                });
+                );
             });
 
             client.on("connect_error", (err) => {
                 if (err.message === "xhr poll error") {
-                    reject(new Error("Unable to connect to the Dockge instance"));
+                    reject(
+                        new Error("Unable to connect to the Dockge instance")
+                    );
                 } else {
                     reject(err);
                 }
@@ -77,7 +82,7 @@ export class AgentManager {
      * @param username
      * @param password
      */
-    async add(url : string, username : string, password : string) : Promise<Agent> {
+    async add(url: string, username: string, password: string): Promise<Agent> {
         let bean = R.dispense("agent") as Agent;
         bean.url = url;
         bean.username = username;
@@ -90,10 +95,8 @@ export class AgentManager {
      *
      * @param url
      */
-    async remove(url : string) {
-        let bean = await R.findOne("agent", " url = ? ", [
-            url,
-        ]);
+    async remove(url: string) {
+        let bean = await R.findOne("agent", " url = ? ", [url]);
 
         if (bean) {
             await R.trash(bean);
@@ -106,7 +109,7 @@ export class AgentManager {
         }
     }
 
-    connect(url : string, username : string, password : string) {
+    connect(url: string, username: string, password: string) {
         let obj = new URL(url);
         let endpoint = obj.host;
 
@@ -116,49 +119,74 @@ export class AgentManager {
         });
 
         if (!endpoint) {
-            log.error("agent-manager", "Invalid endpoint: " + endpoint + " URL: " + url);
+            log.error(
+                "agent-manager",
+                "Invalid endpoint: " + endpoint + " URL: " + url
+            );
             return;
         }
 
         if (this.agentSocketList[endpoint]) {
-            log.debug("agent-manager", "Already connected to the socket server: " + endpoint);
+            log.debug(
+                "agent-manager",
+                "Already connected to the socket server: " + endpoint
+            );
             return;
         }
 
-        log.info("agent-manager", "Connecting to the socket server: " + endpoint);
+        log.info(
+            "agent-manager",
+            "Connecting to the socket server: " + endpoint
+        );
         let client = io(url, {
             extraHeaders: {
                 endpoint,
-            }
+            },
         });
 
         client.on("connect", () => {
-            log.info("agent-manager", "Connected to the socket server: " + endpoint);
+            log.info(
+                "agent-manager",
+                "Connected to the socket server: " + endpoint
+            );
 
-            client.emit("login", {
-                username: username,
-                password: password,
-            }, (res : LooseObject) => {
-                if (res.ok) {
-                    log.info("agent-manager", "Logged in to the socket server: " + endpoint);
-                    this.agentLoggedInList[endpoint] = true;
-                    this.socket.emit("agentStatus", {
-                        endpoint: endpoint,
-                        status: "online",
-                    });
-                } else {
-                    log.error("agent-manager", "Failed to login to the socket server: " + endpoint);
-                    this.agentLoggedInList[endpoint] = false;
-                    this.socket.emit("agentStatus", {
-                        endpoint: endpoint,
-                        status: "offline",
-                    });
+            client.emit(
+                "login",
+                {
+                    username: username,
+                    password: password,
+                },
+                (res: LooseObject) => {
+                    if (res.ok) {
+                        log.info(
+                            "agent-manager",
+                            "Logged in to the socket server: " + endpoint
+                        );
+                        this.agentLoggedInList[endpoint] = true;
+                        this.socket.emit("agentStatus", {
+                            endpoint: endpoint,
+                            status: "online",
+                        });
+                    } else {
+                        log.error(
+                            "agent-manager",
+                            "Failed to login to the socket server: " + endpoint
+                        );
+                        this.agentLoggedInList[endpoint] = false;
+                        this.socket.emit("agentStatus", {
+                            endpoint: endpoint,
+                            status: "offline",
+                        });
+                    }
                 }
-            });
+            );
         });
 
         client.on("connect_error", (err) => {
-            log.error("agent-manager", "Error from the socket server: " + endpoint);
+            log.error(
+                "agent-manager",
+                "Error from the socket server: " + endpoint
+            );
             this.socket.emit("agentStatus", {
                 endpoint: endpoint,
                 status: "offline",
@@ -166,14 +194,17 @@ export class AgentManager {
         });
 
         client.on("disconnect", () => {
-            log.info("agent-manager", "Disconnected from the socket server: " + endpoint);
+            log.info(
+                "agent-manager",
+                "Disconnected from the socket server: " + endpoint
+            );
             this.socket.emit("agentStatus", {
                 endpoint: endpoint,
                 status: "offline",
             });
         });
 
-        client.on("agent", (...args : unknown[]) => {
+        client.on("agent", (...args: unknown[]) => {
             this.socket.emit("agent", ...args);
         });
 
@@ -194,7 +225,7 @@ export class AgentManager {
         this.agentSocketList[endpoint] = client;
     }
 
-    disconnect(endpoint : string) {
+    disconnect(endpoint: string) {
         let client = this.agentSocketList[endpoint];
         client?.disconnect();
     }
@@ -203,14 +234,20 @@ export class AgentManager {
         this._firstConnectTime = dayjs();
 
         if (this.socket.endpoint) {
-            log.info("agent-manager", "This connection is connected as an agent, skip connectAll()");
+            log.info(
+                "agent-manager",
+                "This connection is connected as an agent, skip connectAll()"
+            );
             return;
         }
 
-        let list : Record<string, Agent> = await Agent.getAgentList();
+        let list: Record<string, Agent> = await Agent.getAgentList();
 
         if (Object.keys(list).length !== 0) {
-            log.info("agent-manager", "Connecting to all instance socket server(s)...");
+            log.info(
+                "agent-manager",
+                "Connecting to all instance socket server(s)..."
+            );
         }
 
         for (let endpoint in list) {
@@ -225,13 +262,22 @@ export class AgentManager {
         }
     }
 
-    async emitToEndpoint(endpoint: string, eventName: string, ...args : unknown[]) {
+    async emitToEndpoint(
+        endpoint: string,
+        eventName: string,
+        ...args: unknown[]
+    ) {
         log.debug("agent-manager", "Emitting event to endpoint: " + endpoint);
         let client = this.agentSocketList[endpoint];
 
         if (!client) {
-            log.error("agent-manager", "Socket client not found for endpoint: " + endpoint);
-            throw new Error("Socket client not found for endpoint: " + endpoint);
+            log.error(
+                "agent-manager",
+                "Socket client not found for endpoint: " + endpoint
+            );
+            throw new Error(
+                "Socket client not found for endpoint: " + endpoint
+            );
         }
 
         if (!client.connected || !this.agentLoggedInList[endpoint]) {
@@ -242,25 +288,36 @@ export class AgentManager {
             let ok = false;
             while (diff < 10) {
                 if (client.connected && this.agentLoggedInList[endpoint]) {
-                    log.debug("agent-manager", `${endpoint}: Connected & Logged in`);
+                    log.debug(
+                        "agent-manager",
+                        `${endpoint}: Connected & Logged in`
+                    );
                     ok = true;
                     break;
                 }
-                log.debug("agent-manager", endpoint + ": not ready yet, retrying in 1 second...");
+                log.debug(
+                    "agent-manager",
+                    endpoint + ": not ready yet, retrying in 1 second..."
+                );
                 await sleep(1000);
                 diff = dayjs().diff(this.firstConnectTime, "second");
             }
 
             if (!ok) {
-                log.error("agent-manager", `${endpoint}: Socket client not connected`);
-                throw new Error("Socket client not connected for endpoint: " + endpoint);
+                log.error(
+                    "agent-manager",
+                    `${endpoint}: Socket client not connected`
+                );
+                throw new Error(
+                    "Socket client not connected for endpoint: " + endpoint
+                );
             }
         }
 
         client.emit("agent", endpoint, eventName, ...args);
     }
 
-    emitToAllEndpoints(eventName: string, ...args : unknown[]) {
+    emitToAllEndpoints(eventName: string, ...args: unknown[]) {
         log.debug("agent-manager", "Emitting event to all endpoints");
         for (let endpoint in this.agentSocketList) {
             this.emitToEndpoint(endpoint, eventName, ...args).catch((e) => {
@@ -271,7 +328,7 @@ export class AgentManager {
 
     async sendAgentList() {
         let list = await Agent.getAgentList();
-        let result : Record<string, LooseObject> = {};
+        let result: Record<string, LooseObject> = {};
 
         // Myself
         result[""] = {

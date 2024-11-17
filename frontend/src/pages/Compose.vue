@@ -16,7 +16,7 @@
                         {{ $t("deployStack") }}
                     </button>
 
-                    <button v-if="isEditMode" class="btn btn-normal" :disabled="processing" @click="saveStack">
+                    <button v-if="isEditMode && !stack.isGitRepo" class="btn btn-normal" :disabled="processing" @click="saveStack">
                         <font-awesome-icon icon="save" class="me-1" />
                         {{ $t("saveStackDraft") }}
                     </button>
@@ -39,6 +39,11 @@
                     <button v-if="!isEditMode" class="btn btn-normal" :disabled="processing" @click="updateStack">
                         <font-awesome-icon icon="cloud-arrow-down" class="me-1" />
                         {{ $t("updateStack") }}
+                    </button>
+
+                    <button v-if="!isEditMode && stack.isGitRepo" class="btn btn-normal" :disabled="processing" @click="gitSync">
+                        <font-awesome-icon icon="rotate" class="me-1" />
+                        {{ $t("gitSync") }}
                     </button>
 
                     <button v-if="!isEditMode && active" class="btn btn-normal" :disabled="processing" @click="stopStack">
@@ -103,39 +108,117 @@
                                     </option>
                                 </select>
                             </div>
+
+                            <!-- Manage with git -->
+                            <div class="form-check form-switch my-3">
+                                <input id="gitops" v-model="stack.isGitRepo" class="form-check-input" type="checkbox">
+                                <label class="form-check-label">
+                                    {{ $t("ManageWithGit") }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GitOps -->
+                    <div v-if="stack.isGitRepo">
+                        <h4 class="mb-3">{{ $t("GitConfig") }}</h4>
+                        <div class="shadow-box big-padding mb-3">
+                            <!-- Repo URL -->
+                            <div v-if="isEditMode" class="mb-4">
+                                <label class="form-label">
+                                    {{ $t("repositoryUrl") }}
+                                </label>
+                                <div class="input-group mb-3">
+                                    <input
+                                        v-model="stack.gitUrl"
+                                        class="form-control"
+                                        placeholder="https://"
+                                    />
+                                </div>
+
+                                <div class="form-text"></div>
+                            </div>
+
+                            <!-- branch -->
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    {{ $t("branch") }}
+                                </label>
+                                <div class="input-group mb-3">
+                                    <span v-if="!isEditMode" class="form-control">{{ stack.branch }}</span>
+                                    <input
+                                        v-else
+                                        v-model="stack.branch"
+                                        class="form-control"
+                                        placeholder="main"
+                                    />
+                                </div>
+
+                                <div class="form-text"></div>
+                            </div>
+
+                            <!-- Webhook -->
+                            <div v-if="!isAdd" class="mb-4">
+                                <label class="form-label">
+                                    {{ $t("webhook") }}
+                                </label>
+                                <div class="input-group mb-3">
+                                    <input
+                                        v-model="stack.webhook"
+                                        class="form-control"
+                                        readonly
+                                        @click="selectText"
+                                    />
+                                    <button class="btn btn-outline-primary" type="button" @click="copyWebhookToClipboard">
+                                        {{ $t("copy") }}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Containers -->
-                    <h4 class="mb-3">{{ $tc("container", 2) }}</h4>
+                    <div v-if="!stack.isGitRepo || (stack.isGitRepo && !isEditMode)">
+                        <h4 class="mb-3">{{ $tc("container", 2) }}</h4>
 
-                    <div v-if="isEditMode" class="input-group mb-3">
-                        <input
-                            v-model="newContainerName"
-                            :placeholder="$t(`New Container Name...`)"
-                            class="form-control"
-                            @keyup.enter="addContainer"
-                        />
-                        <button class="btn btn-primary" @click="addContainer">
-                            {{ $t("addContainer") }}
-                        </button>
+                        <div v-if="isEditMode" class="input-group mb-3">
+                            <input
+                                v-model="newContainerName"
+                                :placeholder="$t(`New Container Name...`)"
+                                class="form-control"
+                                @keyup.enter="addContainer"
+                            />
+                            <button class="btn btn-primary" @click="addContainer">
+                                {{ $t("addContainer") }}
+                            </button>
+                        </div>
+                        <div v-if="isEditMode && !stack.isGitRepo" class="input-group mb-3">
+                            <input
+                                v-model="newContainerName"
+                                :placeholder="$t(`New Container Name...`)"
+                                class="form-control"
+                                @keyup.enter="addContainer"
+                            />
+                            <button class="btn btn-primary" @click="addContainer">
+                                {{ $t("addContainer") }}
+                            </button>
+                        </div>
+
+                        <div ref="containerList">
+                            <Container
+                                v-for="(service, name) in jsonConfig.services"
+                                :key="name"
+                                :name="name"
+                                :is-edit-mode="isEditMode"
+                                :first="name === Object.keys(jsonConfig.services)[0]"
+                                :status="serviceStatusList[name]"
+                            />
+                        </div>
                     </div>
 
-                    <div ref="containerList">
-                        <Container
-                            v-for="(service, name) in jsonConfig.services"
-                            :key="name"
-                            :name="name"
-                            :is-edit-mode="isEditMode"
-                            :first="name === Object.keys(jsonConfig.services)[0]"
-                            :status="serviceStatusList[name]"
-                        />
-                    </div>
-
-                    <button v-if="false && isEditMode && jsonConfig.services && Object.keys(jsonConfig.services).length > 0" class="btn btn-normal mb-3" @click="addContainer">{{ $t("addContainer") }}</button>
-
+                    <button v-if="false && isEditMode && !stack.isGitRepo && jsonConfig.services && Object.keys(jsonConfig.services).length > 0" class="btn btn-normal mb-3" @click="addContainer">{{ $t("addContainer") }}</button>
                     <!-- General -->
-                    <div v-if="isEditMode">
+                    <div v-if="isEditMode && !stack.isGitRepo">
                         <h4 class="mb-3">{{ $t("extra") }}</h4>
                         <div class="shadow-box big-padding mb-3">
                             <!-- URLs -->
@@ -162,7 +245,7 @@
                         ></Terminal>
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div v-if="!stack.isGitRepo || (stack.isGitRepo && !isEditMode)" class="col-lg-6">
                     <h4 class="mb-3">{{ stack.composeFileName }}</h4>
 
                     <!-- YAML editor -->
@@ -390,9 +473,9 @@ export default {
 
         url() {
             if (this.stack.endpoint) {
-                return `/compose/${this.stack.name}/${this.stack.endpoint}`;
+                return `/compose/${encodeURIComponent(this.stack.name)}/${this.stack.endpoint}`;
             } else {
-                return `/compose/${this.stack.name}`;
+                return `/compose/${encodeURIComponent(this.stack.name)}`;
             }
         },
     },
@@ -545,45 +628,59 @@ export default {
 
         deployStack() {
             this.processing = true;
-
-            if (!this.jsonConfig.services) {
-                this.$root.toastError("No services found in compose.yaml");
-                this.processing = false;
-                return;
-            }
-
-            // Check if services is object
-            if (typeof this.jsonConfig.services !== "object") {
-                this.$root.toastError("Services must be an object");
-                this.processing = false;
-                return;
-            }
-
-            let serviceNameList = Object.keys(this.jsonConfig.services);
-
-            // Set the stack name if empty, use the first container name
-            if (!this.stack.name && serviceNameList.length > 0) {
-                let serviceName = serviceNameList[0];
-                let service = this.jsonConfig.services[serviceName];
-
-                if (service && service.container_name) {
-                    this.stack.name = service.container_name;
-                } else {
-                    this.stack.name = serviceName;
-                }
-            }
-
             this.bindTerminal();
 
-            this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
-                this.processing = false;
-                this.$root.toastRes(res);
+            if (this.stack.isGitRepo) {
+                this.$root.emitAgent(this.stack.endpoint, "gitDeployStack", this.stack.name, this.stack.gitUrl, this.stack.branch, this.isAdd, (res) => {
+                    this.processing = false;
+                    this.$root.toastRes(res);
 
-                if (res.ok) {
-                    this.isEditMode = false;
-                    this.$router.push(this.url);
+                    if (res.ok) {
+                        this.isEditMode = false;
+                        this.$router.push(this.url);
+                    }
+
+                });
+
+            } else {
+                if (!this.jsonConfig.services) {
+                    this.$root.toastError("No services found in compose.yaml");
+                    this.processing = false;
+                    return;
                 }
-            });
+
+                // Check if services is object
+                if (typeof this.jsonConfig.services !== "object") {
+                    this.$root.toastError("Services must be an object");
+                    this.processing = false;
+                    return;
+                }
+
+                let serviceNameList = Object.keys(this.jsonConfig.services);
+
+                // Set the stack name if empty, use the first container name
+                if (!this.stack.name && serviceNameList.length > 0) {
+                    let serviceName = serviceNameList[0];
+                    let service = this.jsonConfig.services[serviceName];
+
+                    if (service && service.container_name) {
+                        this.stack.name = service.container_name;
+                    } else {
+                        this.stack.name = serviceName;
+                    }
+                }
+
+                this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+                    this.processing = false;
+                    this.$root.toastRes(res);
+
+                    if (res.ok) {
+                        this.isEditMode = false;
+                        this.$router.push(this.url);
+                    }
+                });
+            }
+
         },
 
         saveStack() {
@@ -640,6 +737,15 @@ export default {
             this.processing = true;
 
             this.$root.emitAgent(this.endpoint, "updateStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
+        gitSync() {
+            this.processing = true;
+
+            this.$root.emitAgent(this.endpoint, "gitSync", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
             });
@@ -784,6 +890,19 @@ export default {
 
         stackNameToLowercase() {
             this.stack.name = this.stack?.name?.toLowerCase();
+        },
+
+        async copyWebhookToClipboard() {
+            try {
+                await navigator.clipboard.writeText(this.stack.webhook);
+            } catch (err) {
+                this.$root.toastError("Failed to copy to clipboard");
+            }
+            this.$root.toastSuccess("Copied to clipboard");
+        },
+
+        selectText(event) {
+            event.target.select();
         },
 
     }
