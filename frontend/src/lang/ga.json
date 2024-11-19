@@ -112,5 +112,21 @@
     "containerName": "Ainm na gCoimeádán",
     "disableauth.message2": "Tá sé deartha do chúinsí <strong>ina bhfuil sé beartaithe agat tríú páirtí athbhreithniú a chur i bhfeidhm</strong> os comhair Dockge cosúil le Rochtain Cloudflare, Authelia nó múnlaí deimhniú eile.",
     "Settings": "Socruithe",
-    "active": "gníomhach"
+    "active": "gníomhach",
+    "Lost connection to the socket server. Reconnecting...": "Ceangal caillte leis an bhfreastalaí soicéad. Ag athcheangal...",
+    "Saved": "Shábháil",
+    "Deployed": "Imlonnaithe",
+    "Deleted": "Scriosta",
+    "Updated": "Nuashonraithe",
+    "Started": "Thosaigh",
+    "Stopped": "Stopadh",
+    "Restarted": "Atosaigh",
+    "Downed": "Tugtha anuas",
+    "Switch to sh": "Athraigh go sh",
+    "terminal": "Teirminéal",
+    "CurrentHostname": "(Díshuiteáil: Lean an t-óstainm reatha)",
+    "New Container Name...": "Ainm Gabhdáin Nua...",
+    "Network name...": "Ainm líonra...",
+    "Select a network...": "Roghnaigh líonra...",
+    "NoNetworksAvailable": "Níl líonraí ar fáil. Ní mór duit líonraí inmheánacha a chur leis nó líonraí seachtracha a chumasú ar an taobh deas ar dtús."
 }
