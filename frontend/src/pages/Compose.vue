@@ -46,6 +46,11 @@
                         {{ $t("stopStack") }}
                     </button>
 
+                    <button v-if="!isEditMode" class="btn btn-normal" :disabled="processing" @click="downStack">
+                        <font-awesome-icon icon="stop" class="me-1" />
+                        {{ $t("downStack") }}
+                    </button>
+
                     <BDropdown right text="" variant="normal">
                         <BDropdownItem @click="downStack">
                             <font-awesome-icon icon="stop" class="me-1" />
@@ -245,9 +250,19 @@
         <div class="wide-editor-modal">
             <div class="modal-header d-flex justify-content-between align-items-center p-3">
                 <h4 class="m-0">{{ stack.composeFileName }}</h4>
-                <button class="btn btn-sm btn-outline-secondary" @click="showWideEditor = false">
-                    <font-awesome-icon icon="times" />
-                </button>
+                <div class="d-flex gap-2">
+                    <button v-if="!isEditMode" class="btn btn-sm btn-primary" @click="enableEditMode">
+                        <font-awesome-icon icon="pen" class="me-1" />
+                        {{ $t("editStack") }}
+                    </button>
+                    <button v-if="isEditMode" class="btn btn-sm btn-success" @click="saveStack">
+                        <font-awesome-icon icon="save" class="me-1" />
+                        {{ $t("saveStackDraft") }}
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" @click="showWideEditor = false">
+                        <font-awesome-icon icon="times" />
+                    </button>
+                </div>
             </div>
             <div class="modal-body p-3">
                 <div class="editor-box" :class="{'edit-mode' : isEditMode}">
