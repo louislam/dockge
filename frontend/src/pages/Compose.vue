@@ -163,7 +163,12 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <h4 class="mb-3">{{ stack.composeFileName }}</h4>
+                    <h4 class="mb-3">{{ stack.composeFileName }}
+                        <button class="btn btn-sm btn-outline-secondary" @click="showWideEditor = true">
+                            <font-awesome-icon icon="expand" class="me-1" />
+                            {{ $t("Expand") }}
+                        </button>
+                    </h4>
 
                     <!-- YAML editor -->
                     <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
@@ -234,6 +239,32 @@
             </BModal>
         </div>
     </transition>
+    <!-- Wide Editor Modal -->
+    <div v-if="showWideEditor" class="modal-overlay" @click.self="showWideEditor = false">
+        <div class="wide-editor-modal">
+            <div class="modal-header d-flex justify-content-between align-items-center p-3">
+                <h4 class="m-0">{{ stack.composeFileName }}</h4>
+                <button class="btn btn-sm btn-outline-secondary" @click="showWideEditor = false">
+                    <font-awesome-icon icon="times" />
+                </button>
+            </div>
+            <div class="modal-body p-3">
+                <div class="editor-box" :class="{'edit-mode' : isEditMode}">
+                    <prism-editor
+                        ref="wideEditor"
+                        v-model="stack.composeYAML"
+                        class="yaml-editor wide"
+                        :highlight="highlighterYAML"
+                        line-numbers
+                        :readonly="!isEditMode"
+                        @input="yamlCodeChange"
+                        @focus="editorFocus = true"
+                        @blur="editorFocus = false"
+                    ></prism-editor>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -302,6 +333,7 @@ export default {
             progressTerminalRows: PROGRESS_TERMINAL_ROWS,
             combinedTerminalRows: COMBINED_TERMINAL_ROWS,
             combinedTerminalCols: COMBINED_TERMINAL_COLS,
+            showWideEditor: false,
             stack: {
 
             },
@@ -808,5 +840,48 @@ export default {
 .agent-name {
     font-size: 13px;
     color: $dark-font-color3;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.wide-editor-modal {
+    background: #2c2f38;
+    border-radius: 8px;
+    width: 90%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    background: #2c2f38;
+    color: var(--bs-light);
+    border-bottom: 1px solid #3f4148;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-body {
+    flex: 1;
+    overflow: hidden;
+
+    .editor-box {
+        height: 100%;
+    }
+
+    :deep(.yaml-editor.wide) {
+        height: 100% !important;
+        min-height: 100%;
+    }
 }
 </style>
