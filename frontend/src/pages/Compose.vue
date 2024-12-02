@@ -1,7 +1,7 @@
 <template>
     <transition name="slide-fade" appear>
         <div>
-            <h1 v-if="isAdd" class="mb-3">{{$t("compose")}}</h1>
+            <h1 v-if="isAdd" class="mb-3">{{ $t("compose") }}</h1>
             <h1 v-else class="mb-3">
                 <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
                 <span v-if="$root.agentCount > 1" class="agent-name">
@@ -63,8 +63,8 @@
 
             <!-- URLs -->
             <div v-if="urls.length > 0" class="mb-3">
-                <a v-for="(url, index) in urls" :key="index" target="_blank" :href="url.url">
-                    <span class="badge bg-secondary me-2">{{ url.display }}</span>
+                <a v-for="(urlItem, index) in urls" :key="index" target="_blank" :href="urlItem.url">
+                    <span class="badge bg-secondary me-2">{{ urlItem.display }}</span>
                 </a>
             </div>
 
@@ -98,8 +98,8 @@
                             <div class="mt-3">
                                 <label for="name" class="form-label">{{ $t("dockgeAgent") }}</label>
                                 <select v-model="stack.endpoint" class="form-select">
-                                    <option v-for="(agent, endpoint) in $root.agentList" :key="endpoint" :value="endpoint" :disabled="$root.agentStatusList[endpoint] != 'online'">
-                                        ({{ $root.agentStatusList[endpoint] }}) {{ (endpoint) ? endpoint : $t("currentEndpoint") }}
+                                    <option v-for="(agent, agentEndpoint) in $root.agentList" :key="agentEndpoint" :value="agentEndpoint" :disabled="$root.agentStatusList[agentEndpoint] != 'online'">
+                                        ({{ $root.agentStatusList[agentEndpoint] }}) {{ (agentEndpoint) ? agentEndpoint : $t("currentEndpoint") }}
                                     </option>
                                 </select>
                             </div>
@@ -150,7 +150,7 @@
 
                     <!-- Combined Terminal Output -->
                     <div v-show="!isEditMode">
-                        <h4 class="mb-3">{{$t("terminal")}}</h4>
+                        <h4 class="mb-3">{{ $t("terminal") }}</h4>
                         <Terminal
                             ref="combinedTerminal"
                             class="mb-3 terminal"
@@ -163,7 +163,8 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <h4 class="mb-3">{{ stack.composeFileName }}
+                    <h4 class="mb-3">
+                        {{ stack.composeFileName }}
                         <button class="btn btn-sm btn-outline-secondary" @click="showWideEditor = true">
                             <font-awesome-icon icon="expand" class="me-1" />
                             {{ $t("Expand") }}
@@ -302,7 +303,7 @@ const envDefault = "# VARIABLE=value #comment";
 let yamlErrorTimeout = null;
 
 let serviceStatusTimeout = null;
-let prismjsSymbolDefinition = {
+const prismjsSymbolDefinition = {
     "symbol": {
         pattern: /(?<!\$)\$(\{[^{}]*\}|\w+)/,
     }
@@ -356,11 +357,11 @@ export default {
                 return [];
             }
 
-            let urls = [];
+            const urls = [];
             for (const url of this.envsubstJSONConfig["x-dockge"].urls) {
                 let display;
                 try {
-                    let obj = new URL(url);
+                    const obj = new URL(url);
                     let pathname = obj.pathname;
                     if (pathname === "/") {
                         pathname = "";
@@ -387,7 +388,7 @@ export default {
          * @return {*}
          */
         globalStack() {
-            return this.$root.completeStackList[this.stack.name + "_" + this.endpoint];
+            return this.$root.completeStackList[`${this.stack.name}_${this.endpoint}`];
         },
 
         status() {
@@ -423,9 +424,8 @@ export default {
         url() {
             if (this.stack.endpoint) {
                 return `/compose/${this.stack.name}/${this.stack.endpoint}`;
-            } else {
-                return `/compose/${this.stack.name}`;
             }
+            return `/compose/${this.stack.name}`;
         },
     },
     watch: {
@@ -454,7 +454,7 @@ export default {
                 if (!this.editorFocus) {
                     console.debug("jsonConfig changed");
 
-                    let doc = new Document(this.jsonConfig);
+                    const doc = new Document(this.jsonConfig);
 
                     // Stick back the yaml comments
                     if (this.yamlDoc) {
@@ -591,14 +591,14 @@ export default {
                 return;
             }
 
-            let serviceNameList = Object.keys(this.jsonConfig.services);
+            const serviceNameList = Object.keys(this.jsonConfig.services);
 
             // Set the stack name if empty, use the first container name
             if (!this.stack.name && serviceNameList.length > 0) {
-                let serviceName = serviceNameList[0];
-                let service = this.jsonConfig.services[serviceName];
+                const serviceName = serviceNameList[0];
+                const service = this.jsonConfig.services[serviceName];
 
-                if (service && service.container_name) {
+                if (service?.container_name) {
                     this.stack.name = service.container_name;
                 } else {
                     this.stack.name = serviceName;
@@ -694,7 +694,7 @@ export default {
         highlighterYAML(code) {
             if (!languages.yaml_with_symbols) {
                 languages.yaml_with_symbols = languages.insertBefore("yaml", "punctuation", {
-                    "symbol": prismjsSymbolDefinition["symbol"]
+                    "symbol": prismjsSymbolDefinition.symbol
                 });
             }
             return highlight(code, languages.yaml_with_symbols);
@@ -732,7 +732,7 @@ export default {
         },
 
         yamlToJSON(yaml) {
-            let doc = parseDocument(yaml);
+            const doc = parseDocument(yaml);
             if (doc.errors.length > 0) {
                 throw doc.errors[0];
             }
@@ -757,13 +757,13 @@ export default {
 
         yamlCodeChange() {
             try {
-                let { config, doc } = this.yamlToJSON(this.stack.composeYAML);
+                const { config, doc } = this.yamlToJSON(this.stack.composeYAML);
 
                 this.yamlDoc = doc;
                 this.jsonConfig = config;
 
-                let env = dotenv.parse(this.stack.composeENV);
-                let envYAML = envsubstYAML(this.stack.composeYAML, env);
+                const env = dotenv.parse(this.stack.composeENV);
+                const envYAML = envsubstYAML(this.stack.composeYAML, env);
                 this.envsubstJSONConfig = this.yamlToJSON(envYAML).config;
 
                 clearTimeout(yamlErrorTimeout);
@@ -807,7 +807,7 @@ export default {
                 restart: "unless-stopped",
             };
             this.newContainerName = "";
-            let element = this.$refs.containerList.lastElementChild;
+            const element = this.$refs.containerList.lastElementChild;
             element.scrollIntoView({
                 block: "start",
                 behavior: "smooth"
