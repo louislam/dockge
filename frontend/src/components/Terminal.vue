@@ -2,7 +2,7 @@
     <div class="shadow-box">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div></div>
-            <button class="btn btn-sm btn-outline-secondary" @click="showWideTerminal = true">
+            <button v-if="mode !== 'interactive' && name !== 'console'" class="btn btn-sm btn-outline-secondary" @click="showWideTerminal = true">
                 <font-awesome-icon icon="expand" class="me-1" />
                 {{ $t("Expand") }}
             </button>
