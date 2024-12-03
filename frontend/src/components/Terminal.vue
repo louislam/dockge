@@ -1,6 +1,28 @@
 <template>
     <div class="shadow-box">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div></div>
+            <button class="btn btn-sm btn-outline-secondary" @click="showWideTerminal = true">
+                <font-awesome-icon icon="expand" class="me-1" />
+                {{ $t("Expand") }}
+            </button>
+        </div>
         <div v-pre ref="terminal" class="main-terminal"></div>
+    </div>
+
+    <!-- Wide Terminal Modal -->
+    <div v-if="showWideTerminal" class="modal-overlay" @click.self="showWideTerminal = false">
+        <div class="wide-terminal-modal">
+            <div class="modal-header d-flex justify-content-between align-items-center p-3">
+                <h4 class="m-0">Terminal</h4>
+                <button class="btn btn-sm btn-outline-secondary" @click="showWideTerminal = false">
+                    <font-awesome-icon icon="times" />
+                </button>
+            </div>
+            <div class="modal-body p-3">
+                <div v-pre ref="wideTerminal" class="wide-terminal"></div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -8,14 +30,17 @@
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { TERMINAL_COLS, TERMINAL_ROWS } from "../../../common/util-common";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 export default {
     /**
      * @type {Terminal}
      */
     terminal: null,
+    wideTerminal: null,
+    socket: null,
     components: {
-
+        FontAwesomeIcon,
     },
     props: {
         name: {
@@ -69,6 +94,7 @@ export default {
             first: true,
             terminalInputBuffer: "",
             cursorPosition: 0,
+            showWideTerminal: false,
         };
     },
     created() {
@@ -81,36 +107,30 @@ export default {
             cursorBlink = false;
         }
 
-        this.terminal = new Terminal({
+        const terminalConfig = {
             fontSize: 14,
             fontFamily: "'JetBrains Mono', monospace",
             cursorBlink,
             cols: this.cols,
             rows: this.rows,
-        });
+            theme: {
+                background: "#000000",
+                foreground: "#ffffff",
+                cursor: "#ffffff",
+            }
+        };
+
+        this.terminal = new Terminal(terminalConfig);
 
         if (this.mode === "mainTerminal") {
-            this.mainTerminalConfig();
+            this.mainTerminalConfig(this.terminal);
         } else if (this.mode === "interactive") {
-            this.interactiveTerminalConfig();
+            this.interactiveTerminalConfig(this.terminal);
         }
-
-        //this.terminal.loadAddon(new WebLinksAddon());
 
         // Bind to a div
         this.terminal.open(this.$refs.terminal);
         this.terminal.focus();
-
-        // Notify parent component when data is received
-        this.terminal.onCursorMove(() => {
-            console.debug("onData triggered");
-            if (this.first) {
-                this.$emit("has-data");
-                this.first = false;
-            }
-        });
-
-        this.bind();
 
         // Create a new Terminal
         if (this.mode === "mainTerminal") {
@@ -127,14 +147,84 @@ export default {
                 }
             });
         }
+
+        // Bind terminal to socket
+        this.bind();
+
+        // Notify parent component when data is received
+        this.terminal.onData((data) => {
+            console.debug("onData triggered");
+            if (this.first) {
+                this.$emit("has-data");
+                this.first = false;
+            }
+        });
+
         // Fit the terminal width to the div container size after terminal is created.
         this.updateTerminalSize();
+
+        // Watch for wide terminal modal
+        this.$watch("showWideTerminal", (newVal) => {
+            if (newVal) {
+                // Initialize wide terminal when modal is opened
+                this.$nextTick(() => {
+                    // Always reinitialize the terminal since the DOM element is new
+                    if (this.wideTerminal) {
+                        this.$root.unbindTerminal(this.name, this.wideTerminal);
+                        this.wideTerminal.dispose();
+                    }
+
+                    this.wideTerminal = new Terminal({
+                        ...terminalConfig,
+                        rows: Math.floor(window.innerHeight * 0.7 / 20), // Approximate rows based on window height
+                        cols: Math.floor(window.innerWidth * 0.8 / 9), // Approximate cols based on window width
+                    });
+                    this.wideTerminal.open(this.$refs.wideTerminal);
+
+                    // Copy the terminal buffer content
+                    const buffer = this.terminal.buffer.active;
+                    for (let i = 0; i < buffer.length; i++) {
+                        const line = buffer.getLine(i);
+                        if (line) {
+                            this.wideTerminal.write(`${line.translateToString()}\r\n`);
+                        }
+                    }
+
+                    // Configure the wide terminal
+                    if (this.mode === "mainTerminal") {
+                        this.mainTerminalConfig(this.wideTerminal);
+                    } else if (this.mode === "interactive") {
+                        this.interactiveTerminalConfig(this.wideTerminal);
+                    }
+
+                    // Bind both terminals to the same name to receive the same updates
+                    this.$root.bindTerminal(this.endpoint, this.name, this.wideTerminal);
+
+                    // Listen for data on the wide terminal
+                    this.wideTerminal.onData((data) => {
+                        if (this.mode === "mainTerminal" || this.mode === "interactive") {
+                            this.$root.emitAgent(this.endpoint, "terminalInput", this.name, data);
+                        }
+                    });
+                });
+            } else {
+                // Cleanup terminal when modal is closed
+                if (this.wideTerminal) {
+                    this.$root.unbindTerminal(this.name, this.wideTerminal);
+                    this.wideTerminal.dispose();
+                    this.wideTerminal = null;
+                }
+            }
+        });
     },
 
     unmounted() {
         window.removeEventListener("resize", this.onResizeEvent); // Remove the resize event listener from the window object.
-        this.$root.unbindTerminal(this.name);
+        this.$root.unbindTerminal(this.name, this.terminal);
         this.terminal.dispose();
+        // if (this.socket) {
+        //     this.socket.close();
+        // }
     },
 
     methods: {
@@ -143,11 +233,11 @@ export default {
             if (name) {
                 this.$root.unbindTerminal(name);
                 this.$root.bindTerminal(endpoint, name, this.terminal);
-                console.debug("Terminal bound via parameter: " + name);
+                console.debug(`Terminal bound via parameter: ${name}`);
             } else if (this.name) {
                 this.$root.unbindTerminal(this.name);
                 this.$root.bindTerminal(this.endpoint, this.name, this.terminal);
-                console.debug("Terminal bound: " + this.name);
+                console.debug(`Terminal bound: ${this.name}`);
             } else {
                 console.debug("Terminal name not set");
             }
@@ -161,10 +251,10 @@ export default {
             this.terminalInputBuffer = "";
         },
 
-        mainTerminalConfig() {
-            this.terminal.onKey(e => {
+        mainTerminalConfig(terminal = this.terminal) {
+            terminal.onKey(e => {
                 const code = e.key.charCodeAt(0);
-                console.debug("Encode: " + JSON.stringify(e.key));
+                console.debug(`Encode: ${JSON.stringify(e.key)}`);
 
                 if (e.key === "\r") {
                     // Return if no input
@@ -207,8 +297,8 @@ export default {
             });
         },
 
-        interactiveTerminalConfig() {
-            this.terminal.onKey(e => {
+        interactiveTerminalConfig(terminal = this.terminal) {
+            terminal.onKey(e => {
                 this.$root.emitAgent(this.endpoint, "terminalInput", this.name, e.key, (res) => {
                     if (!res.ok) {
                         this.$root.toastRes(res);
@@ -236,8 +326,8 @@ export default {
          */
         onResizeEvent() {
             this.terminalFitAddOn.fit();
-            let rows = this.terminal.rows;
-            let cols = this.terminal.cols;
+            const rows = this.terminal.rows;
+            const cols = this.terminal.cols;
             this.$root.emitAgent(this.endpoint, "terminalResize", this.name, rows, cols);
         }
     }
@@ -248,6 +338,45 @@ export default {
 .main-terminal {
     height: 100%;
     overflow-x: scroll;
+}
+
+.wide-terminal {
+    height: 100%;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.wide-terminal-modal {
+    background: #000000;
+    border-radius: 8px;
+    width: 90%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    background: #000000;
+    color: var(--bs-light);
+    border-bottom: 1px solid #3f4148;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-body {
+    flex: 1;
+    overflow: hidden;
+    background-color: #000000;
 }
 </style>
 

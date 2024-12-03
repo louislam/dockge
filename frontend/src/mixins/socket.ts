@@ -7,7 +7,8 @@ import { AgentSocket } from "../../../common/agent-socket";
 
 let socket : Socket;
 
-let terminalMap : Map<string, Terminal> = new Map();
+// Change from Map<string, Terminal> to Map<string, Terminal[]> to support multiple terminals
+let terminalMap : Map<string, Terminal[]> = new Map();
 
 export default defineComponent({
     data() {
@@ -236,12 +237,15 @@ export default defineComponent({
             });
 
             agentSocket.on("terminalWrite", (terminalName, data) => {
-                const terminal = terminalMap.get(terminalName);
-                if (!terminal) {
+                const terminals = terminalMap.get(terminalName);
+                if (!terminals) {
                     //console.error("Terminal not found: " + terminalName);
                     return;
                 }
-                terminal.write(data);
+                // Write to all terminals with this name
+                terminals.forEach(terminal => {
+                    terminal.write(data);
+                });
             });
 
             agentSocket.on("stackList", (res) => {
@@ -401,15 +405,27 @@ export default defineComponent({
             this.emitAgent(endpoint, "terminalJoin", terminalName, (res) => {
                 if (res.ok) {
                     terminal.write(res.buffer);
-                    terminalMap.set(terminalName, terminal);
+                    if (!terminalMap.has(terminalName)) {
+                        terminalMap.set(terminalName, []);
+                    }
+                    terminalMap.get(terminalName).push(terminal);
                 } else {
                     this.toastRes(res);
                 }
             });
         },
 
-        unbindTerminal(terminalName : string) {
-            terminalMap.delete(terminalName);
+        unbindTerminal(terminalName : string, terminal : Terminal) {
+            const terminals = terminalMap.get(terminalName);
+            if (terminals) {
+                const index = terminals.indexOf(terminal);
+                if (index > -1) {
+                    terminals.splice(index, 1);
+                }
+                if (terminals.length === 0) {
+                    terminalMap.delete(terminalName);
+                }
+            }
         },
 
     }
