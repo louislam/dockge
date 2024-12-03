@@ -10,43 +10,112 @@ let socket: Socket;
 // Change from Map<string, Terminal> to Map<string, Terminal[]> to support multiple terminals
 const terminalMap: Map<string, Terminal[]> = new Map();
 
+/**
+ * Socket mixin for handling WebSocket connections and terminal management
+ * @mixin
+ */
 export default defineComponent({
     data() {
         return {
+            /**
+             * Socket.io connection state and configuration
+             */
             socketIO: {
+                /**
+                 * Authentication token
+                 */
                 token: null,
+                /**
+                 * Flag for first connection attempt
+                 */
                 firstConnect: true,
+                /**
+                 * Flag for current connection state
+                 */
                 connected: false,
+                /**
+                 * Number of connection attempts
+                 */
                 connectCount: 0,
+                /**
+                 * Flag for initialization of socket.io
+                 */
                 initedSocketIO: false,
+                /**
+                 * Error message for connection issues
+                 */
                 connectionErrorMsg: `${this.$t("Cannot connect to the socket server.")} ${this.$t("Reconnecting...")}`,
+                /**
+                 * Flag for showing reverse proxy guide
+                 */
                 showReverseProxyGuide: true,
+                /**
+                 * Flag for current connection attempt
+                 */
                 connecting: false,
             },
+            /**
+             * Information about the current user and application
+             */
             info: {},
+            /**
+             * Flag for remembering user login
+             */
             remember: localStorage.remember !== "0",
+            /**
+             * Flag for user login state
+             */
             loggedIn: false,
+            /**
+             * Flag for allowing login dialog
+             */
             allowLoginDialog: false,
+            /**
+             * Current username
+             */
             username: null,
+            /**
+             * Compose template
+             */
             composeTemplate: "",
 
+            /**
+             * List of stacks
+             */
             stackList: {},
 
-            // All stack list from all agents
+            /**
+             * All stack list from all agents
+             */
             allAgentStackList: {} as Record<string, object>,
 
-            // online / offline / connecting
+            /**
+             * Agent status list (online/offline/connecting)
+             */
             agentStatusList: {},
 
-            // Agent List
+            /**
+             * Agent list
+             */
             agentList: {},
         };
     },
+    /**
+     * Computed properties for socket management and user interface
+     */
     computed: {
+        /**
+         * Returns the total number of connected agents
+         * @returns {number} Number of agents in the agentList
+         */
         agentCount() {
             return Object.keys(this.agentList).length;
         },
 
+        /**
+         * Returns a combined list of stacks from all agents
+         * @returns {Record<string, object>} Combined list of stacks with their configurations
+         */
         completeStackList() {
             const list: Record<string, object> = {};
 
@@ -63,6 +132,10 @@ export default defineComponent({
             return list;
         },
 
+        /**
+         * Gets the first character of the username in uppercase
+         * @returns {string} First character of username or default emoji
+         */
         usernameFirstChar() {
             if (typeof this.username === "string" && this.username.length >= 1) {
                 return this.username.charAt(0).toUpperCase();
@@ -82,8 +155,8 @@ export default defineComponent({
         },
 
         /**
-         * Are both frontend and backend in the same version?
-         * @returns {boolean}
+         * Checks if frontend and backend versions match
+         * @returns {boolean} True if versions match or no backend version available
          */
         isFrontendBackendVersionMatched() {
             if (!this.info.version) {
@@ -92,6 +165,9 @@ export default defineComponent({
             return this.info.version === this.frontendVersion;
         },
     },
+    /**
+     * Lifecycle hooks and watchers
+     */
     watch: {
         "socketIO.connected"() {
             if (this.socketIO.connected) {
@@ -118,7 +194,15 @@ export default defineComponent({
     mounted() {
         return;
     },
+    /**
+     * Socket and authentication methods
+     */
     methods: {
+        /**
+         * Formats the endpoint display name
+         * @param {string} endpoint - The endpoint to format
+         * @returns {string} Formatted endpoint name or "currentEndpoint" for empty endpoint
+         */
         endpointDisplayFunction(endpoint: string) {
             if (endpoint) {
                 return endpoint;
@@ -128,9 +212,8 @@ export default defineComponent({
         },
 
         /**
-         * Initialize connection to socket server
-         * @param bypass Should the check for if we
-         * are on a status page be bypassed?
+         * Initializes socket.io connection and sets up event handlers
+         * @param {boolean} [bypass=false] - Whether to bypass status page check
          */
         initSocketIO(bypass = false) {
             // No need to re-init
@@ -144,7 +227,7 @@ export default defineComponent({
             if (env === "development" || localStorage.dev === "dev") {
                 url = `${location.protocol}//${location.hostname}:5001`;
             } else {
-                url = location.protocol + "//" + location.host;
+                url = `${location.protocol}//${location.host}`;
             }
 
             const connectingMsgTimeout = setTimeout(() => {
@@ -285,24 +368,34 @@ export default defineComponent({
         },
 
         /**
-         * The storage currently in use
-         * @returns Current storage
+         * Gets the current storage instance
+         * @returns {Storage} Current storage instance
          */
         storage(): Storage {
             return this.remember ? localStorage : sessionStorage;
         },
 
+        /**
+         * Gets the socket instance
+         * @returns {Socket} Socket.io instance
+         */
         getSocket(): Socket {
             return socket;
         },
 
+        /**
+         * Emits an event to a specific agent
+         * @param {string} endpoint - Target agent endpoint
+         * @param {string} eventName - Name of the event to emit
+         * @param {...unknown[]} args - Arguments to pass with the event
+         */
         emitAgent(endpoint: string, eventName: string, ...args: unknown[]) {
             this.getSocket().emit("agent", endpoint, eventName, ...args);
         },
 
         /**
-         * Get payload of JWT cookie
-         * @returns {(object | undefined)} JWT payload
+         * Gets the JWT payload from the current token
+         * @returns {object | undefined} Decoded JWT payload or undefined
          */
         getJWTPayload() {
             const jwtToken = this.storage().token;
@@ -314,12 +407,11 @@ export default defineComponent({
         },
 
         /**
-         * Send request to log user in
-         * @param {string} username Username to log in with
-         * @param {string} password Password to log in with
-         * @param {string} token User token
-         * @param {loginCB} callback Callback to call with result
-         * @returns {void}
+         * Authenticates user with credentials or token
+         * @param {string} username - Username for authentication
+         * @param {string} password - Password for authentication
+         * @param {string} token - Authentication token
+         * @param {Function} callback - Callback function after authentication attempt
          */
         login(username: string, password: string, token: string, callback) {
             this.getSocket().emit(
@@ -352,9 +444,8 @@ export default defineComponent({
         },
 
         /**
-         * Log in using a token
-         * @param {string} token Token to log in with
-         * @returns {void}
+         * Authenticates user using stored token
+         * @param {string} token - Authentication token
          */
         loginByToken(token: string) {
             socket.emit("loginByToken", token, (res) => {
@@ -371,8 +462,7 @@ export default defineComponent({
         },
 
         /**
-         * Log out of the web application
-         * @returns {void}
+         * Logs out the current user
          */
         logout() {
             socket.emit("logout", () => {});
@@ -384,12 +474,21 @@ export default defineComponent({
         },
 
         /**
-         * @returns {void}
+         * Clears all user data from storage
          */
         clearData() {},
 
+        /**
+         * Handles post-login operations
+         */
         afterLogin() {},
 
+        /**
+         * Binds a terminal to a specific endpoint
+         * @param {string} endpoint - Target endpoint
+         * @param {string} terminalName - Name of the terminal
+         * @param {Terminal} terminal - Terminal instance to bind
+         */
         bindTerminal(endpoint: string, terminalName: string, terminal: Terminal) {
             // Load terminal, get terminal screen
             this.emitAgent(endpoint, "terminalJoin", terminalName, (res) => {
@@ -405,6 +504,11 @@ export default defineComponent({
             });
         },
 
+        /**
+         * Unbinds a terminal from socket events
+         * @param {string} terminalName - Name of the terminal to unbind
+         * @param {Terminal} terminal - Terminal instance to unbind
+         */
         unbindTerminal(terminalName: string, terminal: Terminal) {
             const terminals = terminalMap.get(terminalName);
             if (terminals) {
