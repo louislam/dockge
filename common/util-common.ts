@@ -250,7 +250,8 @@ function copyYAMLCommentsItems(items: any, srcItems: any) {
         const item: any = items[i];
         
         // Try to find matching source item by content
-        const srcIndex = srcItems.findIndex((srcItem: any) => 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const srcIndex = srcItems.findIndex((srcItem: any) =>
             JSON.stringify(srcItem.value) === JSON.stringify(item.value) &&
             JSON.stringify(srcItem.key) === JSON.stringify(item.key)
         );
