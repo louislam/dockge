@@ -104,7 +104,7 @@ export class Stack {
     }
 
     get isManagedByDockge() : boolean {
-        return fs.existsSync(this.path) && fs.statSync(this.path).isDirectory();
+        return !!this._configFilePath && this._configFilePath.startsWith(this.server.stacksDir);
     }
 
     get status() : number {
@@ -153,7 +153,7 @@ export class Stack {
     }
 
     get path() : string {
-        return path.join(this.server.stacksDir, this.name);
+        return this._configFilePath || "";
     }
 
     get fullPath() : string {
@@ -263,41 +263,12 @@ export class Stack {
     }
 
     static async getStackList(server : DockgeServer, useCacheForManaged = false) : Promise<Map<string, Stack>> {
-        let stacksDir = server.stacksDir;
-        let stackList : Map<string, Stack>;
+        let stackList : Map<string, Stack> = new Map<string, Stack>();
 
         // Use cached stack list?
         if (useCacheForManaged && this.managedStackList.size > 0) {
             stackList = this.managedStackList;
-        } else {
-            stackList = new Map<string, Stack>();
-
-            // Scan the stacks directory, and get the stack list
-            let filenameList = await fsAsync.readdir(stacksDir);
-
-            for (let filename of filenameList) {
-                try {
-                    // Check if it is a directory
-                    let stat = await fsAsync.stat(path.join(stacksDir, filename));
-                    if (!stat.isDirectory()) {
-                        continue;
-                    }
-                    // If no compose file exists, skip it
-                    if (!await Stack.composeFileExists(stacksDir, filename)) {
-                        continue;
-                    }
-                    let stack = await this.getStack(server, filename);
-                    stack._status = CREATED_FILE;
-                    stackList.set(filename, stack);
-                } catch (e) {
-                    if (e instanceof Error) {
-                        log.warn("getStackList", `Failed to get stack ${filename}, error: ${e.message}`);
-                    }
-                }
-            }
-
-            // Cache by copying
-            this.managedStackList = new Map(stackList);
+            return stackList;
         }
 
         // Get status from docker compose ls
@@ -306,28 +277,33 @@ export class Stack {
         });
 
         if (!res.stdout) {
+            log.warn("getStackList", "No response from docker compose daemon when attempting to retrieve list of stacks");
             return stackList;
         }
 
         let composeList = JSON.parse(res.stdout.toString());
 
         for (let composeStack of composeList) {
-            let stack = stackList.get(composeStack.Name);
+            try {
+                let stack = new Stack(server, composeStack.Name);
+                stack._status = this.statusConvert(composeStack.Status);
 
-            // This stack probably is not managed by Dockge, but we still want to show it
-            if (!stack) {
-                // Skip the dockge stack if it is not managed by Dockge
-                if (composeStack.Name === "dockge") {
+                let composeFiles = composeStack.ConfigFiles.split(","); // it is possible for a project to have more than one config file
+                stack._configFilePath = path.dirname(composeFiles[0]);
+                stack._composeFileName = path.basename(composeFiles[0]);
+                if (stack.name === "dockge" && !stack.isManagedByDockge) {
+                    // skip dockge if not managed by dockge
                     continue;
                 }
-                stack = new Stack(server, composeStack.Name);
                 stackList.set(composeStack.Name, stack);
+            } catch (e) {
+                if (e instanceof Error) {
+                    log.warn("getStackList", `Failed to get stack ${composeStack.Name}, error: ${e.message}`);
+                }
             }
-
-            stack._status = this.statusConvert(composeStack.Status);
-            stack._configFilePath = composeStack.ConfigFiles;
         }
 
+        this.managedStackList = stackList;
         return stackList;
     }
 
@@ -375,35 +351,24 @@ export class Stack {
     }
 
     static async getStack(server: DockgeServer, stackName: string, skipFSOperations = false) : Promise<Stack> {
-        let dir = path.join(server.stacksDir, stackName);
-
+        let stack: Stack | undefined;
         if (!skipFSOperations) {
-            if (!await fileExists(dir) || !(await fsAsync.stat(dir)).isDirectory()) {
-                // Maybe it is a stack managed by docker compose directly
-                let stackList = await this.getStackList(server, true);
-                let stack = stackList.get(stackName);
-
-                if (stack) {
-                    return stack;
-                } else {
-                    // Really not found
-                    throw new ValidationError("Stack not found");
-                }
+            let stackList = await this.getStackList(server, true);
+            stack = stackList.get(stackName);
+            if (!stack || !await fileExists(stack.path) || !(await fsAsync.stat(stack.path)).isDirectory() ) {
+                throw new ValidationError(`getStack; Stack ${stackName} not found`);
             }
         } else {
-            //log.debug("getStack", "Skip FS operations");
+            // search for known stack with this name
+            if (this.managedStackList) {
+                stack = this.managedStackList.get(stackName);
+            }
+            if (!this.managedStackList || !stack) {
+                stack = new Stack(server, stackName, undefined, undefined, true);
+                stack._status = UNKNOWN;
+                stack._configFilePath = path.resolve(server.stacksDir, stackName);
+            }
         }
-
-        let stack : Stack;
-
-        if (!skipFSOperations) {
-            stack = new Stack(server, stackName);
-        } else {
-            stack = new Stack(server, stackName, undefined, undefined, true);
-        }
-
-        stack._status = UNKNOWN;
-        stack._configFilePath = path.resolve(dir);
         return stack;
     }
 
@@ -522,7 +487,6 @@ export class Stack {
                 } catch (e) {
                 }
             }
-
             return statusList;
         } catch (e) {
             log.error("getServiceStatusList", e);
