@@ -21,6 +21,10 @@ export interface LooseObject {
     [key: string]: any
 }
 
+export interface ArbitrarilyNestedLooseObject {
+    [key: string]: ArbitrarilyNestedLooseObject | Record<string, never>;
+}
+
 export interface BaseRes {
     ok: boolean;
     msg?: string;
@@ -124,6 +128,13 @@ export const acceptedComposeFileNames = [
     "docker-compose.yml",
     "compose.yml",
 ];
+
+// Make a regex out of accepted compose file names
+export const acceptedComposeFileNamePattern = new RegExp(
+    acceptedComposeFileNames
+        .map((filename: string) => filename.replace(".", "\\$&"))
+        .join("|")
+);
 
 /**
  * Generate a decimal integer number from a string

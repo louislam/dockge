@@ -6,6 +6,8 @@ import { DockgeSocket, fileExists, ValidationError } from "./util-server";
 import path from "path";
 import {
     acceptedComposeFileNames,
+    acceptedComposeFileNamePattern,
+    ArbitrarilyNestedLooseObject,
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
     CREATED_FILE,
@@ -282,6 +284,7 @@ export class Stack {
         }
 
         let composeList = JSON.parse(res.stdout.toString());
+        let pathSearchTree: ArbitrarilyNestedLooseObject = {}; // search structure for matching paths
 
         for (let composeStack of composeList) {
             try {
@@ -296,10 +299,68 @@ export class Stack {
                     continue;
                 }
                 stackList.set(composeStack.Name, stack);
+
+                // add project path to search tree so we can quickly decide if we have seen it before later
+                // e.g. path "/opt/stacks" would yield the tree { opt: stacks: {} }
+                path.join(stack._configFilePath, stack._composeFileName).split(path.sep).reduce((searchTree, pathComponent) => {
+                    if (pathComponent == "") {
+                        return searchTree;
+                    }
+                    if (!searchTree[pathComponent]) {
+                        searchTree[pathComponent] = {};
+                    }
+                    return searchTree[pathComponent];
+                }, pathSearchTree);
             } catch (e) {
                 if (e instanceof Error) {
-                    log.warn("getStackList", `Failed to get stack ${composeStack.Name}, error: ${e.message}`);
+                    log.error("getStackList", `Failed to get stack ${composeStack.Name}, error: ${e.message}`);
                 }
+            }
+        }
+
+        // Search stacks directory for compose files not associated with a running compose project (ie. never started through CLI)
+        try {
+            // Hopefully the user has access to everything in this directory! If they don't, log the error. It is a small price to pay for fast searching.
+            let rawFilesList = fs.readdirSync(server.stacksDir, {
+                recursive: true,
+                withFileTypes: true
+            });
+            let acceptedComposeFiles = rawFilesList.filter((dirEnt: fs.Dirent) => dirEnt.isFile() && !!dirEnt.name.match(acceptedComposeFileNamePattern));
+            log.debug("getStackList", `Folder scan yielded ${acceptedComposeFiles.length} files`);
+            for (let composeFile of acceptedComposeFiles) {
+                // check if we have seen this file before
+                let fullPath = composeFile.parentPath;
+                let previouslySeen = fullPath.split(path.sep).reduce((searchTree: ArbitrarilyNestedLooseObject | boolean, pathComponent) => {
+                    if (pathComponent == "") {
+                        return searchTree;
+                    }
+
+                    // end condition
+                    if (searchTree == false || !(searchTree as ArbitrarilyNestedLooseObject)[pathComponent]) {
+                        return false;
+                    }
+
+                    // path (so far) has been previously seen
+                    return (searchTree as ArbitrarilyNestedLooseObject)[pathComponent];
+                }, pathSearchTree);
+                if (!previouslySeen) {
+                    // a file with an accepted compose filename has been found that did not appear in `docker compose ls`. Use its config file path as a temp name
+                    log.info("getStackList", `Found project unknown to docker compose: ${fullPath}/${composeFile.name}`);
+                    let [ configFilePath, configFilename, inferredProjectName ] = [ fullPath, composeFile.name, path.basename(fullPath) ];
+                    if (stackList.get(inferredProjectName)) {
+                        log.info("getStackList", `... but it was ignored. A project named ${inferredProjectName} already exists`);
+                    } else {
+                        let stack = new Stack(server, inferredProjectName);
+                        stack._status = UNKNOWN;
+                        stack._configFilePath = configFilePath;
+                        stack._composeFileName = configFilename;
+                        stackList.set(inferredProjectName, stack);
+                    }
+                }
+            }
+        } catch (e) {
+            if (e instanceof Error) {
+                log.error("getStackList", `Got error searching for undiscovered stacks:\n${e.message}`);
             }
         }
 
@@ -492,6 +553,5 @@ export class Stack {
             log.error("getServiceStatusList", e);
             return statusList;
         }
-
     }
 }
