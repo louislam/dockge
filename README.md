@@ -84,6 +84,21 @@ curl "https://dockge.kuma.pet/compose.yaml?port=5001&stacksPath=/opt/stacks" --o
 Interactive compose.yaml generator is available on: 
 https://dockge.kuma.pet
 
+### Podman
+
+You need to install `podman` and `podman-compose`.
+Fix the problem with `/var/run/docker.sock':
+
+```yaml
+version: "3.8"
+services:
+  dockge:
+    privileged: true
+    volumes:
+      - /run/podman/podman.sock:/var/run/docker.sock:Z
+    # ...
+```
+
 ## How to Update
 
 ```bash
