@@ -129,6 +129,15 @@ export default {
         }
         // Fit the terminal width to the div container size after terminal is created.
         this.updateTerminalSize();
+
+        // Add paste event listener
+        this.terminal.textarea.addEventListener("paste", (event) => {
+            const textToPaste = event.clipboardData.getData("text").replace(/\n+$/, "");
+            this.cursorPosition += textToPaste.length;
+            this.terminalInputBuffer += textToPaste;
+            console.debug("Paste text: " + textToPaste);
+            this.terminal.write(textToPaste);
+        });
     },
 
     unmounted() {
