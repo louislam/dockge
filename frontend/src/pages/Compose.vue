@@ -129,6 +129,10 @@
                             :is-edit-mode="isEditMode"
                             :first="name === Object.keys(jsonConfig.services)[0]"
                             :status="serviceStatusList[name]"
+                            :processing="processing"
+                            @start-service="startService"
+                            @stop-service="stopService"
+                            @restart-service="restartService"
                         />
                     </div>
 
@@ -786,6 +790,44 @@ export default {
             this.stack.name = this.stack?.name?.toLowerCase();
         },
 
+        startService(serviceName) {
+            this.processing = true;
+
+            this.$root.emitAgent(this.endpoint, "startService", this.stack.name, serviceName, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+
+                if (res.ok) {
+                    this.requestServiceStatus(); // Refresh service status
+                }
+            });
+        },
+
+        stopService(serviceName) {
+            this.processing = true;
+
+            this.$root.emitAgent(this.endpoint, "stopService", this.stack.name, serviceName, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+
+                if (res.ok) {
+                    this.requestServiceStatus(); // Refresh service status
+                }
+            });
+        },
+
+        restartService(serviceName) {
+            this.processing = true;
+
+            this.$root.emitAgent(this.endpoint, "restartService", this.stack.name, serviceName, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+
+                if (res.ok) {
+                    this.requestServiceStatus(); // Refresh service status
+                }
+            });
+        },
     }
 };
 </script>
