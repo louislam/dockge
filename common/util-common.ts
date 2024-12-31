@@ -236,42 +236,63 @@ export function copyYAMLComments(doc : Document, src : Document) {
 
 /**
  * Copy yaml comments from srcItems to items
- * Typescript is super annoying here, so I have to use any here
- * TODO: Since comments are belong to the array index, the comments will be lost if the order of the items is changed or removed or added.
+ * Attempts to preserve comments by matching content rather than just array indices
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function copyYAMLCommentsItems(items : any, srcItems : any) {
+function copyYAMLCommentsItems(items: any, srcItems: any) {
     if (!items || !srcItems) {
         return;
     }
 
+    // First pass - try to match items by their content
     for (let i = 0; i < items.length; i++) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const item : any = items[i];
+        const item: any = items[i];
 
+        // Try to find matching source item by content
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const srcItem : any = srcItems[i];
+        const srcIndex = srcItems.findIndex((srcItem: any) =>
+            JSON.stringify(srcItem.value) === JSON.stringify(item.value) &&
+            JSON.stringify(srcItem.key) === JSON.stringify(item.key)
+        );
 
-        if (!srcItem) {
-            continue;
-        }
+        if (srcIndex !== -1) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const srcItem: any = srcItems[srcIndex];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const nextSrcItem: any = srcItems[srcIndex + 1];
 
-        if (item.key && srcItem.key) {
-            item.key.comment = srcItem.key.comment;
-            item.key.commentBefore = srcItem.key.commentBefore;
-        }
+            if (item.key && srcItem.key) {
+                item.key.comment = srcItem.key.comment;
+                item.key.commentBefore = srcItem.key.commentBefore;
+            }
 
-        if (srcItem.comment) {
-            item.comment = srcItem.comment;
-        }
+            if (srcItem.comment) {
+                item.comment = srcItem.comment;
+            }
 
-        if (item.value && srcItem.value) {
-            if (typeof item.value === "object" && typeof srcItem.value === "object") {
-                item.value.comment = srcItem.value.comment;
-                item.value.commentBefore = srcItem.value.commentBefore;
+            // Handle comments between array items
+            if (nextSrcItem && nextSrcItem.commentBefore) {
+                if (items[i + 1]) {
+                    items[i + 1].commentBefore = nextSrcItem.commentBefore;
+                }
+            }
 
-                if (item.value.items && srcItem.value.items) {
-                    copyYAMLCommentsItems(item.value.items, srcItem.value.items);
+            // Handle trailing comments after array items
+            if (srcItem.value && srcItem.value.comment) {
+                if (item.value) {
+                    item.value.comment = srcItem.value.comment;
+                }
+            }
+
+            if (item.value && srcItem.value) {
+                if (typeof item.value === "object" && typeof srcItem.value === "object") {
+                    item.value.comment = srcItem.value.comment;
+                    item.value.commentBefore = srcItem.value.commentBefore;
+
+                    if (item.value.items && srcItem.value.items) {
+                        copyYAMLCommentsItems(item.value.items, srcItem.value.items);
+                    }
                 }
             }
         }
