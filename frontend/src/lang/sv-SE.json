@@ -112,5 +112,21 @@
     "removeAgentMsg": "Är du säker att du vill ta bort denna agent?",
     "dockgeAgent": "Dockge agenter | Dockge agenter",
     "agentAddedSuccessfully": "Agent tillagd.",
-    "LongSyntaxNotSupported": "Lång syntax stöds inte här. Använd YAML-redigeraren."
+    "LongSyntaxNotSupported": "Lång syntax stöds inte här. Använd YAML-redigeraren.",
+    "Lost connection to the socket server. Reconnecting...": "Tappade anslutning till socket-server. Återansluter...",
+    "Saved": "Sparad",
+    "Deployed": "Uppsatt",
+    "Deleted": "Borttagen",
+    "Updated": "Uppdaterad",
+    "Started": "Startad",
+    "Stopped": "Stoppad",
+    "Restarted": "Omstartad",
+    "Downed": "Nedstängd",
+    "Switch to sh": "Byt till sh",
+    "terminal": "Terminal",
+    "CurrentHostname": "(Ej angedd: Följ nuvarande värdnamn)",
+    "New Container Name...": "Nytt kontainernamn...",
+    "Network name...": "Nätverksnamn...",
+    "Select a network...": "Välj ett nätverk...",
+    "NoNetworksAvailable": "Inga nätverk tillgängliga. Du måste lägga till interna nätverk eller aktivera externa nätverk på högra sidan först."
 }
