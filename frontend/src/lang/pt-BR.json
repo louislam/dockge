@@ -112,5 +112,21 @@
     "agentRemovedSuccessfully": "Agente removido com sucesso.",
     "removeAgent": "Remover Agente",
     "removeAgentMsg": "Tem certeza de que deseja remover este agente?",
-    "LongSyntaxNotSupported": "Sintaxe longa não é suportada aqui. Por favor, use o editor de YAML."
+    "LongSyntaxNotSupported": "Sintaxe longa não é suportada aqui. Por favor, use o editor de YAML.",
+    "Lost connection to the socket server. Reconnecting...": "Conexão perdida com o servidor de socket. Reconectando...",
+    "Saved": "Salvo",
+    "Deployed": "Implantado",
+    "Deleted": "Excluído",
+    "Updated": "Alterado",
+    "Started": "Iniciado",
+    "Stopped": "Parado",
+    "Restarted": "Reiniciado",
+    "Downed": "Finalizado",
+    "Switch to sh": "Mudar para sh",
+    "terminal": "Terminal",
+    "CurrentHostname": "(Não definido: seguir o nome do host atual)",
+    "New Container Name...": "Nome do novo container...",
+    "Network name...": "Nome da rede...",
+    "Select a network...": "Selecione uma rede...",
+    "NoNetworksAvailable": "Nenhuma rede disponível. Você precisa adicionar redes internas ou habilitar redes externas no lado direito primeiro."
 }
