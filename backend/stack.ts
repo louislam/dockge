@@ -497,7 +497,7 @@ export class Stack {
     }
 
     async getServiceStatusList() {
-        let statusList = new Map<string, number>();
+        let statusList = new Map<string, Array<object>>();
 
         try {
             let res = await childProcessAsync.spawn("docker", [ "compose", "ps", "--format", "json" ], {
@@ -511,13 +511,23 @@ export class Stack {
 
             let lines = res.stdout?.toString().split("\n");
 
+            const addLine = (obj: { Service: string, State: string, Name: string, Health: string }) => {
+                if (!statusList.has(obj.Service)) {
+                    statusList.set(obj.Service, []);
+                }
+                statusList.get(obj.Service)?.push({
+                    status: obj.Health || obj.State,
+                    name: obj.Name
+                });
+            };
+
             for (let line of lines) {
                 try {
                     let obj = JSON.parse(line);
-                    if (obj.Health === "") {
-                        statusList.set(obj.Service, obj.State);
+                    if (obj instanceof Array) {
+                        obj.forEach(addLine);
                     } else {
-                        statusList.set(obj.Service, obj.Health);
+                        addLine(obj);
                     }
                 } catch (e) {
                 }
@@ -528,6 +538,5 @@ export class Stack {
             log.error("getServiceStatusList", e);
             return statusList;
         }
-
     }
 }
