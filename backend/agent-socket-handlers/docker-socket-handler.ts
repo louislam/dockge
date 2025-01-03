@@ -238,6 +238,21 @@ export class DockerSocketHandler extends AgentSocketHandler {
             }
         });
 
+        // Docker stats
+        agentSocket.on("dockerStats", async (callback) => {
+            try {
+                checkLogin(socket);
+
+                const dockerStats = Object.fromEntries(await server.getDockerStats());
+                callbackResult({
+                    ok: true,
+                    dockerStats,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
         // getExternalNetworkList
         agentSocket.on("getDockerNetworkList", async (callback) => {
             try {
