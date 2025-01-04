@@ -154,16 +154,17 @@ export default {
         },
 
         removeInput() {
+            const textAfterCursorLength = this.terminalInputBuffer.length - this.cursorPosition;
+            const spaces = " ".repeat(textAfterCursorLength);
             const backspaceCount = this.terminalInputBuffer.length;
             const backspaces = "\b \b".repeat(backspaceCount);
             this.cursorPosition = 0;
-            this.terminal.write(backspaces);
+            this.terminal.write(spaces + backspaces);
             this.terminalInputBuffer = "";
         },
 
         mainTerminalConfig() {
             this.terminal.onKey(e => {
-                const code = e.key.charCodeAt(0);
                 console.debug("Encode: " + JSON.stringify(e.key));
 
                 if (e.key === "\r") {
@@ -180,29 +181,39 @@ export default {
                     this.$root.emitAgent(this.endpoint, "terminalInput", this.name, buffer + e.key, (err) => {
                         this.$root.toastError(err.msg);
                     });
-
-                } else if (code === 127) { // Backspace
+                } else if (e.key === "\u007F") {      // Backspace
                     if (this.cursorPosition > 0) {
-                        this.terminal.write("\b \b");
+                        const trimmedTextBeforeCursor = this.terminalInputBuffer.slice(0, this.cursorPosition - 1);
+                        const textAfterCursor = this.terminalInputBuffer.slice(this.cursorPosition);
+                        const clearAfterCursor = " ".repeat(textAfterCursor.length) + "\b \b".repeat(textAfterCursor.length + 1);
+                        this.terminalInputBuffer = trimmedTextBeforeCursor + textAfterCursor;
+                        this.terminal.write(clearAfterCursor + textAfterCursor + "\b".repeat(textAfterCursor.length));
                         this.cursorPosition--;
-                        this.terminalInputBuffer = this.terminalInputBuffer.slice(0, -1);
                     }
                 } else if (e.key === "\u001B\u005B\u0041" || e.key === "\u001B\u005B\u0042") {      // UP OR DOWN
                     // Do nothing
-
                 } else if (e.key === "\u001B\u005B\u0043") {      // RIGHT
-                    // TODO
+                    if (this.cursorPosition < this.terminalInputBuffer.length) {
+                        this.terminal.write(this.terminalInputBuffer[this.cursorPosition]);
+                        this.cursorPosition++;
+                    }
                 } else if (e.key === "\u001B\u005B\u0044") {      // LEFT
-                    // TODO
+                    if (this.cursorPosition > 0) {
+                        this.terminal.write("\b");
+                        this.cursorPosition--;
+                    }
                 } else if (e.key === "\u0003") {      // Ctrl + C
                     console.debug("Ctrl + C");
                     this.$root.emitAgent(this.endpoint, "terminalInput", this.name, e.key);
                     this.removeInput();
+                } else if (e.key === "\u0009" || e.key.startsWith("\u001B")) {      // TAB or other special keys
+                    // Do nothing
                 } else {
+                    const textBeforeCursor = this.terminalInputBuffer.slice(0, this.cursorPosition);
+                    const textAfterCursor = this.terminalInputBuffer.slice(this.cursorPosition);
+                    this.terminalInputBuffer = textBeforeCursor + e.key + textAfterCursor;
+                    this.terminal.write(e.key + textAfterCursor + "\b".repeat(textAfterCursor.length));
                     this.cursorPosition++;
-                    this.terminalInputBuffer += e.key;
-                    console.log(this.terminalInputBuffer);
-                    this.terminal.write(e.key);
                 }
             });
         },
