@@ -112,5 +112,21 @@
     "connecting...": "Csatlakozás a socket szerver-hez…",
     "url": "URL | URL-ek",
     "dockgeURL": "Dockge URL (pl. http://127.0.0.1:5001)",
-    "LongSyntaxNotSupported": "A hosszú szintaxis itt nem támogatott. Használja a YAML szerkesztőt."
+    "LongSyntaxNotSupported": "A hosszú szintaxis itt nem támogatott. Használja a YAML szerkesztőt.",
+    "Lost connection to the socket server. Reconnecting...": "Megszakadt a kapcsolat a socket szerverrel. Újracsatlakozás...",
+    "Saved": "Elmentve",
+    "Deployed": "Telepítve",
+    "Deleted": "Törölve",
+    "Updated": "Frissítve",
+    "Started": "Indult",
+    "Stopped": "Megállítva",
+    "Restarted": "Újraindítva",
+    "Downed": "Leállított",
+    "Switch to sh": "Váltás shell-re",
+    "terminal": "Terminál",
+    "CurrentHostname": "(Unset: Az aktuális gazdagépnév követése)",
+    "New Container Name...": "Új konténer név...",
+    "Network name...": "Hálózat név...",
+    "Select a network...": "Válasszon ki egy hálózatot...",
+    "NoNetworksAvailable": "Nincs elérhető hálózat. Először hozzá kell adnia belső hálózatokat, vagy engedélyeznie kell a külső hálózatokat a jobb oldalon."
 }
