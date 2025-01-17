@@ -25,6 +25,7 @@
     "saveStackDraft": "Save",
     "notAvailableShort": "N/A",
     "deleteStackMsg": "Are you sure you want to delete this stack?",
+    "deleteStackFilesConfirmation": "delete all stack files",
     "stackNotManagedByDockgeMsg": "This stack is not managed by Dockge.",
     "primaryHostname": "Primary Hostname",
     "general": "General",
