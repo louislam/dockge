@@ -172,7 +172,6 @@
                             v-model="stack.composeYAML"
                             :dark="false"
                             :extensions="[oneDarkTheme, yaml()]"
-                            
                             basic
                         ></CodeMirror>
                         <!-- <prism-editor
@@ -252,10 +251,10 @@
 </template>
 
 <script>
-import CodeMirror from 'vue-codemirror6';
-import { yaml as yamlLang } from '@codemirror/lang-yaml';
-import { oneDark } from '@codemirror/theme-one-dark';
-import { vsCodeDarkPlus } from '@upleveled/theme-vs-code-dark-plus';
+import CodeMirror from "vue-codemirror6";
+import { yaml as yamlLang } from "@codemirror/lang-yaml";
+import { oneDark } from "@codemirror/theme-one-dark";
+import { vsCodeDarkPlus } from "@upleveled/theme-vs-code-dark-plus";
 import { parseDocument, Document } from "yaml";
 
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -303,7 +302,11 @@ export default {
         const yaml = yamlLang;
         const oneDarkTheme = oneDark;
         const vsCodeDark = vsCodeDarkPlus;
-        return { yaml, oneDarkTheme, vsCodeDark };
+        return {
+            yaml,
+            oneDarkTheme,
+            vsCodeDark
+        };
     },
     yamlDoc: null,  // For keeping the yaml comments
     data() {
