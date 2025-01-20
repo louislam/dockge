@@ -676,18 +676,5 @@ code {
     color: $dark-font-color3;
 }
 
-// Vue Prism Editor bug - workaround
-// https://github.com/koca/vue-prism-editor/issues/87
-/*
-.prism-editor__textarea {
-    width: 999999px !important;
-}
-.prism-editor__editor {
-    white-space: pre !important;
-}
-.prism-editor__container {
-    overflow-x: scroll !important;
-}*/
-
 // Localization
 @import "localization.scss";
