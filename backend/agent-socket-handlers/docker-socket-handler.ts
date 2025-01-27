@@ -67,6 +67,25 @@ export class DockerSocketHandler extends AgentSocketHandler {
             }
         });
 
+        agentSocket.on("forceDeleteStack", async (name : unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof(name) !== "string") {
+                    throw new ValidationError("Name must be a string");
+                }
+                const stack = await Stack.getStack(server, name);
+                await stack.forceDelete(socket);
+                server.sendStackList();
+                callbackResult({
+                    ok: true,
+                    msg: "Deleted",
+                    msgi18n: true,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
         agentSocket.on("getStack", async (stackName : unknown, callback) => {
             try {
                 checkLogin(socket);
