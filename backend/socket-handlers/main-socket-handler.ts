@@ -15,7 +15,6 @@ import {
     JWTDecoded,
     ValidationError
 } from "../util-server";
-import { passwordStrength } from "check-password-strength";
 import jwt from "jsonwebtoken";
 import { Settings } from "../settings";
 
@@ -29,9 +28,6 @@ export class MainSocketHandler extends SocketHandler {
         // Setup
         socket.on("setup", async (username, password, callback) => {
             try {
-                if (passwordStrength(password).value === "Too weak") {
-                    throw new Error("Password is too weak. It should contain alphabetic and numeric characters. It must be at least 6 characters in length.");
-                }
 
                 if ((await R.knex("user").count("id as count").first()).count !== 0) {
                     throw new Error("Dockge has been initialized. If you want to run setup again, please delete the database.");
@@ -211,10 +207,6 @@ export class MainSocketHandler extends SocketHandler {
 
                 if (! password.newPassword) {
                     throw new Error("Invalid new password");
-                }
-
-                if (passwordStrength(password.newPassword).value === "Too weak") {
-                    throw new Error("Password is too weak. It should contain alphabetic and numeric characters. It must be at least 6 characters in length.");
                 }
 
                 let user = await doubleCheckPassword(socket, password.currentPassword);
