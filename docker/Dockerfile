@@ -10,7 +10,7 @@ FROM louislam/dockge:base AS build
 WORKDIR /app
 COPY --chown=node:node  ./package.json ./package.json
 COPY --chown=node:node  ./pnpm-lock.yaml ./pnpm-lock.yaml
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+RUN npm ci
 
 ############################################
 # ⭐ Main Image
@@ -39,4 +39,4 @@ CMD ["tsx", "./backend/index.ts"]
 # Mark as Nightly
 ############################################
 FROM release AS nightly
-RUN pnpm run mark-as-nightly
+RUN npm run mark-as-nightly
