@@ -34,7 +34,7 @@
         "check-password-strength": "~2.0.10",
         "command-exists": "~1.2.9",
         "compare-versions": "~6.1.1",
-        "composerize": "~1.4.1",
+        "composerize": "~1.7.1",
         "croner": "~8.1.2",
         "dayjs": "~1.11.13",
         "dotenv": "~16.3.2",
