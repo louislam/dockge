@@ -279,7 +279,6 @@ export default defineComponent({
             });
 
             socket.on("agentList", (res) => {
-                console.log(res);
                 if (res.ok) {
                     this.agentList = res.agentList;
                 }

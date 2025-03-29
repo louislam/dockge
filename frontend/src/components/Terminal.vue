@@ -201,7 +201,6 @@ export default {
                 } else {
                     this.cursorPosition++;
                     this.terminalInputBuffer += e.key;
-                    console.log(this.terminalInputBuffer);
                     this.terminal.write(e.key);
                 }
             });

@@ -4,7 +4,6 @@ import * as pty from "@homebridge/node-pty-prebuilt-multiarch";
 import { LimitQueue } from "./utils/limit-queue";
 import { DockgeSocket } from "./util-server";
 import {
-    allowedCommandList, allowedRawKeys,
     PROGRESS_TERMINAL_ROWS,
     TERMINAL_COLS,
     TERMINAL_ROWS
@@ -16,7 +15,6 @@ import { log } from "./log";
  * Terminal for running commands, no user interaction
  */
 export class Terminal {
-
     protected static terminalMap : Map<string, Terminal> = new Map();
 
     protected _ptyProcess? : pty.IPty;
@@ -272,6 +270,11 @@ export class MainTerminal extends InteractiveTerminal {
     constructor(server : DockgeServer, name : string) {
         let shell;
 
+        // Throw an error if console is not enabled
+        if (!server.config.enableConsole) {
+            throw new Error("Console is not enabled.");
+        }
+
         if (os.platform() === "win32") {
             if (commandExistsSync("pwsh.exe")) {
                 shell = "pwsh.exe";
@@ -285,21 +288,6 @@ export class MainTerminal extends InteractiveTerminal {
     }
 
     public write(input : string) {
-        // For like Ctrl + C
-        if (allowedRawKeys.includes(input)) {
-            super.write(input);
-            return;
-        }
-
-        // Check if the command is allowed
-        const cmdParts = input.split(" ");
-        const executable = cmdParts[0].trim();
-        log.debug("console", "Executable: " + executable);
-        log.debug("console", "Executable length: " + executable.length);
-
-        if (!allowedCommandList.includes(executable)) {
-            throw new Error("Command not allowed.");
-        }
         super.write(input);
     }
 }
