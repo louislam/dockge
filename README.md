@@ -106,7 +106,7 @@ docker compose pull && docker compose up -d
 ## Motivations
 
 - I have been using Portainer for some time, but for the stack management, I am sometimes not satisfied with it. For example, sometimes when I try to deploy a stack, the loading icon keeps spinning for a few minutes without progress. And sometimes error messages are not clear.
-- Try to develop with ES Module + TypeScript (Originally, I planned to use Deno or Bun.js, but they don't have support for arm64, so I stepped back to Node.js)
+- Try to develop with ES Module + TypeScript
 
 If you love this project, please consider giving it a ⭐.
 
