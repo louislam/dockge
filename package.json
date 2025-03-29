@@ -3,23 +3,23 @@
     "version": "1.4.2",
     "type": "module",
     "engines": {
-        "node": ">= 18.0.0 && <= 18.17.1"
+        "node": ">= 22.14.0"
     },
     "scripts": {
         "fmt": "eslint \"**/*.{ts,vue}\" --fix",
         "lint": "eslint \"**/*.{ts,vue}\"",
         "check-ts": "tsc --noEmit",
         "start": "tsx ./backend/index.ts",
-        "dev": "concurrently -k -r \"wait-on tcp:5000 && pnpm run dev:backend \" \"pnpm run dev:frontend\"",
+        "dev": "concurrently -k -r \"wait-on tcp:5000 && npm run dev:backend \" \"npm run dev:frontend\"",
         "dev:backend": "cross-env NODE_ENV=development tsx watch --inspect ./backend/index.ts",
         "dev:frontend": "cross-env NODE_ENV=development vite --host --config ./frontend/vite.config.ts",
-        "release-final": "tsx ./extra/test-docker.ts && tsx extra/update-version.ts && pnpm run build:frontend && npm run build:docker",
-        "release-beta": "tsx ./extra/test-docker.ts && tsx extra/update-version.ts && pnpm run build:frontend && npm run build:docker-beta",
+        "release-final": "tsx ./extra/test-docker.ts && tsx extra/update-version.ts && npm run build:frontend && npm run build:docker",
+        "release-beta": "tsx ./extra/test-docker.ts && tsx extra/update-version.ts && npm run build:frontend && npm run build:docker-beta",
         "build:frontend": "vite build --config ./frontend/vite.config.ts",
         "build:docker-base": "docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:base -f ./docker/Base.Dockerfile . --push",
         "build:docker": "node ./extra/env2arg.js docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:latest -t louislam/dockge:1 -t louislam/dockge:$VERSION -t louislam/dockge:beta -t louislam/dockge:nightly --target release -f ./docker/Dockerfile . --push",
         "build:docker-beta": "node ./extra/env2arg.js docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:beta -t louislam/dockge:$VERSION --target release -f ./docker/Dockerfile . --push",
-        "build:docker-nightly": "pnpm run build:frontend && docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:nightly --target nightly -f ./docker/Dockerfile . --push",
+        "build:docker-nightly": "npm run build:frontend && docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:nightly --target nightly -f ./docker/Dockerfile . --push",
         "build:healthcheck": "docker buildx build -f docker/BuildHealthCheck.Dockerfile --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:build-healthcheck . --push",
         "start-docker": "docker run --rm -p 5001:5001 --name dockge louislam/dockge:latest",
         "mark-as-nightly": "tsx ./extra/mark-as-nightly.ts",
