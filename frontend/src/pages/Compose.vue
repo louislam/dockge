@@ -1,7 +1,7 @@
 <template>
     <transition name="slide-fade" appear>
         <div>
-            <h1 v-if="isAdd" class="mb-3">{{$t("compose")}}</h1>
+            <h1 v-if="isAdd" class="mb-3">{{ $t("compose") }}</h1>
             <h1 v-else class="mb-3">
                 <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
                 <span v-if="$root.agentCount > 1" class="agent-name">
@@ -55,9 +55,13 @@
                 </div>
 
                 <button v-if="isEditMode && !isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
-                <button v-if="!isEditMode" class="btn btn-danger" :disabled="processing" @click="showDeleteDialog = !showDeleteDialog">
+                <button v-if="!isEditMode && !errorDelete" class="btn btn-danger" :disabled="processing" @click="showDeleteDialog = !showDeleteDialog">
                     <font-awesome-icon icon="trash" class="me-1" />
                     {{ $t("deleteStack") }}
+                </button>
+                <button v-if="errorDelete" class="btn btn-danger" :disabled="processing" @click="showForceDeleteDialog = !showForceDeleteDialog">
+                    <font-awesome-icon icon="trash" class="me-1" />
+                    {{ $t("forceDeleteStack") }}
                 </button>
             </div>
 
@@ -150,7 +154,7 @@
 
                     <!-- Combined Terminal Output -->
                     <div v-show="!isEditMode">
-                        <h4 class="mb-3">{{$t("terminal")}}</h4>
+                        <h4 class="mb-3">{{ $t("terminal") }}</h4>
                         <Terminal
                             ref="combinedTerminal"
                             class="mb-3 terminal"
@@ -232,6 +236,11 @@
             <BModal v-model="showDeleteDialog" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
                 {{ $t("deleteStackMsg") }}
             </BModal>
+
+            <!-- Force Delete Dialog -->
+            <BModal v-model="showForceDeleteDialog" :okTitle="$t('forceDeleteStack')" okVariant="danger" @ok="forceDeleteDialog">
+                {{ $t("forceDeleteStackMsg") }}
+            </BModal>
         </div>
     </transition>
 </template>
@@ -307,8 +316,10 @@ export default {
             },
             serviceStatusList: {},
             isEditMode: false,
+            errorDelete: false,
             submitted: false,
             showDeleteDialog: false,
+            showForceDeleteDialog: false,
             newContainerName: "",
             stopServiceStatusTimeout: false,
         };
@@ -647,6 +658,17 @@ export default {
 
         deleteDialog() {
             this.$root.emitAgent(this.endpoint, "deleteStack", this.stack.name, (res) => {
+                this.$root.toastRes(res);
+                if (res.ok) {
+                    this.$router.push("/");
+                } else {
+                    this.errorDelete = true;
+                }
+            });
+        },
+
+        forceDeleteDialog() {
+            this.$root.emitAgent(this.endpoint, "forceDeleteStack", this.stack.name, (res) => {
                 this.$root.toastRes(res);
                 if (res.ok) {
                     this.$router.push("/");
