@@ -39,7 +39,6 @@ export default {
         },
     },
     mounted() {
-        console.log(this.endpoint);
         this.$root.emitAgent(this.endpoint, "checkMainTerminal", (res) => {
             this.enableConsole = res.ok;
             this.processing = false;
