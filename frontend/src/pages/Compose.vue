@@ -229,7 +229,7 @@
             </div>
 
             <!-- Delete Dialog -->
-            <BModal v-model="showDeleteDialog" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
+            <BModal v-model="showDeleteDialog" :cancelTitle="$t('cancel')" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
                 {{ $t("deleteStackMsg") }}
             </BModal>
         </div>
@@ -508,7 +508,7 @@ export default {
 
         exitConfirm(next) {
             if (this.isEditMode) {
-                if (confirm("You are currently editing a stack. Are you sure you want to leave?")) {
+                if (confirm(this.$t("confirmLeaveStack"))) {
                     this.exitAction();
                     next();
                 } else {
