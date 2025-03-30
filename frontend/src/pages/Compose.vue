@@ -1,7 +1,7 @@
 <template>
     <transition name="slide-fade" appear>
         <div>
-            <h1 v-if="isAdd" class="mb-3">{{$t("compose")}}</h1>
+            <h1 v-if="isAdd" class="mb-3">{{ $t("compose") }}</h1>
             <h1 v-else class="mb-3">
                 <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
                 <span v-if="$root.agentCount > 1" class="agent-name">
@@ -150,7 +150,7 @@
 
                     <!-- Combined Terminal Output -->
                     <div v-show="!isEditMode">
-                        <h4 class="mb-3">{{$t("terminal")}}</h4>
+                        <h4 class="mb-3">{{ $t("terminal") }}</h4>
                         <Terminal
                             ref="combinedTerminal"
                             class="mb-3 terminal"
@@ -491,6 +491,11 @@ export default {
         },
 
         requestServiceStatus() {
+            // Do not request if it is add mode
+            if (this.isAdd) {
+                return;
+            }
+
             this.$root.emitAgent(this.endpoint, "serviceStatusList", this.stack.name, (res) => {
                 if (res.ok) {
                     this.serviceStatusList = res.serviceStatusList;
