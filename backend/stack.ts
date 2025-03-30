@@ -20,6 +20,10 @@ import { InteractiveTerminal, Terminal } from "./terminal";
 import childProcessAsync from "promisify-child-process";
 import { Settings } from "./settings";
 
+export interface DeleteOptions {
+    deleteStackFiles: boolean
+}
+
 export class Stack {
 
     name: string;
@@ -215,18 +219,20 @@ export class Stack {
         return exitCode;
     }
 
-    async delete(socket: DockgeSocket) : Promise<number> {
+    async delete(socket: DockgeSocket, options: DeleteOptions) : Promise<number> {
         const terminalName = getComposeTerminalName(socket.endpoint, this.name);
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "compose", "down", "--remove-orphans" ], this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to delete, please check the terminal output for more information.");
         }
 
-        // Remove the stack folder
-        await fsAsync.rm(this.path, {
-            recursive: true,
-            force: true
-        });
+        if (options.deleteStackFiles) {
+            // Remove the stack folder
+            await fsAsync.rm(this.path, {
+                recursive: true,
+                force: true
+            });
+        }
 
         return exitCode;
     }
