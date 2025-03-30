@@ -1,6 +1,6 @@
 {
     "name": "dockge",
-    "version": "1.4.2",
+    "version": "1.5.0",
     "type": "module",
     "engines": {
         "node": ">= 22.14.0"
