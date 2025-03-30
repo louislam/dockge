@@ -1,7 +1,7 @@
 <template>
     <div class="shadow-box big-padding mb-3 container">
         <div class="row">
-            <div class="col-7">
+            <div class="col-5">
                 <h4>{{ name }}</h4>
                 <div class="image mb-2">
                     <span class="me-1">{{ imageName }}:</span><span class="tag">{{ imageTag }}</span>
@@ -14,12 +14,33 @@
                     </a>
                 </div>
             </div>
-            <div class="col-5">
+            <div class="col-7">
                 <div class="function">
                     <router-link v-if="!isEditMode" class="btn btn-normal" :to="terminalRouteLink" disabled="">
                         <font-awesome-icon icon="terminal" />
                         Bash
                     </router-link>
+                    <button v-if="status !== 'running' && status !== 'healthy'"
+                            class="btn btn-primary me-2"
+                            :disabled="processing"
+                            @click="startService">
+                        <font-awesome-icon icon="play" class="me-1" />
+                        Start
+                    </button>
+                    <button v-if="status === 'running' || status === 'healthy' || status === 'unhealthy'"
+                            class="btn btn-danger me-2"
+                            :disabled="processing"
+                            @click="stopService">
+                        <font-awesome-icon icon="stop" class="me-1" />
+                        Stop
+                    </button>
+                    <button v-if="status === 'running' || status === 'healthy' || status === 'unhealthy'"
+                            class="btn btn-warning me-2"
+                            :disabled="processing"
+                            @click="restartService">
+                        <font-awesome-icon icon="sync" class="me-1" />
+                        Restart
+                    </button>
                 </div>
             </div>
         </div>
@@ -284,6 +305,16 @@ export default defineComponent({
         remove() {
             delete this.jsonObject.services[this.name];
         },
+        startService() {
+            this.$emit("start-service", this.name);
+        },
+        stopService() {
+            this.$emit("stop-service", this.name);
+        },
+        restartService() {
+            this.$emit("restart-service", this.name);
+        }
+
     }
 });
 </script>
