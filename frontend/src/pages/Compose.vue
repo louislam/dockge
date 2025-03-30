@@ -128,7 +128,8 @@
                             :name="name"
                             :is-edit-mode="isEditMode"
                             :first="name === Object.keys(jsonConfig.services)[0]"
-                            :status="serviceStatusList[name]"
+                            :serviceStatus="serviceStatusList[name]"
+                            :dockerStats="dockerStats"
                         />
                     </div>
 
@@ -271,6 +272,7 @@ const envDefault = "# VARIABLE=value #comment";
 let yamlErrorTimeout = null;
 
 let serviceStatusTimeout = null;
+let dockerStatsTimeout = null;
 let prismjsSymbolDefinition = {
     "symbol": {
         pattern: /(?<!\$)\$(\{[^{}]*\}|\w+)/,
@@ -306,11 +308,13 @@ export default {
 
             },
             serviceStatusList: {},
+            dockerStats: {},
             isEditMode: false,
             submitted: false,
             showDeleteDialog: false,
             newContainerName: "",
             stopServiceStatusTimeout: false,
+            stopDockerStatsTimeout: false,
         };
     },
     computed: {
@@ -478,6 +482,7 @@ export default {
         }
 
         this.requestServiceStatus();
+        this.requestDockerStats();
     },
     unmounted() {
 
@@ -487,6 +492,13 @@ export default {
             clearTimeout(serviceStatusTimeout);
             serviceStatusTimeout = setTimeout(async () => {
                 this.requestServiceStatus();
+            }, 5000);
+        },
+
+        startDockerStatsTimeout() {
+            clearTimeout(dockerStatsTimeout);
+            dockerStatsTimeout = setTimeout(async () => {
+                this.requestDockerStats();
             }, 5000);
         },
 
@@ -502,6 +514,17 @@ export default {
                 }
                 if (!this.stopServiceStatusTimeout) {
                     this.startServiceStatusTimeout();
+                }
+            });
+        },
+
+        requestDockerStats() {
+            this.$root.emitAgent(this.endpoint, "dockerStats", (res) => {
+                if (res.ok) {
+                    this.dockerStats = res.dockerStats;
+                }
+                if (!this.stopDockerStatsTimeout) {
+                    this.startDockerStatsTimeout();
                 }
             });
         },
@@ -523,7 +546,9 @@ export default {
         exitAction() {
             console.log("exitAction");
             this.stopServiceStatusTimeout = true;
+            this.stopDockerStatsTimeout = true;
             clearTimeout(serviceStatusTimeout);
+            clearTimeout(dockerStatsTimeout);
 
             // Leave Combined Terminal
             console.debug("leaveCombinedTerminal", this.endpoint, this.stack.name);
