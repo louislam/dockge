@@ -164,7 +164,6 @@ export default {
         mainTerminalConfig() {
             this.terminal.onKey(e => {
                 const code = e.key.charCodeAt(0);
-                console.debug("Encode: " + JSON.stringify(e.key));
 
                 if (e.key === "\r") {
                     // Return if no input
