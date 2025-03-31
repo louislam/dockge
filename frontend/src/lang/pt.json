@@ -112,5 +112,21 @@
     "extra": "Extra",
     "reconnecting...": "Reconectando…",
     "connecting...": "Conectando ao servidor de socket…",
-    "LongSyntaxNotSupported": "Sintaxes longas não são suportadas aqui. Por favor, utilize um editor YAML."
+    "LongSyntaxNotSupported": "Sintaxes longas não são suportadas aqui. Por favor, utilize um editor YAML.",
+    "Lost connection to the socket server. Reconnecting...": "Conexão com o servidor perdida. Reconectando...",
+    "Saved": "Salvo",
+    "Deployed": "Implantado",
+    "Deleted": "Deletado",
+    "Updated": "Atualizado",
+    "Started": "Iniciado",
+    "Stopped": "Parado",
+    "Restarted": "Reiniciado",
+    "Downed": "Desativado",
+    "Switch to sh": "Trocar para sh",
+    "terminal": "Terminal",
+    "CurrentHostname": "(Não configurado: Seguir nome atual do host)",
+    "New Container Name...": "Nome do novo container...",
+    "Network name...": "Nome de rede...",
+    "Select a network...": "Selecione uma rede...",
+    "NoNetworksAvailable": "Nenhuma rede disponível. Adicione novas redes internas ou habilite redes externas no lado direito primeiro."
 }
