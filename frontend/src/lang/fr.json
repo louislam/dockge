@@ -128,5 +128,11 @@
     "Downed": "Abattu",
     "Lost connection to the socket server. Reconnecting...": "Connexion au serveur socket perdue. Reconnexion...",
     "CurrentHostname": "(Non défini : suivre le nom d'hôte actuel)",
-    "NoNetworksAvailable": "Aucun réseau disponible. Vous devez d'abord ajouter des réseaux internes ou activer les réseaux externes sur le côté droit."
+    "NoNetworksAvailable": "Aucun réseau disponible. Vous devez d'abord ajouter des réseaux internes ou activer les réseaux externes sur le côté droit.",
+    "Console is not enabled": "La console n'est pas activée",
+    "ConsoleNotEnabledMSG1": "La console est un outil puissant qui vous permet d'exécuter n'importe quelle commande, comme <code>docker</code> ou <code>rm</code>, directement dans le conteneur de Dockge via cette interface Web.",
+    "ConsoleNotEnabledMSG3": "Si vous comprenez les risques, vous pouvez l'activer en définissant <code>DOCKGE_ENABLE_CONSOLE=true</code> dans les variables d'environnement.",
+    "confirmLeaveStack": "Vous êtes en train de modifier une stack. Êtes-vous sûr de vouloir quitter ?",
+    "cancel": "Annuler",
+    "ConsoleNotEnabledMSG2": "Cela peut être dangereux, car ce conteneur Dockge est connecté au démon Docker de l'hôte. De plus, Dockge pourrait éventuellement être mis hors service par des commandes telles que <code>rm -rf</code>"
 }
