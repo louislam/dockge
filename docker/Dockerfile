@@ -10,7 +10,7 @@ FROM louislam/dockge:base AS build
 WORKDIR /app
 COPY --chown=node:node  ./package.json ./package.json
 COPY --chown=node:node  ./package-lock.json ./package-lock.json
-RUN npm ci
+RUN npm ci --omit=dev
 
 ############################################
 # ⭐ Main Image
