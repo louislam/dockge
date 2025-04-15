@@ -128,5 +128,11 @@
     "terminal": "Terminal",
     "CurrentHostname": "(nicht gesetzt: verwende aktuellen Hostname)",
     "Downed": "Heruntergefahren",
-    "NoNetworksAvailable": "Keine Netzwerke verfügbar. Du musst zunächst interne Netzwerke hinzufügen oder externe Netzwerke auf der rechten Seite aktivieren."
+    "NoNetworksAvailable": "Keine Netzwerke verfügbar. Du musst zunächst interne Netzwerke hinzufügen oder externe Netzwerke auf der rechten Seite aktivieren.",
+    "cancel": "Abbrechen",
+    "Console is not enabled": "Konsole ist nicht aktiviert",
+    "ConsoleNotEnabledMSG1": "Die Konsole ist ein leistungsstarkes Werkzeug, mit dem in dieser Web-Oberfläche jeder Befehl wie z. B. <code>docker</code> oder <code>rm</code> im Container von Dockge ausgeführt werden kann.",
+    "ConsoleNotEnabledMSG2": "Es könnte gefährlich sein, da dieser Dockge-Container mit dem Docker-Daemon des Hosts verbunden ist. Außerdem könnte Dockge durch Befehle wie <code>rm -rf</code> gelöscht werden.",
+    "ConsoleNotEnabledMSG3": "Wenn du das Risiko verstehst, kannst du es aktivieren, indem du Umgebungsvariable auf <code>DOCKGE_ENABLE_CONSOLE=true</code> setzt.",
+    "confirmLeaveStack": "Du bearbeitest gerade einen Stack. Möchtest du wirklich verlassen?"
 }
