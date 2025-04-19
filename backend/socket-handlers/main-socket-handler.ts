@@ -19,6 +19,34 @@ import { passwordStrength } from "check-password-strength";
 import jwt from "jsonwebtoken";
 import { Settings } from "../settings";
 
+async function verifyTurnstileToken(token: string, clientIP: string, secretKey: string): Promise<boolean> {
+    if (!token) {
+        console.error("Token is not provided.");
+        return false;
+    }
+
+    const url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+    const result = await fetch(url, {
+        body: JSON.stringify({
+            secret: secretKey,
+            response: token,
+            remoteip: clientIP
+        }),
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    const outcome = await result.json();
+    if (outcome && outcome.success) {
+        console.log("Token verified successfully:", outcome);
+        return true;
+    }
+    console.error("Token verification failed:", outcome["error-codes"]);
+    return false;
+
+}
+
 export class MainSocketHandler extends SocketHandler {
     create(socket : DockgeSocket, server : DockgeServer) {
 
@@ -57,6 +85,37 @@ export class MainSocketHandler extends SocketHandler {
                         msg: e.message,
                     });
                 }
+            }
+        });
+
+        // New event to fetch the Turnstile site key
+        socket.on("getTurnstileSiteKey", async (callback) => {
+            try {
+                const siteKey = process.env.TURNSTILE_SITE_KEY || "";
+                console.log("Turnstile site key from env:", siteKey);
+                // Checking
+                if (typeof callback !== "function") {
+                    return;
+                }
+                if (!siteKey) {
+                    log.warn("auth", "Turnstile site key is not configured in the environment.");
+                    callback({
+                        ok: false,
+                        msg: "Turnstile site key is not configured.",
+                    });
+                    return;
+                }
+
+                callback({
+                    ok: true,
+                    siteKey: siteKey,
+                });
+            } catch (error) {
+                log.error("Error fetching Turnstile site key:", error);
+                callback({
+                    ok: false,
+                    msg: "Failed to fetch Turnstile site key.",
+                });
             }
         });
 
@@ -123,6 +182,21 @@ export class MainSocketHandler extends SocketHandler {
             const clientIP = await server.getClientIP(socket);
 
             log.info("auth", `Login by username + password. IP=${clientIP}`);
+
+            const siteKey = process.env.TURNSTILE_SITE_KEY || "";
+            const secretKey = process.env.TURNSTILE_SECRET_KEY || "";
+            if (siteKey && secretKey) {
+                // Verify Turnstile token
+                const isCaptchaValid = await verifyTurnstileToken(data.captchaToken, clientIP, secretKey);
+                if (!isCaptchaValid) {
+                    return callback({
+                        ok: false,
+                        msg: "Invalid CAPTCHA"
+                    });
+                }
+            } else {
+                log.warn("auth", "Turnstile keys are not configured. Skipping CAPTCHA verification.");
+            }
 
             // Checking
             if (typeof callback !== "function") {

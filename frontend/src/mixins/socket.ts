@@ -319,18 +319,30 @@ export default defineComponent({
         },
 
         /**
+         * Get configured Cloudflare Turnstile Site Key from backend
+         * @param {loginCB} callback Callback to call with result
+         */
+        getTurnstileSiteKey(callback) {
+            this.getSocket().emit("getTurnstileSiteKey", (res) => {
+                callback(res);
+            });
+        },
+
+        /**
          * Send request to log user in
          * @param {string} username Username to log in with
          * @param {string} password Password to log in with
          * @param {string} token User token
+         * @param {string} captchaToken captcha token
          * @param {loginCB} callback Callback to call with result
          * @returns {void}
          */
-        login(username : string, password : string, token : string, callback) {
+        login(username : string, password : string, token : string, captchaToken : string, callback) {
             this.getSocket().emit("login", {
                 username,
                 password,
                 token,
+                captchaToken,
             }, (res) => {
                 if (res.tokenRequired) {
                     callback(res);
