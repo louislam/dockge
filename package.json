@@ -27,11 +27,16 @@
         "reset-password": "tsx ./extra/reset-password.ts"
     },
     "dependencies": {
+        "@codemirror/lang-yaml": "^6.1.2",
+        "@codemirror/language": "^6.11.0",
+        "@codemirror/stream-parser": "^0.19.9",
+        "@codemirror/theme-one-dark": "^6.1.2",
         "@homebridge/node-pty-prebuilt-multiarch": "0.11.14",
         "@inventage/envsubst": "^0.16.0",
         "@louislam/sqlite3": "~15.1.6",
         "bcryptjs": "~2.4.3",
         "check-password-strength": "~2.0.10",
+        "codemirror": "^6.0.1",
         "command-exists": "~1.2.9",
         "compare-versions": "~6.1.1",
         "composerize": "~1.7.1",
@@ -51,10 +56,12 @@
         "semver": "^7.7.1",
         "socket.io": "~4.8.1",
         "socket.io-client": "~4.8.1",
+        "thememirror": "^2.0.1",
         "timezones-list": "~3.0.3",
         "ts-command-line-args": "~2.5.1",
         "tsx": "~4.19.3",
         "type-fest": "~4.3.3",
+        "vue-codemirror6": "^1.3.13",
         "yaml": "~2.3.4"
     },
     "devDependencies": {

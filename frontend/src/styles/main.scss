@@ -689,5 +689,24 @@ code {
     overflow-x: scroll !important;
 }*/
 
+.cm-gutters {
+	background-color: transparent !important;
+}
+.dark [contenteditable="true"] {
+	background-color: transparent !important;
+}
+.cm-editor {
+	background-color: transparent !important;
+}
+.cm-activeLine, .cm-activeLineGutter {
+	background-color: transparent !important;
+}
+.cm-selectionBackground {
+    background-color: #74c2ff3d !important;
+}
+.cm-focused {
+    outline: none !important;
+}
+
 // Localization
 @import "localization.scss";
