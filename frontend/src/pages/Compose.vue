@@ -242,6 +242,7 @@
 <script>
 import CodeMirror from "vue-codemirror6";
 import { yaml } from "@codemirror/lang-yaml";
+import { python } from "@codemirror/lang-python";
 import { dracula as editorTheme } from "thememirror";
 import { lineNumbers, EditorView } from "@codemirror/view";
 import { parseDocument, Document } from "yaml";
@@ -260,43 +261,6 @@ import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
 import dotenv from "dotenv";
 import { ref } from "vue";
-import { LanguageSupport } from "@codemirror/language";
-import { StreamParser } from "@codemirror/language"
-
-const envParser = new StreamParser({
-    startState: () => ({ inKey: true }),
-    token: (stream, state) => {
-        if (stream.eatSpace()) {
-            return null;
-        }
-
-        if (state.inKey) {
-            if (stream.eat(/[\w_]/)) {
-                while (stream.eat(/[\w_.-]/)) {}
-                state.inKey = false;
-                return "key"; // Token type for keys
-            } else if (stream.eat("=")) {
-                state.inKey = false;
-                return "equal"; // Token type for equal sign
-            } else {
-                stream.next(); // Skip invalid characters
-            }
-        } else {
-            if (stream.eat(/[^#\n]/)) {
-                while (stream.eat(/[^#\n]/)) {}
-                state.inKey = true;
-                return "value"; // Token type for values
-            } else if (stream.eat("#")) {
-                stream.skipToEnd(); // Skip comments
-                return "comment"; // Token type for comments
-            } else if (stream.eat("\n")) {
-                state.inKey = true;
-                return "newline"; // Token type for new lines
-            }
-        }
-        return null; // No token
-    }
-});
 
 const template = `
 services:
@@ -342,7 +306,7 @@ export default {
 
         const extensionsEnv = [
             editorTheme,
-            new LanguageSupport(envParser),
+            python(),
             lineNumbers(),
             EditorView.focusChangeEffect.of(focusEffectHandler)
         ];

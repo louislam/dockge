@@ -27,6 +27,7 @@
         "reset-password": "tsx ./extra/reset-password.ts"
     },
     "dependencies": {
+        "@codemirror/lang-python": "^6.1.7",
         "@codemirror/lang-yaml": "^6.1.2",
         "@codemirror/language": "^6.11.0",
         "@codemirror/stream-parser": "^0.19.9",
