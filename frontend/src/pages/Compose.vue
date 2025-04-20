@@ -174,6 +174,7 @@
                             minimal
                             wrap="true"
                             dark="true"
+                            tab="true"
                             :disabled="!isEditMode"
                             :hasFocus="editorFocus"
                             @change="yamlCodeChange"
@@ -194,6 +195,7 @@
                                 minimal
                                 wrap="true"
                                 dark="true"
+                                tab="true"
                                 :disabled="!isEditMode"
                                 :hasFocus="editorFocus"
                                 @change="yamlCodeChange"
