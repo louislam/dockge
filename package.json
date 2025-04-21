@@ -29,9 +29,6 @@
     "dependencies": {
         "@codemirror/lang-python": "^6.1.7",
         "@codemirror/lang-yaml": "^6.1.2",
-        "@codemirror/language": "^6.11.0",
-        "@codemirror/stream-parser": "^0.19.9",
-        "@codemirror/theme-one-dark": "^6.1.2",
         "@homebridge/node-pty-prebuilt-multiarch": "0.11.14",
         "@inventage/envsubst": "^0.16.0",
         "@louislam/sqlite3": "~15.1.6",
