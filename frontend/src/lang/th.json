@@ -24,7 +24,7 @@
     "discardStack": "ยกเลิก",
     "saveStackDraft": "บันทึก",
     "notAvailableShort": "N/A",
-    "deleteStackMsg": "คุณแน่ใจหรือไม่ว่าต้องการลบ stack นี้",
+    "deleteStackMsg": "คุณแน่ใจหรือไม่ว่าต้องการลบ stack นี้?",
     "stackNotManagedByDockgeMsg": "stack นี้ไม่ได้รับการจัดการโดย Dockge",
     "primaryHostname": "ชื่อโฮสต์หลัก",
     "general": "ทั่วไป",
