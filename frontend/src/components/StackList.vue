@@ -46,25 +46,18 @@
                 <router-link to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
             </div>
             <div class="stack-list-inner" v-for="(agent, index) in agentStackList" :key="index">
-                <div v-if="$root.agentCount > 1" class="p-2">
-                    <button class="btn btn-outline-normal btn-sm me-1" type="button"
-                        @click="closedAgents.set(agent.endpoint, !closedAgents.get(agent.endpoint))">
+                <div v-if="$root.agentCount > 1" class="p-2 agent-select"
+                    @click="closedAgents.set(agent.endpoint, !closedAgents.get(agent.endpoint))">
+                    <span class="me-1">
                         <font-awesome-icon v-show="closedAgents.get(agent.endpoint)" icon="chevron-circle-right" />
                         <font-awesome-icon v-show="!closedAgents.get(agent.endpoint)" icon="chevron-circle-down" />
-                    </button>
+                    </span>
                     <span v-if="agent.endpoint === 'current'">{{ $t("currentEndpoint") }}</span>
                     <span v-else>{{ agent.endpoint }}</span>
                 </div>
-                <StackListItem 
-                    v-show="$root.agentCount === 1 || !closedAgents.get(agent.endpoint)" 
-                    v-for="(item, index) in agent.stacks" 
-                    :key="index" 
-                    :stack="item"
-                    :isSelectMode="selectMode" 
-                    :isSelected="isSelected" 
-                    :select="select" 
-                    :deselect="deselect"
-                />
+                <StackListItem v-show="$root.agentCount === 1 || !closedAgents.get(agent.endpoint)"
+                    v-for="(item, index) in agent.stacks" :key="index" :stack="item" :isSelectMode="selectMode"
+                    :isSelected="isSelected" :select="select" :deselect="deselect" />
             </div>
         </div>
     </div>
@@ -474,5 +467,17 @@ export default {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.agent-select {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: $dark-font-color3;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+    align-items: center;
+    user-select: none;
 }
 </style>
