@@ -191,6 +191,8 @@ export default {
                 return m1.name.localeCompare(m2.name);
             });
 
+            // Group stacks by endpoint, sorting them so the local endpoint is first
+            // and the rest are sorted alphabetically
             result = [
                 ...result.reduce((acc, stack) => {
                     const endpoint = stack.endpoint || 'current';
