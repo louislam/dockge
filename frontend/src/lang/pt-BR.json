@@ -128,5 +128,8 @@
     "New Container Name...": "Nome do novo container...",
     "Network name...": "Nome da rede...",
     "Select a network...": "Selecione uma rede...",
-    "NoNetworksAvailable": "Nenhuma rede disponível. Você precisa adicionar redes internas ou habilitar redes externas no lado direito primeiro."
+    "NoNetworksAvailable": "Nenhuma rede disponível. Você precisa adicionar redes internas ou habilitar redes externas no lado direito primeiro.",
+    "Console is not enabled": "Console não ativado",
+    "cancel": "Cancelar",
+    "ConsoleNotEnabledMSG1": "O console é uma ferramenta poderosa que permite que você execute qualquer comando, como <code>docker</code>, <code>rm</code>, dentro do contêiner do Dockge nesta Web UI."
 }
