@@ -324,7 +324,7 @@ export class Stack {
                 stackList.set(composeStack.Name, stack);
             }
 
-            stack._status = this.statusConvert(composeStack.Status);
+            stack._status = await this.statusConvert(composeStack);
             stack._configFilePath = composeStack.ConfigFiles;
         }
 
@@ -349,24 +349,74 @@ export class Stack {
         let composeList = JSON.parse(res.stdout.toString());
 
         for (let composeStack of composeList) {
-            statusList.set(composeStack.Name, this.statusConvert(composeStack.Status));
+            statusList.set(composeStack.Name, await this.statusConvert(composeStack));
         }
 
         return statusList;
     }
 
     /**
+     * Get the detailed status of a single compose stack, listing every container in the stack
+     */
+    static async getSingleComposeStatus(composeName : string) : Promise<any[] | null> {
+
+        let res = await childProcessAsync.spawn("docker", [ "ps", "-a", "--filter", `"label=com.docker.compose.project=${composeName}"`, "--format", "json" ], {
+            encoding: "utf-8",
+        });
+
+        if (!res.stdout) {
+            return null;
+        }
+
+        let composeList = JSON.parse(res.stdout.toString());
+
+        return composeList;
+    }
+
+    /**
+     * Check if the compose stack is exited cleanly
+     * First, we need to get the number of containers that are in the exited state
+     * Then read all the containers and check if they are exited with status 0 (OK) or something else (Not OK)
+     */
+    static async isComposeExitClean(composeStack : any[]) : Promise<number> {
+            const expectedContainersExited = parseInt(composeStack.Status.split("(")[1].split(")")[0]);
+            let cleanlyExitedContainerCount = 0;
+
+            const composeStatus = await this.getSingleComposeStatus(composeStack.Name);
+
+            if (composeStatus === null) {
+                return EXITED;
+            }
+            for (const containerStatus of composeStatus) {
+                const status = containerStatus.Status.trim();
+
+                if (status.startsWith("exited" ,0)) {
+                    if(status.startsWith("exited (0)" ,0)) {
+                        cleanlyExitedContainerCount++;
+                    } else {
+                        return EXITED;
+                    }
+                }
+            }
+
+            if (cleanlyExitedContainerCount == expectedContainersExited) {
+                return RUNNING;
+            }
+            
+            return EXITED;
+        }
+
+    /**
      * Convert the status string from `docker compose ls` to the status number
      * Input Example: "exited(1), running(1)"
      * @param status
      */
-    static statusConvert(status : string) : number {
-        if (status.startsWith("created")) {
+    static async statusConvert(composeStack : any[]) : Promise<number> {
+        if (composeStack.Status.startsWith("created")) {
             return CREATED_STACK;
-        } else if (status.includes("exited")) {
-            // If one of the service is exited, we consider the stack is exited
-            return EXITED;
-        } else if (status.startsWith("running")) {
+        } else if (composeStack.Status.includes("exited")) {
+            return await this.isComposeExitClean(composeStack);
+        } else if (composeStack.Status.startsWith("running")) {
             // If there is no exited services, there should be only running services
             return RUNNING;
         } else {
