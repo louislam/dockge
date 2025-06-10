@@ -131,5 +131,8 @@
     "NoNetworksAvailable": "Nenhuma rede disponível. Você precisa adicionar redes internas ou habilitar redes externas no lado direito primeiro.",
     "Console is not enabled": "Console não ativado",
     "cancel": "Cancelar",
-    "ConsoleNotEnabledMSG1": "O console é uma ferramenta poderosa que permite que você execute qualquer comando, como <code>docker</code>, <code>rm</code>, dentro do contêiner do Dockge nesta Web UI."
+    "ConsoleNotEnabledMSG1": "O console é uma ferramenta poderosa que permite que você execute qualquer comando, como <code>docker</code>, <code>rm</code>, dentro do contêiner do Dockge nesta Web UI.",
+    "ConsoleNotEnabledMSG2": "Pode ser perigoso, pois este contêiner Dockge está se conectando ao daemon Docker do host. Além disso, o Dockge pode ser desativado por comandos como <code>rm -rf</code>",
+    "ConsoleNotEnabledMSG3": "Se você entende o risco, pode habilitá-lo definindo <code>DOCKGE_ENABLE_CONSOLE=true</code> nas variáveis de ambiente.",
+    "confirmLeaveStack": "Você está editando uma pilha. Tem certeza de que deseja sair?"
 }
