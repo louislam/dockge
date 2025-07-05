@@ -128,5 +128,11 @@
     "New Container Name...": "Ainm Gabhdáin Nua...",
     "Network name...": "Ainm líonra...",
     "Select a network...": "Roghnaigh líonra...",
-    "NoNetworksAvailable": "Níl líonraí ar fáil. Ní mór duit líonraí inmheánacha a chur leis nó líonraí seachtracha a chumasú ar an taobh deas ar dtús."
+    "NoNetworksAvailable": "Níl líonraí ar fáil. Ní mór duit líonraí inmheánacha a chur leis nó líonraí seachtracha a chumasú ar an taobh deas ar dtús.",
+    "Console is not enabled": "Níl an consól cumasaithe",
+    "ConsoleNotEnabledMSG3": "Má thuigeann tú an riosca, is féidir leat é a chumasú trí <code>DOCKGE_ENABLE_CONSOLE=true</code> a shocrú sna hathróga comhshaoil.",
+    "confirmLeaveStack": "Tá tú ag eagarthóireacht cruach faoi láthair. An bhfuil tú cinnte gur mhaith leat imeacht?",
+    "cancel": "Cealaigh",
+    "ConsoleNotEnabledMSG1": "Is uirlis chumhachtach é an consól a ligeann duit aon orduithe ar nós <code>docker</code>, <code>rm</code> a fhorghníomhú laistigh de choimeádán an Dockge sa Chomhéadan Gréasáin seo.",
+    "ConsoleNotEnabledMSG2": "D’fhéadfadh sé a bheith contúirteach ós rud é go bhfuil an coimeádán Dockge seo ag ceangal le daemon Docker an óstaigh. Chomh maith leis sin, d’fhéadfaí Dockge a bhaint anuas le horduithe cosúil le <code>rm -rf</code>"
 }
