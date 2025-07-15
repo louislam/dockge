@@ -167,8 +167,8 @@
 
                     <!-- YAML editor -->
                     <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
-                        <button class="expand-button" v-if="isEditMode" v-b-modal.compose-editor-modal>
-                            <font-awesome-icon icon="expand"/>
+                        <button v-if="isEditMode" v-b-modal.compose-editor-modal class="expand-button">
+                            <font-awesome-icon icon="expand" />
                         </button>
                         <prism-editor
                             ref="editor"
@@ -184,7 +184,7 @@
                     <div v-if="isEditMode" class="mb-3">
                         {{ yamlError }}
                     </div>
-                    <BModal :title="stack.composeFileName" id="compose-editor-modal" scrollable size="fullscreen" hide-footer>
+                    <BModal id="compose-editor-modal" :title="stack.composeFileName" scrollable size="fullscreen" hide-footer>
                         <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
                             <prism-editor
                                 ref="editor"
@@ -205,7 +205,7 @@
                     <!-- ENV editor -->
                     <div v-if="isEditMode">
                         <h4 class="mb-3">.env</h4>
-                        <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}" v-b-modal.yamlEditorModal>
+                        <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
                             <prism-editor
                                 ref="editor"
                                 v-model="stack.composeENV"
@@ -274,7 +274,7 @@ import {
     PROGRESS_TERMINAL_ROWS,
     RUNNING
 } from "../../../common/util-common";
-import { BModal, vBModal } from "bootstrap-vue-next";
+import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
 import dotenv from "dotenv";
 
