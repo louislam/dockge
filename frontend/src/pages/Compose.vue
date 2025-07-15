@@ -184,6 +184,7 @@
                     <div v-if="isEditMode" class="mb-3">
                         {{ yamlError }}
                     </div>
+                    <!-- YAML modal fullscreen editor -->
                     <BModal id="compose-editor-modal" :title="stack.composeFileName" scrollable size="fullscreen" hide-footer>
                         <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
                             <prism-editor
