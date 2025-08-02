@@ -113,7 +113,7 @@
     "dockgeAgent": "Dockge agenter | Dockge agenter",
     "agentAddedSuccessfully": "Agent tillagd.",
     "LongSyntaxNotSupported": "Lång syntax stöds inte här. Använd YAML-redigeraren.",
-    "Lost connection to the socket server. Reconnecting...": "Tappade anslutning till socket-server. Återansluter...",
+    "Lost connection to the socket server. Reconnecting...": "Tappade anslutning till socket-server. Återansluter…",
     "Saved": "Sparad",
     "Deployed": "Uppsatt",
     "Deleted": "Borttagen",
@@ -125,8 +125,14 @@
     "Switch to sh": "Byt till sh",
     "terminal": "Terminal",
     "CurrentHostname": "(Ej angedd: Följ nuvarande värdnamn)",
-    "New Container Name...": "Nytt kontainernamn...",
-    "Network name...": "Nätverksnamn...",
-    "Select a network...": "Välj ett nätverk...",
-    "NoNetworksAvailable": "Inga nätverk tillgängliga. Du måste lägga till interna nätverk eller aktivera externa nätverk på högra sidan först."
+    "New Container Name...": "Nytt kontainernamn…",
+    "Network name...": "Nätverksnamn…",
+    "Select a network...": "Välj ett nätverk…",
+    "NoNetworksAvailable": "Inga nätverk tillgängliga. Du måste lägga till interna nätverk eller aktivera externa nätverk på högra sidan först.",
+    "cancel": "Avbryt",
+    "Console is not enabled": "Konsol är inte aktiverad",
+    "ConsoleNotEnabledMSG1": "Konsol är ett kraftfullt verktyg som tillåter dig att exekvera valfritt kommando som tex. <code>docker</code>, <code>rm</code> inifrån Dockges kontainer i detta webbui.",
+    "confirmLeaveStack": "Du redigerar för närvarande en stack. Är du säker att du vill lämna?",
+    "ConsoleNotEnabledMSG2": "Det kan vara farligt eftersom Dockge kontainern ansluter till värdens Docker demon. Dockge kan också eventuellt tas ned genom kommandon som <code>rm -rf</code>",
+    "ConsoleNotEnabledMSG3": "Om du förstår risken, kan du aktivera det genom inställningen <code>DOCKGE_ENABLE_CONSOLE=true</code> i miljövariablerna."
 }
