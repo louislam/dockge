@@ -461,6 +461,12 @@ export class Stack {
         if (exitCode !== 0) {
             throw new Error("Failed to restart, please check the terminal output for more information.");
         }
+
+        exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", [ "image", "prune", "--all", "--force" ], this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to restart, please check the terminal output for more information.");
+        }
+        
         return exitCode;
     }
 
