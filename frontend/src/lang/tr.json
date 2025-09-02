@@ -112,5 +112,21 @@
     "agentRemovedSuccessfully": "Aracı başarıyla kaldırıldı.",
     "removeAgent": "Aracıyı Kaldır",
     "removeAgentMsg": "Bu aracıyı kaldırmak istediğinize emin misiniz?",
-    "LongSyntaxNotSupported": "Uzun syntax burada desteklenmiyor. Lütfen YAML editörünü kullanın."
+    "LongSyntaxNotSupported": "Uzun syntax burada desteklenmiyor. Lütfen YAML editörünü kullanın.",
+    "Lost connection to the socket server. Reconnecting...": "Soket sunucusuna bağlantı kesildi. Yeniden bağlanılıyor...",
+    "NoNetworksAvailable": "Kullanılabilir ağ yok. Önce dahili ağları eklemeniz veya sağ tarafta harici ağları etkinleştirmeniz gerekir.",
+    "Saved": "Kayıtlı",
+    "Deployed": "Deploy Edildi",
+    "Deleted": "Silindi",
+    "Updated": "Güncellendi",
+    "Started": "Başladı",
+    "Stopped": "Durdu",
+    "Restarted": "Yeniden başlatıldı",
+    "Downed": "Düştü",
+    "Switch to sh": "sh'ye çevir",
+    "terminal": "Terminal",
+    "CurrentHostname": "(Ayarlanmamış: Mevcut hostname'i takip et)",
+    "New Container Name...": "Yeni Konteyner Adı...",
+    "Network name...": "Ağ adı...",
+    "Select a network...": "Bir ağ seçin..."
 }

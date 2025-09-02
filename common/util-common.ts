@@ -107,17 +107,6 @@ export const COMBINED_TERMINAL_ROWS = 20;
 
 export const ERROR_TYPE_VALIDATION = 1;
 
-export const allowedCommandList : string[] = [
-    "docker",
-    "ls",
-    "cd",
-    "dir",
-];
-
-export const allowedRawKeys = [
-    "\u0003", // Ctrl + C
-];
-
 export const acceptedComposeFileNames = [
     "compose.yaml",
     "docker-compose.yaml",

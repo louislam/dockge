@@ -112,5 +112,11 @@
     "agentOnline": "Terhubung",
     "agentOffline": "Terputus",
     "removeAgentMsg": "Apakah anda yakin untuk menghapus agen ini?",
-    "LongSyntaxNotSupported": "Sintaks yang panjang tidak didukung di sini. Silakan gunakan editor YAML."
+    "LongSyntaxNotSupported": "Sintaks yang panjang tidak didukung di sini. Silakan gunakan editor YAML.",
+    "Saved": "Tersimpan",
+    "Deleted": "Terhapus",
+    "Updated": "Telah diperbaharui",
+    "Started": "Aplikasi dimulai",
+    "Stopped": "Aplikasi dihentikan",
+    "Restarted": "Aplikasi memuat kembali"
 }
