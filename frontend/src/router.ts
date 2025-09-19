@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import Layout from "./layouts/Layout.vue";
 import Setup from "./pages/Setup.vue";
+import CloneSite from "./pages/CloneSite.vue";
 import Dashboard from "./pages/Dashboard.vue";
 import DashboardHome from "./pages/DashboardHome.vue";
 import Console from "./pages/Console.vue";
@@ -91,6 +92,11 @@ const routes = [
     {
         path: "/setup",
         component: Setup,
+    },
+    {
+        path: "/tools/clone",
+        name: "CloneSite",
+        component: CloneSite,
     },
 ];
 
