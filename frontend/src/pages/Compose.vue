@@ -163,6 +163,23 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
+                    <!-- Override YAML editor (only show if file exists) -->
+                    <div v-if="stack.composeOverrideYAML && stack.composeOverrideYAML.trim() !== ''">
+                        <h4 class="mb-3">compose.override.yaml</h4>
+                        <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
+                            <prism-editor
+                                ref="overrideEditor"
+                                v-model="stack.composeOverrideYAML"
+                                class="yaml-editor"
+                                :highlight="highlighterYAML"
+                                line-numbers :readonly="!isEditMode"
+                                @input="yamlCodeChange"
+                                @focus="editorFocus = true"
+                                @blur="editorFocus = false"
+                            ></prism-editor>
+                        </div>
+                    </div>
+
                     <h4 class="mb-3">{{ stack.composeFileName }}</h4>
 
                     <!-- YAML editor -->
@@ -303,7 +320,7 @@ export default {
             combinedTerminalRows: COMBINED_TERMINAL_ROWS,
             combinedTerminalCols: COMBINED_TERMINAL_COLS,
             stack: {
-
+                composeOverrideYAML: "",
             },
             serviceStatusList: {},
             isEditMode: false,
@@ -411,6 +428,16 @@ export default {
             handler() {
                 if (this.editorFocus) {
                     console.debug("env code changed");
+                    this.yamlCodeChange();
+                }
+            },
+            deep: true,
+        },
+
+        "stack.composeOverrideYAML": {
+            handler() {
+                if (this.editorFocus) {
+                    console.debug("override yaml code changed");
                     this.yamlCodeChange();
                 }
             },
@@ -580,7 +607,7 @@ export default {
 
             this.bindTerminal();
 
-            this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+            this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.stack.composeOverrideYAML || "", this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
@@ -594,7 +621,7 @@ export default {
         saveStack() {
             this.processing = true;
 
-            this.$root.emitAgent(this.stack.endpoint, "saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+            this.$root.emitAgent(this.stack.endpoint, "saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.stack.composeOverrideYAML || "", this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
