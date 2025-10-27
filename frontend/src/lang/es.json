@@ -130,7 +130,7 @@
     "Select a network...": "Selecciona una red…",
     "NoNetworksAvailable": "No hay redes disponibles. Primero debes agregar redes internas o habilitar redes externas en el lado derecho.",
     "confirmLeaveStack": "Actualmente estás editando una pila. Estás seguro de que quieres salir?",
-    "ConsoleNotEnabledMSG2": "Puede ser peligroso ya que este contenedor de Dockge está conectándose al demonio de Docker del anfitrión.",
+    "ConsoleNotEnabledMSG2": "Podría ser peligroso, ya que este contenedor de Dockge se está conectando al daemon de Docker del host. Además, Dockge podría ser potencialmente eliminado mediante comandos como <code>rm -rf</code>",
     "cancel": "Cancelar",
     "Console is not enabled": "La consola está deshabilitada",
     "ConsoleNotEnabledMSG3": "Si entiendes el riesgo, puedes habilitarlo estableciendo <code>DOCKGE_ENABLE_CONSOLE=true</code> en las variables de entorno.",
