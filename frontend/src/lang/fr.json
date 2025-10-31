@@ -108,7 +108,7 @@
     "agentAddedSuccessfully": "Agent ajouté avec succès.",
     "agentRemovedSuccessfully": "Agent supprimé avec succès.",
     "removeAgent": "Supprimer l'agent",
-    "dockgeAgent": "Dockge Agent | Dockge Agents",
+    "dockgeAgent": "Agent Dockge | Agents Dockge",
     "currentEndpoint": "Actuel",
     "connect": "Connecter",
     "removeAgentMsg": "Êtes-vous sûr de vouloir supprimer cet agent ?",
