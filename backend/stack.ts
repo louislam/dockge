@@ -359,18 +359,30 @@ export class Stack {
      * Get the detailed status of a single compose stack, listing every container in the stack
      */
     static async getSingleComposeStatus(composeName : string) : Promise<any[] | null> {
+        try {
+            let res = await childProcessAsync.spawn("docker", [ "ps", "-a", "--filter", `label=com.docker.compose.project=${composeName}`, "--format", "json" ], {
+                encoding: "utf-8",
+            });
 
-        let res = await childProcessAsync.spawn("docker", [ "ps", "-a", "--filter", `"label=com.docker.compose.project=${composeName}"`, "--format", "json" ], {
-            encoding: "utf-8",
-        });
+            if (!res || !res.stdout) {
+                log.warn("getSingleComposeStatus", `No output from docker ps for compose stack: ${composeName}`);
+                if (res && res.stderr) {
+                    log.error("getSingleComposeStatus", `stderr: ${res.stderr.toString()}`);
+                }
+                return null;
+            }
 
-        if (!res.stdout) {
+            if (res.stderr) {
+                log.warn("getSingleComposeStatus", `stderr: ${res.stderr.toString()}`);
+            }
+
+            let composeList = JSON.parse(res.stdout.toString());
+
+            return composeList;
+        } catch (e) {
+            log.error("getSingleComposeStatus", `Failed to get status for compose stack ${composeName}: ${e}`);
             return null;
         }
-
-        let composeList = JSON.parse(res.stdout.toString());
-
-        return composeList;
     }
 
     /**
