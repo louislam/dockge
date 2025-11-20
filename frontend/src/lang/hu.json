@@ -113,7 +113,7 @@
     "url": "URL | URL-ek",
     "dockgeURL": "Dockge URL (pl. http://127.0.0.1:5001)",
     "LongSyntaxNotSupported": "A hosszú szintaxis itt nem támogatott. Használja a YAML szerkesztőt.",
-    "Lost connection to the socket server. Reconnecting...": "Megszakadt a kapcsolat a socket szerverrel. Újracsatlakozás...",
+    "Lost connection to the socket server. Reconnecting...": "Megszakadt a kapcsolat a socket szerverrel. Újracsatlakozás…",
     "Saved": "Elmentve",
     "Deployed": "Telepítve",
     "Deleted": "Törölve",
@@ -125,8 +125,14 @@
     "Switch to sh": "Váltás shell-re",
     "terminal": "Terminál",
     "CurrentHostname": "(Nincs beállítva: Az aktuális gazdagépnév követése)",
-    "New Container Name...": "Új konténer név...",
-    "Network name...": "Hálózat név...",
-    "Select a network...": "Válasszon ki egy hálózatot...",
-    "NoNetworksAvailable": "Nincs elérhető hálózat. Először hozzá kell adnia belső hálózatokat, vagy engedélyeznie kell a külső hálózatokat a jobb oldalon."
+    "New Container Name...": "Új konténer név…",
+    "Network name...": "Hálózat név…",
+    "Select a network...": "Válasszon ki egy hálózatot…",
+    "NoNetworksAvailable": "Nincs elérhető hálózat. Először hozzá kell adnia belső hálózatokat, vagy engedélyeznie kell a külső hálózatokat a jobb oldalon.",
+    "cancel": "Mégsem",
+    "Console is not enabled": "Konzol nem engedélyezett",
+    "ConsoleNotEnabledMSG1": "A konzol egy hatékony eszköz, amely lehetővé teszi a Dockge konténerén belüli parancsok, például a <code>docker</code> és az <code>rm</code> végrehajtását ezen a webes felhasználói felületen.",
+    "ConsoleNotEnabledMSG2": "Veszélyes lehet, mivel ez a Dockge konténer a gazdagép Docker démonjához csatlakozik. A Dockge-t akár le is lehet törölni olyan parancsokkal, mint az <code>rm -rf</code>",
+    "ConsoleNotEnabledMSG3": "Ha megérted a kockázatot, engedélyezheted a <code>DOCKGE_ENABLE_CONSOLE=true</code> környezeti változók beállításával.",
+    "confirmLeaveStack": "Jelenleg egy stack-et szerkesztesz. Biztosan kilépsz?"
 }
