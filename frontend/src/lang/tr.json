@@ -113,7 +113,7 @@
     "removeAgent": "Aracıyı Kaldır",
     "removeAgentMsg": "Bu aracıyı kaldırmak istediğinize emin misiniz?",
     "LongSyntaxNotSupported": "Uzun syntax burada desteklenmiyor. Lütfen YAML editörünü kullanın.",
-    "Lost connection to the socket server. Reconnecting...": "Soket sunucusuna bağlantı kesildi. Yeniden bağlanılıyor...",
+    "Lost connection to the socket server. Reconnecting...": "Soket sunucusuyla bağlantı kesildi. Yeniden bağlanılıyor…",
     "NoNetworksAvailable": "Kullanılabilir ağ yok. Önce dahili ağları eklemeniz veya sağ tarafta harici ağları etkinleştirmeniz gerekir.",
     "Saved": "Kayıtlı",
     "Deployed": "Deploy Edildi",
@@ -126,7 +126,13 @@
     "Switch to sh": "sh'ye çevir",
     "terminal": "Terminal",
     "CurrentHostname": "(Ayarlanmamış: Mevcut hostname'i takip et)",
-    "New Container Name...": "Yeni Konteyner Adı...",
-    "Network name...": "Ağ adı...",
-    "Select a network...": "Bir ağ seçin..."
+    "New Container Name...": "Yeni Konteyner Adı…",
+    "Network name...": "Ağ adı…",
+    "Select a network...": "Bir ağ seçin…",
+    "cancel": "İptal",
+    "Console is not enabled": "Konsol etkin değil",
+    "ConsoleNotEnabledMSG3": "Risklerin farkındaysanız, ortam değişkenlerinde <code>DOCKGE_ENABLE_CONSOLE=true</code> ayarını yaparak bu özelliği etkinleştirebilirsiniz.",
+    "confirmLeaveStack": "Şu anda bir yığını düzenliyorsunuz. Ayrılmak istediğinize emin misiniz?",
+    "ConsoleNotEnabledMSG1": "Konsol, bu Web Arayüzü üzerinden Dockge konteyneri içerisinde <code>docker</code> ve <code>rm</code> gibi komutları çalıştırmanızı sağlayan güçlü bir araçtır.",
+    "ConsoleNotEnabledMSG2": "Bu Dockge konteyneri ana makinenin Docker Arka plan hizmetine bağlandığı için tehlikeli olabilir. Ayrıca Dockge, <code>rm -rf</code> gibi komutlarla devre dışı kalabilir"
 }
