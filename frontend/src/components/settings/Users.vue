@@ -1,7 +1,6 @@
 <template>
     <div>
-        <h2>{{ $t("User Management") }}</h2>
-        <p class="mb-3">{{ $t("Manage users and their access permissions. Only administrators can manage users.") }}</p>
+        <p class="my-4">{{ $t("Manage users and their access permissions. Only administrators can manage users.") }}</p>
 
         <div class="mb-3">
             <button class="btn btn-primary" @click="showCreateModal = true">
@@ -9,51 +8,49 @@
             </button>
         </div>
 
-        <div class="shadow-box">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>{{ $t("Username") }}</th>
-                        <th>{{ $t("Role") }}</th>
-                        <th>{{ $t("Status") }}</th>
-                        <th>{{ $t("Groups") }}</th>
-                        <th>{{ $t("Actions") }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="user in users" :key="user.id">
-                        <td>{{ user.username }}</td>
-                        <td>
-                            <span v-if="user.is_admin" class="badge bg-danger">{{ $t("Admin") }}</span>
-                            <span v-else class="badge bg-secondary">{{ $t("User") }}</span>
-                        </td>
-                        <td>
-                            <span v-if="user.active" class="badge bg-success">{{ $t("Active") }}</span>
-                            <span v-else class="badge bg-warning">{{ $t("Inactive") }}</span>
-                        </td>
-                        <td>
-                            <span v-for="group in user.groups" :key="group.id" class="badge bg-info me-1">
-                                {{ group.name }}
-                            </span>
-                            <span v-if="!user.groups || user.groups.length === 0" class="text-muted">
-                                {{ $t("No groups") }}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-primary me-1" @click="editUser(user)">
-                                <font-awesome-icon icon="edit" /> {{ $t("Edit") }}
-                            </button>
-                            <button class="btn btn-sm btn-danger" @click="confirmDeleteUser(user)" :disabled="user.id === currentUserId">
-                                <font-awesome-icon icon="trash" /> {{ $t("Delete") }}
-                            </button>
-                        </td>
-                    </tr>
-                    <tr v-if="!users || users.length === 0">
-                        <td colspan="5" class="text-center text-muted">{{ $t("No users found") }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>{{ $t("Username") }}</th>
+                    <th>{{ $t("Role") }}</th>
+                    <th>{{ $t("Status") }}</th>
+                    <th>{{ $t("Groups") }}</th>
+                    <th>{{ $t("Actions") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="user in users" :key="user.id">
+                    <td>{{ user.username }}</td>
+                    <td>
+                        <span v-if="user.is_admin" class="badge bg-danger">{{ $t("Admin") }}</span>
+                        <span v-else class="badge bg-secondary">{{ $t("User") }}</span>
+                    </td>
+                    <td>
+                        <span v-if="user.active" class="badge bg-success">{{ $t("Active") }}</span>
+                        <span v-else class="badge bg-warning">{{ $t("Inactive") }}</span>
+                    </td>
+                    <td>
+                        <span v-for="group in user.groups" :key="group.id" class="badge bg-secondary me-1">
+                            {{ group.name }}
+                        </span>
+                        <span v-if="!user.groups || user.groups.length === 0" class="text-muted">
+                            {{ $t("No groups") }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-1" @click="editUser(user)">
+                            <font-awesome-icon icon="edit" /> {{ $t("Edit") }}
+                        </button>
+                        <button class="btn btn-sm btn-danger" @click="confirmDeleteUser(user)" :disabled="user.id === currentUserId">
+                            <font-awesome-icon icon="trash" /> {{ $t("Delete") }}
+                        </button>
+                    </td>
+                </tr>
+                <tr v-if="!users || users.length === 0">
+                    <td colspan="5" class="text-center text-muted">{{ $t("No users found") }}</td>
+                </tr>
+            </tbody>
+        </table>
 
         <!-- Create User Modal -->
         <div v-if="showCreateModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5)">
@@ -255,14 +252,3 @@ export default {
     },
 };
 </script>
-
-<style lang="scss" scoped>
-.shadow-box {
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.badge {
-    font-size: 0.8rem;
-}
-</style>

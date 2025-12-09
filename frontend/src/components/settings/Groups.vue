@@ -1,7 +1,6 @@
 <template>
     <div>
-        <h2>{{ $t("Group Management") }}</h2>
-        <p class="mb-3">{{ $t("Manage groups and assign users and stacks to them.") }}</p>
+        <p class="my-4">{{ $t("Manage groups and assign users and stacks to them.") }}</p>
 
         <div class="mb-3">
             <button class="btn btn-primary" @click="showCreateModal = true">
@@ -9,45 +8,43 @@
             </button>
         </div>
 
-        <div class="shadow-box">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>{{ $t("Group Name") }}</th>
-                        <th>{{ $t("Description") }}</th>
-                        <th>{{ $t("Users") }}</th>
-                        <th>{{ $t("Stacks") }}</th>
-                        <th>{{ $t("Actions") }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="group in groups" :key="group.id">
-                        <td>{{ group.name }}</td>
-                        <td>{{ group.description || $t("No description") }}</td>
-                        <td>
-                            <span class="badge bg-info">{{ group.users.length }} {{ $t("users") }}</span>
-                        </td>
-                        <td>
-                            <span class="badge bg-success">{{ group.stacks.length }} {{ $t("stacks") }}</span>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-info me-1" @click="manageGroup(group)">
-                                <font-awesome-icon icon="cog" /> {{ $t("Manage") }}
-                            </button>
-                            <button class="btn btn-sm btn-primary me-1" @click="editGroup(group)">
-                                <font-awesome-icon icon="edit" /> {{ $t("Edit") }}
-                            </button>
-                            <button class="btn btn-sm btn-danger" @click="confirmDeleteGroup(group)">
-                                <font-awesome-icon icon="trash" /> {{ $t("Delete") }}
-                            </button>
-                        </td>
-                    </tr>
-                    <tr v-if="!groups || groups.length === 0">
-                        <td colspan="5" class="text-center text-muted">{{ $t("No groups found") }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>{{ $t("Group Name") }}</th>
+                    <th>{{ $t("Description") }}</th>
+                    <th>{{ $t("Users") }}</th>
+                    <th>{{ $t("Stacks") }}</th>
+                    <th>{{ $t("Actions") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="group in groups" :key="group.id">
+                    <td>{{ group.name }}</td>
+                    <td>{{ group.description || $t("No description") }}</td>
+                    <td>
+                        <span class="badge bg-secondary">{{ group.users.length }} {{ $t("users") }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">{{ group.stacks.length }} {{ $t("stacks") }}</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-1" @click="manageGroup(group)">
+                            <font-awesome-icon icon="cog" /> {{ $t("Manage") }}
+                        </button>
+                        <button class="btn btn-sm btn-primary me-1" @click="editGroup(group)">
+                            <font-awesome-icon icon="edit" /> {{ $t("Edit") }}
+                        </button>
+                        <button class="btn btn-sm btn-danger" @click="confirmDeleteGroup(group)">
+                            <font-awesome-icon icon="trash" /> {{ $t("Delete") }}
+                        </button>
+                    </td>
+                </tr>
+                <tr v-if="!groups || groups.length === 0">
+                    <td colspan="5" class="text-center text-muted">{{ $t("No groups found") }}</td>
+                </tr>
+            </tbody>
+        </table>
 
         <!-- Create Group Modal -->
         <div v-if="showCreateModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5)">
@@ -418,14 +415,3 @@ export default {
     },
 };
 </script>
-
-<style lang="scss" scoped>
-.shadow-box {
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.badge {
-    font-size: 0.8rem;
-}
-</style>
