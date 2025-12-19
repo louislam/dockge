@@ -214,6 +214,8 @@ export default {
                     this.terminalInputBuffer = textBeforeCursor + e.key + textAfterCursor;
                     this.terminal.write(e.key + textAfterCursor + "\b".repeat(textAfterCursor.length));
                     this.cursorPosition++;
+                    this.terminalInputBuffer += e.key;
+                    this.terminal.write(e.key);
                 }
             });
         },
@@ -258,13 +260,12 @@ export default {
 <style scoped lang="scss">
 .main-terminal {
     height: 100%;
-    overflow-x: scroll;
 }
 </style>
 
 <style lang="scss">
 .terminal {
-    padding: 10px 15px;
+    background-color: black !important;
     height: 100%;
 }
 </style>

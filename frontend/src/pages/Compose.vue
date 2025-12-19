@@ -1,7 +1,7 @@
 <template>
     <transition name="slide-fade" appear>
         <div>
-            <h1 v-if="isAdd" class="mb-3">Compose</h1>
+            <h1 v-if="isAdd" class="mb-3">{{ $t("compose") }}</h1>
             <h1 v-else class="mb-3">
                 <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
                 <span v-if="$root.agentCount > 1" class="agent-name">
@@ -112,7 +112,7 @@
                     <div v-if="isEditMode" class="input-group mb-3">
                         <input
                             v-model="newContainerName"
-                            placeholder="New Container Name..."
+                            :placeholder="$t(`New Container Name...`)"
                             class="form-control"
                             @keyup.enter="addContainer"
                         />
@@ -150,7 +150,7 @@
 
                     <!-- Combined Terminal Output -->
                     <div v-show="!isEditMode">
-                        <h4 class="mb-3">Terminal</h4>
+                        <h4 class="mb-3">{{ $t("terminal") }}</h4>
                         <Terminal
                             ref="combinedTerminal"
                             class="mb-3 terminal"
@@ -158,7 +158,7 @@
                             :endpoint="endpoint"
                             :rows="combinedTerminalRows"
                             :cols="combinedTerminalCols"
-                            style="height: 350px;"
+                            style="height: 315px;"
                         ></Terminal>
                     </div>
                 </div>
@@ -229,7 +229,7 @@
             </div>
 
             <!-- Delete Dialog -->
-            <BModal v-model="showDeleteDialog" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
+            <BModal v-model="showDeleteDialog" :cancelTitle="$t('cancel')" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
                 {{ $t("deleteStackMsg") }}
             </BModal>
         </div>
@@ -491,6 +491,11 @@ export default {
         },
 
         requestServiceStatus() {
+            // Do not request if it is add mode
+            if (this.isAdd) {
+                return;
+            }
+
             this.$root.emitAgent(this.endpoint, "serviceStatusList", this.stack.name, (res) => {
                 if (res.ok) {
                     this.serviceStatusList = res.serviceStatusList;
@@ -503,7 +508,7 @@ export default {
 
         exitConfirm(next) {
             if (this.isEditMode) {
-                if (confirm("You are currently editing a stack. Are you sure you want to leave?")) {
+                if (confirm(this.$t("confirmLeaveStack"))) {
                     this.exitAction();
                     next();
                 } else {

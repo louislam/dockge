@@ -112,5 +112,21 @@
     "removeAgent": "移除代理",
     "removeAgentMsg": "您确定要移除此代理？",
     "agentAddedSuccessfully": "代理添加成功。",
-    "LongSyntaxNotSupported": "此处不支持Long syntax，请使用YAML编辑器。"
+    "LongSyntaxNotSupported": "此处不支持Long syntax，请使用YAML编辑器。",
+    "Lost connection to the socket server. Reconnecting...": "已断开socket服务器连接，重新连接中...",
+    "Saved": "已保存",
+    "Deployed": "已部署",
+    "Deleted": "已删除",
+    "Updated": "已更新",
+    "Started": "已启动",
+    "Stopped": "已停止",
+    "Restarted": "已重启",
+    "Switch to sh": "切换至sh",
+    "terminal": "终端",
+    "CurrentHostname": "未设置:沿用当前主机名",
+    "New Container Name...": "新的容器名称...",
+    "Network name...": "网络名称...",
+    "Select a network...": "选择网络...",
+    "NoNetworksAvailable": "网络不可用.你需要在正确的方向先添加内部网络或者启用外部网络.",
+    "Downed": "已宕机"
 }

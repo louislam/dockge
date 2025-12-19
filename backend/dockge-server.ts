@@ -136,6 +136,11 @@ export class DockgeServer {
             stacksDir: {
                 type: String,
                 optional: true,
+            },
+            enableConsole: {
+                type: Boolean,
+                optional: true,
+                defaultValue: false,
             }
         });
 
@@ -149,6 +154,7 @@ export class DockgeServer {
         this.config.hostname = args.hostname || process.env.DOCKGE_HOSTNAME || undefined;
         this.config.dataDir = args.dataDir || process.env.DOCKGE_DATA_DIR || "./data/";
         this.config.stacksDir = args.stacksDir || process.env.DOCKGE_STACKS_DIR || defaultStacksDir;
+        this.config.enableConsole = args.enableConsole || process.env.DOCKGE_ENABLE_CONSOLE === "true" || false;
         this.stacksDir = this.config.stacksDir;
 
         log.debug("server", this.config);

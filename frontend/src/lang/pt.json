@@ -101,15 +101,16 @@
     "agentAddedSuccessfully": "Agente adicionado com sucesso.",
     "agentRemovedSuccessfully": "Agente removido com sucesso.",
     "removeAgent": "Remover Agente",
-    "downStack": "Parar & Inativar",
+    "downStack": "Parar & Desativar",
     "dockgeAgent": "Dockge Agente | Dockge Agentes",
     "connect": "Conectar",
     "removeAgentMsg": "Tem certeza de que deseja remover este agente?",
     "reverseProxyMsg1": "Usando um Proxy Reverso?",
     "reverseProxyMsg2": "Verifique para configurá-lo como WebSocket",
     "Cannot connect to the socket server.": "Não é possível se conectar ao servidor socket.",
-    "url": "URL | URLs",
+    "url": "URL | URL's",
     "extra": "Extra",
     "reconnecting...": "Reconectando…",
-    "connecting...": "Conectando ao servidor de socket…"
+    "connecting...": "Conectando ao servidor de socket…",
+    "LongSyntaxNotSupported": "Sintaxes longas não são suportadas aqui. Por favor, utilize um editor YAML."
 }
