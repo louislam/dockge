@@ -87,7 +87,7 @@
         "typescript": "~5.2.2",
         "unplugin-vue-components": "~0.25.2",
         "vite": "~5.4.15",
-        "vite-plugin-compression": "~0.5.1",
+        "vite-plugin-compression": "^0.5.1",
         "vue": "~3.5.13",
         "vue-eslint-parser": "~9.3.2",
         "vue-i18n": "~10.0.6",
