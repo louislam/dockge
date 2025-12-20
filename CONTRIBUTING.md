@@ -58,8 +58,7 @@ I personally do not like something that requires so many configurations before y
 
 ## Tools
 
-- [`Node.js`](https://nodejs.org/) >= 20
-- [`pnpm`](https://pnpm.io/)
+- [`Node.js`](https://nodejs.org/) >= 22.14.0
 - [`git`](https://git-scm.com/)
 - IDE that supports [`ESLint`](https://eslint.org/) and EditorConfig (I am using [`IntelliJ IDEA`](https://www.jetbrains.com/idea/))
 - A SQLite GUI tool (f.ex. [`SQLite Expert Personal`](https://www.sqliteexpert.com/download.html) or [`DBeaver Community`](https://dbeaver.io/download/))
@@ -67,14 +66,14 @@ I personally do not like something that requires so many configurations before y
 ## Install Dependencies for Development
 
 ```bash
-pnpm install
+npm install
 ```
 
 ## Dev Server
 
 ```
-pnpm run dev:frontend
-pnpm run dev:backend
+npm run dev:frontend
+npm run dev:backend
 ```
 
 ## Backend Dev Server
@@ -94,7 +93,7 @@ You can use Vue.js devtools Chrome extension for debugging.
 ### Build the frontend
 
 ```bash
-pnpm run build
+npm run build
 ```
 
 ## Database Migration
@@ -117,7 +116,7 @@ Both frontend and backend share the same package.json. However, the frontend dep
 Should only be done by the maintainer.
 
 ```bash
-pnpm update
+npm update
 ````
 
 It should update the patch release version only.

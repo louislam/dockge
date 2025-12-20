@@ -311,7 +311,12 @@ export class MainSocketHandler extends SocketHandler {
                     throw new ValidationError("dockerRunCommand must be a string");
                 }
 
-                const composeTemplate = composerize(dockerRunCommand);
+                // Option: 'latest' | 'v2x' | 'v3x'
+                let composeTemplate = composerize(dockerRunCommand, "", "latest");
+
+                // Remove the first line "name: <your project name>"
+                composeTemplate = composeTemplate.split("\n").slice(1).join("\n");
+
                 callback({
                     ok: true,
                     composeTemplate,

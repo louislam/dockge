@@ -35,7 +35,7 @@
     "restartPolicyAlways": "دائماً",
     "restartPolicyOnFailure": "عند الفشل",
     "restartPolicyNo": "لا",
-    "environmentVariable": "متغير البيئة | متغيرات البيئة",
+    "environmentVariable": "متغير | متغيرات",
     "restartPolicy": "سياسة إعادة التشغيل",
     "containerName": "اسم الحاوية",
     "port": "منفذ | منافذ",
@@ -98,5 +98,16 @@
     "url": "رابط | روابط",
     "extra": "إضافات",
     "reverseProxyMsg1": "هل تستدخم خادم عكسي؟",
-    "connecting...": "جاري الاتصال بخادم المقبس…"
+    "connecting...": "جاري الاتصال بخادم المقبس…",
+    "newUpdate": "تحديث جديد",
+    "currentEndpoint": "السياق: الوكيل الحالي",
+    "dockgeURL": "رابط Dockge (مثلا http://127.0.0.1:5001)",
+    "agentOnline": "متصل",
+    "agentOffline": "غير متصل",
+    "connecting": "جاري الإتصال",
+    "connect": "ارتبط",
+    "dockgeAgent": "سيرفر Dockge",
+    "removeAgent": "حذف الوكيل",
+    "removeAgentMsg": "هل انت متأكد من حذف هذا الوكيل؟",
+    "LongSyntaxNotSupported": "كتابة النصوص المدعومة غير المدعومة هنا. الرجاء استخدام محرر YAML."
 }

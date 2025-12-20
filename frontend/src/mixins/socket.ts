@@ -203,7 +203,7 @@ export default defineComponent({
 
             socket.on("disconnect", () => {
                 console.log("disconnect");
-                this.socketIO.connectionErrorMsg = "Lost connection to the socket server. Reconnecting...";
+                this.socketIO.connectionErrorMsg = `${this.$t("Lost connection to the socket server. Reconnecting...")}`;
                 this.socketIO.connected = false;
             });
 
@@ -279,7 +279,6 @@ export default defineComponent({
             });
 
             socket.on("agentList", (res) => {
-                console.log(res);
                 if (res.ok) {
                     this.agentList = res.agentList;
                 }
