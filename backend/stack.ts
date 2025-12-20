@@ -530,4 +530,34 @@ export class Stack {
         }
 
     }
+
+    async startService(socket: DockgeSocket, serviceName: string) {
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
+        const exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", ["compose", "up", "-d", serviceName], this.path);
+        if (exitCode !== 0) {
+            throw new Error(`Failed to start service ${serviceName}, please check logs for more information.`);
+        }
+
+        return exitCode;
+    }
+
+    async stopService(socket: DockgeSocket, serviceName: string): Promise<number> {
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
+        const exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", ["compose", "stop", serviceName], this.path);
+        if (exitCode !== 0) {
+            throw new Error(`Failed to stop service ${serviceName}, please check logs for more information.`);
+        }
+
+        return exitCode;
+    }
+
+    async restartService(socket: DockgeSocket, serviceName: string): Promise<number> {
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
+        const exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", ["compose", "restart", serviceName], this.path);
+        if (exitCode !== 0) {
+            throw new Error(`Failed to restart service ${serviceName}, please check logs for more information.`);
+        }
+
+        return exitCode;
+    }
 }
