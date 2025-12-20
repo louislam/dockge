@@ -182,7 +182,8 @@ export default {
 
         mainTerminalConfig() {
             this.terminal.onKey(e => {
-                console.debug("Encode: " + JSON.stringify(e.key));
+                // Optional: keep for debugging
+                // console.debug("Encode: " + JSON.stringify(e.key));
 
                 if (e.key === "\r") {
                     // Return if no input
