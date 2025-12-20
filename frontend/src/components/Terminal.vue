@@ -252,7 +252,7 @@ export default {
         interactiveTerminalConfig() {
             this.terminal.onKey(e => {
                 // Handle Ctrl+V for paste
-                if (e.key === "\u0016" || (e.ctrlKey && e.key === "v")) {
+                if (e.key === "\u0016" || (e.domEvent?.ctrlKey && e.key.toLowerCase() === "v")) {
                     this.handlePaste();
                     return;
                 }
