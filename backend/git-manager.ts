@@ -26,7 +26,9 @@ export class GitManager {
      */
     static async getStatus(stackPath: string): Promise<GitStatusResponse> {
         try {
-            const git: SimpleGit = simpleGit(stackPath);
+            // Find git root to ensure we're working from the repository root
+            const gitRoot = await this.getGitRoot(stackPath);
+            const git: SimpleGit = simpleGit(gitRoot);
             const status: StatusResult = await git.status();
 
             const files = [
@@ -68,7 +70,9 @@ export class GitManager {
      */
     static async addFiles(stackPath: string, files: string[]): Promise<void> {
         try {
-            const git: SimpleGit = simpleGit(stackPath);
+            // Find git root to ensure we're working from the repository root
+            const gitRoot = await this.getGitRoot(stackPath);
+            const git: SimpleGit = simpleGit(gitRoot);
             await git.add(files);
         } catch (error) {
             log.error("git-manager", `Error adding files: ${error}`);
@@ -81,7 +85,9 @@ export class GitManager {
      */
     static async commit(stackPath: string, message: string): Promise<void> {
         try {
-            const git: SimpleGit = simpleGit(stackPath);
+            // Find git root to ensure we're working from the repository root
+            const gitRoot = await this.getGitRoot(stackPath);
+            const git: SimpleGit = simpleGit(gitRoot);
             await git.commit(message);
         } catch (error) {
             log.error("git-manager", `Error committing changes: ${error}`);
@@ -93,7 +99,9 @@ export class GitManager {
      * Push changes to remote repository
      */
     static async push(stackPath: string, credentials?: GitCredentials): Promise<void> {
-        const git: SimpleGit = simpleGit(stackPath);
+        // Find git root to ensure we're working from the repository root
+        const gitRoot = await this.getGitRoot(stackPath);
+        const git: SimpleGit = simpleGit(gitRoot);
         let originalRemoteUrl: string | null = null;
 
         try {
@@ -104,7 +112,7 @@ export class GitManager {
                     originalRemoteUrl = remotes[0].refs.push || remotes[0].refs.fetch;
                 }
                 // Configure git credentials
-                await this.configureCredentials(stackPath, credentials);
+                await this.configureCredentials(gitRoot, credentials);
             }
 
             await git.push();
@@ -127,7 +135,9 @@ export class GitManager {
      * Pull changes from remote repository
      */
     static async pull(stackPath: string, credentials?: GitCredentials): Promise<void> {
-        const git: SimpleGit = simpleGit(stackPath);
+        // Find git root to ensure we're working from the repository root
+        const gitRoot = await this.getGitRoot(stackPath);
+        const git: SimpleGit = simpleGit(gitRoot);
         let originalRemoteUrl: string | null = null;
 
         try {
@@ -138,7 +148,7 @@ export class GitManager {
                     originalRemoteUrl = remotes[0].refs.push || remotes[0].refs.fetch;
                 }
                 // Configure git credentials
-                await this.configureCredentials(stackPath, credentials);
+                await this.configureCredentials(gitRoot, credentials);
             }
 
             await git.pull();
@@ -220,6 +230,22 @@ export class GitManager {
         }
 
         return null;
+    }
+
+    /**
+     * Get the git root directory for a given path
+     * @param stackPath The path to search from
+     * @returns The absolute path to the git root directory
+     */
+    private static async getGitRoot(stackPath: string): Promise<string> {
+        try {
+            const git: SimpleGit = simpleGit(stackPath);
+            const result = await git.revparse([ "--show-toplevel" ]);
+            return result.trim();
+        } catch (error) {
+            log.error("git-manager", `Error finding git root: ${error}`);
+            throw new Error("Not a git repository or git root not found");
+        }
     }
 
     /**
