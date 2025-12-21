@@ -141,6 +141,8 @@
     "commitsAhead": "commits ahead",
     "commitsBehind": "commits behind",
     "changedFiles": "Changed Files",
+    "unstagedChanges": "Unstaged Changes",
+    "stagedChanges": "Staged Changes",
     "noChanges": "No changes detected.",
     "commitMessage": "Commit Message",
     "commitMessagePlaceholder": "Enter commit message...",

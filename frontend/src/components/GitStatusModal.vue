@@ -26,20 +26,18 @@
                 </span>
             </div>
 
-            <!-- Files List -->
-            <div v-if="gitStatus.files.length > 0" class="mb-3">
-                <h6>{{ $t('changedFiles') }}:</h6>
+            <!-- Unstaged Files List -->
+            <div v-if="unstagedFiles.length > 0" class="mb-3">
+                <h6>{{ $t('unstagedChanges') }}:</h6>
                 <div class="file-list">
-                    <div v-for="file in gitStatus.files" :key="file.path" class="file-item d-flex align-items-center mb-2">
+                    <div v-for="file in unstagedFiles" :key="file.path" class="file-item d-flex align-items-center mb-2">
                         <input
-                            v-if="!file.staged"
                             :id="'file-' + file.path"
                             v-model="selectedFiles"
                             type="checkbox"
                             :value="file.path"
                             class="form-check-input me-2"
                         />
-                        <span v-else class="me-2">✓</span>
                         <span :class="getFileStatusClass(file.status)" class="me-2">
                             {{ file.status }}
                         </span>
@@ -48,12 +46,26 @@
                 </div>
             </div>
 
-            <div v-else class="alert alert-info">
+            <!-- Staged Files List -->
+            <div v-if="stagedFiles.length > 0" class="mb-3">
+                <h6>{{ $t('stagedChanges') }}:</h6>
+                <div class="file-list staged-list">
+                    <div v-for="file in stagedFiles" :key="file.path" class="file-item d-flex align-items-center mb-2">
+                        <span class="me-2">✓</span>
+                        <span :class="getFileStatusClass(file.status)" class="me-2">
+                            {{ file.status }}
+                        </span>
+                        <span class="text-monospace">{{ file.path }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="gitStatus.files.length === 0" class="alert alert-info">
                 {{ $t('noChanges') }}
             </div>
 
             <!-- Commit Message -->
-            <div v-if="gitStatus.files.length > 0" class="mb-3">
+            <div v-if="stagedFiles.length > 0" class="mb-3">
                 <label for="commitMessage" class="form-label">{{ $t('commitMessage') }}</label>
                 <input
                     id="commitMessage"
@@ -167,6 +179,14 @@ export default {
                 password: "",
             },
         };
+    },
+    computed: {
+        unstagedFiles() {
+            return this.gitStatus.files.filter(f => !f.staged);
+        },
+        stagedFiles() {
+            return this.gitStatus.files.filter(f => f.staged);
+        },
     },
     methods: {
         async open() {
@@ -297,6 +317,11 @@ export default {
     border: 1px solid #dee2e6;
     border-radius: 0.25rem;
     padding: 0.5rem;
+}
+
+.file-list.staged-list {
+    background-color: #f8f9fa;
+    border-color: #28a745;
 }
 
 .file-item {
