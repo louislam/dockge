@@ -3,6 +3,7 @@ import { DockgeServer } from "../dockge-server";
 import { callbackError, callbackResult, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { Stack } from "../stack";
 import { AgentSocket } from "../../common/agent-socket";
+import { GitManager, GitCredentials } from "../git-manager";
 
 export class DockerSocketHandler extends AgentSocketHandler {
     create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
@@ -247,6 +248,205 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     ok: true,
                     dockerNetworkList,
                 }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // Git operations
+        agentSocket.on("getGitStatus", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = await Stack.getStack(server, stackName);
+                const isGitRepo = await GitManager.isGitRepository(stack.path);
+
+                if (!isGitRepo) {
+                    callbackResult({
+                        ok: false,
+                        msg: "Not a git repository",
+                    }, callback);
+                    return;
+                }
+
+                const gitStatus = await GitManager.getStatus(stack.path);
+                callbackResult({
+                    ok: true,
+                    gitStatus,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("gitAddFiles", async (stackName : unknown, files : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                if (!Array.isArray(files)) {
+                    throw new ValidationError("Files must be an array");
+                }
+
+                const stack = await Stack.getStack(server, stackName);
+                await GitManager.addFiles(stack.path, files);
+                callbackResult({
+                    ok: true,
+                    msg: "Files added to staging",
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("gitCommit", async (stackName : unknown, message : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                if (typeof(message) !== "string") {
+                    throw new ValidationError("Commit message must be a string");
+                }
+
+                const stack = await Stack.getStack(server, stackName);
+                await GitManager.commit(stack.path, message);
+                callbackResult({
+                    ok: true,
+                    msg: "Changes committed",
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("gitPush", async (stackName : unknown, credentials : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = await Stack.getStack(server, stackName);
+
+                // Get credentials from parameter or stored settings
+                let creds: GitCredentials | null = null;
+                if (credentials && typeof credentials === "object" && "username" in credentials && "password" in credentials) {
+                    creds = credentials as GitCredentials;
+                    // Save credentials for future use
+                    await GitManager.saveCredentials(creds);
+                } else {
+                    creds = await GitManager.getCredentials();
+                }
+
+                await GitManager.push(stack.path, creds || undefined);
+                callbackResult({
+                    ok: true,
+                    msg: "Changes pushed to remote",
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("gitPull", async (stackName : unknown, credentials : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = await Stack.getStack(server, stackName);
+
+                // Get credentials from parameter or stored settings
+                let creds: GitCredentials | null = null;
+                if (credentials && typeof credentials === "object" && "username" in credentials && "password" in credentials) {
+                    creds = credentials as GitCredentials;
+                    // Save credentials for future use
+                    await GitManager.saveCredentials(creds);
+                } else {
+                    creds = await GitManager.getCredentials();
+                }
+
+                await GitManager.pull(stack.path, creds || undefined);
+                callbackResult({
+                    ok: true,
+                    msg: "Changes pulled from remote",
+                }, callback);
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("getGitCredentials", async (callback) => {
+            try {
+                checkLogin(socket);
+                const credentials = await GitManager.getCredentials();
+                callbackResult({
+                    ok: true,
+                    hasCredentials: credentials !== null,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("gitClone", async (repoUrl : unknown, stackName : unknown, credentials : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(repoUrl) !== "string") {
+                    throw new ValidationError("Repository URL must be a string");
+                }
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                // Validate stack name
+                if (!stackName || stackName.trim() === "") {
+                    throw new ValidationError("Stack name cannot be empty");
+                }
+
+                // Target path is in the stacks directory
+                const targetPath = server.stacksDir + "/" + stackName;
+
+                // Check if directory already exists
+                const fs = await import("fs");
+                if (fs.existsSync(targetPath)) {
+                    throw new ValidationError("A stack with this name already exists");
+                }
+
+                // Get credentials from parameter or stored settings
+                let creds: GitCredentials | null = null;
+                if (credentials && typeof credentials === "object" && "username" in credentials && "password" in credentials) {
+                    creds = credentials as GitCredentials;
+                    // Save credentials for future use
+                    await GitManager.saveCredentials(creds);
+                } else {
+                    creds = await GitManager.getCredentials();
+                }
+
+                await GitManager.clone(repoUrl, targetPath, creds || undefined);
+
+                callbackResult({
+                    ok: true,
+                    msg: "Repository cloned successfully",
+                }, callback);
+
+                server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
             }

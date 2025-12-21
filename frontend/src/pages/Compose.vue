@@ -55,6 +55,10 @@
                 </div>
 
                 <button v-if="isEditMode && !isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
+                <button v-if="!isEditMode" class="btn btn-normal me-2" :disabled="processing" @click="openGitStatusModal">
+                    <font-awesome-icon icon="code-branch" class="me-1" />
+                    {{ $t("gitStatus") }}
+                </button>
                 <button v-if="!isEditMode" class="btn btn-danger" :disabled="processing" @click="showDeleteDialog = !showDeleteDialog">
                     <font-awesome-icon icon="trash" class="me-1" />
                     {{ $t("deleteStack") }}
@@ -232,6 +236,9 @@
             <BModal v-model="showDeleteDialog" :cancelTitle="$t('cancel')" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
                 {{ $t("deleteStackMsg") }}
             </BModal>
+
+            <!-- Git Status Modal -->
+            <GitStatusModal ref="gitStatusModal" :stack-name="stack.name" :endpoint="endpoint" />
         </div>
     </transition>
 </template>
@@ -256,6 +263,7 @@ import {
 } from "../../../common/util-common";
 import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
+import GitStatusModal from "../components/GitStatusModal.vue";
 import dotenv from "dotenv";
 
 const template = `
@@ -283,6 +291,7 @@ export default {
         FontAwesomeIcon,
         PrismEditor,
         BModal,
+        GitStatusModal,
     },
     beforeRouteUpdate(to, from, next) {
         this.exitConfirm(next);
@@ -657,6 +666,10 @@ export default {
                     this.$router.push("/");
                 }
             });
+        },
+
+        openGitStatusModal() {
+            this.$refs.gitStatusModal.open();
         },
 
         discardStack() {
