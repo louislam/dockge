@@ -20,7 +20,7 @@ export interface GitStatusResponse {
 }
 
 export class GitManager {
-    
+
     /**
      * Get git status for a stack directory
      */
@@ -28,14 +28,26 @@ export class GitManager {
         try {
             const git: SimpleGit = simpleGit(stackPath);
             const status: StatusResult = await git.status();
-            
+
             const files = [
-                ...status.modified.map(file => ({ path: file, status: "modified", staged: false })),
-                ...status.not_added.map(file => ({ path: file, status: "untracked", staged: false })),
-                ...status.created.map(file => ({ path: file, status: "new file", staged: true })),
-                ...status.deleted.map(file => ({ path: file, status: "deleted", staged: false })),
-                ...status.renamed.map(file => ({ path: file.to, status: "renamed", staged: true })),
-                ...status.staged.map(file => ({ path: file, status: "staged", staged: true })),
+                ...status.modified.map(file => ({ path: file,
+                    status: "modified",
+                    staged: false })),
+                ...status.not_added.map(file => ({ path: file,
+                    status: "untracked",
+                    staged: false })),
+                ...status.created.map(file => ({ path: file,
+                    status: "new file",
+                    staged: true })),
+                ...status.deleted.map(file => ({ path: file,
+                    status: "deleted",
+                    staged: false })),
+                ...status.renamed.map(file => ({ path: file.to,
+                    status: "renamed",
+                    staged: true })),
+                ...status.staged.map(file => ({ path: file,
+                    status: "staged",
+                    staged: true })),
             ];
 
             return {
@@ -83,12 +95,12 @@ export class GitManager {
     static async push(stackPath: string, credentials?: GitCredentials): Promise<void> {
         try {
             const git: SimpleGit = simpleGit(stackPath);
-            
+
             if (credentials) {
                 // Configure git credentials
                 await this.configureCredentials(stackPath, credentials);
             }
-            
+
             await git.push();
         } catch (error) {
             log.error("git-manager", `Error pushing changes: ${error}`);
@@ -102,12 +114,12 @@ export class GitManager {
     static async pull(stackPath: string, credentials?: GitCredentials): Promise<void> {
         try {
             const git: SimpleGit = simpleGit(stackPath);
-            
+
             if (credentials) {
                 // Configure git credentials
                 await this.configureCredentials(stackPath, credentials);
             }
-            
+
             await git.pull();
         } catch (error) {
             log.error("git-manager", `Error pulling changes: ${error}`);
@@ -120,7 +132,7 @@ export class GitManager {
      */
     private static async configureCredentials(stackPath: string, credentials: GitCredentials): Promise<void> {
         const git: SimpleGit = simpleGit(stackPath);
-        
+
         // Get the remote URL
         const remotes = await git.getRemotes(true);
         if (remotes.length === 0) {
@@ -129,7 +141,7 @@ export class GitManager {
 
         const remote = remotes[0];
         const remoteUrl = remote.refs.push || remote.refs.fetch;
-        
+
         if (!remoteUrl) {
             throw new Error("No remote URL found");
         }
@@ -138,9 +150,9 @@ export class GitManager {
         const url = new URL(remoteUrl);
         url.username = encodeURIComponent(credentials.username);
         url.password = encodeURIComponent(credentials.password);
-        
+
         // Set the remote URL with credentials
-        await git.remote(["set-url", "origin", url.toString()]);
+        await git.remote([ "set-url", "origin", url.toString() ]);
     }
 
     /**
@@ -157,11 +169,12 @@ export class GitManager {
     static async getCredentials(): Promise<GitCredentials | null> {
         const username = await Settings.get("gitUsername");
         const password = await Settings.get("gitPassword");
-        
+
         if (username && password) {
-            return { username, password };
+            return { username,
+                password };
         }
-        
+
         return null;
     }
 

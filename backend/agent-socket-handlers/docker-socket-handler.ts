@@ -338,7 +338,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 }
 
                 const stack = await Stack.getStack(server, stackName);
-                
+
                 // Get credentials from parameter or stored settings
                 let creds: GitCredentials | null = null;
                 if (credentials && typeof credentials === "object" && "username" in credentials && "password" in credentials) {
@@ -368,7 +368,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 }
 
                 const stack = await Stack.getStack(server, stackName);
-                
+
                 // Get credentials from parameter or stored settings
                 let creds: GitCredentials | null = null;
                 if (credentials && typeof credentials === "object" && "username" in credentials && "password" in credentials) {

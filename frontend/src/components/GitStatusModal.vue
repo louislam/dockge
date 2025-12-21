@@ -33,9 +33,9 @@
                     <div v-for="file in gitStatus.files" :key="file.path" class="file-item d-flex align-items-center mb-2">
                         <input
                             v-if="!file.staged"
-                            type="checkbox"
                             :id="'file-' + file.path"
                             v-model="selectedFiles"
+                            type="checkbox"
                             :value="file.path"
                             class="form-check-input me-2"
                         />
@@ -180,7 +180,8 @@ export default {
             this.selectedFiles = [];
             this.commitMessage = "";
             this.showCredentialsDialog = false;
-            this.credentials = { username: "", password: "" };
+            this.credentials = { username: "",
+                password: "" };
         },
 
         async loadGitStatus() {
