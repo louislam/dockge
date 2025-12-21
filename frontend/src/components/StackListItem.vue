@@ -57,10 +57,11 @@ export default {
             return this.$root.endpointDisplayFunction(this.stack.endpoint);
         },
         url() {
+            const encodedStackName = encodeURIComponent(this.stack.name);
             if (this.stack.endpoint) {
-                return `/compose/${this.stack.name}/${this.stack.endpoint}`;
+                return `/compose/${encodedStackName}/${this.stack.endpoint}`;
             } else {
-                return `/compose/${this.stack.name}`;
+                return `/compose/${encodedStackName}`;
             }
         },
         depthMargin() {
