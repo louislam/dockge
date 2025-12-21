@@ -112,9 +112,10 @@ export class Stack {
     }
 
     validate() {
-        // Check name, allows [a-z][0-9] _ - only
-        if (!this.name.match(/^[a-z0-9_-]+$/)) {
-            throw new ValidationError("Stack name can only contain [a-z][0-9] _ - only");
+        // Check name, allows [a-z0-9] _ - / only (/ for nested directories)
+        // Pattern ensures no leading/trailing slashes or consecutive slashes
+        if (!this.name.match(/^[a-z0-9_-]+(?:\/[a-z0-9_-]+)*$/)) {
+            throw new ValidationError("Stack name can only contain [a-z0-9] _ - / only");
         }
 
         // Check YAML format
@@ -253,13 +254,58 @@ export class Stack {
     static async composeFileExists(stacksDir : string, filename : string) : Promise<boolean> {
         let filenamePath = path.join(stacksDir, filename);
         // Check if any compose file exists
-        for (const filename of acceptedComposeFileNames) {
-            let composeFile = path.join(filenamePath, filename);
+        for (const composeFileName of acceptedComposeFileNames) {
+            let composeFile = path.join(filenamePath, composeFileName);
             if (await fileExists(composeFile)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Recursively scans a directory for compose files and returns stack names (relative paths).
+     * @async
+     * @static
+     * @param {string} baseDir - The base directory to start scanning from.
+     * @param {string} currentRelativePath - The current relative path from baseDir (used for recursion).
+     * @returns {Promise<string[]>} A promise that resolves to an array of stack names (relative paths).
+     */
+    static async scanDirectory(baseDir : string, currentRelativePath : string = "") : Promise<string[]> {
+        const stacks : string[] = [];
+        const currentPath = path.join(baseDir, currentRelativePath);
+
+        try {
+            const entries = await fsAsync.readdir(currentPath, { withFileTypes: true });
+
+            for (const entry of entries) {
+                if (entry.isDirectory()) {
+                    const relativePath = currentRelativePath ? path.join(currentRelativePath, entry.name) : entry.name;
+
+                    // Check if this directory contains a compose file (check all types concurrently)
+                    const composeFileChecks = acceptedComposeFileNames.map(composeFileName =>
+                        fileExists(path.join(baseDir, relativePath, composeFileName))
+                    );
+                    const composeFileResults = await Promise.all(composeFileChecks);
+                    const hasComposeFile = composeFileResults.some(result => result);
+
+                    if (hasComposeFile) {
+                        // This directory has a compose file, add it to the list
+                        stacks.push(relativePath);
+                    } else {
+                        // No compose file, scan subdirectories
+                        const subStacks = await Stack.scanDirectory(baseDir, relativePath);
+                        stacks.push(...subStacks);
+                    }
+                }
+            }
+        } catch (e) {
+            if (e instanceof Error) {
+                log.warn("scanDirectory", `Failed to scan directory ${currentPath}, error: ${e.message}, stack: ${e.stack}`);
+            }
+        }
+
+        return stacks;
     }
 
     static async getStackList(server : DockgeServer, useCacheForManaged = false) : Promise<Map<string, Stack>> {
@@ -272,26 +318,17 @@ export class Stack {
         } else {
             stackList = new Map<string, Stack>();
 
-            // Scan the stacks directory, and get the stack list
-            let filenameList = await fsAsync.readdir(stacksDir);
+            // Recursively scan the stacks directory for compose files
+            let stackNames = await Stack.scanDirectory(stacksDir);
 
-            for (let filename of filenameList) {
+            for (let stackName of stackNames) {
                 try {
-                    // Check if it is a directory
-                    let stat = await fsAsync.stat(path.join(stacksDir, filename));
-                    if (!stat.isDirectory()) {
-                        continue;
-                    }
-                    // If no compose file exists, skip it
-                    if (!await Stack.composeFileExists(stacksDir, filename)) {
-                        continue;
-                    }
-                    let stack = await this.getStack(server, filename);
+                    let stack = await this.getStack(server, stackName);
                     stack._status = CREATED_FILE;
-                    stackList.set(filename, stack);
+                    stackList.set(stackName, stack);
                 } catch (e) {
                     if (e instanceof Error) {
-                        log.warn("getStackList", `Failed to get stack ${filename}, error: ${e.message}`);
+                        log.warn("getStackList", `Failed to get stack ${stackName}, error: ${e.message}`);
                     }
                 }
             }

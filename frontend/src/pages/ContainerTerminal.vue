@@ -25,7 +25,7 @@ export default {
     },
     computed: {
         stackName() {
-            return this.$route.params.stackName;
+            return decodeURIComponent(this.$route.params.stackName);
         },
         endpoint() {
             return this.$route.params.endpoint || "";
