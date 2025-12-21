@@ -243,13 +243,15 @@ export class GitManager {
             const result = await git.revparse([ "--show-toplevel" ]);
             return result.trim();
         } catch (error) {
-            log.error("git-manager", `Error finding git root: ${error}`);
-            throw new Error("Not a git repository or git root not found");
+            log.error("git-manager", `Error finding git root from ${stackPath}: ${error}`);
+            throw new Error(`Unable to find git repository root. The path '${stackPath}' may not be inside a git repository.`);
         }
     }
 
     /**
      * Check if a directory is a git repository
+     * This checks if the given path is within a git repository,
+     * not necessarily the git root itself.
      */
     static async isGitRepository(stackPath: string): Promise<boolean> {
         try {
