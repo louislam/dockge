@@ -27,7 +27,7 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
 
 - 🚄 Reactive - Everything is just responsive. Progress (Pull/Up/Down) and terminal output are in real-time
 - 🐣 Easy-to-use & fancy UI - If you love Uptime Kuma's UI/UX, you will love this one too
-- 🔀 Git Integration - Check git status, add files, commit and push/pull changes directly from the UI
+- 🔀 Git Integration - Check git status, add files, commit and push/pull changes directly from the UI. Clone repositories to create new stacks.
 
 ![](https://github.com/louislam/dockge/assets/1336778/89fc1023-b069-42c0-a01c-918c495f1a6a)
 
@@ -162,6 +162,8 @@ Yes, you can.
 
 #### How does Git Integration work?
 
+**Git Status Management:**
+
 If your stack directory is a Git repository, you can use the "Git Status" button on the stack's page to:
 - View the current git status (branch, changed files, commits ahead/behind)
 - Add untracked files to staging
@@ -169,7 +171,16 @@ If your stack directory is a Git repository, you can use the "Git Status" button
 - Push changes to the remote repository
 - Pull changes from the remote repository
 
-The first time you push or pull, you'll be asked for your GitHub credentials (username and password/token). These credentials are stored securely for future operations.
+**Clone Repository:**
+
+You can clone a Git repository to create a new stack:
+1. Click the "Clone Repository" button on the Dashboard
+2. Enter the repository URL (HTTPS or SSH)
+3. Enter a name for the new stack
+4. For private repositories, provide your GitHub credentials
+5. The repository will be cloned and a new stack will be created
+
+The first time you push, pull, or clone a private repository, you'll be asked for your GitHub credentials (username and password/token). These credentials are stored for future operations.
 
 **Note**: For SSH remotes, please configure SSH keys separately as the credential injection only works with HTTPS URLs.
 
