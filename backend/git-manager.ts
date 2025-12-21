@@ -93,10 +93,16 @@ export class GitManager {
      * Push changes to remote repository
      */
     static async push(stackPath: string, credentials?: GitCredentials): Promise<void> {
-        try {
-            const git: SimpleGit = simpleGit(stackPath);
+        const git: SimpleGit = simpleGit(stackPath);
+        let originalRemoteUrl: string | null = null;
 
+        try {
             if (credentials) {
+                // Store original URL before modifying
+                const remotes = await git.getRemotes(true);
+                if (remotes.length > 0) {
+                    originalRemoteUrl = remotes[0].refs.push || remotes[0].refs.fetch;
+                }
                 // Configure git credentials
                 await this.configureCredentials(stackPath, credentials);
             }
@@ -105,6 +111,15 @@ export class GitManager {
         } catch (error) {
             log.error("git-manager", `Error pushing changes: ${error}`);
             throw error;
+        } finally {
+            // Restore original remote URL if it was modified
+            if (originalRemoteUrl && credentials) {
+                try {
+                    await git.remote([ "set-url", "origin", originalRemoteUrl ]);
+                } catch (e) {
+                    log.warn("git-manager", `Could not restore original remote URL: ${e}`);
+                }
+            }
         }
     }
 
@@ -112,10 +127,16 @@ export class GitManager {
      * Pull changes from remote repository
      */
     static async pull(stackPath: string, credentials?: GitCredentials): Promise<void> {
-        try {
-            const git: SimpleGit = simpleGit(stackPath);
+        const git: SimpleGit = simpleGit(stackPath);
+        let originalRemoteUrl: string | null = null;
 
+        try {
             if (credentials) {
+                // Store original URL before modifying
+                const remotes = await git.getRemotes(true);
+                if (remotes.length > 0) {
+                    originalRemoteUrl = remotes[0].refs.push || remotes[0].refs.fetch;
+                }
                 // Configure git credentials
                 await this.configureCredentials(stackPath, credentials);
             }
@@ -124,6 +145,15 @@ export class GitManager {
         } catch (error) {
             log.error("git-manager", `Error pulling changes: ${error}`);
             throw error;
+        } finally {
+            // Restore original remote URL if it was modified
+            if (originalRemoteUrl && credentials) {
+                try {
+                    await git.remote([ "set-url", "origin", originalRemoteUrl ]);
+                } catch (e) {
+                    log.warn("git-manager", `Could not restore original remote URL: ${e}`);
+                }
+            }
         }
     }
 
@@ -146,17 +176,31 @@ export class GitManager {
             throw new Error("No remote URL found");
         }
 
-        // Parse the URL and inject credentials
-        const url = new URL(remoteUrl);
-        url.username = encodeURIComponent(credentials.username);
-        url.password = encodeURIComponent(credentials.password);
+        // Only handle HTTPS URLs, skip SSH URLs
+        if (!remoteUrl.startsWith("http://") && !remoteUrl.startsWith("https://")) {
+            log.warn("git-manager", "SSH URLs are not supported for credential injection. Please configure SSH keys separately.");
+            return;
+        }
 
-        // Set the remote URL with credentials
-        await git.remote([ "set-url", "origin", url.toString() ]);
+        try {
+            // Parse the URL and inject credentials
+            const url = new URL(remoteUrl);
+            url.username = encodeURIComponent(credentials.username);
+            url.password = encodeURIComponent(credentials.password);
+
+            // Set the remote URL with credentials temporarily (for this operation only)
+            await git.remote([ "set-url", "origin", url.toString() ]);
+        } catch (error) {
+            log.error("git-manager", `Error configuring credentials: ${error}`);
+            throw new Error("Failed to configure git credentials. Please check the remote URL format.");
+        }
     }
 
     /**
      * Save git credentials to settings
+     * WARNING: Credentials are stored in plain text in the database.
+     * For production use, consider implementing encryption or using
+     * a more secure credential storage mechanism.
      */
     static async saveCredentials(credentials: GitCredentials): Promise<void> {
         await Settings.set("gitUsername", credentials.username, "git");

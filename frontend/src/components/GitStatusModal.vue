@@ -228,7 +228,7 @@ export default {
 
         async commitAndPush() {
             if (!this.commitMessage) {
-                this.$root.toastError("Please enter a commit message");
+                this.$root.toastError(this.$t("pleaseEnterCommitMessage"));
                 return;
             }
 

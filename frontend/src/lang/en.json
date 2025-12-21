@@ -152,5 +152,6 @@
     "username": "Username",
     "token": "Token",
     "githubUsername": "GitHub username",
-    "githubPasswordOrToken": "GitHub password or personal access token"
+    "githubPasswordOrToken": "GitHub password or personal access token",
+    "pleaseEnterCommitMessage": "Please enter a commit message"
 }
