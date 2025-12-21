@@ -112,10 +112,10 @@ export class Stack {
     }
 
     validate() {
-        // Check name, allows [a-z][0-9] _ - / only (/ for nested directories)
+        // Check name, allows [a-z0-9] _ - / only (/ for nested directories)
         // Pattern ensures no leading/trailing slashes or consecutive slashes
         if (!this.name.match(/^[a-z0-9_-]+(?:\/[a-z0-9_-]+)*$/)) {
-            throw new ValidationError("Stack name can only contain [a-z][0-9] _ - / only");
+            throw new ValidationError("Stack name can only contain [a-z0-9] _ - / only");
         }
 
         // Check YAML format
@@ -281,16 +281,14 @@ export class Stack {
             for (const entry of entries) {
                 if (entry.isDirectory()) {
                     const relativePath = currentRelativePath ? path.join(currentRelativePath, entry.name) : entry.name;
-                    const fullPath = path.join(baseDir, relativePath);
+                    const dirPath = path.join(baseDir, relativePath);
 
-                    // Check if this directory contains a compose file
-                    let hasComposeFile = false;
-                    for (const composeFileName of acceptedComposeFileNames) {
-                        if (await fileExists(path.join(fullPath, composeFileName))) {
-                            hasComposeFile = true;
-                            break;
-                        }
-                    }
+                    // Check if this directory contains a compose file (check all types concurrently)
+                    const composeFileChecks = acceptedComposeFileNames.map(composeFileName =>
+                        fileExists(path.join(dirPath, composeFileName))
+                    );
+                    const composeFileResults = await Promise.all(composeFileChecks);
+                    const hasComposeFile = composeFileResults.some(result => result);
 
                     if (hasComposeFile) {
                         // This directory has a compose file, add it to the list
