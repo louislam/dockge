@@ -473,7 +473,7 @@ export default {
             this.yamlCodeChange();
 
         } else {
-            this.stack.name = this.$route.params.stackName;
+            this.stack.name = decodeURIComponent(this.$route.params.stackName);
             this.loadStack();
         }
 
