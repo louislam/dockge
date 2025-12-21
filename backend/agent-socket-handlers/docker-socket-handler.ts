@@ -402,6 +402,55 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 callbackError(e, callback);
             }
         });
+
+        agentSocket.on("gitClone", async (repoUrl : unknown, stackName : unknown, credentials : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(repoUrl) !== "string") {
+                    throw new ValidationError("Repository URL must be a string");
+                }
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                // Validate stack name
+                if (!stackName || stackName.trim() === "") {
+                    throw new ValidationError("Stack name cannot be empty");
+                }
+
+                // Target path is in the stacks directory
+                const targetPath = server.stacksDir + "/" + stackName;
+
+                // Check if directory already exists
+                const fs = await import("fs");
+                if (fs.existsSync(targetPath)) {
+                    throw new ValidationError("A stack with this name already exists");
+                }
+
+                // Get credentials from parameter or stored settings
+                let creds: GitCredentials | null = null;
+                if (credentials && typeof credentials === "object" && "username" in credentials && "password" in credentials) {
+                    creds = credentials as GitCredentials;
+                    // Save credentials for future use
+                    await GitManager.saveCredentials(creds);
+                } else {
+                    creds = await GitManager.getCredentials();
+                }
+
+                await GitManager.clone(repoUrl, targetPath, creds || undefined);
+
+                callbackResult({
+                    ok: true,
+                    msg: "Repository cloned successfully",
+                }, callback);
+
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
     }
 
     async saveStack(server : DockgeServer, name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown) : Promise<Stack> {

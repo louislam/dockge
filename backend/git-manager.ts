@@ -234,4 +234,38 @@ export class GitManager {
             return false;
         }
     }
+
+    /**
+     * Clone a remote git repository
+     * @param repoUrl The URL of the repository to clone
+     * @param targetPath The directory path where the repository should be cloned
+     * @param credentials Optional credentials for private repositories
+     */
+    static async clone(repoUrl: string, targetPath: string, credentials?: GitCredentials): Promise<void> {
+        try {
+            let cloneUrl = repoUrl;
+
+            // If credentials provided and URL is HTTPS, inject them
+            if (credentials && (repoUrl.startsWith("http://") || repoUrl.startsWith("https://"))) {
+                const url = new URL(repoUrl);
+                url.username = encodeURIComponent(credentials.username);
+                url.password = encodeURIComponent(credentials.password);
+                cloneUrl = url.toString();
+            }
+
+            const git: SimpleGit = simpleGit();
+            await git.clone(cloneUrl, targetPath);
+
+            // If credentials were used, remove them from the remote URL after cloning
+            if (credentials && (repoUrl.startsWith("http://") || repoUrl.startsWith("https://"))) {
+                const clonedGit: SimpleGit = simpleGit(targetPath);
+                await clonedGit.remote([ "set-url", "origin", repoUrl ]);
+            }
+
+            log.info("git-manager", `Repository cloned successfully to ${targetPath}`);
+        } catch (error) {
+            log.error("git-manager", `Error cloning repository: ${error}`);
+            throw error;
+        }
+    }
 }

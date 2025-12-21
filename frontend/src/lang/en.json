@@ -153,5 +153,13 @@
     "token": "Token",
     "githubUsername": "GitHub username",
     "githubPasswordOrToken": "GitHub password or personal access token",
-    "pleaseEnterCommitMessage": "Please enter a commit message"
+    "pleaseEnterCommitMessage": "Please enter a commit message",
+    "cloneRepository": "Clone Repository",
+    "repositoryUrl": "Repository URL",
+    "repositoryUrlPlaceholder": "https://github.com/username/repository.git",
+    "repositoryUrlHelp": "Enter the HTTPS or SSH URL of the Git repository",
+    "stackNamePlaceholder": "my-stack",
+    "privateRepositoryNotice": "For private repositories, please provide your GitHub credentials.",
+    "addCredentials": "Add Credentials for Private Repository",
+    "clone": "Clone"
 }
