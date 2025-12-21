@@ -64,7 +64,8 @@
                     />
                 </div>
                 <div class="mb-2">
-                    <label for="gitPassword" class="form-label">{{ $t('Password') }} / {{ $t('token') }}</label>
+                    <label for="gitPassword" class="form-label">{{ $t('Password') }}</label>
+                    <div class="form-text">{{ $t('githubPasswordOrToken') }}</div>
                     <input
                         id="gitPassword"
                         v-model="credentials.password"
@@ -141,8 +142,7 @@ export default {
             this.stackName = "";
             this.endpoint = "";
             this.needsCredentials = false;
-            this.credentials = { username: "",
-                password: "" };
+            this.credentials = { username: "", password: "" };
         },
 
         async checkStoredCredentials() {
