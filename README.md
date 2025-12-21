@@ -27,6 +27,7 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
 
 - 🚄 Reactive - Everything is just responsive. Progress (Pull/Up/Down) and terminal output are in real-time
 - 🐣 Easy-to-use & fancy UI - If you love Uptime Kuma's UI/UX, you will love this one too
+- 🔀 Git Integration - Check git status, add files, commit and push/pull changes directly from the UI
 
 ![](https://github.com/louislam/dockge/assets/1336778/89fc1023-b069-42c0-a01c-918c495f1a6a)
 
@@ -158,6 +159,19 @@ If you still need to manage something like docker networks, single containers, t
 #### Can I install both Dockge and Portainer?
 
 Yes, you can.
+
+#### How does Git Integration work?
+
+If your stack directory is a Git repository, you can use the "Git Status" button on the stack's page to:
+- View the current git status (branch, changed files, commits ahead/behind)
+- Add untracked files to staging
+- Commit staged changes
+- Push changes to the remote repository
+- Pull changes from the remote repository
+
+The first time you push or pull, you'll be asked for your GitHub credentials (username and password/token). These credentials are stored securely for future operations.
+
+**Note**: For SSH remotes, please configure SSH keys separately as the credential injection only works with HTTPS URLs.
 
 ## Others
 
