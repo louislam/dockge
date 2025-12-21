@@ -113,7 +113,8 @@ export class Stack {
 
     validate() {
         // Check name, allows [a-z][0-9] _ - / only (/ for nested directories)
-        if (!this.name.match(/^[a-z0-9_/-]+$/)) {
+        // Pattern ensures no leading/trailing slashes or consecutive slashes
+        if (!this.name.match(/^[a-z0-9_-]+(?:\/[a-z0-9_-]+)*$/)) {
             throw new ValidationError("Stack name can only contain [a-z][0-9] _ - / only");
         }
 
@@ -253,8 +254,8 @@ export class Stack {
     static async composeFileExists(stacksDir : string, filename : string) : Promise<boolean> {
         let filenamePath = path.join(stacksDir, filename);
         // Check if any compose file exists
-        for (const filename of acceptedComposeFileNames) {
-            let composeFile = path.join(filenamePath, filename);
+        for (const composeFileName of acceptedComposeFileNames) {
+            let composeFile = path.join(filenamePath, composeFileName);
             if (await fileExists(composeFile)) {
                 return true;
             }
