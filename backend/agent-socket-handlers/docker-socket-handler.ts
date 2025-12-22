@@ -318,6 +318,18 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Files must be an array");
                 }
 
+                if (files.length === 0) {
+                    callbackResult({
+                        ok: true,
+                        msg: "No files to unstage",
+                    }, callback);
+                    return;
+                }
+
+                if (!files.every(file => typeof file === "string")) {
+                    throw new ValidationError("All files must be strings");
+                }
+
                 const stack = await Stack.getStack(server, stackName);
                 await GitManager.unstageFiles(stack.path, files);
                 callbackResult({
