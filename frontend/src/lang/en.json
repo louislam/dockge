@@ -147,6 +147,7 @@
     "commitMessage": "Commit Message",
     "commitMessagePlaceholder": "Enter commit message...",
     "addFiles": "Add Files",
+    "unstageFiles": "Unstage Files",
     "commitAndPush": "Commit & Push",
     "pull": "Pull",
     "close": "Close",

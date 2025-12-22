@@ -81,6 +81,21 @@ export class GitManager {
     }
 
     /**
+     * Remove files from git staging area (unstage)
+     */
+    static async unstageFiles(stackPath: string, files: string[]): Promise<void> {
+        try {
+            // Find git root to ensure we're working from the repository root
+            const gitRoot = await this.getGitRoot(stackPath);
+            const git: SimpleGit = simpleGit(gitRoot);
+            await git.reset([ "--", ...files ]);
+        } catch (error) {
+            log.error("git-manager", `Error unstaging files: ${error}`);
+            throw error;
+        }
+    }
+
+    /**
      * Commit changes
      */
     static async commit(stackPath: string, message: string): Promise<void> {
