@@ -51,7 +51,13 @@
                 <h6>{{ $t('stagedChanges') }}:</h6>
                 <div class="file-list staged-list">
                     <div v-for="file in stagedFiles" :key="file.path" class="file-item d-flex align-items-center mb-2">
-                        <span class="me-2">✓</span>
+                        <input
+                            :id="'staged-file-' + file.path"
+                            v-model="selectedStagedFiles"
+                            type="checkbox"
+                            :value="file.path"
+                            class="form-check-input me-2"
+                        />
                         <span :class="getFileStatusClass(file.status)" class="me-2">
                             {{ file.status }}
                         </span>
@@ -118,6 +124,15 @@
                 {{ $t('addFiles') }}
             </button>
             <button
+                v-if="isGitRepo && selectedStagedFiles.length > 0"
+                class="btn btn-warning"
+                :disabled="processing"
+                @click="unstageFiles"
+            >
+                <font-awesome-icon icon="minus" class="me-1" />
+                {{ $t('unstageFiles') }}
+            </button>
+            <button
                 v-if="isGitRepo && gitStatus.files.some(f => f.staged)"
                 class="btn btn-success"
                 :disabled="processing || !commitMessage"
@@ -172,6 +187,7 @@ export default {
                 behind: 0,
             },
             selectedFiles: [],
+            selectedStagedFiles: [],
             commitMessage: "",
             showCredentialsDialog: false,
             credentials: {
@@ -198,6 +214,7 @@ export default {
         onHide() {
             this.show = false;
             this.selectedFiles = [];
+            this.selectedStagedFiles = [];
             this.commitMessage = "";
             this.showCredentialsDialog = false;
             this.credentials = { username: "",
@@ -241,6 +258,22 @@ export default {
                 this.$root.toastRes(res);
                 if (res.ok) {
                     this.selectedFiles = [];
+                    this.loadGitStatus();
+                }
+            });
+        },
+
+        async unstageFiles() {
+            if (this.selectedStagedFiles.length === 0) {
+                return;
+            }
+
+            this.processing = true;
+            this.$root.emitAgent(this.endpoint, "gitUnstageFiles", this.stackName, this.selectedStagedFiles, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+                if (res.ok) {
+                    this.selectedStagedFiles = [];
                     this.loadGitStatus();
                 }
             });

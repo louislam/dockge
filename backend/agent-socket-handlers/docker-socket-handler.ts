@@ -306,6 +306,29 @@ export class DockerSocketHandler extends AgentSocketHandler {
             }
         });
 
+        agentSocket.on("gitUnstageFiles", async (stackName : unknown, files : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                if (!Array.isArray(files)) {
+                    throw new ValidationError("Files must be an array");
+                }
+
+                const stack = await Stack.getStack(server, stackName);
+                await GitManager.unstageFiles(stack.path, files);
+                callbackResult({
+                    ok: true,
+                    msg: "Files removed from staging",
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
         agentSocket.on("gitCommit", async (stackName : unknown, message : unknown, callback) => {
             try {
                 checkLogin(socket);
