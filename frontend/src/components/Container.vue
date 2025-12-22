@@ -15,8 +15,8 @@
                 </div>
             </div>
             <div class="col-5">
-                <div class="function">
-                    <router-link v-if="!isEditMode" class="btn btn-normal" :to="terminalRouteLink" disabled="">
+                <div class="function" :class="{notallowed:!(!isEditMode && active)}">
+                    <router-link v-if="!isEditMode" class="btn btn-normal" :to="terminalRouteLink" :class="{disabledlink:!(!isEditMode && active)}">
                         <font-awesome-icon icon="terminal" />
                         Bash
                     </router-link>
@@ -159,7 +159,11 @@ export default defineComponent({
         status: {
             type: String,
             default: "N/A",
-        }
+        },
+        active: {
+            type: Boolean,
+            default: false,
+        },
     },
     emits: [
     ],
@@ -308,5 +312,16 @@ export default defineComponent({
         align-items: center;
         justify-content: end;
     }
+}
+
+.disabledlink {
+    pointer-events: none;
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
+}
+
+.notallowed{
+    cursor: not-allowed;
 }
 </style>
