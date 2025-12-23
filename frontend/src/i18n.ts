@@ -31,6 +31,8 @@ const languageList = {
     "vi": "Tiếng Việt",
     "hu": "Magyar",
     "ca": "Català",
+    "ga": "Gaeilge",
+    "de-CH": "Schwiizerdütsch",
 };
 
 let messages = {

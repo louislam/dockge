@@ -1,7 +1,7 @@
 <template>
     <transition name="slide-fade" appear>
         <div>
-            <h1 v-if="isAdd" class="mb-3">Compose</h1>
+            <h1 v-if="isAdd" class="mb-3">{{ $t("compose") }}</h1>
             <h1 v-else class="mb-3">
                 <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
                 <span v-if="$root.agentCount > 1" class="agent-name">
@@ -112,7 +112,7 @@
                     <div v-if="isEditMode" class="input-group mb-3">
                         <input
                             v-model="newContainerName"
-                            placeholder="New Container Name..."
+                            :placeholder="$t(`New Container Name...`)"
                             class="form-control"
                             @keyup.enter="addContainer"
                         />
@@ -151,7 +151,7 @@
 
                     <!-- Combined Terminal Output -->
                     <div v-show="!isEditMode">
-                        <h4 class="mb-3">Terminal</h4>
+                        <h4 class="mb-3">{{ $t("terminal") }}</h4>
                         <Terminal
                             ref="combinedTerminal"
                             class="mb-3 terminal"
@@ -159,7 +159,7 @@
                             :endpoint="endpoint"
                             :rows="combinedTerminalRows"
                             :cols="combinedTerminalCols"
-                            style="height: 350px;"
+                            style="height: 315px;"
                         ></Terminal>
                     </div>
                 </div>
@@ -168,16 +168,18 @@
 
                     <!-- YAML editor -->
                     <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
-                        <prism-editor
+                        <code-mirror
                             ref="editor"
                             v-model="stack.composeYAML"
-                            class="yaml-editor"
-                            :highlight="highlighterYAML"
-                            line-numbers :readonly="!isEditMode"
-                            @input="yamlCodeChange"
-                            @focus="editorFocus = true"
-                            @blur="editorFocus = false"
-                        ></prism-editor>
+                            :extensions="extensions"
+                            minimal
+                            wrap="true"
+                            dark="true"
+                            tab="true"
+                            :disabled="!isEditMode"
+                            :hasFocus="editorFocus"
+                            @change="yamlCodeChange"
+                        />
                     </div>
                     <div v-if="isEditMode" class="mb-3">
                         {{ yamlError }}
@@ -187,15 +189,18 @@
                     <div v-if="isEditMode">
                         <h4 class="mb-3">.env</h4>
                         <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
-                            <prism-editor
+                            <code-mirror
                                 ref="editor"
                                 v-model="stack.composeENV"
-                                class="env-editor"
-                                :highlight="highlighterENV"
-                                line-numbers :readonly="!isEditMode"
-                                @focus="editorFocus = true"
-                                @blur="editorFocus = false"
-                            ></prism-editor>
+                                :extensions="extensionsEnv"
+                                minimal
+                                wrap="true"
+                                dark="true"
+                                tab="true"
+                                :disabled="!isEditMode"
+                                :hasFocus="editorFocus"
+                                @change="yamlCodeChange"
+                            />
                         </div>
                     </div>
 
@@ -230,7 +235,7 @@
             </div>
 
             <!-- Delete Dialog -->
-            <BModal v-model="showDeleteDialog" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
+            <BModal v-model="showDeleteDialog" :cancelTitle="$t('cancel')" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
                 {{ $t("deleteStackMsg") }}
             </BModal>
         </div>
@@ -238,13 +243,13 @@
 </template>
 
 <script>
-import { highlight, languages } from "prismjs/components/prism-core";
-import { PrismEditor } from "vue-prism-editor";
-import "prismjs/components/prism-yaml";
+import CodeMirror from "vue-codemirror6";
+import { yaml } from "@codemirror/lang-yaml";
+import { python } from "@codemirror/lang-python";
+import { dracula as editorTheme } from "thememirror";
+import { lineNumbers, EditorView } from "@codemirror/view";
 import { parseDocument, Document } from "yaml";
 
-import "prismjs/themes/prism-tomorrow.css";
-import "vue-prism-editor/dist/prismeditor.min.css";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
     COMBINED_TERMINAL_COLS,
@@ -258,8 +263,9 @@ import {
 import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
 import dotenv from "dotenv";
+import { ref } from "vue";
 
-const template = `version: "3.8"
+const template = `
 services:
   nginx:
     image: nginx:latest
@@ -272,17 +278,12 @@ const envDefault = "# VARIABLE=value #comment";
 let yamlErrorTimeout = null;
 
 let serviceStatusTimeout = null;
-let prismjsSymbolDefinition = {
-    "symbol": {
-        pattern: /(?<!\$)\$(\{[^{}]*\}|\w+)/,
-    }
-};
 
 export default {
     components: {
         NetworkInput,
         FontAwesomeIcon,
-        PrismEditor,
+        CodeMirror,
         BModal,
     },
     beforeRouteUpdate(to, from, next) {
@@ -291,10 +292,35 @@ export default {
     beforeRouteLeave(to, from, next) {
         this.exitConfirm(next);
     },
+    setup() {
+        const editorFocus = ref(false);
+
+        const focusEffectHandler = (state, focusing) => {
+            editorFocus.value = focusing;
+            return null;
+        };
+
+        const extensions = [
+            editorTheme,
+            yaml(),
+            lineNumbers(),
+            EditorView.focusChangeEffect.of(focusEffectHandler)
+        ];
+
+        const extensionsEnv = [
+            editorTheme,
+            python(),
+            lineNumbers(),
+            EditorView.focusChangeEffect.of(focusEffectHandler)
+        ];
+
+        return { extensions,
+            extensionsEnv,
+            editorFocus };
+    },
     yamlDoc: null,  // For keeping the yaml comments
     data() {
         return {
-            editorFocus: false,
             jsonConfig: {},
             envsubstJSONConfig: {},
             yamlError: "",
@@ -315,7 +341,6 @@ export default {
         };
     },
     computed: {
-
         endpointDisplay() {
             return this.$root.endpointDisplayFunction(this.endpoint);
         },
@@ -492,6 +517,11 @@ export default {
         },
 
         requestServiceStatus() {
+            // Do not request if it is add mode
+            if (this.isAdd) {
+                return;
+            }
+
             this.$root.emitAgent(this.endpoint, "serviceStatusList", this.stack.name, (res) => {
                 if (res.ok) {
                     this.serviceStatusList = res.serviceStatusList;
@@ -504,7 +534,7 @@ export default {
 
         exitConfirm(next) {
             if (this.isEditMode) {
-                if (confirm("You are currently editing a stack. Are you sure you want to leave?")) {
+                if (confirm(this.$t("confirmLeaveStack"))) {
                     this.exitAction();
                     next();
                 } else {
@@ -660,46 +690,6 @@ export default {
             this.isEditMode = false;
         },
 
-        highlighterYAML(code) {
-            if (!languages.yaml_with_symbols) {
-                languages.yaml_with_symbols = languages.insertBefore("yaml", "punctuation", {
-                    "symbol": prismjsSymbolDefinition["symbol"]
-                });
-            }
-            return highlight(code, languages.yaml_with_symbols);
-        },
-
-        highlighterENV(code) {
-            if (!languages.docker_env) {
-                languages.docker_env = {
-                    "comment": {
-                        pattern: /(^#| #).*$/m,
-                        greedy: true
-                    },
-                    "keyword": {
-                        pattern: /^\w*(?=[:=])/m,
-                        greedy: true
-                    },
-                    "value": {
-                        pattern: /(?<=[:=]).*?((?= #)|$)/m,
-                        greedy: true,
-                        inside: {
-                            "string": [
-                                {
-                                    pattern: /^ *'.*?(?<!\\)'/m,
-                                },
-                                {
-                                    pattern: /^ *".*?(?<!\\)"|^.*$/m,
-                                    inside: prismjsSymbolDefinition
-                                },
-                            ],
-                        },
-                    },
-                };
-            }
-            return highlight(code, languages.docker_env);
-        },
-
         yamlToJSON(yaml) {
             let doc = parseDocument(yaml);
             if (doc.errors.length > 0) {
@@ -801,9 +791,6 @@ export default {
 .editor-box {
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
-    &.edit-mode {
-        background-color: #2c2f38 !important;
-    }
 }
 
 .agent-name {

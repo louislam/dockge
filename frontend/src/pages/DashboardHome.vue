@@ -29,7 +29,7 @@
                     <!-- Docker Run -->
                     <h2 class="mb-3">{{ $t("Docker Run") }}</h2>
                     <div class="mb-3">
-                        <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run" required placeholder="docker run ..."></textarea>
+                        <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run shadow-box" required placeholder="docker run ..."></textarea>
                     </div>
 
                     <button class="btn-normal btn mb-4" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
@@ -326,7 +326,6 @@ table {
 }
 
 .docker-run {
-    background-color: $dark-bg !important;
     border: none;
     font-family: 'JetBrains Mono', monospace;
     font-size: 15px;

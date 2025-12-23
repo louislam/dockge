@@ -38,6 +38,11 @@ export class TerminalSocketHandler extends AgentSocketHandler {
             try {
                 checkLogin(socket);
 
+                // Throw an error if console is not enabled
+                if (!server.config.enableConsole) {
+                    throw new ValidationError("Console is not enabled.");
+                }
+
                 // TODO: Reset the name here, force one main terminal for now
                 terminalName = "console";
 
@@ -60,6 +65,18 @@ export class TerminalSocketHandler extends AgentSocketHandler {
 
                 callbackResult({
                     ok: true,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // Check if MainTerminal is enabled
+        agentSocket.on("checkMainTerminal", async (callback) => {
+            try {
+                checkLogin(socket);
+                callbackResult({
+                    ok: server.config.enableConsole,
                 }, callback);
             } catch (e) {
                 callbackError(e, callback);

@@ -14,7 +14,7 @@
                 </option>
             </select>
         </div>
-        <div v-show="false" class="my-4">
+        <div v-show="true" class="my-4">
             <label for="timezone" class="form-label">{{ $t("Theme") }}</label>
             <div>
                 <div
