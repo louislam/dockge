@@ -3,13 +3,17 @@
         <div v-if="settingsLoaded" class="my-4">
             <form class="my-4" autocomplete="off" @submit.prevent="saveGeneral">
                 <div class="shadow-box mb-3 editor-box edit-mode">
-                    <prism-editor
+                    <code-mirror
                         ref="editor"
                         v-model="settings.globalENV"
-                        class="env-editor"
-                        :highlight="highlighterENV"
-                        line-numbers
-                    ></prism-editor>
+                        :extensions="extensionsEnv"
+                        minimal
+                        wrap="true"
+                        dark="true"
+                        tab="true"
+                        :hasFocus="editorFocus"
+                        @change="onChange"
+                    />
                 </div>
 
                 <div class="my-4">
@@ -26,23 +30,34 @@
 </template>
 
 <script>
-import { highlight, languages } from "prismjs/components/prism-core";
-import { PrismEditor } from "vue-prism-editor";
-
-let prismjsSymbolDefinition = {
-    "symbol": {
-        pattern: /(?<!\$)\$(\{[^{}]*\}|\w+)/,
-    }
-};
+import CodeMirror from "vue-codemirror6";
+import { python } from "@codemirror/lang-python"; // good enough for .env key=value highlighting
+import { dracula as editorTheme } from "thememirror";
+import { lineNumbers, EditorView } from "@codemirror/view";
+import { ref } from "vue";
 
 export default {
+    name: "GlobalEnv",
     components: {
-        PrismEditor,
+        CodeMirror,
     },
 
-    data() {
-        return {
+    setup() {
+        const editorFocus = ref(false);
+
+        const focusEffectHandler = (state, focusing) => {
+            editorFocus.value = focusing;
+            return null;
         };
+
+        const extensionsEnv = [
+            editorTheme,
+            python(),
+            lineNumbers(),
+            EditorView.focusChangeEffect.of(focusEffectHandler),
+        ];
+
+        return { editorFocus, extensionsEnv };
     },
 
     computed: {
@@ -54,7 +69,7 @@ export default {
         },
         settingsLoaded() {
             return this.$parent.$parent.$parent.settingsLoaded;
-        }
+        },
     },
 
     methods: {
@@ -63,45 +78,18 @@ export default {
             this.saveSettings();
         },
 
-        highlighterENV(code) {
-            if (!languages.docker_env) {
-                languages.docker_env = {
-                    "comment": {
-                        pattern: /(^#| #).*$/m,
-                        greedy: true
-                    },
-                    "keyword": {
-                        pattern: /^\w*(?=[:=])/m,
-                        greedy: true
-                    },
-                    "value": {
-                        pattern: /(?<=[:=]).*?((?= #)|$)/m,
-                        greedy: true,
-                        inside: {
-                            "string": [
-                                {
-                                    pattern: /^ *'.*?(?<!\\)'/m,
-                                },
-                                {
-                                    pattern: /^ *".*?(?<!\\)"|^.*$/m,
-                                    inside: prismjsSymbolDefinition
-                                },
-                            ],
-                        },
-                    },
-                };
-            }
-            return highlight(code, languages.docker_env);
+        onChange() {
+            // hook for future live validation if desired
         },
     },
 };
 </script>
 
 <style scoped lang="scss">
-
 .editor-box {
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
+
     &.edit-mode {
         background-color: #2c2f38 !important;
     }
