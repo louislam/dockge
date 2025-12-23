@@ -167,16 +167,18 @@
 
                     <!-- YAML editor -->
                     <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
-                        <prism-editor
+                        <code-mirror
                             ref="editor"
                             v-model="stack.composeYAML"
-                            class="yaml-editor"
-                            :highlight="highlighterYAML"
-                            line-numbers :readonly="!isEditMode"
-                            @input="yamlCodeChange"
-                            @focus="editorFocus = true"
-                            @blur="editorFocus = false"
-                        ></prism-editor>
+                            :extensions="extensions"
+                            minimal
+                            wrap="true"
+                            dark="true"
+                            tab="true"
+                            :disabled="!isEditMode"
+                            :hasFocus="editorFocus"
+                            @change="yamlCodeChange"
+                        />
                     </div>
                     <div v-if="isEditMode" class="mb-3">
                         {{ yamlError }}
@@ -186,15 +188,18 @@
                     <div v-if="isEditMode">
                         <h4 class="mb-3">.env</h4>
                         <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
-                            <prism-editor
+                            <code-mirror
                                 ref="editor"
                                 v-model="stack.composeENV"
-                                class="env-editor"
-                                :highlight="highlighterENV"
-                                line-numbers :readonly="!isEditMode"
-                                @focus="editorFocus = true"
-                                @blur="editorFocus = false"
-                            ></prism-editor>
+                                :extensions="extensionsEnv"
+                                minimal
+                                wrap="true"
+                                dark="true"
+                                tab="true"
+                                :disabled="!isEditMode"
+                                :hasFocus="editorFocus"
+                                @change="yamlCodeChange"
+                            />
                         </div>
                     </div>
 
@@ -237,13 +242,13 @@
 </template>
 
 <script>
-import { highlight, languages } from "prismjs/components/prism-core";
-import { PrismEditor } from "vue-prism-editor";
-import "prismjs/components/prism-yaml";
+import CodeMirror from "vue-codemirror6";
+import { yaml } from "@codemirror/lang-yaml";
+import { python } from "@codemirror/lang-python";
+import { dracula as editorTheme } from "thememirror";
+import { lineNumbers, EditorView } from "@codemirror/view";
 import { parseDocument, Document } from "yaml";
 
-import "prismjs/themes/prism-tomorrow.css";
-import "vue-prism-editor/dist/prismeditor.min.css";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
     COMBINED_TERMINAL_COLS,
@@ -257,6 +262,7 @@ import {
 import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
 import dotenv from "dotenv";
+import { ref } from "vue";
 
 const template = `
 services:
@@ -271,17 +277,12 @@ const envDefault = "# VARIABLE=value #comment";
 let yamlErrorTimeout = null;
 
 let serviceStatusTimeout = null;
-let prismjsSymbolDefinition = {
-    "symbol": {
-        pattern: /(?<!\$)\$(\{[^{}]*\}|\w+)/,
-    }
-};
 
 export default {
     components: {
         NetworkInput,
         FontAwesomeIcon,
-        PrismEditor,
+        CodeMirror,
         BModal,
     },
     beforeRouteUpdate(to, from, next) {
@@ -290,10 +291,35 @@ export default {
     beforeRouteLeave(to, from, next) {
         this.exitConfirm(next);
     },
+    setup() {
+        const editorFocus = ref(false);
+
+        const focusEffectHandler = (state, focusing) => {
+            editorFocus.value = focusing;
+            return null;
+        };
+
+        const extensions = [
+            editorTheme,
+            yaml(),
+            lineNumbers(),
+            EditorView.focusChangeEffect.of(focusEffectHandler)
+        ];
+
+        const extensionsEnv = [
+            editorTheme,
+            python(),
+            lineNumbers(),
+            EditorView.focusChangeEffect.of(focusEffectHandler)
+        ];
+
+        return { extensions,
+            extensionsEnv,
+            editorFocus };
+    },
     yamlDoc: null,  // For keeping the yaml comments
     data() {
         return {
-            editorFocus: false,
             jsonConfig: {},
             envsubstJSONConfig: {},
             yamlError: "",
@@ -314,7 +340,6 @@ export default {
         };
     },
     computed: {
-
         endpointDisplay() {
             return this.$root.endpointDisplayFunction(this.endpoint);
         },
@@ -662,46 +687,6 @@ export default {
         discardStack() {
             this.loadStack();
             this.isEditMode = false;
-        },
-
-        highlighterYAML(code) {
-            if (!languages.yaml_with_symbols) {
-                languages.yaml_with_symbols = languages.insertBefore("yaml", "punctuation", {
-                    "symbol": prismjsSymbolDefinition["symbol"]
-                });
-            }
-            return highlight(code, languages.yaml_with_symbols);
-        },
-
-        highlighterENV(code) {
-            if (!languages.docker_env) {
-                languages.docker_env = {
-                    "comment": {
-                        pattern: /(^#| #).*$/m,
-                        greedy: true
-                    },
-                    "keyword": {
-                        pattern: /^\w*(?=[:=])/m,
-                        greedy: true
-                    },
-                    "value": {
-                        pattern: /(?<=[:=]).*?((?= #)|$)/m,
-                        greedy: true,
-                        inside: {
-                            "string": [
-                                {
-                                    pattern: /^ *'.*?(?<!\\)'/m,
-                                },
-                                {
-                                    pattern: /^ *".*?(?<!\\)"|^.*$/m,
-                                    inside: prismjsSymbolDefinition
-                                },
-                            ],
-                        },
-                    },
-                };
-            }
-            return highlight(code, languages.docker_env);
         },
 
         yamlToJSON(yaml) {

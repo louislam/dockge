@@ -593,9 +593,6 @@ optgroup {
     color: $primary;
 }
 
-.prism-editor__textarea {
-    outline: none !important;
-}
 
 h5.settings-subheading::after {
     content: "";
@@ -676,18 +673,25 @@ code {
     color: $dark-font-color3;
 }
 
-// Vue Prism Editor bug - workaround
-// https://github.com/koca/vue-prism-editor/issues/87
-/*
-.prism-editor__textarea {
-    width: 999999px !important;
+
+.cm-gutters {
+	background-color: transparent !important;
 }
-.prism-editor__editor {
-    white-space: pre !important;
+.dark [contenteditable="true"] {
+	background-color: transparent !important;
 }
-.prism-editor__container {
-    overflow-x: scroll !important;
-}*/
+.cm-editor {
+	background-color: transparent !important;
+}
+.cm-activeLine, .cm-activeLineGutter {
+	background-color: transparent !important;
+}
+.cm-selectionBackground {
+    background-color: #74c2ff3d !important;
+}
+.cm-focused {
+    outline: none !important;
+}
 
 // Localization
 @import "localization.scss";
