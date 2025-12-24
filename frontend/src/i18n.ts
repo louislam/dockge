@@ -33,6 +33,8 @@ const languageList = {
     "ca": "Català",
     "ga": "Gaeilge",
     "de-CH": "Schwiizerdütsch",
+    "mag": "मगही",
+    "mai": "मैथिली",
 };
 
 let messages = {
