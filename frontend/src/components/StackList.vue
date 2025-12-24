@@ -19,6 +19,12 @@
                         <input v-model="searchText" class="form-control search-input" autocomplete="off" />
                     </form>
                 </div>
+                <div class="update-all-wrapper">
+                    <button class="btn btn-primary" :disabled="processing || Object.keys(sortedStackList).length === 0" @click="updateAll">
+                        <font-awesome-icon icon="fa-cloud-arrow-down me-1" />
+                        {{ $t("updateAll") }}
+                    </button>
+                </div>
             </div>
 
             <!-- TODO -->
@@ -346,6 +352,17 @@ export default {
 
             this.cancelSelectMode();
         },
+        updateAll() {
+            console.log("updateAll");
+            console.log(this.sortedStackList);
+            for (let stack of this.sortedStackList) {
+                console.log(stack);
+                this.$root.emitAgent(stack.endpoint, "updateStack", stack.name, (res) => {
+                    this.processing = false;
+                    this.$root.toastRes(res);
+                });
+            }
+        },
     },
 };
 </script>
@@ -417,7 +434,7 @@ export default {
 }
 
 .search-input {
-    max-width: 15em;
+    max-width: 10em;
 }
 
 .stack-item {
