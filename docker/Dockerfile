@@ -4,9 +4,19 @@
 FROM louislam/dockge:build-healthcheck AS build_healthcheck
 
 ############################################
-# Build
+# Build frontend
 ############################################
-FROM louislam/dockge:base AS build
+FROM louislam/dockge:base AS build_frontend
+WORKDIR /app
+COPY --chown=node:node . .
+RUN --mount=type=cache,id=npm,target=/npm/store \
+    npm install && \
+    npm run build:frontend
+
+############################################
+# Install node modules
+############################################
+FROM louislam/dockge:base AS build_nodemodules
 WORKDIR /app
 COPY --chown=node:node  ./package.json ./package.json
 COPY --chown=node:node  ./package-lock.json ./package-lock.json
@@ -18,8 +28,9 @@ RUN npm ci --omit=dev
 FROM louislam/dockge:base AS release
 WORKDIR /app
 COPY --chown=node:node --from=build_healthcheck /app/extra/healthcheck /app/extra/healthcheck
-COPY --from=build /app/node_modules /app/node_modules
-COPY --chown=node:node  . .
+COPY --from=build_frontend /app/frontend-dist /app/frontend-dist
+COPY --from=build_nodemodules /app/node_modules /app/node_modules
+COPY --chown=node:node . .
 RUN mkdir ./data
 
 
