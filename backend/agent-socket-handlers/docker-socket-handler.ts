@@ -8,10 +8,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
     create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
         // Do not call super.create()
 
-        agentSocket.on("deployStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
+        agentSocket.on("deployStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, composeOverrideYAML : unknown, isAdd : unknown, callback) => {
             try {
                 checkLogin(socket);
-                const stack = await this.saveStack(server, name, composeYAML, composeENV, isAdd);
+                const stack = await this.saveStack(server, name, composeYAML, composeENV, composeOverrideYAML, isAdd);
                 await stack.deploy(socket);
                 server.sendStackList();
                 callbackResult({
@@ -25,10 +25,10 @@ export class DockerSocketHandler extends AgentSocketHandler {
             }
         });
 
-        agentSocket.on("saveStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
+        agentSocket.on("saveStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, composeOverrideYAML : unknown, isAdd : unknown, callback) => {
             try {
                 checkLogin(socket);
-                await this.saveStack(server, name, composeYAML, composeENV, isAdd);
+                await this.saveStack(server, name, composeYAML, composeENV, composeOverrideYAML, isAdd);
                 callbackResult({
                     ok: true,
                     msg: "Saved",
@@ -253,7 +253,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
         });
     }
 
-    async saveStack(server : DockgeServer, name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown) : Promise<Stack> {
+    async saveStack(server : DockgeServer, name : unknown, composeYAML : unknown, composeENV : unknown, composeOverrideYAML : unknown, isAdd : unknown) : Promise<Stack> {
         // Check types
         if (typeof(name) !== "string") {
             throw new ValidationError("Name must be a string");
@@ -264,14 +264,16 @@ export class DockerSocketHandler extends AgentSocketHandler {
         if (typeof(composeENV) !== "string") {
             throw new ValidationError("Compose ENV must be a string");
         }
+        if (typeof(composeOverrideYAML) !== "string") {
+            throw new ValidationError("Compose Override YAML must be a string");
+        }
         if (typeof(isAdd) !== "boolean") {
             throw new ValidationError("isAdd must be a boolean");
         }
 
-        const stack = new Stack(server, name, composeYAML, composeENV, false);
+        const stack = new Stack(server, name, composeYAML, composeENV, composeOverrideYAML, false);
         await stack.save(isAdd);
         return stack;
     }
 
 }
-

@@ -114,6 +114,13 @@ export const acceptedComposeFileNames = [
     "compose.yml",
 ];
 
+export const acceptedComposeOverrideFileNames = [
+    "compose.override.yaml",
+    "compose.override.yml",
+    "docker-compose.override.yaml",
+    "docker-compose.override.yml",
+];
+
 /**
  * Generate a decimal integer number from a string
  * @param str Input
@@ -427,4 +434,3 @@ function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
         pair.value.value = envsubst(pair.value.value, env);
     }
 }
-
