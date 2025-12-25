@@ -31,19 +31,36 @@ export class GitManager {
             const git: SimpleGit = simpleGit(gitRoot);
             const status: StatusResult = await git.status();
 
+            // Create a set of all staged file paths to exclude them from unstaged lists
+            const stagedFilePaths = new Set([
+                ...status.staged,
+                ...status.created,
+                ...status.renamed.map(file => file.to),
+            ]);
+
             const files = [
-                ...status.modified.map(file => ({ path: file,
-                    status: "modified",
-                    staged: false })),
-                ...status.not_added.map(file => ({ path: file,
-                    status: "untracked",
-                    staged: false })),
+                // Only include modified files that are NOT staged
+                ...status.modified
+                    .filter(file => !stagedFilePaths.has(file))
+                    .map(file => ({ path: file,
+                        status: "modified",
+                        staged: false })),
+                // Only include untracked files that are NOT staged
+                ...status.not_added
+                    .filter(file => !stagedFilePaths.has(file))
+                    .map(file => ({ path: file,
+                        status: "untracked",
+                        staged: false })),
+                // Only include deleted files that are NOT staged
+                ...status.deleted
+                    .filter(file => !stagedFilePaths.has(file))
+                    .map(file => ({ path: file,
+                        status: "deleted",
+                        staged: false })),
+                // Staged files (created, renamed, and explicitly staged)
                 ...status.created.map(file => ({ path: file,
                     status: "new file",
                     staged: true })),
-                ...status.deleted.map(file => ({ path: file,
-                    status: "deleted",
-                    staged: false })),
                 ...status.renamed.map(file => ({ path: file.to,
                     status: "renamed",
                     staged: true })),

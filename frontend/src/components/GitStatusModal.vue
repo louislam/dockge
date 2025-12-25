@@ -27,41 +27,53 @@
             </div>
 
             <!-- Unstaged Files List -->
-            <div v-if="unstagedFiles.length > 0" class="mb-3">
-                <h6>{{ $t('unstagedChanges') }}:</h6>
-                <div class="file-list">
-                    <div v-for="file in unstagedFiles" :key="file.path" class="file-item d-flex align-items-center mb-2">
-                        <input
-                            :id="'file-' + file.path"
-                            v-model="selectedFiles"
-                            type="checkbox"
-                            :value="file.path"
-                            class="form-check-input me-2"
-                        />
-                        <span :class="getFileStatusClass(file.status)" class="me-2">
-                            {{ file.status }}
-                        </span>
-                        <span class="text-monospace">{{ file.path }}</span>
+            <div v-if="unstagedFiles.length > 0" class="mb-4">
+                <h6 class="section-title unstaged-title">
+                    <font-awesome-icon icon="circle" class="me-2 unstaged-icon" />
+                    {{ $t('unstagedChanges') }}
+                    <span class="badge bg-secondary ms-2">{{ unstagedFiles.length }}</span>
+                </h6>
+                <div class="file-list unstaged-list">
+                    <div v-for="file in unstagedFiles" :key="file.path" class="file-item unstaged-item">
+                        <div class="file-item-content">
+                            <input
+                                :id="'file-' + file.path"
+                                v-model="selectedFiles"
+                                type="checkbox"
+                                :value="file.path"
+                                class="form-check-input file-checkbox"
+                            />
+                            <span :class="getFileStatusClass(file.status)" class="file-status-badge">
+                                {{ file.status }}
+                            </span>
+                            <span class="file-path text-monospace">{{ file.path }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Staged Files List -->
-            <div v-if="stagedFiles.length > 0" class="mb-3">
-                <h6>{{ $t('stagedChanges') }}:</h6>
+            <div v-if="stagedFiles.length > 0" class="mb-4">
+                <h6 class="section-title staged-title">
+                    <font-awesome-icon icon="check-circle" class="me-2 staged-icon" />
+                    {{ $t('stagedChanges') }}
+                    <span class="badge bg-success ms-2">{{ stagedFiles.length }}</span>
+                </h6>
                 <div class="file-list staged-list">
-                    <div v-for="file in stagedFiles" :key="file.path" class="file-item d-flex align-items-center mb-2">
-                        <input
-                            :id="'staged-file-' + file.path"
-                            v-model="selectedStagedFiles"
-                            type="checkbox"
-                            :value="file.path"
-                            class="form-check-input me-2"
-                        />
-                        <span :class="getFileStatusClass(file.status)" class="me-2">
-                            {{ file.status }}
-                        </span>
-                        <span class="text-monospace">{{ file.path }}</span>
+                    <div v-for="file in stagedFiles" :key="file.path" class="file-item staged-item">
+                        <div class="file-item-content">
+                            <input
+                                :id="'staged-file-' + file.path"
+                                v-model="selectedStagedFiles"
+                                type="checkbox"
+                                :value="file.path"
+                                class="form-check-input file-checkbox"
+                            />
+                            <span :class="getFileStatusClass(file.status)" class="file-status-badge">
+                                {{ file.status }}
+                            </span>
+                            <span class="file-path text-monospace">{{ file.path }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -343,27 +355,219 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import "../styles/vars.scss";
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.unstaged-title {
+    color: $warning;
+}
+
+.staged-title {
+    color: #86e6a9;
+}
+
+.unstaged-icon {
+    color: $warning;
+    font-size: 0.85rem;
+}
+
+.staged-icon {
+    color: #86e6a9;
+    font-size: 0.85rem;
+}
+
 .file-list {
     max-height: 300px;
     overflow-y: auto;
-    border: 1px solid #dee2e6;
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
     padding: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+
+    .dark & {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        background-color: $dark-bg2;
+        border-color: $dark-border-color;
+    }
 }
 
-.file-list.staged-list {
-    background-color: #f8f9fa;
-    border-color: #28a745;
+.unstaged-list {
+    border-left: 3px solid $warning;
+
+    .dark & {
+        background-color: $dark-bg2;
+        border-color: $dark-border-color;
+    }
+}
+
+.staged-list {
+    background: linear-gradient(135deg, #f0f9f4 0%, #e7faec 100%);
+    border: 1px solid #86e6a9;
+    border-left: 3px solid #86e6a9;
+
+    .dark & {
+        background: linear-gradient(135deg, rgba(134, 230, 169, 0.1) 0%, rgba(134, 230, 169, 0.05) 100%);
+        border-color: #86e6a9;
+    }
 }
 
 .file-item {
-    padding: 0.25rem;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.unstaged-item {
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+
+    &:hover {
+        background-color: #f8f9fa;
+        border-color: $warning;
+        transform: translateX(2px);
+        box-shadow: 0 2px 4px rgba(248, 163, 6, 0.2);
+    }
+
+    .dark & {
+        background-color: $dark-bg;
+        border-color: $dark-border-color;
+
+        &:hover {
+            background-color: lighten($dark-bg, 3%);
+            border-color: $warning;
+            box-shadow: 0 2px 8px rgba(248, 163, 6, 0.3);
+        }
+    }
+}
+
+.staged-item {
+    background-color: #ffffff;
+    border: 1px solid #d1e7dd;
+
+    &:hover {
+        background-color: #f0f9f4;
+        border-color: #86e6a9;
+        transform: translateX(2px);
+        box-shadow: 0 2px 4px rgba(134, 230, 169, 0.2);
+    }
+
+    .dark & {
+        background-color: rgba(134, 230, 169, 0.05);
+        border-color: rgba(134, 230, 169, 0.3);
+
+        &:hover {
+            background-color: rgba(134, 230, 169, 0.1);
+            border-color: #86e6a9;
+            box-shadow: 0 2px 8px rgba(134, 230, 169, 0.3);
+        }
+    }
 }
 
 .file-item:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.file-item-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.file-checkbox {
+    margin: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 1.1em;
+    height: 1.1em;
+}
+
+.file-checkbox:checked {
+    background-color: $primary;
+    border-color: $primary;
+}
+
+.file-status-badge {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    padding: 0.25em 0.6em;
+    font-weight: 500;
+    text-transform: capitalize;
+    letter-spacing: 0.3px;
+}
+
+.file-path {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    font-size: 0.875rem;
+    color: #495057;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dark .file-path {
+    color: $dark-font-color;
+}
+
+.staged-item .file-path {
+    color: #155724;
+    font-weight: 500;
+}
+
+.dark .staged-item .file-path {
+    color: #86e6a9;
+}
+
+.unstaged-item .file-path {
+    color: #495057;
+}
+
+.dark .unstaged-item .file-path {
+    color: $dark-font-color;
+}
+
+/* Custom scrollbar for file lists */
+.file-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.file-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.dark .file-list::-webkit-scrollbar-track {
+    background: $dark-bg;
+}
+
+.file-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.dark .file-list::-webkit-scrollbar-thumb {
+    background: $dark-border-color;
+}
+
+.file-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.dark .file-list::-webkit-scrollbar-thumb:hover {
+    background: lighten($dark-border-color, 10%);
 }
 
 .text-monospace {
