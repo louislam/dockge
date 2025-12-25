@@ -234,7 +234,15 @@ export class Stack {
 
     async updateStatus() {
         let statusList = await Stack.getStatusList();
+        // Try direct match first (for stacks not in subfolders)
         let status = statusList.get(this.name);
+
+        // If not found, try matching by directory name (for stacks in subfolders)
+        // Docker Compose reports stack names as directory names, not full paths
+        if (!status) {
+            const directoryName = path.basename(this.name);
+            status = statusList.get(directoryName);
+        }
 
         if (status) {
             this._status = status;
@@ -348,8 +356,59 @@ export class Stack {
 
         let composeList = JSON.parse(res.stdout.toString());
 
+        // Create a mapping from directory name (last part of path) to full stack path
+        // This is needed because Docker Compose reports stack names as directory names,
+        // while Dockge stores them as relative paths (e.g., "homeserver/traefik")
+        const directoryNameToStackPath = new Map<string, string[]>();
+        for (let [stackPath, stack] of stackList) {
+            const directoryName = path.basename(stackPath);
+            if (!directoryNameToStackPath.has(directoryName)) {
+                directoryNameToStackPath.set(directoryName, []);
+            }
+            directoryNameToStackPath.get(directoryName)!.push(stackPath);
+        }
+
         for (let composeStack of composeList) {
+            // First try direct match (for stacks not in subfolders)
             let stack = stackList.get(composeStack.Name);
+
+            // If not found, try matching by directory name (for stacks in subfolders)
+            if (!stack) {
+                const matchingStackPaths = directoryNameToStackPath.get(composeStack.Name);
+                if (matchingStackPaths && matchingStackPaths.length > 0) {
+                    // If there's only one match, use it
+                    if (matchingStackPaths.length === 1) {
+                        stack = stackList.get(matchingStackPaths[0]);
+                    } else {
+                        // If multiple stacks have the same directory name, try to match by config file path
+                        if (composeStack.ConfigFiles) {
+                            const configFileDir = path.dirname(path.resolve(composeStack.ConfigFiles));
+                            const stacksDirResolved = path.resolve(stacksDir);
+                            
+                            // Extract relative path from config file directory
+                            if (configFileDir.startsWith(stacksDirResolved)) {
+                                const relativePath = path.relative(stacksDirResolved, configFileDir);
+                                // Normalize path separators (handle both / and \)
+                                const normalizedRelativePath = relativePath.split(path.sep).join("/");
+                                
+                                // Try to find exact match
+                                if (stackList.has(normalizedRelativePath)) {
+                                    stack = stackList.get(normalizedRelativePath);
+                                } else {
+                                    // Fallback: use first matching stack path
+                                    stack = stackList.get(matchingStackPaths[0]);
+                                }
+                            } else {
+                                // Fallback: use first matching stack path
+                                stack = stackList.get(matchingStackPaths[0]);
+                            }
+                        } else {
+                            // Fallback: use first matching stack path
+                            stack = stackList.get(matchingStackPaths[0]);
+                        }
+                    }
+                }
+            }
 
             // This stack probably is not managed by Dockge, but we still want to show it
             if (!stack) {
