@@ -134,5 +134,6 @@
     "ConsoleNotEnabledMSG1": "Terminál je výkonný nástroj, který vám umožňuje provádět jakékoli příkazy, jako například <code>docker</code>, <code>rm</code>, v kontejneru Dockge v tomto webovém uživatelském rozhraní.",
     "ConsoleNotEnabledMSG2": "Může to být nebezpečné, protože tento kontejner Dockge se připojuje k démonu Docker hostitele. Dockge může být také vyřazen z provozu příkazy jako <code>rm -rf</code>",
     "Downed": "Sestřelený",
-    "CurrentHostname": "(Nenastaveno: Použít aktuální název hostitele)"
+    "CurrentHostname": "(Nenastaveno: Použít aktuální název hostitele)",
+    "GlobalEnv": "Globální .env"
 }
