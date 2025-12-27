@@ -112,5 +112,21 @@
     "agentRemovedSuccessfully": "Agent verwijderd.",
     "removeAgent": "Verwijder agent",
     "removeAgentMsg": "Weet je zeker dat je deze agent wilt verwijderen?",
-    "LongSyntaxNotSupported": "Lange syntax wordt hier niet ondersteund. Gebruik de YAML editor."
+    "LongSyntaxNotSupported": "Lange syntax wordt hier niet ondersteund. Gebruik de YAML editor.",
+    "Select a network...": "Selecteer een netwerk...",
+    "NoNetworksAvailable": "Geen netwerken beschikbaar. Je moet interne netwerken toevoegen of externe netwerken aan de rechterkant eerst inschakelen.",
+    "Lost connection to the socket server. Reconnecting...": "Verbinding met de socket-server verloren. Opnieuw verbinden...",
+    "Saved": "Opgeslagen",
+    "Deployed": "Ingezet",
+    "Deleted": "Verwijderd",
+    "Updated": "Bijgewerkt",
+    "Started": "Begonnen met",
+    "Stopped": "Gestopt",
+    "Restarted": "Herstart",
+    "Switch to sh": "Wissel naar sh",
+    "terminal": "Terminal",
+    "CurrentHostname": "(Niet ingesteld: huidige hostnaam volgen)",
+    "New Container Name...": "Nieuwe containernaam...",
+    "Network name...": "Netwerk naam...",
+    "Downed": "Neergehaald"
 }
