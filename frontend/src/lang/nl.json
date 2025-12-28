@@ -128,5 +128,8 @@
     "CurrentHostname": "(Niet ingesteld: huidige hostnaam volgen)",
     "New Container Name...": "Nieuwe containernaam...",
     "Network name...": "Netwerk naam...",
-    "Downed": "Neergehaald"
+    "Downed": "Neergehaald",
+    "cancel": "Annuleren",
+    "Console is not enabled": "Console is uitgeschakeld",
+    "GlobalEnv": "Globale .env"
 }
