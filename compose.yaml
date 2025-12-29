@@ -20,3 +20,9 @@ services:
     environment:
       # Tell Dockge where is your stacks directory
       - DOCKGE_STACKS_DIR=/opt/stacks
+      
+      # Proxy Authentication (for use with Authentik, Authelia, etc.)
+      # Uncomment and configure these to enable header-based authentication
+      # - DOCKGE_AUTH_PROXY_HEADER=Remote-User
+      # - DOCKGE_AUTH_PROXY_AUTO_CREATE=true
+      # - DOCKGE_AUTH_PROXY_LOGOUT_URL=https://auth.example.com/logout
