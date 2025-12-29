@@ -37,6 +37,7 @@ import { AgentSocketHandler } from "./agent-socket-handler";
 import { AgentSocket } from "../common/agent-socket";
 import { ManageAgentSocketHandler } from "./socket-handlers/manage-agent-socket-handler";
 import { Terminal } from "./terminal";
+import { ProxyAuth } from "./proxy-auth";
 
 export class DockgeServer {
     app : Express;
@@ -141,7 +142,20 @@ export class DockgeServer {
                 type: Boolean,
                 optional: true,
                 defaultValue: false,
-            }
+            },
+            authProxyHeader: {
+                type: String,
+                optional: true,
+            },
+            authProxyAutoCreate: {
+                type: Boolean,
+                optional: true,
+                defaultValue: false,
+            },
+            authProxyLogoutUrl: {
+                type: String,
+                optional: true,
+            },
         });
 
         this.config = args as Config;
@@ -155,6 +169,22 @@ export class DockgeServer {
         this.config.dataDir = args.dataDir || process.env.DOCKGE_DATA_DIR || "./data/";
         this.config.stacksDir = args.stacksDir || process.env.DOCKGE_STACKS_DIR || defaultStacksDir;
         this.config.enableConsole = args.enableConsole || process.env.DOCKGE_ENABLE_CONSOLE === "true" || false;
+
+        // Proxy authentication configuration
+        this.config.authProxyHeader = args.authProxyHeader || process.env.DOCKGE_AUTH_PROXY_HEADER || undefined;
+        this.config.authProxyAutoCreate = args.authProxyAutoCreate || process.env.DOCKGE_AUTH_PROXY_AUTO_CREATE === "true" || false;
+        this.config.authProxyLogoutUrl = args.authProxyLogoutUrl || process.env.DOCKGE_AUTH_PROXY_LOGOUT_URL || undefined;
+
+        if (this.config.authProxyHeader) {
+            log.info("server", `Proxy authentication enabled using header: ${this.config.authProxyHeader}`);
+            if (this.config.authProxyAutoCreate) {
+                log.info("server", "Proxy authentication auto-create users: enabled");
+            }
+            if (this.config.authProxyLogoutUrl) {
+                log.info("server", `Proxy authentication logout URL: ${this.config.authProxyLogoutUrl}`);
+            }
+        }
+
         this.stacksDir = this.config.stacksDir;
 
         log.debug("server", this.config);
@@ -274,11 +304,6 @@ export class DockgeServer {
 
             this.sendInfo(dockgeSocket, true);
 
-            if (this.needSetup) {
-                log.info("server", "Redirect to setup page");
-                dockgeSocket.emit("setup");
-            }
-
             // Create socket handlers (original, no agent support)
             for (const socketHandler of this.socketHandlerList) {
                 socketHandler.create(dockgeSocket, this);
@@ -300,7 +325,56 @@ export class DockgeServer {
             // ***************************
 
             log.debug("auth", "check auto login");
-            if (await Settings.get("disableAuth")) {
+
+            // Check for proxy authentication first (before setup page redirect)
+            if (this.config.authProxyHeader) {
+                const proxyUser = await ProxyAuth.authenticate(
+                    socket.request.headers,
+                    this.config.authProxyHeader,
+                    this.config.authProxyAutoCreate
+                );
+
+                if (proxyUser) {
+                    log.info("auth", `Proxy auth successful for user: ${proxyUser.username}`);
+
+                    // If this was the first user created via proxy auth, clear the needSetup flag
+                    if (this.needSetup) {
+                        log.info("auth", "First user created via proxy auth, clearing setup flag");
+                        this.needSetup = false;
+                    }
+
+                    await this.afterLogin(dockgeSocket, proxyUser);
+                    dockgeSocket.emit("proxyAuthLogin", {
+                        ok: true,
+                        username: proxyUser.username,
+                        logoutUrl: this.config.authProxyLogoutUrl,
+                    });
+                } else {
+                    // Proxy auth is enabled but no valid user found
+                    // This could be: no header present, or user doesn't exist and auto-create is off
+                    const headerValue = socket.request.headers[this.config.authProxyHeader.toLowerCase()];
+
+                    if (headerValue) {
+                        // Header is present but user doesn't exist and auto-create is disabled
+                        log.warn("auth", `Proxy auth header present but user not found and auto-create is disabled. Header: ${this.config.authProxyHeader}, Value: ${headerValue}`);
+                        dockgeSocket.emit("proxyAuthError", {
+                            ok: false,
+                            msg: "User not found. Please contact your administrator to create your account, or enable DOCKGE_AUTH_PROXY_AUTO_CREATE.",
+                        });
+                    } else {
+                        // No proxy auth header present - user is accessing directly without going through proxy
+                        log.warn("auth", `Proxy auth enabled but no header found. Expected header: ${this.config.authProxyHeader}`);
+                        dockgeSocket.emit("proxyAuthError", {
+                            ok: false,
+                            msg: "Proxy authentication is required. Please access Dockge through your identity provider.",
+                        });
+                    }
+                }
+            } else if (this.needSetup) {
+                // Only redirect to setup if proxy auth is not enabled
+                log.info("server", "Redirect to setup page");
+                dockgeSocket.emit("setup");
+            } else if (await Settings.get("disableAuth")) {
                 log.info("auth", "Disabled Auth: auto login to admin");
                 this.afterLogin(dockgeSocket, await R.findOne("user") as User);
                 dockgeSocket.emit("autoLogin");
@@ -439,6 +513,9 @@ export class DockgeServer {
             latestVersion: latestVersionProperty,
             isContainer,
             primaryHostname: await Settings.get("primaryHostname"),
+            // Proxy auth info for frontend
+            proxyAuthEnabled: !!this.config.authProxyHeader,
+            proxyAuthLogoutUrl: this.config.authProxyLogoutUrl,
             //serverTimezone: await this.getTimezone(),
             //serverTimezoneOffset: this.getTimezoneOffset(),
         });

@@ -31,12 +31,20 @@ export interface Arguments {
     dataDir? : string;
     stacksDir? : string;
     enableConsole? : boolean;
+    // Proxy authentication options
+    authProxyHeader? : string;
+    authProxyAutoCreate? : boolean;
+    authProxyLogoutUrl? : string;
 }
 
 // Some config values are required
 export interface Config extends Arguments {
     dataDir : string;
     stacksDir : string;
+    // Proxy authentication - undefined means disabled
+    authProxyHeader? : string;
+    authProxyAutoCreate : boolean;
+    authProxyLogoutUrl? : string;
 }
 
 export function checkLogin(socket : DockgeSocket) {
