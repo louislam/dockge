@@ -416,7 +416,7 @@ export class Stack {
             }
             options.splice(1, 0, "--env-file", "../global.env");
         }
-        console.log(options);
+        log.debug("getComposeOptions", options);
         return options;
     }
 
@@ -512,6 +512,10 @@ export class Stack {
     async getServiceStatusList() {
         let statusList = new Map<string, { state: string, ports: string[] }>();
 
+        if (! this.isManagedByDockge) {
+          log.warn("getServiceStatusList", `Cannot request status for stack '${this.name}' as directory '${this.path}' does not exist.`)
+          return statusList;
+        }
         try {
             let res = await childProcessAsync.spawn("docker", this.getComposeOptions("ps", "--format", "json"), {
                 cwd: this.path,
