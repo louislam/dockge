@@ -36,29 +36,28 @@
                         {{ $t("restartStack") }}
                     </button>
 
-                    <button v-if="!isEditMode" class="btn btn-normal" :disabled="processing" @click="updateStack">
-                        <font-awesome-icon icon="cloud-arrow-down" class="me-1" />
-                        {{ $t("updateStack") }}
-                    </button>
-
                     <button v-if="!isEditMode && active" class="btn btn-normal" :disabled="processing" @click="stopStack">
                         <font-awesome-icon icon="stop" class="me-1" />
                         {{ $t("stopStack") }}
                     </button>
 
-                    <BDropdown right text="" variant="normal">
-                        <BDropdownItem @click="downStack">
-                            <font-awesome-icon icon="stop" class="me-1" />
-                            {{ $t("downStack") }}
-                        </BDropdownItem>
-                    </BDropdown>
+                    <button v-if="!isEditMode && active" class="btn btn-normal" :disabled="processing" @click="downStack">
+                        <font-awesome-icon icon="stop" class="me-1" />
+                        {{ $t("downStack") }}
+                    </button>
+
+                    <button v-if="!isEditMode && !active" class="btn btn-normal" :disabled="processing" @click="updateStack">
+                        <font-awesome-icon icon="cloud-arrow-down" class="me-1" />
+                        {{ $t("updateStack") }}
+                    </button>
+
+                    <button v-if="!isEditMode && !active" class="btn btn-danger" :disabled="processing" @click="showDeleteDialog = !showDeleteDialog">
+                        <font-awesome-icon icon="trash" class="me-1" />
+                        {{ $t("deleteStack") }}
+                    </button>
                 </div>
 
                 <button v-if="isEditMode && !isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
-                <button v-if="!isEditMode" class="btn btn-danger" :disabled="processing" @click="showDeleteDialog = !showDeleteDialog">
-                    <font-awesome-icon icon="trash" class="me-1" />
-                    {{ $t("deleteStack") }}
-                </button>
             </div>
 
             <!-- URLs -->
@@ -258,7 +257,8 @@ import {
     getCombinedTerminalName,
     getComposeTerminalName,
     PROGRESS_TERMINAL_ROWS,
-    RUNNING
+    RUNNING,
+    EXITED
 } from "../../../common/util-common";
 import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
@@ -389,7 +389,7 @@ export default {
         },
 
         active() {
-            return this.status === RUNNING;
+            return this.status === RUNNING || this.status === EXITED;
         },
 
         terminalName() {
