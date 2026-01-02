@@ -134,5 +134,6 @@
     "ConsoleNotEnabledMSG1": "Die Konsole ist ein leistungsstarkes Werkzeug, mit dem in dieser Web-Oberfläche jeder Befehl wie z. B. <code>docker</code> oder <code>rm</code> im Container von Dockge ausgeführt werden kann.",
     "ConsoleNotEnabledMSG2": "Es könnte gefährlich sein, da dieser Dockge-Container mit dem Docker-Daemon des Hosts verbunden ist. Außerdem könnte Dockge durch Befehle wie <code>rm -rf</code> gelöscht werden.",
     "ConsoleNotEnabledMSG3": "Wenn du das Risiko verstehst, kannst du es aktivieren, indem du Umgebungsvariable auf <code>DOCKGE_ENABLE_CONSOLE=true</code> setzt.",
-    "confirmLeaveStack": "Du bearbeitest gerade einen Stack. Möchtest du wirklich verlassen?"
+    "confirmLeaveStack": "Du bearbeitest gerade einen Stack. Möchtest du wirklich verlassen?",
+    "GlobalEnv": "Globale .env"
 }
