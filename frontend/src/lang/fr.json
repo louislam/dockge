@@ -134,5 +134,6 @@
     "ConsoleNotEnabledMSG3": "Si vous comprenez les risques, vous pouvez l'activer en définissant <code>DOCKGE_ENABLE_CONSOLE=true</code> dans les variables d'environnement.",
     "confirmLeaveStack": "Vous êtes en train de modifier une stack. Êtes-vous sûr de vouloir quitter ?",
     "cancel": "Annuler",
-    "ConsoleNotEnabledMSG2": "Cela peut être dangereux, car ce conteneur Dockge est connecté au démon Docker de l'hôte. De plus, Dockge pourrait éventuellement être mis hors service par des commandes telles que <code>rm -rf</code>"
+    "ConsoleNotEnabledMSG2": "Cela peut être dangereux, car ce conteneur Dockge est connecté au démon Docker de l'hôte. De plus, Dockge pourrait éventuellement être mis hors service par des commandes telles que <code>rm -rf</code>",
+    "GlobalEnv": "Global .env"
 }
