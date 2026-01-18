@@ -44,12 +44,12 @@ export default {
 
 <style scoped>
 .badge {
-    min-width: 62px;
+    min-width: 20px;
 
 }
 
 .fixed-width {
-    width: 62px;
+    width: 20px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
