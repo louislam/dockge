@@ -83,6 +83,12 @@ export default {
                 security: {
                     title: this.$t("Security"),
                 },
+                globalEnv: {
+                    title: this.$t("GlobalEnv"),
+                },
+                about: {
+                    title: this.$t("About"),
+                },
             };
             
             // Only show admin menus if user is admin

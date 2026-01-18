@@ -19,6 +19,8 @@ import {
 import { passwordStrength } from "check-password-strength";
 import jwt from "jsonwebtoken";
 import { Settings } from "../settings";
+import fs, { promises as fsAsync } from "fs";
+import path from "path";
 
 export class MainSocketHandler extends SocketHandler {
     create(socket : DockgeSocket, server : DockgeServer) {
@@ -244,6 +246,12 @@ export class MainSocketHandler extends SocketHandler {
                 checkLogin(socket);
                 const data = await Settings.getSettings("general");
 
+                if (fs.existsSync(path.join(server.stacksDir, "global.env"))) {
+                    data.globalENV = fs.readFileSync(path.join(server.stacksDir, "global.env"), "utf-8");
+                } else {
+                    data.globalENV = "# VARIABLE=value #comment";
+                }
+
                 callback({
                     ok: true,
                     data: data,
@@ -272,6 +280,16 @@ export class MainSocketHandler extends SocketHandler {
                 if (!currentDisabledAuth && data.disableAuth) {
                     await doubleCheckPassword(socket, currentPassword);
                 }
+                // Handle global.env
+                if (data.globalENV && data.globalENV != "# VARIABLE=value #comment") {
+                    await fsAsync.writeFile(path.join(server.stacksDir, "global.env"), data.globalENV);
+                } else {
+                    await fsAsync.rm(path.join(server.stacksDir, "global.env"), {
+                        recursive: true,
+                        force: true
+                    });
+                }
+                delete data.globalENV;
 
                 await Settings.setSettings("general", data);
 

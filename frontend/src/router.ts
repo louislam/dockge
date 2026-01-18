@@ -16,6 +16,7 @@ import General from "./components/settings/General.vue";
 const Security = () => import("./components/settings/Security.vue");
 const Users = () => import("./components/settings/Users.vue");
 const Groups = () => import("./components/settings/Groups.vue");
+const GlobalEnv = () => import("./components/settings/GlobalEnv.vue");
 import About from "./components/settings/About.vue";
 
 const routes = [
@@ -86,7 +87,11 @@ const routes = [
                             },
                             {
                                 path: "groups",
-                                component: Groups,
+                                component: Groups, 
+                            },
+                            {
+                                path: "globalEnv",
+                                component: GlobalEnv,
                             },
                             {
                                 path: "about",
