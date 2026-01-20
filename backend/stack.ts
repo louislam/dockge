@@ -12,6 +12,7 @@ import {
     CREATED_STACK,
     EXITED, getCombinedTerminalName,
     getComposeTerminalName, getContainerExecTerminalName,
+    PAUSED,
     PROGRESS_TERMINAL_ROWS,
     RUNNING, TERMINAL_ROWS,
     UNKNOWN
@@ -363,6 +364,9 @@ export class Stack {
     static statusConvert(status : string) : number {
         if (status.startsWith("created")) {
             return CREATED_STACK;
+        } else if (status.includes("paused")) {
+            // If one of the services is paused, we consider the stack is paused
+            return PAUSED;
         } else if (status.includes("exited")) {
             // If one of the service is exited, we consider the stack is exited
             return EXITED;
@@ -452,6 +456,24 @@ export class Stack {
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", this.getComposeOptions("down"), this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to down, please check the terminal output for more information.");
+        }
+        return exitCode;
+    }
+
+    async pause(socket: DockgeSocket) : Promise<number> {
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", this.getComposeOptions("pause"), this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to pause, please check the terminal output for more information.");
+        }
+        return exitCode;
+    }
+
+    async unpause(socket: DockgeSocket) : Promise<number> {
+        const terminalName = getComposeTerminalName(socket.endpoint, this.name);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", this.getComposeOptions("unpause"), this.path);
+        if (exitCode !== 0) {
+            throw new Error("Failed to unpause, please check the terminal output for more information.");
         }
         return exitCode;
     }
