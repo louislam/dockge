@@ -6,6 +6,8 @@ import { DockgeSocket, fileExists, ValidationError } from "./util-server";
 import path from "path";
 import {
     acceptedComposeFileNames,
+    acceptedComposeFileNamePattern,
+    ArbitrarilyNestedLooseObject,
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
     CREATED_FILE,
@@ -104,7 +106,7 @@ export class Stack {
     }
 
     get isManagedByDockge() : boolean {
-        return fs.existsSync(this.path) && fs.statSync(this.path).isDirectory();
+        return !!this._configFilePath && this._configFilePath.startsWith(this.server.stacksDir);
     }
 
     get status() : number {
@@ -153,7 +155,7 @@ export class Stack {
     }
 
     get path() : string {
-        return path.join(this.server.stacksDir, this.name);
+        return this._configFilePath || "";
     }
 
     get fullPath() : string {
@@ -263,41 +265,12 @@ export class Stack {
     }
 
     static async getStackList(server : DockgeServer, useCacheForManaged = false) : Promise<Map<string, Stack>> {
-        let stacksDir = server.stacksDir;
-        let stackList : Map<string, Stack>;
+        let stackList : Map<string, Stack> = new Map<string, Stack>();
 
         // Use cached stack list?
         if (useCacheForManaged && this.managedStackList.size > 0) {
             stackList = this.managedStackList;
-        } else {
-            stackList = new Map<string, Stack>();
-
-            // Scan the stacks directory, and get the stack list
-            let filenameList = await fsAsync.readdir(stacksDir);
-
-            for (let filename of filenameList) {
-                try {
-                    // Check if it is a directory
-                    let stat = await fsAsync.stat(path.join(stacksDir, filename));
-                    if (!stat.isDirectory()) {
-                        continue;
-                    }
-                    // If no compose file exists, skip it
-                    if (!await Stack.composeFileExists(stacksDir, filename)) {
-                        continue;
-                    }
-                    let stack = await this.getStack(server, filename);
-                    stack._status = CREATED_FILE;
-                    stackList.set(filename, stack);
-                } catch (e) {
-                    if (e instanceof Error) {
-                        log.warn("getStackList", `Failed to get stack ${filename}, error: ${e.message}`);
-                    }
-                }
-            }
-
-            // Cache by copying
-            this.managedStackList = new Map(stackList);
+            return stackList;
         }
 
         // Get status from docker compose ls
@@ -306,28 +279,92 @@ export class Stack {
         });
 
         if (!res.stdout) {
+            log.warn("getStackList", "No response from docker compose daemon when attempting to retrieve list of stacks");
             return stackList;
         }
 
         let composeList = JSON.parse(res.stdout.toString());
+        let pathSearchTree: ArbitrarilyNestedLooseObject = {}; // search structure for matching paths
 
         for (let composeStack of composeList) {
-            let stack = stackList.get(composeStack.Name);
+            try {
+                let stack = new Stack(server, composeStack.Name);
+                stack._status = this.statusConvert(composeStack.Status);
 
-            // This stack probably is not managed by Dockge, but we still want to show it
-            if (!stack) {
-                // Skip the dockge stack if it is not managed by Dockge
-                if (composeStack.Name === "dockge") {
+                let composeFiles = composeStack.ConfigFiles.split(","); // it is possible for a project to have more than one config file
+                stack._configFilePath = path.dirname(composeFiles[0]);
+                stack._composeFileName = path.basename(composeFiles[0]);
+                if (stack.name === "dockge" && !stack.isManagedByDockge) {
+                    // skip dockge if not managed by dockge
                     continue;
                 }
-                stack = new Stack(server, composeStack.Name);
                 stackList.set(composeStack.Name, stack);
-            }
 
-            stack._status = this.statusConvert(composeStack.Status);
-            stack._configFilePath = composeStack.ConfigFiles;
+                // add project path to search tree so we can quickly decide if we have seen it before later
+                // e.g. path "/opt/stacks" would yield the tree { opt: stacks: {} }
+                path.join(stack._configFilePath, stack._composeFileName).split(path.sep).reduce((searchTree, pathComponent) => {
+                    if (pathComponent == "") {
+                        return searchTree;
+                    }
+                    if (!searchTree[pathComponent]) {
+                        searchTree[pathComponent] = {};
+                    }
+                    return searchTree[pathComponent];
+                }, pathSearchTree);
+            } catch (e) {
+                if (e instanceof Error) {
+                    log.error("getStackList", `Failed to get stack ${composeStack.Name}, error: ${e.message}`);
+                }
+            }
         }
 
+        // Search stacks directory for compose files not associated with a running compose project (ie. never started through CLI)
+        try {
+            // Hopefully the user has access to everything in this directory! If they don't, log the error. It is a small price to pay for fast searching.
+            let rawFilesList = fs.readdirSync(server.stacksDir, {
+                recursive: true,
+                withFileTypes: true
+            });
+            let acceptedComposeFiles = rawFilesList.filter((dirEnt: fs.Dirent) => dirEnt.isFile() && !!dirEnt.name.match(acceptedComposeFileNamePattern));
+            log.debug("getStackList", `Folder scan yielded ${acceptedComposeFiles.length} files`);
+            for (let composeFile of acceptedComposeFiles) {
+                // check if we have seen this file before
+                let fullPath = composeFile.parentPath;
+                let previouslySeen = fullPath.split(path.sep).reduce((searchTree: ArbitrarilyNestedLooseObject | boolean, pathComponent) => {
+                    if (pathComponent == "") {
+                        return searchTree;
+                    }
+
+                    // end condition
+                    if (searchTree == false || !(searchTree as ArbitrarilyNestedLooseObject)[pathComponent]) {
+                        return false;
+                    }
+
+                    // path (so far) has been previously seen
+                    return (searchTree as ArbitrarilyNestedLooseObject)[pathComponent];
+                }, pathSearchTree);
+                if (!previouslySeen) {
+                    // a file with an accepted compose filename has been found that did not appear in `docker compose ls`. Use its config file path as a temp name
+                    log.info("getStackList", `Found project unknown to docker compose: ${fullPath}/${composeFile.name}`);
+                    let [ configFilePath, configFilename, inferredProjectName ] = [ fullPath, composeFile.name, path.basename(fullPath) ];
+                    if (stackList.get(inferredProjectName)) {
+                        log.info("getStackList", `... but it was ignored. A project named ${inferredProjectName} already exists`);
+                    } else {
+                        let stack = new Stack(server, inferredProjectName);
+                        stack._status = UNKNOWN;
+                        stack._configFilePath = configFilePath;
+                        stack._composeFileName = configFilename;
+                        stackList.set(inferredProjectName, stack);
+                    }
+                }
+            }
+        } catch (e) {
+            if (e instanceof Error) {
+                log.error("getStackList", `Got error searching for undiscovered stacks:\n${e.message}`);
+            }
+        }
+
+        this.managedStackList = stackList;
         return stackList;
     }
 
@@ -375,35 +412,24 @@ export class Stack {
     }
 
     static async getStack(server: DockgeServer, stackName: string, skipFSOperations = false) : Promise<Stack> {
-        let dir = path.join(server.stacksDir, stackName);
-
+        let stack: Stack | undefined;
         if (!skipFSOperations) {
-            if (!await fileExists(dir) || !(await fsAsync.stat(dir)).isDirectory()) {
-                // Maybe it is a stack managed by docker compose directly
-                let stackList = await this.getStackList(server, true);
-                let stack = stackList.get(stackName);
-
-                if (stack) {
-                    return stack;
-                } else {
-                    // Really not found
-                    throw new ValidationError("Stack not found");
-                }
+            let stackList = await this.getStackList(server, true);
+            stack = stackList.get(stackName);
+            if (!stack || !await fileExists(stack.path) || !(await fsAsync.stat(stack.path)).isDirectory() ) {
+                throw new ValidationError(`getStack; Stack ${stackName} not found`);
             }
         } else {
-            //log.debug("getStack", "Skip FS operations");
+            // search for known stack with this name
+            if (this.managedStackList) {
+                stack = this.managedStackList.get(stackName);
+            }
+            if (!this.managedStackList || !stack) {
+                stack = new Stack(server, stackName, undefined, undefined, true);
+                stack._status = UNKNOWN;
+                stack._configFilePath = path.resolve(server.stacksDir, stackName);
+            }
         }
-
-        let stack : Stack;
-
-        if (!skipFSOperations) {
-            stack = new Stack(server, stackName);
-        } else {
-            stack = new Stack(server, stackName, undefined, undefined, true);
-        }
-
-        stack._status = UNKNOWN;
-        stack._configFilePath = path.resolve(dir);
         return stack;
     }
 
@@ -544,12 +570,10 @@ export class Stack {
                 } catch (e) {
                 }
             }
-
             return statusList;
         } catch (e) {
             log.error("getServiceStatusList", e);
             return statusList;
         }
-
     }
 }
