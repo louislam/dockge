@@ -26,11 +26,15 @@
                         {{ $t("editStack") }}
                     </button>
 
-                    <button v-if="!isEditMode && !active" class="btn btn-primary" :disabled="processing" @click="startStack">
+                    <button v-if="!isEditMode && !active && !paused" class="btn btn-primary" :disabled="processing" @click="startStack">
                         <font-awesome-icon icon="play" class="me-1" />
                         {{ $t("startStack") }}
                     </button>
 
+                    <button v-if="!isEditMode && paused" class="btn btn-primary" :disabled="processing" @click="unpauseStack">
+                        <font-awesome-icon icon="play" class="me-1" />
+                        {{ $t("unpauseStack") }}
+                    </button>
                     <button v-if="!isEditMode && active" class="btn btn-normal " :disabled="processing" @click="restartStack">
                         <font-awesome-icon icon="rotate" class="me-1" />
                         {{ $t("restartStack") }}
@@ -50,6 +54,10 @@
                         <BDropdownItem @click="downStack">
                             <font-awesome-icon icon="stop" class="me-1" />
                             {{ $t("downStack") }}
+                        </BDropdownItem>
+                        <BDropdownItem v-if="active" @click="pauseStack">
+                            <font-awesome-icon icon="pause" class="me-1" />
+                            {{ $t("pauseStack") }}
                         </BDropdownItem>
                     </BDropdown>
                 </div>
@@ -257,6 +265,7 @@ import {
     copyYAMLComments, envsubstYAML,
     getCombinedTerminalName,
     getComposeTerminalName,
+    PAUSED,
     PROGRESS_TERMINAL_ROWS,
     RUNNING
 } from "../../../common/util-common";
@@ -390,6 +399,10 @@ export default {
 
         active() {
             return this.status === RUNNING;
+        },
+        
+        paused() {
+            return this.status === PAUSED;
         },
 
         terminalName() {
@@ -682,6 +695,24 @@ export default {
                 if (res.ok) {
                     this.$router.push("/");
                 }
+            });
+        },
+
+        pauseStack() {
+            this.processing = true;
+
+            this.$root.emitAgent(this.endpoint, "pauseStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
+        unpauseStack() {
+            this.processing = true;
+
+            this.$root.emitAgent(this.endpoint, "unpauseStack", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
             });
         },
 
