@@ -38,7 +38,7 @@
                 <div class="col-md-5">
                     <!-- Agent List -->
                     <div class="shadow-box big-padding">
-                        <h4 class="mb-3">{{ $tc("dockgeAgent", 2) }} <span class="badge bg-warning" style="font-size: 12px;">beta</span></h4>
+                        <h4 class="mb-3">{{ $tc("dockgeAgent", 2) }} <span class="badge bg-warning" style="font-size: 9px;">beta</span></h4>
 
                         <div v-for="(agent, endpoint) in $root.agentList" :key="endpoint" class="mb-3 agent">
                             <!-- Agent Status -->
@@ -294,7 +294,7 @@ export default {
 @import "../styles/vars";
 
 .num {
-    font-size: 30px;
+    font-size: 23px;
 
     font-weight: bold;
     display: block;
@@ -313,7 +313,7 @@ export default {
 }
 
 table {
-    font-size: 14px;
+    font-size: 11px;
 
     tr {
         transition: all ease-in-out 0.2ms;
@@ -328,7 +328,7 @@ table {
 .docker-run {
     border: none;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 15px;
+    font-size: 11px;
 }
 
 .first-row .shadow-box {

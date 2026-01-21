@@ -134,7 +134,7 @@ export default {
     display: flex;
     align-items: center;
     min-height: 52px;
-    border-radius: 10px;
+    border-radius: 2px;
     transition: all ease-in-out 0.15s;
     width: 100%;
     padding: 5px 8px;
@@ -151,7 +151,7 @@ export default {
         margin-top: -4px;
     }
     .endpoint {
-        font-size: 12px;
+        font-size: 9px;
         color: $dark-font-color3;
     }
 }

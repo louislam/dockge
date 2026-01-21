@@ -106,6 +106,19 @@
                         </div>
                     </div>
 
+                    <!-- Combined Terminal Output -->
+                    <div v-show="!isEditMode">
+                        <h4 class="mb-3">{{ $t("terminal") }}</h4>
+                        <Terminal
+                            ref="combinedTerminal"
+                            class="mb-3 terminal"
+                            :name="combinedTerminalName"
+                            :endpoint="endpoint"
+                            :rows="combinedTerminalRows"
+                            :cols="combinedTerminalCols"
+                        ></Terminal>
+                    </div>
+
                     <!-- Containers -->
                     <h4 class="mb-3">{{ $tc("container", 2) }}</h4>
 
@@ -147,20 +160,6 @@
                                 <ArrayInput name="urls" :display-name="$t('url')" placeholder="https://" object-type="x-dockge" />
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Combined Terminal Output -->
-                    <div v-show="!isEditMode">
-                        <h4 class="mb-3">{{ $t("terminal") }}</h4>
-                        <Terminal
-                            ref="combinedTerminal"
-                            class="mb-3 terminal"
-                            :name="combinedTerminalName"
-                            :endpoint="endpoint"
-                            :rows="combinedTerminalRows"
-                            :cols="combinedTerminalCols"
-                            style="height: 315px;"
-                        ></Terminal>
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -785,16 +784,17 @@ export default {
 @import "../styles/vars.scss";
 
 .terminal {
-    height: 200px;
+    height: auto;
+    min-height: 400px;
 }
 
 .editor-box {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
+    font-size: 11px;
 }
 
 .agent-name {
-    font-size: 13px;
+    font-size: 10px;
     color: $dark-font-color3;
 }
 </style>
