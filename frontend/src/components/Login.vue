@@ -1,7 +1,19 @@
 <template>
     <div class="form-container">
         <div class="form">
-            <form @submit.prevent="submit">
+            <!-- Proxy Auth Error Message -->
+            <div v-if="$root.proxyAuth.error" class="proxy-auth-error">
+                <div class="alert alert-danger" role="alert">
+                    <h5 class="alert-heading">{{ $t("Authentication Error") }}</h5>
+                    <p class="mb-0">{{ $root.proxyAuth.error }}</p>
+                </div>
+                <p class="text-muted mt-3">
+                    {{ $t("proxyAuthErrorHelp") }}
+                </p>
+            </div>
+
+            <!-- Normal Login Form -->
+            <form v-else @submit.prevent="submit">
                 <h1 class="h3 mb-3 fw-normal" />
 
                 <div v-if="!tokenRequired" class="form-floating">

@@ -25,6 +25,12 @@ export default defineComponent({
             info: {
 
             },
+            // Proxy authentication state
+            proxyAuth: {
+                enabled: false,
+                logoutUrl: null as string | null,
+                error: null as string | null,
+            },
             remember: (localStorage.remember !== "0"),
             loggedIn: false,
             allowLoginDialog: false,
@@ -220,6 +226,11 @@ export default defineComponent({
 
             socket.on("info", (info) => {
                 this.info = info;
+                // Update proxy auth info from server
+                if (info.proxyAuthEnabled !== undefined) {
+                    this.proxyAuth.enabled = info.proxyAuthEnabled;
+                    this.proxyAuth.logoutUrl = info.proxyAuthLogoutUrl || null;
+                }
             });
 
             socket.on("autoLogin", () => {
@@ -228,6 +239,32 @@ export default defineComponent({
                 this.socketIO.token = "autoLogin";
                 this.allowLoginDialog = false;
                 this.afterLogin();
+            });
+
+            // Proxy authentication login (e.g., via Authentik, Authelia, etc.)
+            socket.on("proxyAuthLogin", (res) => {
+                if (res.ok) {
+                    console.log("Proxy auth login successful for user:", res.username);
+                    this.loggedIn = true;
+                    this.username = res.username;
+                    this.storage().token = "proxyAuth";
+                    this.socketIO.token = "proxyAuth";
+                    this.allowLoginDialog = false;
+                    // Store logout URL if provided
+                    if (res.logoutUrl) {
+                        this.proxyAuth.logoutUrl = res.logoutUrl;
+                    }
+                    this.afterLogin();
+                }
+            });
+
+            // Proxy authentication error (user not found, no header, etc.)
+            socket.on("proxyAuthError", (res) => {
+                console.error("Proxy auth error:", res.msg);
+                this.proxyAuth.enabled = true;
+                this.proxyAuth.error = res.msg;
+                this.allowLoginDialog = false;
+                // Don't show normal login - proxy auth is required
             });
 
             socket.on("setup", () => {
@@ -382,6 +419,11 @@ export default defineComponent({
             this.loggedIn = false;
             this.username = null;
             this.clearData();
+
+            // If proxy auth is enabled and has a logout URL, redirect to it
+            if (this.proxyAuth.enabled && this.proxyAuth.logoutUrl) {
+                window.location.href = this.proxyAuth.logoutUrl;
+            }
         },
 
         /**
