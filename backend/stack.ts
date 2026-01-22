@@ -6,6 +6,7 @@ import { DockgeSocket, fileExists, ValidationError } from "./util-server";
 import path from "path";
 import {
     acceptedComposeFileNames,
+    acceptedComposeOverrideFileNames,
     COMBINED_TERMINAL_COLS,
     COMBINED_TERMINAL_ROWS,
     CREATED_FILE,
@@ -26,25 +27,36 @@ export class Stack {
     protected _status: number = UNKNOWN;
     protected _composeYAML?: string;
     protected _composeENV?: string;
+    protected _composeOverrideYAML?: string;
     protected _configFilePath?: string;
     protected _composeFileName: string = "compose.yaml";
+    protected _composeOverrideFileName: string = "compose.override.yaml";
     protected server: DockgeServer;
 
     protected combinedTerminal? : Terminal;
 
     protected static managedStackList: Map<string, Stack> = new Map();
 
-    constructor(server : DockgeServer, name : string, composeYAML? : string, composeENV? : string, skipFSOperations = false) {
+    constructor(server : DockgeServer, name : string, composeYAML? : string, composeENV? : string, composeOverrideYAML? : string, skipFSOperations = false) {
         this.name = name;
         this.server = server;
         this._composeYAML = composeYAML;
         this._composeENV = composeENV;
+        this._composeOverrideYAML = composeOverrideYAML;
 
         if (!skipFSOperations) {
             // Check if compose file name is different from compose.yaml
             for (const filename of acceptedComposeFileNames) {
                 if (fs.existsSync(path.join(this.path, filename))) {
                     this._composeFileName = filename;
+                    break;
+                }
+            }
+
+            // Check if override file exists and determine its name
+            for (const filename of acceptedComposeOverrideFileNames) {
+                if (fs.existsSync(path.join(this.path, filename))) {
+                    this._composeOverrideFileName = filename;
                     break;
                 }
             }
@@ -74,6 +86,7 @@ export class Stack {
             ...obj,
             composeYAML: this.composeYAML,
             composeENV: this.composeENV,
+            composeOverrideYAML: this.composeOverrideYAML,
             primaryHostname,
         };
     }
@@ -120,6 +133,11 @@ export class Stack {
         // Check YAML format
         yaml.parse(this.composeYAML);
 
+        // Check override YAML format if it exists
+        if (this.composeOverrideYAML && this.composeOverrideYAML.trim() !== "") {
+            yaml.parse(this.composeOverrideYAML);
+        }
+
         let lines = this.composeENV.split("\n");
 
         // Check if the .env is able to pass docker-compose
@@ -150,6 +168,17 @@ export class Stack {
             }
         }
         return this._composeENV;
+    }
+
+    get composeOverrideYAML() : string {
+        if (this._composeOverrideYAML === undefined) {
+            try {
+                this._composeOverrideYAML = fs.readFileSync(path.join(this.path, this._composeOverrideFileName), "utf-8");
+            } catch (e) {
+                this._composeOverrideYAML = "";
+            }
+        }
+        return this._composeOverrideYAML;
     }
 
     get path() : string {
@@ -203,6 +232,14 @@ export class Stack {
         // If .env is not existing and the composeENV is empty, we don't need to write it
         if (await fileExists(envPath) || this.composeENV.trim() !== "") {
             await fsAsync.writeFile(envPath, this.composeENV);
+        }
+
+        const overridePath = path.join(dir, this._composeOverrideFileName);
+
+        // Write or overwrite the compose override file
+        // If override file is not existing and the composeOverrideYAML is empty, we don't need to write it
+        if (await fileExists(overridePath) || this.composeOverrideYAML.trim() !== "") {
+            await fsAsync.writeFile(overridePath, this.composeOverrideYAML);
         }
     }
 
@@ -399,7 +436,7 @@ export class Stack {
         if (!skipFSOperations) {
             stack = new Stack(server, stackName);
         } else {
-            stack = new Stack(server, stackName, undefined, undefined, true);
+            stack = new Stack(server, stackName, undefined, undefined, undefined, true);
         }
 
         stack._status = UNKNOWN;
