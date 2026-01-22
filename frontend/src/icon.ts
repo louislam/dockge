@@ -54,6 +54,8 @@ import {
     faTerminal, faWarehouse, faHome, faRocket,
     faRotate,
     faCloudArrowDown, faArrowsRotate,
+    faChevronCircleRight,
+    faChevronCircleDown,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -109,6 +111,8 @@ library.add(
     faRotate,
     faCloudArrowDown,
     faArrowsRotate,
+    faChevronCircleRight,
+    faChevronCircleDown,
 );
 
 export { FontAwesomeIcon };
