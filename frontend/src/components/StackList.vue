@@ -42,7 +42,22 @@
                 </span>
             </div>
         </div>
-        <div ref="stackList" class="stack-list" :class="{ scrollbar: scrollbar }" :style="stackListStyle">
+
+        <div v-if="searchText === '' && $root.agentCount > 1" ref="stackList" :style="stackListStyle" class="stack-list">
+            <AgentStackList v-for="[agentName, stacks] in stackListByAgent" :agentName="agentName" :key="agentName">
+                <StackListItem
+                    v-for="(stack, index) in stacks"
+                    :key="index"
+                    :stack="stack"
+                    :isSelectMode="selectMode"
+                    :isSelected="isSelected"
+                    :select="select"
+                    :deselect="deselect"
+                />
+            </AgentStackList>
+        </div>
+
+        <div v-else ref="stackList" class="stack-list" :class="{ scrollbar: scrollbar }" :style="stackListStyle">
             <div v-if="Object.keys(sortedStackList).length === 0" class="text-center mt-3">
                 <router-link to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
             </div>
@@ -189,7 +204,30 @@ export default {
 
             return result;
         },
+        /**
+         * Groups all stacks by it's agent
+         * @returns {Map<string, object} A map containing all agents with their stacks
+         */
+        stackListByAgent() {
+            const stacksByAgent = new Map();
+            const stacks = this.$root.completeStackList;
 
+            for (const key of Object.keys(stacks)) {
+                // Handle stacks with no suffix (from the current endpoint)
+                let [ stackName, agent ] = key.split("_");
+                const stackHasEndpoint = agent !== "";
+                agent = stackHasEndpoint ? agent : this.$t("currentEndpoint");
+
+                if (!stacksByAgent.has(agent)) {
+                    stacksByAgent.set(agent, []);
+                }
+
+                const stack = stacks[!stackHasEndpoint ? `${stackName}_` : `${stackName}_${agent}`];
+                stacksByAgent.get(agent).push(stack);
+            }
+
+            return stacksByAgent;
+        },
         isDarkTheme() {
             return document.body.classList.contains("dark");
         },
