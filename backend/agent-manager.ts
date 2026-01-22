@@ -76,12 +76,14 @@ export class AgentManager {
      * @param url
      * @param username
      * @param password
+     * @param name
      */
-    async add(url : string, username : string, password : string) : Promise<Agent> {
+    async add(url: string, username: string, password: string, name: string): Promise<Agent> {
         let bean = R.dispense("agent") as Agent;
         bean.url = url;
         bean.username = username;
         bean.password = password;
+        bean.name = name;
         await R.store(bean);
         return bean;
     }
@@ -101,6 +103,23 @@ export class AgentManager {
             this.disconnect(endpoint);
             this.sendAgentList();
             delete this.agentSocketList[endpoint];
+        } else {
+            throw new Error("Agent not found");
+        }
+    }
+
+    /**
+     *
+     * @param url
+     * @param updatedName
+     */
+    async update(url: string, updatedName: string) {
+        const agent = await R.findOne("agent", " url = ? ", [
+            url,
+        ]);
+        if (agent) {
+            agent.name = updatedName;
+            await R.store(agent);
         } else {
             throw new Error("Agent not found");
         }
@@ -278,6 +297,8 @@ export class AgentManager {
             url: "",
             username: "",
             endpoint: "",
+            name: "",
+            updatedName: "",
         };
 
         for (let endpoint in list) {
