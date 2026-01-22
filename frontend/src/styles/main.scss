@@ -308,6 +308,37 @@ optgroup {
         opacity: 1;
     }
 
+    .table {
+        --bs-table-bg: transparent;
+        --bs-table-striped-bg: $dark-bg2;
+        --bs-table-hover-bg: #1a1a1a;
+        --bs-table-border-color: $dark-border-color;
+        --bs-table-color: $dark-font-color;
+        color: $dark-font-color;
+
+        thead {
+            th {
+                background-color: $dark-header-bg;
+                color: $dark-font-color;
+                border-bottom: 2px solid $dark-border-color;
+                border-top: 1px solid $dark-border-color;
+            }
+        }
+
+        tbody {
+            tr {
+                background-color: $dark-bg2;
+                border-color: $dark-border-color;
+                color: $dark-font-color;
+
+                td {
+                    border-color: $dark-border-color;
+                    color: $dark-font-color;
+                }
+            }
+        }
+    }
+
     .table-hover > tbody > tr:hover > * {
         --bs-table-accent-bg: #070a10;
         color: $dark-font-color;

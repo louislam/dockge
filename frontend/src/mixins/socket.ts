@@ -392,7 +392,12 @@ export default defineComponent({
         },
 
         afterLogin() {
-
+            // Load user info including admin status
+            this.getSocket().emit("getUserInfo", (res) => {
+                if (res.ok) {
+                    this.info.isAdmin = res.user.is_admin;
+                }
+            });
         },
 
         bindTerminal(endpoint : string, terminalName : string, terminal : Terminal) {
