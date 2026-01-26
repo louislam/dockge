@@ -125,5 +125,14 @@
     "New Container Name...": "新しいコンテナ名...",
     "Network name...": "ネットワーク名...",
     "Select a network...": "ネットワークを選択...",
-    "NoNetworksAvailable": "利用可能なネットワークがありません。まず右側の内部ネットワークを追加するか、外部ネットワークを有効にする必要があります。"
+    "NoNetworksAvailable": "利用可能なネットワークがありません。まず右側の内部ネットワークを追加するか、外部ネットワークを有効にする必要があります。",
+    "currentEndpoint": "ローカル",
+    "ConsoleNotEnabledMSG3": "リスクを理解しているのであれば、環境変数を<code>DOCKGE_ENABLE_CONSOLE=true</code>にすることで有効になります。",
+    "confirmLeaveStack": "現在スタックを編集中です。本当にこのページを離れますか？",
+    "cancel": "キャンセル",
+    "Console is not enabled": "コンソールは有効ではありません",
+    "ConsoleNotEnabledMSG1": "コンソールは、Dockgeのコンテナ内で<code>docker</code>, <code>rm</code> などのコマンドをWeb UI上で実行できる強力なツールです。",
+    "ConsoleNotEnabledMSG2": "このDockgeコンテナはホストのDockerデーモンに接続しているため危険である可能性があります。またDockge は <code>rm -rf</code> のようなコマンドによって停止させられる可能性もあります",
+    "Downed": "ダウン",
+    "CurrentHostname": "(未設定：現在のホスト名に従う）"
 }

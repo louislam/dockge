@@ -128,5 +128,11 @@
     "Network name...": "网络名称...",
     "Select a network...": "选择网络...",
     "NoNetworksAvailable": "网络不可用.你需要在正确的方向先添加内部网络或者启用外部网络.",
-    "Downed": "已宕机"
+    "Downed": "已宕机",
+    "Console is not enabled": "终端未被启用",
+    "ConsoleNotEnabledMSG3": "如果你理解此风险，你可以通过设置环境变量 <code>DOCKGE_ENABLE_CONSOLE=true</code> 来启用它。",
+    "confirmLeaveStack": "当前有编辑中的堆栈，你确定要离开吗？",
+    "cancel": "取消",
+    "ConsoleNotEnabledMSG1": "终端是一个强力的工具，允许你在这个 Web UI 上执行像 <code>docker</code>，以及 Docker 容器中的 <code>rm</code> 等任何命令。",
+    "ConsoleNotEnabledMSG2": "这个操作是危险的，因为此时 Dockge 容器已经连接到主机的 Docker 守护进程中了。此时，Dockge 可以被 <code>rm -rf</code> 之类的命令强行关闭"
 }

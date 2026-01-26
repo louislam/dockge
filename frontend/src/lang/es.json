@@ -1,5 +1,5 @@
 {
-    "languageName": "Inglés",
+    "languageName": "Español",
     "Create your admin account": "Crea tu cuenta de administrador",
     "authIncorrectCreds": "Nombre de usuario o contraseña incorrectos.",
     "PasswordsDoNotMatch": "Las contraseñas no coinciden.",
@@ -99,7 +99,7 @@
     "reconnecting...": "Reconectando…",
     "connecting...": "Conectando al servidor del socket…",
     "url": "Dirección URL | Direcciones URLs",
-    "extra": "Addicional",
+    "extra": "Adicional",
     "currentEndpoint": "Actual",
     "dockgeURL": "URL de Dockge (ej. http://127.0.0.1:5001)",
     "agentOnline": "En línea",
@@ -113,7 +113,7 @@
     "connecting": "Conectando",
     "agentRemovedSuccessfully": "Agente eliminado satisfactoriamente.",
     "LongSyntaxNotSupported": "No hay soporte para la sintaxis larga. Por favor use el editor de YAML.",
-    "Lost connection to the socket server. Reconnecting...": "Se ha perdido la conexión con el servidor de socket. Reconectando...",
+    "Lost connection to the socket server. Reconnecting...": "Se ha perdido la conexión con el servidor de socket. Reconectando…",
     "Saved": "Guardado",
     "Deployed": "Desplegado",
     "Deleted": "Eliminado",
@@ -125,8 +125,14 @@
     "Switch to sh": "Cambiar a sh",
     "terminal": "Terminal",
     "CurrentHostname": "(Vacío: Seguir hostname actual)",
-    "New Container Name...": "Nombre del nuevo Container...",
-    "Network name...": "Nombre de la red...",
-    "Select a network...": "Selecciona una red...",
-    "NoNetworksAvailable": "No hay redes disponibles. Primero debes agregar redes internas o habilitar redes externas en el lado derecho."
+    "New Container Name...": "Nombre del nuevo Container…",
+    "Network name...": "Nombre de la red…",
+    "Select a network...": "Selecciona una red…",
+    "NoNetworksAvailable": "No hay redes disponibles. Primero debes agregar redes internas o habilitar redes externas en el lado derecho.",
+    "confirmLeaveStack": "Actualmente estás editando una pila. Estás seguro de que quieres salir?",
+    "ConsoleNotEnabledMSG2": "Podría ser peligroso, ya que este contenedor de Dockge se está conectando al daemon de Docker del host. Además, Dockge podría ser potencialmente eliminado mediante comandos como <code>rm -rf</code>",
+    "cancel": "Cancelar",
+    "Console is not enabled": "La consola está deshabilitada",
+    "ConsoleNotEnabledMSG3": "Si entiendes el riesgo, puedes habilitarlo estableciendo <code>DOCKGE_ENABLE_CONSOLE=true</code> en las variables de entorno.",
+    "ConsoleNotEnabledMSG1": "La consola es una herramienta poderosa que te permite ejecutar cualquier comando, como <code>docker</code> o <code>rm</code>, dentro del contenedor de Dockge en esta interfaz web."
 }
