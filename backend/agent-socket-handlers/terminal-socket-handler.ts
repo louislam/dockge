@@ -5,9 +5,40 @@ import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
 import { Stack } from "../stack";
 import { AgentSocketHandler } from "../agent-socket-handler";
 import { AgentSocket } from "../../common/agent-socket";
+import { R } from "redbean-node";
 
 export class TerminalSocketHandler extends AgentSocketHandler {
     create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
+
+        /**
+         * Check if user has access to a stack
+         */
+        const checkStackAccess = async (stackName: string) => {
+            const user = await R.findOne("user", " id = ? AND active = 1 ", [socket.userID]);
+            
+            if (!user) {
+                throw new ValidationError("User not found");
+            }
+            
+            const isAdmin = user.is_admin === true || user.is_admin === 1;
+            
+            if (isAdmin) {
+                return true;
+            }
+            
+            // Check if user has access through groups
+            const hasAccess = await R.getRow(`
+                SELECT COUNT(*) as count FROM stack_group sg
+                INNER JOIN user_group ug ON sg.group_id = ug.group_id
+                WHERE ug.user_id = ? AND sg.stack_name = ?
+            `, [socket.userID, stackName]);
+            
+            if (!hasAccess || hasAccess.count === 0) {
+                throw new ValidationError("You do not have permission to access this stack");
+            }
+            
+            return true;
+        };
 
         agentSocket.on("terminalInput", async (terminalName : unknown, cmd : unknown, callback) => {
             try {
@@ -103,6 +134,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 log.debug("interactiveTerminal", "Stack name: " + stackName);
                 log.debug("interactiveTerminal", "Service name: " + serviceName);
 
+                await checkStackAccess(stackName);
                 // Get stack
                 const stack = await Stack.getStack(server, stackName);
                 stack.joinContainerTerminal(socket, serviceName, shell);
@@ -154,6 +186,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Stack name must be a string.");
                 }
 
+                await checkStackAccess(stackName);
                 const stack = await Stack.getStack(server, stackName);
                 await stack.leaveCombinedTerminal(socket);
 

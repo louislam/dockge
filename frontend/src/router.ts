@@ -14,6 +14,8 @@ const Settings = () => import("./pages/Settings.vue");
 import Appearance from "./components/settings/Appearance.vue";
 import General from "./components/settings/General.vue";
 const Security = () => import("./components/settings/Security.vue");
+const Users = () => import("./components/settings/Users.vue");
+const Groups = () => import("./components/settings/Groups.vue");
 const GlobalEnv = () => import("./components/settings/GlobalEnv.vue");
 import About from "./components/settings/About.vue";
 
@@ -78,6 +80,14 @@ const routes = [
                             {
                                 path: "security",
                                 component: Security,
+                            },
+                            {
+                                path: "users",
+                                component: Users,
+                            },
+                            {
+                                path: "groups",
+                                component: Groups, 
                             },
                             {
                                 path: "globalEnv",

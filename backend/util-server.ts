@@ -45,6 +45,24 @@ export function checkLogin(socket : DockgeSocket) {
     }
 }
 
+export async function checkAdmin(socket : DockgeSocket) {
+    checkLogin(socket);
+    
+    const user = await R.findOne("user", " id = ? AND active = 1 ", [
+        socket.userID,
+    ]);
+    
+    if (!user) {
+        throw new Error("User not found");
+    }
+    
+    if (!user.is_admin) {
+        throw new Error("You do not have permission to perform this action. Admin access required.");
+    }
+    
+    return user;
+}
+
 export class ValidationError extends Error {
     constructor(message : string) {
         super(message);

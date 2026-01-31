@@ -44,7 +44,8 @@
         </div>
         <div ref="stackList" class="stack-list" :class="{ scrollbar: scrollbar }" :style="stackListStyle">
             <div v-if="Object.keys(sortedStackList).length === 0" class="text-center mt-3">
-                <router-link to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
+                <router-link v-if="$root.info && $root.info.isAdmin" to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
+                <span v-else class="text-muted">{{ $t("No stacks found") }}</span>
             </div>
 
             <StackListItem

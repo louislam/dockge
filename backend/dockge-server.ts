@@ -434,11 +434,22 @@ export class DockgeServer {
             isContainer = (process.env.DOCKGE_IS_CONTAINER === "1");
         }
 
+        // Get user admin status if logged in
+        let isAdmin = false;
+        const dockgeSocket = socket as DockgeSocket;
+        if (dockgeSocket.userID) {
+            const user = await R.findOne("user", " id = ? AND active = 1 ", [dockgeSocket.userID]);
+            if (user) {
+                isAdmin = user.is_admin === true || user.is_admin === 1;
+            }
+        }
+
         socket.emit("info", {
             version: versionProperty,
             latestVersion: latestVersionProperty,
             isContainer,
             primaryHostname: await Settings.get("primaryHostname"),
+            isAdmin: isAdmin,
             //serverTimezone: await this.getTimezone(),
             //serverTimezoneOffset: this.getTimezoneOffset(),
         });
@@ -601,10 +612,34 @@ export class DockgeServer {
                     stackList = await Stack.getStackList(this, useCache);
                 }
 
+                // Get user to check permissions
+                const user = await R.findOne("user", " id = ? AND active = 1 ", [dockgeSocket.userID]);
+                
+                if (!user) {
+                    continue;
+                }
+                
+                const isAdmin = user.is_admin === true || user.is_admin === 1;
+                
                 let map : Map<string, object> = new Map();
 
+                // Filter stacks based on user permissions
                 for (let [ stackName, stack ] of stackList) {
-                    map.set(stackName, stack.toSimpleJSON(dockgeSocket.endpoint));
+                    // Admin sees all stacks
+                    if (isAdmin) {
+                        map.set(stackName, stack.toSimpleJSON(dockgeSocket.endpoint));
+                    } else {
+                        // Non-admin users only see stacks assigned to their groups
+                        const hasAccess = await R.getRow(`
+                            SELECT COUNT(*) as count FROM stack_group sg
+                            INNER JOIN user_group ug ON sg.group_id = ug.group_id
+                            WHERE ug.user_id = ? AND sg.stack_name = ?
+                        `, [dockgeSocket.userID, stackName]);
+                        
+                        if (hasAccess && hasAccess.count > 0) {
+                            map.set(stackName, stack.toSimpleJSON(dockgeSocket.endpoint));
+                        }
+                    }
                 }
 
                 log.debug("server", "Send stack list to user: " + dockgeSocket.id + " (" + dockgeSocket.endpoint + ")");

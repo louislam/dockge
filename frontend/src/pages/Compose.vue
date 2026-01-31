@@ -468,6 +468,13 @@ export default {
     },
     mounted() {
         if (this.isAdd) {
+            // Only admins can create new stacks
+            if (!this.$root.info || !this.$root.info.isAdmin) {
+                this.$router.push("/");
+                this.$root.toastError("Only administrators can create new stacks");
+                return;
+            }
+            
             this.processing = false;
             this.isEditMode = true;
 

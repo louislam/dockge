@@ -26,7 +26,7 @@
                     </a>
                 </div>
                 <div class="settings-content col-lg-9 col-md-7">
-                    <div v-if="currentPage" class="settings-content-header">
+                    <div v-if="currentPage && subMenus[currentPage]" class="settings-content-header">
                         {{ subMenus[currentPage].title }}
                     </div>
                     <div class="mx-3">
@@ -73,7 +73,7 @@ export default {
         },
 
         subMenus() {
-            return {
+            const menus = {
                 general: {
                     title: this.$t("general"),
                 },
@@ -90,6 +90,22 @@ export default {
                     title: this.$t("About"),
                 },
             };
+            
+            // Only show admin menus if user is admin
+            if (this.$root.info && this.$root.info.isAdmin) {
+                menus.users = {
+                    title: this.$t("Users"),
+                };
+                menus.groups = {
+                    title: this.$t("Groups"),
+                };
+            }
+            
+            menus.about = {
+                title: this.$t("About"),
+            };
+            
+            return menus;
         },
     },
 
