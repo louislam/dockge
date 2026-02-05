@@ -20,6 +20,8 @@ import { InteractiveTerminal, Terminal } from "./terminal";
 import childProcessAsync from "promisify-child-process";
 import { Settings } from "./settings";
 
+const STACK_DELETED_MARKER = ".dockge-deleted";
+
 export class Stack {
 
     name: string;
@@ -222,11 +224,20 @@ export class Stack {
             throw new Error("Failed to delete, please check the terminal output for more information.");
         }
 
-        // Remove the stack folder
-        await fsAsync.rm(this.path, {
-            recursive: true,
-            force: true
-        });
+        const enableFilesDelete = process.env.DOCKGE_ENABLE_STACK_FILES_DELETE === "true";
+
+        if (enableFilesDelete) {
+            // Remove the stack folder
+            await fsAsync.rm(this.path, {
+                recursive: true,
+                force: true
+            });
+        } else {
+            // Mark as deleted so it is hidden from the UI, but keep files on disk
+            if (await fileExists(this.path)) {
+                await fsAsync.writeFile(path.join(this.path, STACK_DELETED_MARKER), new Date().toISOString());
+            }
+        }
 
         return exitCode;
     }
@@ -278,8 +289,13 @@ export class Stack {
             for (let filename of filenameList) {
                 try {
                     // Check if it is a directory
-                    let stat = await fsAsync.stat(path.join(stacksDir, filename));
+                    let stackDir = path.join(stacksDir, filename);
+                    let stat = await fsAsync.stat(stackDir);
                     if (!stat.isDirectory()) {
+                        continue;
+                    }
+                    // Skip stacks marked as deleted
+                    if (await fileExists(path.join(stackDir, STACK_DELETED_MARKER))) {
                         continue;
                     }
                     // If no compose file exists, skip it
@@ -316,6 +332,13 @@ export class Stack {
 
             // This stack probably is not managed by Dockge, but we still want to show it
             if (!stack) {
+                const managedStackDir = path.join(stacksDir, composeStack.Name);
+
+                // Skip stacks marked as deleted
+                if (await fileExists(path.join(managedStackDir, STACK_DELETED_MARKER))) {
+                    continue;
+                }
+
                 // Skip the dockge stack if it is not managed by Dockge
                 if (composeStack.Name === "dockge") {
                     continue;
