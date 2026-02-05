@@ -3,7 +3,7 @@ name: Build and Push Multi-Arch Image
 on:
   push:
     branches:
-      - main
+      - master
     tags:
       - "v*"
   workflow_dispatch:
@@ -64,6 +64,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: docker/Dockerfile
           platforms: ${{ matrix.arch.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ghcr.io/${{ github.repository }}
