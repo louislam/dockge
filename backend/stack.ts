@@ -12,6 +12,7 @@ import {
     CREATED_STACK,
     EXITED, getCombinedTerminalName,
     getComposeTerminalName, getContainerExecTerminalName,
+    LooseObject,
     PROGRESS_TERMINAL_ROWS,
     RUNNING, TERMINAL_ROWS,
     UNKNOWN
@@ -507,6 +508,106 @@ export class Stack {
 
         terminal.join(socket);
         terminal.start();
+    }
+
+    /**
+     * Get stats for all running containers across all stacks (CPU, memory, uptime, ports, image)
+     */
+    static async getAllContainerStats(server: DockgeServer): Promise<object[]> {
+        let stats: object[] = [];
+
+        try {
+            let res = await childProcessAsync.spawn("docker", [
+                "ps", "-a", "--format", "json"
+            ], {
+                encoding: "utf-8",
+            });
+
+            if (!res.stdout) {
+                return stats;
+            }
+
+            let lines = res.stdout.toString().split("\n").filter(l => l.trim());
+            let containerIds: string[] = [];
+            let containerInfo: Map<string, LooseObject> = new Map();
+
+            for (let line of lines) {
+                try {
+                    let obj = JSON.parse(line);
+                    containerIds.push(obj.ID);
+                    containerInfo.set(obj.ID, {
+                        id: obj.ID,
+                        name: obj.Names,
+                        image: obj.Image,
+                        state: obj.State,
+                        status: obj.Status,
+                        ports: obj.Ports || "",
+                        createdAt: obj.CreatedAt || "",
+                        labels: obj.Labels || "",
+                    });
+                } catch (e) {
+                    // skip malformed lines
+                }
+            }
+
+            // Get stats for running containers
+            if (containerIds.length > 0) {
+                let runningIds = Array.from(containerInfo.values())
+                    .filter(c => c.state === "running")
+                    .map(c => c.id);
+
+                if (runningIds.length > 0) {
+                    let statsRes = await childProcessAsync.spawn("docker", [
+                        "stats", "--no-stream", "--format", "json", ...runningIds
+                    ], {
+                        encoding: "utf-8",
+                    });
+
+                    if (statsRes.stdout) {
+                        let statsLines = statsRes.stdout.toString().split("\n").filter(l => l.trim());
+                        for (let line of statsLines) {
+                            try {
+                                let statObj = JSON.parse(line);
+                                let info = containerInfo.get(statObj.ID);
+                                if (info) {
+                                    info.cpuPercent = statObj.CPUPerc || "0%";
+                                    info.memUsage = statObj.MemUsage || "0B / 0B";
+                                    info.memPercent = statObj.MemPerc || "0%";
+                                }
+                            } catch (e) {
+                                // skip malformed lines
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (let [, info] of containerInfo) {
+                let stackName = "";
+                let serviceName = "";
+                if (info.labels) {
+                    let labelParts = info.labels.split(",");
+                    for (let label of labelParts) {
+                        let [key, value] = label.split("=");
+                        if (key === "com.docker.compose.project") {
+                            stackName = value || "";
+                        }
+                        if (key === "com.docker.compose.service") {
+                            serviceName = value || "";
+                        }
+                    }
+                }
+                info.stackName = stackName;
+                info.serviceName = serviceName;
+                delete info.labels;
+                stats.push(info);
+            }
+
+        } catch (e) {
+            log.error("getAllContainerStats", e);
+        }
+
+        return stats;
     }
 
     async getServiceStatusList() {

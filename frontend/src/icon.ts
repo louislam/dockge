@@ -54,6 +54,7 @@ import {
     faTerminal, faWarehouse, faHome, faRocket,
     faRotate,
     faCloudArrowDown, faArrowsRotate,
+    faServer, faMicrochip, faMemory, faClock, faChevronRight, faChevronLeft, faGripVertical,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -109,6 +110,13 @@ library.add(
     faRotate,
     faCloudArrowDown,
     faArrowsRotate,
+    faServer,
+    faMicrochip,
+    faMemory,
+    faClock,
+    faChevronRight,
+    faChevronLeft,
+    faGripVertical,
 );
 
 export { FontAwesomeIcon };
