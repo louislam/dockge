@@ -250,6 +250,8 @@ import { dracula as editorTheme } from "thememirror";
 import { lineNumbers, EditorView } from "@codemirror/view";
 import { parseDocument, Document } from "yaml";
 
+import { defaultComposeTemplate } from "../../../common/util-common.ts";
+
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
     COMBINED_TERMINAL_COLS,
@@ -265,14 +267,6 @@ import NetworkInput from "../components/NetworkInput.vue";
 import dotenv from "dotenv";
 import { ref } from "vue";
 
-const template = `
-services:
-  nginx:
-    image: nginx:latest
-    restart: unless-stopped
-    ports:
-      - "8080:80"
-`;
 const envDefault = "# VARIABLE=value #comment";
 
 let yamlErrorTimeout = null;
@@ -478,8 +472,16 @@ export default {
                 composeYAML = this.$root.composeTemplate;
                 this.$root.composeTemplate = "";
             } else {
-                composeYAML = template;
+                composeYAML = defaultComposeTemplate;
             }
+
+            this.$root.getSocket().emit("getSettings", (res) => {
+                if (res.ok && res.data.template) {
+                    this.stack.composeYAML = res.data.template;
+                    this.yamlCodeChange();
+                }
+            });
+
             if (this.$root.envTemplate) {
                 composeENV = this.$root.envTemplate;
                 this.$root.envTemplate = "";

@@ -428,3 +428,11 @@ function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
     }
 }
 
+export const defaultComposeTemplate = `services:
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - 8080:80
+networks: {}
+`;
