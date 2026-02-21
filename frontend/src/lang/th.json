@@ -134,5 +134,6 @@
     "ConsoleNotEnabledMSG1": "คอนโซลเป็นเครื่องมือที่มีประสิทธิภาพที่ช่วยให้คุณสามารถรันคำสั่งใดๆ เช่น <code>docker</code>, <code>rm</code> ภายในคอนเทนเนอร์ของ Dockge ใน UI เว็บนี้",
     "ConsoleNotEnabledMSG2": "มันอาจเป็นอันตรายเนื่องจากคอนเทนเนอร์ Dockge นี้กำลังเชื่อมต่อกับ Docker daemon ของโฮสต์ นอกจากนี้ Dockge อาจถูกปิดโดยคำสั่งเช่น <code>rm -rf</code>",
     "ConsoleNotEnabledMSG3": "หากคุณเข้าใจความเสี่ยง คุณสามารถเปิดใช้งานได้โดยการตั้งค่า <code>DOCKGE_ENABLE_CONSOLE=true</code> ในตัวแปรสภาพแวดล้อม",
-    "confirmLeaveStack": "คุณกำลังแก้ไขสแต็กอยู่ คุณแน่ใจหรือไม่ว่าต้องการออก?"
+    "confirmLeaveStack": "คุณกำลังแก้ไขสแต็กอยู่ คุณแน่ใจหรือไม่ว่าต้องการออก?",
+    "GlobalEnv": "Global .env"
 }
