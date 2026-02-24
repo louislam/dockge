@@ -35,6 +35,7 @@ const languageList = {
     "de-CH": "Schwiizerdütsch",
     "mag": "मगही",
     "mai": "मैथिली",
+    "eu": "Euskara",
 };
 
 let messages = {
