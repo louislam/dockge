@@ -4,6 +4,8 @@ import { log } from "./log";
 import yaml from "yaml";
 import { DockgeSocket, fileExists, ValidationError } from "./util-server";
 import path from "path";
+import os from "os";
+import childProcess from "child_process";
 import {
     acceptedComposeFileNames,
     COMBINED_TERMINAL_COLS,
@@ -458,6 +460,71 @@ export class Stack {
 
     async update(socket: DockgeSocket) {
         const terminalName = getComposeTerminalName(socket.endpoint, this.name);
+
+        // Get registry credentials
+        const registries = await Settings.getSettings("registry");
+        const registryList = registries.registryList || [];
+
+        // Get enabled registries
+        const enabledRegistries = registryList.filter(registry => registry.enabled);
+        
+        // Login to registries before pulling
+        for (const registry of enabledRegistries) {
+            try {
+                // Login to registry
+                const loginOptions = [
+                    "login",
+                    "--username", registry.username,
+                    "--password", registry.token
+                ];
+                
+                if (registry.allowInsecure) {
+                    loginOptions.push("--insecure");
+                }
+                
+                loginOptions.push(registry.url);
+                
+                const loginProcess = childProcess.spawn("docker", loginOptions, {
+                    cwd: this.path,
+                    stdio: ['ignore', 'pipe', 'pipe'],
+                    windowsHide: true
+                });
+                
+                let stdoutData = '';
+                let stderrData = '';
+                
+                if (loginProcess.stdout) {
+                    loginProcess.stdout.on('data', (data) => {
+                        stdoutData += data.toString();
+                    });
+                }
+                
+                if (loginProcess.stderr) {
+                    loginProcess.stderr.on('data', (data) => {
+                        stderrData += data.toString();
+                    });
+                }
+                
+                // Wait for login
+                await new Promise((resolve, reject) => {
+                    loginProcess.on('close', (code) => {
+                        if (code === 0) {
+                            resolve(null);
+                        } else {
+                            const sanitizedError = stderrData.replace(new RegExp(registry.token, 'g'), '********');
+                            reject(new Error(`Failed to login to registry ${registry.url}: ${sanitizedError}`));
+                        }
+                    });
+                });
+
+                log.info("registry", `Logged in to registry: ${registry.url}`);
+            } catch (e) {
+                if (e instanceof Error) {
+                    log.error("registry", `Failed to login to registry ${registry.url}: ${e.message}`);
+                }
+            }
+        }
+
         let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", this.getComposeOptions("pull"), this.path);
         if (exitCode !== 0) {
             throw new Error("Failed to pull, please check the terminal output for more information.");

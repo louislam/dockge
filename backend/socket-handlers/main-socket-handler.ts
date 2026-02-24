@@ -343,6 +343,133 @@ export class MainSocketHandler extends SocketHandler {
                 callbackError(e, callback);
             }
         });
+
+        // Get Registries
+        socket.on("getRegistries", async (callback) => {
+            try {
+                checkLogin(socket);
+                const registries = await Settings.getSettings("registry");
+                
+                callback({
+                    ok: true,
+                    data: registries.registryList || [],
+                });
+            } catch (e) {
+                if (e instanceof Error) {
+                    callback({
+                        ok: false,
+                        msg: e.message,
+                    });
+                }
+            }
+        });
+
+        // Add Registry
+        socket.on("addRegistry", async (registry, callback) => {
+            try {
+                checkLogin(socket);
+                
+                // Validate registry data
+                if (!registry.url || !registry.username || !registry.token) {
+                    throw new ValidationError("Missing required fields");
+                }
+                
+                // Get existing registries
+                let registries = await Settings.getSettings("registry");
+                let registryList = registries.registryList || [];
+                
+                // Add new registry
+                registryList.push(registry);
+                
+                // Save updated registry list
+                await Settings.setSettings("registry", { registryList });
+                
+                callback({
+                    ok: true,
+                    msg: "Registry added successfully",
+                });
+            } catch (e) {
+                if (e instanceof Error) {
+                    callback({
+                        ok: false,
+                        msg: e.message,
+                    });
+                }
+            }
+        });
+
+        // Update Registry
+        socket.on("updateRegistry", async (index, registry, callback) => {
+            try {
+                checkLogin(socket);
+                
+                // Validate registry data
+                if (!registry.url || !registry.username || !registry.token) {
+                    throw new ValidationError("Missing required fields");
+                }
+                
+                // Get existing registries
+                let registries = await Settings.getSettings("registry");
+                let registryList = registries.registryList || [];
+                
+                // Check if index is valid
+                if (index < 0 || index >= registryList.length) {
+                    throw new ValidationError("Invalid registry index");
+                }
+                
+                // Update registry
+                registryList[index] = registry;
+                
+                // Save updated registry list
+                await Settings.setSettings("registry", { registryList });
+                
+                callback({
+                    ok: true,
+                    msg: "Registry updated successfully",
+                });
+            } catch (e) {
+                if (e instanceof Error) {
+                    callback({
+                        ok: false,
+                        msg: e.message,
+                    });
+                }
+            }
+        });
+
+        // Delete Registry
+        socket.on("deleteRegistry", async (index, callback) => {
+            try {
+                checkLogin(socket);
+                
+                // Get existing registries
+                let registries = await Settings.getSettings("registry");
+                let registryList = registries.registryList || [];
+                
+                // Check if index is valid
+                if (index < 0 || index >= registryList.length) {
+                    throw new ValidationError("Invalid registry index");
+                }
+                
+                // Remove registry
+                registryList.splice(index, 1);
+                
+                // Save updated registry list
+                await Settings.setSettings("registry", { registryList });
+                
+                callback({
+                    ok: true,
+                    msg: "Registry deleted successfully",
+                });
+            } catch (e) {
+                if (e instanceof Error) {
+                    callback({
+                        ok: false,
+                        msg: e.message,
+                    });
+                }
+            }
+        });
     }
 
     async login(username : string, password : string) : Promise<User | null> {
