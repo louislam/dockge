@@ -6,10 +6,10 @@
                 <table class="table table-hover" v-if="registries.length > 0">
                     <thead>
                         <tr>
-                            <th>{{ $t("Registry URL") }}</th>
-                            <th>{{ $t("Username") }}</th>
-                            <th>{{ $t("Description") }}</th>
-                            <th class="text-end">{{ $t("Actions") }}</th>
+                            <th class="col">{{ $t("Registry URL") }}</th>
+                            <th class="col">{{ $t("Username") }}</th>
+                            <th class="col">{{ $t("Description") }}</th>
+                            <th class="col text-end">{{ $t("Actions") }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -24,7 +24,7 @@
                             <td class="text-end">
                                 <button
                                     type="button"
-                                    class="btn btn-sm btn-primary me-2"
+                                    class="btn btn-sm btn-primary mb-1 mb-md-0 me-md-2"
                                     @click="editRegistry(index)"
                                 >
                                     {{ $t("Edit") }}
