@@ -125,14 +125,15 @@
     "Deployed": "Istanziato",
     "Downed": "Rimosso",
     "Switch to sh": "Passa a sh",
-    "New Container Name...": "Nome del nuovo container...",
+    "New Container Name...": "Nome del nuovo container…",
     "terminal": "Terminale",
     "CurrentHostname": "(Non impostato: Segue l'hostname attuale)",
     "Deleted": "Rimosso",
-    "Lost connection to the socket server. Reconnecting...": "Connessione con il socket server persa. Riconnessione...",
-    "Network name...": "Nome della rete...",
-    "Select a network...": "Seleziona una rete...",
+    "Lost connection to the socket server. Reconnecting...": "Connessione con il socket server persa. Riconnessione…",
+    "Network name...": "Nome della rete…",
+    "Select a network...": "Seleziona una rete…",
     "Updated": "Aggiornato",
     "Started": "Avviato",
-    "Stopped": "Fermato"
+    "Stopped": "Fermato",
+    "GlobalEnv": ".env Globale"
 }
