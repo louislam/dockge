@@ -510,7 +510,7 @@ export class Stack {
     }
 
     async getServiceStatusList() {
-        let statusList = new Map<string, { state: string, ports: string[] }>();
+        let statusList = new Map<string, Array<object>>();
 
         try {
             let res = await childProcessAsync.spawn("docker", this.getComposeOptions("ps", "--format", "json"), {
@@ -524,22 +524,33 @@ export class Stack {
 
             let lines = res.stdout?.toString().split("\n");
 
+                        const addLine = (obj: { Service: string, State: string, Name: string, Health: string }) => {
+                if (!statusList.has(obj.Service)) {
+                    statusList.set(obj.Service, []);
+                }
+                statusList.get(obj.Service)?.push({
+                    status: obj.Health || obj.State,
+                    name: obj.Name
+                });
+            };
+
             for (let line of lines) {
                 try {
                     let obj = JSON.parse(line);
-                    let ports = (obj.Ports as string).split(/,\s*/).filter((s) => {
-                        return s.indexOf("->") >= 0;
-                    });
-                    if (obj.Health === "") {
-                        statusList.set(obj.Service, {
-                            state: obj.State,
-                            ports: ports
+                    const addLine = (obj: { Service: string, State: string, Name: string, Health: string }) => {
+                    if (!statusList.has(obj.Service)) {
+                        statusList.set(obj.Service, []);
+                    }
+                    statusList.get(obj.Service)?.push({
+                        status: obj.Health || obj.State,
+                        name: obj.Name
                         });
+                    };
+
+                    if (obj instanceof Array) {
+                        obj.forEach(addLine);
                     } else {
-                        statusList.set(obj.Service, {
-                            state: obj.Health,
-                            ports: ports
-                        });
+                        addLine(obj);
                     }
                 } catch (e) {
                 }
@@ -552,4 +563,49 @@ export class Stack {
         }
 
     }
+
+/**
+ * Fetch docker stats for all containers in this stack.
+ * Returns an array of per-container stat objects.
+ */
+async getDockerStats(): Promise<object[]> {
+    const { stdout } = await childProcessAsync.spawn("docker", [
+        "stats",
+        "--no-stream",
+        "--format",
+        "{{json .}}",
+        ...await this.getContainerNames(),
+    ], {
+        cwd: this.path,
+    });
+
+    if (!stdout) {
+        return [];
+    }
+
+    // docker stats outputs one JSON object per line
+    return stdout
+        .trim()
+        .split("\n")
+        .filter(Boolean)
+        .map((line: string) => {
+            try {
+                return JSON.parse(line);
+            } catch {
+                return null;
+            }
+        })
+        .filter(Boolean);
+}
+
+/**
+ * Get all running container names for this stack.
+ */
+async getContainerNames(): Promise<string[]> {
+    const serviceList = await this.getServiceStatusList();
+    return serviceList
+        .filter((s: any) => s.status?.startsWith("running"))
+        .map((s: any) => s.name)
+        .filter(Boolean);
+}
 }

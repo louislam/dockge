@@ -9,7 +9,7 @@
                 <div v-if="!isEditMode">
                     <span class="badge me-1" :class="bgStyle">{{ status }}</span>
 
-                    <a v-for="port in (ports ?? envsubstService.ports)" :key="port" :href="parsePort(port).url" target="_blank">
+                    <a v-for="port in envsubstService.ports" :key="port" :href="parsePort(port).url" target="_blank">
                         <span class="badge me-1 bg-secondary">{{ parsePort(port).display }}</span>
                     </a>
                 </div>
@@ -35,7 +35,32 @@
                 {{ $t("deleteContainer") }}
             </button>
         </div>
-
+        <div v-else-if="statsInstances.length > 0" class="mt-2">
+            <div class="d-flex align-items-center gap-3">
+                <template v-if="!expandedStats">
+                    <div class="stats">
+                        {{ $t('CPU') }}: {{ statsInstances[0].CPUPerc }}
+                    </div>
+                    <div class="stats">
+                        {{ $t('memoryAbbreviated') }}: {{ statsInstances[0].MemUsage }}
+                    </div>
+                </template>
+                <div class="d-flex flex-grow-1 justify-content-end">
+                    <button class="btn btn-sm btn-normal" @click="expandedStats = !expandedStats">
+                        <font-awesome-icon :icon="expandedStats ? 'chevron-up' : 'chevron-down'" />
+                    </button>
+            </div>
+        </div>
+        <transition name="slide-fade" appear>
+            <div v-if="expandedStats" class="d-flex flex-column gap-3 mt-2">
+                <DockerStat 
+                    v-for="stat in statsInstances" 
+                    :key="stat.Name" 
+                    :stat="stat" 
+                />
+            </div>
+        </transition>
+    </div>
         <transition name="slide-fade" appear>
             <div v-if="isEditMode && showConfig" class="config mt-3">
                 <!-- Image -->
@@ -138,10 +163,12 @@
 import { defineComponent } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { parseDockerPort } from "../../../common/util-common";
+import DockerStat from "./DockerStat.vue";
 
 export default defineComponent({
     components: {
         FontAwesomeIcon,
+        DockerStat
     },
     props: {
         name: {
@@ -156,20 +183,21 @@ export default defineComponent({
             type: Boolean,
             default: false,
         },
-        status: {
-            type: String,
-            default: "N/A",
+        serviceStatus: { 
+            type: Object,
+            default: null 
         },
-        ports: {
-            type: Array,
-            default: null
-        }
+        dockerStats: { 
+            type: Object, 
+            default: null 
+        },
     },
     emits: [
     ],
     data() {
         return {
             showConfig: false,
+            expandedStats: false
         };
     },
     computed: {
@@ -270,6 +298,17 @@ export default defineComponent({
                 return "";
             }
         },
+        statsInstances() {
+            if (!this.serviceStatus) return [];
+            return this.serviceStatus
+                .map(s => this.dockerStats[s.name])
+                .filter(s => !!s)
+                .sort((a, b) => a.Name.localeCompare(b.Name));
+        },
+        status() {
+            if (!this.serviceStatus) return "N/A";
+            return this.serviceStatus[0].status;
+        }
     },
     mounted() {
         if (this.first) {

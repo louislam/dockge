@@ -128,8 +128,9 @@
                             :name="name"
                             :is-edit-mode="isEditMode"
                             :first="name === Object.keys(jsonConfig.services)[0]"
-                            :status="serviceStatusList[name]?.state"
                             :ports="serviceStatusList[name]?.ports"
+                            :serviceStatus="serviceStatusList[name]"
+                            :dockerStats="dockerStats"
                         />
                     </div>
 
@@ -279,6 +280,8 @@ let yamlErrorTimeout = null;
 
 let serviceStatusTimeout = null;
 
+let dockerStatsTimeout = null;
+
 export default {
     components: {
         NetworkInput,
@@ -338,6 +341,10 @@ export default {
             showDeleteDialog: false,
             newContainerName: "",
             stopServiceStatusTimeout: false,
+            dockerStats: [] as object[],
+            statsExpanded: false,
+            statsInterval: null as ReturnType<typeof setInterval> | null,
+            stopDockerStatsTimeout: false,
         };
     },
     computed: {
@@ -504,6 +511,7 @@ export default {
         }
 
         this.requestServiceStatus();
+        this.requestDockerStats();
     },
     unmounted() {
 
@@ -515,6 +523,14 @@ export default {
                 this.requestServiceStatus();
             }, 5000);
         },
+
+        startDockerStatsTimeout() {
+            clearTimeout(dockerStatsTimeout);
+            dockerStatsTimeout = setTimeout(async () => {
+                this.requestDockerStats();
+            }, 5000);
+        },
+
 
         requestServiceStatus() {
             // Do not request if it is add mode
@@ -528,6 +544,17 @@ export default {
                 }
                 if (!this.stopServiceStatusTimeout) {
                     this.startServiceStatusTimeout();
+                }
+            });
+        },
+
+        requestDockerStats() {
+            this.$root.emitAgent(this.endpoint, "dockerStats", (res) => {
+                if (res.ok) {
+                    this.dockerStats = res.dockerStats;
+                }
+                if (!this.stopDockerStatsTimeout) {
+                    this.startDockerStatsTimeout();
                 }
             });
         },
@@ -549,7 +576,9 @@ export default {
         exitAction() {
             console.log("exitAction");
             this.stopServiceStatusTimeout = true;
+            this.stopDockerStatsTimeout = true;
             clearTimeout(serviceStatusTimeout);
+            clearTimeout(dockerStatsTimeout);
 
             // Leave Combined Terminal
             console.debug("leaveCombinedTerminal", this.endpoint, this.stack.name);
@@ -616,6 +645,16 @@ export default {
                 }
             });
         },
+
+        fetchDockerStats() {
+    if (!this.stack?.name || this.isAdd) return;
+
+    this.$root.emitAgent(this.endpoint, "getDockerStats", this.stack.name, this.endpoint, (res: any) => {
+        if (res.ok) {
+            this.dockerStats = res.stats;
+        }
+    });
+    },
 
         saveStack() {
             this.processing = true;
