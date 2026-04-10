@@ -1,0 +1,14 @@
+name: 🚀 Feature Request (Please go to the "Discussions" tab to submit a Feature Request)
+description: "⚠️ Please go to the \"Discussions\" tab to submit a Feature Request"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️  Please go to https://github.com/louislam/dockge/discussions/new?category=ask-for-help
+  - type: checkboxes
+    id: no-duplicate-issues
+    attributes:
+      label: "Issues are for bug reports only, please go to the \"Discussions\" tab to submit a Feature Request"
+      options:
+        - label: "I understand"
+          required: true

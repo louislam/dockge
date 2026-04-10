@@ -9,7 +9,7 @@ import knex from "knex";
 import Dialect from "knex/lib/dialects/sqlite3/index.js";
 
 import sqlite from "@louislam/sqlite3";
-import { sleep } from "./util-common";
+import { sleep } from "../common/util-common";
 
 interface DBConfig {
     type?: "sqlite" | "mysql";

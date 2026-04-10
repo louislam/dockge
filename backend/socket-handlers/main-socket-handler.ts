@@ -1,3 +1,5 @@
+// @ts-ignore
+import composerize from "composerize";
 import { SocketHandler } from "../socket-handler.js";
 import { DockgeServer } from "../dockge-server";
 import { log } from "../log";
@@ -5,10 +7,19 @@ import { R } from "redbean-node";
 import { loginRateLimiter, twoFaRateLimiter } from "../rate-limiter";
 import { generatePasswordHash, needRehashPassword, shake256, SHAKE256_LENGTH, verifyPassword } from "../password-hash";
 import { User } from "../models/user";
-import { checkLogin, DockgeSocket, doubleCheckPassword, JWTDecoded } from "../util-server";
+import {
+    callbackError,
+    checkLogin,
+    DockgeSocket,
+    doubleCheckPassword,
+    JWTDecoded,
+    ValidationError
+} from "../util-server";
 import { passwordStrength } from "check-password-strength";
 import jwt from "jsonwebtoken";
 import { Settings } from "../settings";
+import fs, { promises as fsAsync } from "fs";
+import path from "path";
 
 export class MainSocketHandler extends SocketHandler {
     create(socket : DockgeSocket, server : DockgeServer) {
@@ -211,6 +222,8 @@ export class MainSocketHandler extends SocketHandler {
                 let user = await doubleCheckPassword(socket, password.currentPassword);
                 await user.resetPassword(password.newPassword);
 
+                server.disconnectAllSocketClients(user.id, socket.id);
+
                 callback({
                     ok: true,
                     msg: "Password has been updated successfully.",
@@ -230,6 +243,12 @@ export class MainSocketHandler extends SocketHandler {
             try {
                 checkLogin(socket);
                 const data = await Settings.getSettings("general");
+
+                if (fs.existsSync(path.join(server.stacksDir, "global.env"))) {
+                    data.globalENV = fs.readFileSync(path.join(server.stacksDir, "global.env"), "utf-8");
+                } else {
+                    data.globalENV = "# VARIABLE=value #comment";
+                }
 
                 callback({
                     ok: true,
@@ -259,8 +278,16 @@ export class MainSocketHandler extends SocketHandler {
                 if (!currentDisabledAuth && data.disableAuth) {
                     await doubleCheckPassword(socket, currentPassword);
                 }
-
-                console.log(data);
+                // Handle global.env
+                if (data.globalENV && data.globalENV != "# VARIABLE=value #comment") {
+                    await fsAsync.writeFile(path.join(server.stacksDir, "global.env"), data.globalENV);
+                } else {
+                    await fsAsync.rm(path.join(server.stacksDir, "global.env"), {
+                        recursive: true,
+                        force: true
+                    });
+                }
+                delete data.globalENV;
 
                 await Settings.setSettings("general", data);
 
@@ -278,6 +305,42 @@ export class MainSocketHandler extends SocketHandler {
                         msg: e.message,
                     });
                 }
+            }
+        });
+
+        // Disconnect all other socket clients of the user
+        socket.on("disconnectOtherSocketClients", async () => {
+            try {
+                checkLogin(socket);
+                server.disconnectAllSocketClients(socket.userID, socket.id);
+            } catch (e) {
+                if (e instanceof Error) {
+                    log.warn("disconnectOtherSocketClients", e.message);
+                }
+            }
+        });
+
+        // composerize
+        socket.on("composerize", async (dockerRunCommand : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(dockerRunCommand) !== "string") {
+                    throw new ValidationError("dockerRunCommand must be a string");
+                }
+
+                // Option: 'latest' | 'v2x' | 'v3x'
+                let composeTemplate = composerize(dockerRunCommand, "", "latest");
+
+                // Remove the first line "name: <your project name>"
+                composeTemplate = composeTemplate.split("\n").slice(1).join("\n");
+
+                callback({
+                    ok: true,
+                    composeTemplate,
+                });
+            } catch (e) {
+                callbackError(e, callback);
             }
         });
     }

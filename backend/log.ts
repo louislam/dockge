@@ -1,6 +1,6 @@
 // Console colors
 // https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
-import { intHash, isDev } from "./util-common";
+import { intHash, isDev } from "../common/util-common";
 import dayjs from "dayjs";
 
 export const CONSOLE_STYLE_Reset = "\x1b[0m";
@@ -103,6 +103,10 @@ class Logger {
      * @param level Log level. One of INFO, WARN, ERROR, DEBUG or can be customized.
      */
     log(module: string, msg: unknown, level: string) {
+        if (level === "DEBUG" && !isDev) {
+            return;
+        }
+
         if (this.hideLog[level] && this.hideLog[level].includes(module.toLowerCase())) {
             return;
         }

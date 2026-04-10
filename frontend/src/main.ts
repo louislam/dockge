@@ -1,5 +1,5 @@
 // Dayjs init inside this, so it has to be the first import
-import "../../backend/util-common";
+import "../../common/util-common";
 
 import { createApp, defineComponent, h } from "vue";
 import App from "./App.vue";
@@ -10,12 +10,12 @@ import { i18n } from "./i18n";
 // Dependencies
 import "bootstrap";
 import Toast, { POSITION, useToast } from "vue-toastification";
-import "xterm/lib/xterm.js";
+import "@xterm/xterm/lib/xterm.js";
 
 // CSS
 import "@fontsource/jetbrains-mono";
 import "vue-toastification/dist/index.css";
-import "xterm/css/xterm.css";
+import "@xterm/xterm/css/xterm.css";
 import "./styles/main.scss";
 
 // Minxins

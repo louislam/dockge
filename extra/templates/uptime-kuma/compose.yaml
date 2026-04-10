@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   uptime-kuma:
     image: louislam/uptime-kuma:1

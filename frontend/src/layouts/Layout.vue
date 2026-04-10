@@ -3,6 +3,9 @@
         <div v-if="! $root.socketIO.connected && ! $root.socketIO.firstConnect" class="lost-connection">
             <div class="container-fluid">
                 {{ $root.socketIO.connectionErrorMsg }}
+                <div v-if="$root.socketIO.showReverseProxyGuide">
+                    {{ $t("reverseProxyMsg1") }} <a href="https://github.com/louislam/uptime-kuma/wiki/Reverse-Proxy" target="_blank">{{ $t("reverseProxyMsg2") }}</a>
+                </div>
             </div>
         </div>
 
@@ -13,8 +16,8 @@
                 <span class="fs-4 title">Dockge</span>
             </router-link>
 
-            <a v-if="hasNewVersion" target="_blank" href="https://github.com/louislam/dockge/releases" class="btn btn-info me-3">
-                <font-awesome-icon icon="arrow-alt-circle-up" /> {{ $t("New Update") }}
+            <a v-if="hasNewVersion" target="_blank" href="https://github.com/louislam/dockge/releases" class="btn btn-warning me-3">
+                <font-awesome-icon icon="arrow-alt-circle-up" /> {{ $t("newUpdate") }}
             </a>
 
             <ul class="nav nav-pills">
@@ -82,6 +85,10 @@
         </header>
 
         <main>
+            <div v-if="$root.socketIO.connecting" class="container mt-5">
+                <h4>{{ $t("connecting...") }}</h4>
+            </div>
+
             <router-view v-if="$root.loggedIn" />
             <Login v-if="! $root.loggedIn && $root.allowLoginDialog" />
         </main>
@@ -91,6 +98,7 @@
 <script>
 import Login from "../components/Login.vue";
 import { compareVersions } from "compare-versions";
+import { ALL_ENDPOINTS } from "../../../common/util-common";
 
 export default {
 
@@ -138,7 +146,7 @@ export default {
 
     methods: {
         scanFolder() {
-            this.$root.getSocket().emit("requestStackList", (res) => {
+            this.$root.emitAgent(ALL_ENDPOINTS, "requestStackList", (res) => {
                 this.$root.toastRes(res);
             });
         },

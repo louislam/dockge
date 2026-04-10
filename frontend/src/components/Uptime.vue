@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { statusColor, statusNameShort } from "../../../backend/util-common";
+import { statusColor, statusNameShort } from "../../../common/util-common";
 
 export default {
     props: {
@@ -45,9 +45,12 @@ export default {
 <style scoped>
 .badge {
     min-width: 62px;
+
 }
 
 .fixed-width {
     width: 62px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 </style>

@@ -9,7 +9,7 @@
                 <div v-if="!isEditMode">
                     <span class="badge me-1" :class="bgStyle">{{ status }}</span>
 
-                    <a v-for="port in service.ports" :key="port" :href="parsePort(port).url" target="_blank">
+                    <a v-for="port in (ports ?? envsubstService.ports)" :key="port" :href="parsePort(port).url" target="_blank">
                         <span class="badge me-1 bg-secondary">{{ parsePort(port).display }}</span>
                     </a>
                 </div>
@@ -116,7 +116,7 @@
                     </label>
 
                     <div v-if="networkList.length === 0 && service.networks && service.networks.length > 0" class="text-warning mb-3">
-                        No networks available. You need to add internal networks or enable external networks in the right side first.
+                        {{ $t("NoNetworksAvailable") }}
                     </div>
 
                     <ArraySelect name="networks" :display-name="$t('network')" placeholder="Network Name" :options="networkList" />
@@ -127,7 +127,7 @@
                     <label class="form-label">
                         {{ $t("dependsOn") }}
                     </label>
-                    <ArrayInput name="depends_on" :display-name="$t('dependsOn')" placeholder="Container Name" />
+                    <ArrayInput name="depends_on" :display-name="$t('dependsOn')" :placeholder="$t(`containerName`)" />
                 </div>
             </div>
         </transition>
@@ -137,7 +137,7 @@
 <script>
 import { defineComponent } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { parseDockerPort } from "../../../backend/util-common";
+import { parseDockerPort } from "../../../common/util-common";
 
 export default defineComponent({
     components: {
@@ -159,6 +159,10 @@ export default defineComponent({
         status: {
             type: String,
             default: "N/A",
+        },
+        ports: {
+            type: Array,
+            default: null
         }
     },
     emits: [
@@ -189,14 +193,34 @@ export default defineComponent({
         },
 
         terminalRouteLink() {
-            return {
-                name: "containerTerminal",
-                params: {
-                    stackName: this.stackName,
-                    serviceName: this.name,
-                    type: "bash",
-                },
-            };
+            if (this.endpoint) {
+                return {
+                    name: "containerTerminalEndpoint",
+                    params: {
+                        endpoint: this.endpoint,
+                        stackName: this.stackName,
+                        serviceName: this.name,
+                        type: "bash",
+                    },
+                };
+            } else {
+                return {
+                    name: "containerTerminal",
+                    params: {
+                        stackName: this.stackName,
+                        serviceName: this.name,
+                        type: "bash",
+                    },
+                };
+            }
+        },
+
+        endpoint() {
+            return this.$parent.$parent.endpoint;
+        },
+
+        stack() {
+            return this.$parent.$parent.stack;
         },
 
         stackName() {
@@ -213,16 +237,29 @@ export default defineComponent({
         jsonObject() {
             return this.$parent.$parent.jsonConfig;
         },
+
+        envsubstJSONConfig() {
+            return this.$parent.$parent.envsubstJSONConfig;
+        },
+
+        envsubstService() {
+            if (!this.envsubstJSONConfig.services[this.name]) {
+                return {};
+            }
+            return this.envsubstJSONConfig.services[this.name];
+        },
+
         imageName() {
-            if (this.service.image) {
-                return this.service.image.split(":")[0];
+            if (this.envsubstService.image) {
+                return this.envsubstService.image.split(":")[0];
             } else {
                 return "";
             }
         },
+
         imageTag() {
-            if (this.service.image) {
-                let tag = this.service.image.split(":")[1];
+            if (this.envsubstService.image) {
+                let tag = this.envsubstService.image.split(":")[1];
 
                 if (tag) {
                     return tag;
@@ -241,8 +278,12 @@ export default defineComponent({
     },
     methods: {
         parsePort(port) {
-            let hostname = this.$root.info.primaryHostname || location.hostname;
-            return parseDockerPort(port, hostname);
+            if (this.stack.endpoint) {
+                return parseDockerPort(port, this.stack.primaryHostname);
+            } else {
+                let hostname = this.$root.info.primaryHostname || location.hostname;
+                return parseDockerPort(port, hostname);
+            }
         },
         remove() {
             delete this.jsonObject.services[this.name];

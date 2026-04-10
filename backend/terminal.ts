@@ -4,13 +4,10 @@ import * as pty from "@homebridge/node-pty-prebuilt-multiarch";
 import { LimitQueue } from "./utils/limit-queue";
 import { DockgeSocket } from "./util-server";
 import {
-    allowedCommandList, allowedRawKeys,
-    getComposeTerminalName,
-    getCryptoRandomInt,
     PROGRESS_TERMINAL_ROWS,
     TERMINAL_COLS,
     TERMINAL_ROWS
-} from "./util-common";
+} from "../common/util-common";
 import { sync as commandExistsSync } from "command-exists";
 import { log } from "./log";
 
@@ -18,7 +15,6 @@ import { log } from "./log";
  * Terminal for running commands, no user interaction
  */
 export class Terminal {
-
     protected static terminalMap : Map<string, Terminal> = new Map();
 
     protected _ptyProcess? : pty.IPty;
@@ -33,6 +29,12 @@ export class Terminal {
 
     protected _rows : number = TERMINAL_ROWS;
     protected _cols : number = TERMINAL_COLS;
+
+    public enableKeepAlive : boolean = false;
+    protected keepAliveInterval? : NodeJS.Timeout;
+    protected kickDisconnectedClientsInterval? : NodeJS.Timeout;
+
+    protected socketList : Record<string, DockgeSocket> = {};
 
     constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
@@ -66,6 +68,7 @@ export class Terminal {
 
     set cols(cols : number) {
         this._cols = cols;
+        log.debug("Terminal", `Terminal cols: ${this._cols}`); // Added to check if cols is being set when changing terminal size.
         try {
             this.ptyProcess?.resize(this.cols, this.rows);
         } catch (e) {
@@ -80,47 +83,101 @@ export class Terminal {
             return;
         }
 
-        this._ptyProcess = pty.spawn(this.file, this.args, {
-            name: this.name,
-            cwd: this.cwd,
-            cols: TERMINAL_COLS,
-            rows: this.rows,
-        });
-
-        // On Data
-        this._ptyProcess.onData((data) => {
-            this.buffer.pushItem(data);
-            if (this.server.io) {
-                this.server.io.to(this.name).emit("terminalWrite", this.name, data);
+        this.kickDisconnectedClientsInterval = setInterval(() => {
+            for (const socketID in this.socketList) {
+                const socket = this.socketList[socketID];
+                if (!socket.connected) {
+                    log.debug("Terminal", "Kicking disconnected client " + socket.id + " from terminal " + this.name);
+                    this.leave(socket);
+                }
             }
-        });
+        }, 60 * 1000);
 
-        // On Exit
-        this._ptyProcess.onExit((res) => {
-            this.server.io.to(this.name).emit("terminalExit", this.name, res.exitCode);
+        if (this.enableKeepAlive) {
+            log.debug("Terminal", "Keep alive enabled for terminal " + this.name);
 
-            // Remove room
-            this.server.io.in(this.name).socketsLeave(this.name);
+            // Close if there is no clients
+            this.keepAliveInterval = setInterval(() => {
+                const numClients = Object.keys(this.socketList).length;
 
-            Terminal.terminalMap.delete(this.name);
-            log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
+                if (numClients === 0) {
+                    log.debug("Terminal", "Terminal " + this.name + " has no client, closing...");
+                    this.close();
+                } else {
+                    log.debug("Terminal", "Terminal " + this.name + " has " + numClients + " client(s)");
+                }
+            }, 60 * 1000);
+        } else {
+            log.debug("Terminal", "Keep alive disabled for terminal " + this.name);
+        }
 
-            if (this.callback) {
-                this.callback(res.exitCode);
+        try {
+            this._ptyProcess = pty.spawn(this.file, this.args, {
+                name: this.name,
+                cwd: this.cwd,
+                cols: TERMINAL_COLS,
+                rows: this.rows,
+            });
+
+            // On Data
+            this._ptyProcess.onData((data) => {
+                this.buffer.pushItem(data);
+
+                for (const socketID in this.socketList) {
+                    const socket = this.socketList[socketID];
+                    socket.emitAgent("terminalWrite", this.name, data);
+                }
+            });
+
+            // On Exit
+            this._ptyProcess.onExit(this.exit);
+        } catch (error) {
+            if (error instanceof Error) {
+                clearInterval(this.keepAliveInterval);
+
+                log.error("Terminal", "Failed to start terminal: " + error.message);
+                const exitCode = Number(error.message.split(" ").pop());
+                this.exit({
+                    exitCode,
+                });
             }
-        });
+        }
     }
+
+    /**
+     * Exit event handler
+     * @param res
+     */
+    protected exit = (res : {exitCode: number, signal?: number | undefined}) => {
+        for (const socketID in this.socketList) {
+            const socket = this.socketList[socketID];
+            socket.emitAgent("terminalExit", this.name, res.exitCode);
+        }
+
+        // Remove all clients
+        this.socketList = {};
+
+        Terminal.terminalMap.delete(this.name);
+        log.debug("Terminal", "Terminal " + this.name + " exited with code " + res.exitCode);
+
+        clearInterval(this.keepAliveInterval);
+        clearInterval(this.kickDisconnectedClientsInterval);
+
+        if (this.callback) {
+            this.callback(res.exitCode);
+        }
+    };
 
     public onExit(callback : (exitCode : number) => void) {
         this.callback = callback;
     }
 
     public join(socket : DockgeSocket) {
-        socket.join(this.name);
+        this.socketList[socket.id] = socket;
     }
 
     public leave(socket : DockgeSocket) {
-        socket.leave(this.name);
+        delete this.socketList[socket.id];
     }
 
     public get ptyProcess() {
@@ -142,7 +199,9 @@ export class Terminal {
     }
 
     close() {
-        this._ptyProcess?.kill();
+        clearInterval(this.keepAliveInterval);
+        // Send Ctrl+C to the terminal
+        this.ptyProcess?.write("\x03");
     }
 
     /**
@@ -163,19 +222,29 @@ export class Terminal {
     }
 
     public static exec(server : DockgeServer, socket : DockgeSocket | undefined, terminalName : string, file : string, args : string | string[], cwd : string) : Promise<number> {
-        const terminal = new Terminal(server, terminalName, file, args, cwd);
-        terminal.rows = PROGRESS_TERMINAL_ROWS;
+        return new Promise((resolve, reject) => {
+            // check if terminal exists
+            if (Terminal.terminalMap.has(terminalName)) {
+                reject("Another operation is already running, please try again later.");
+                return;
+            }
 
-        if (socket) {
-            terminal.join(socket);
-        }
+            let terminal = new Terminal(server, terminalName, file, args, cwd);
+            terminal.rows = PROGRESS_TERMINAL_ROWS;
 
-        return new Promise((resolve) => {
+            if (socket) {
+                terminal.join(socket);
+            }
+
             terminal.onExit((exitCode : number) => {
                 resolve(exitCode);
             });
             terminal.start();
         });
+    }
+
+    public static getTerminalCount() {
+        return Terminal.terminalMap.size;
     }
 }
 
@@ -201,6 +270,11 @@ export class MainTerminal extends InteractiveTerminal {
     constructor(server : DockgeServer, name : string) {
         let shell;
 
+        // Throw an error if console is not enabled
+        if (!server.config.enableConsole) {
+            throw new Error("Console is not enabled.");
+        }
+
         if (os.platform() === "win32") {
             if (commandExistsSync("pwsh.exe")) {
                 shell = "pwsh.exe";
@@ -214,21 +288,6 @@ export class MainTerminal extends InteractiveTerminal {
     }
 
     public write(input : string) {
-        // For like Ctrl + C
-        if (allowedRawKeys.includes(input)) {
-            super.write(input);
-            return;
-        }
-
-        // Check if the command is allowed
-        const cmdParts = input.split(" ");
-        const executable = cmdParts[0].trim();
-        log.debug("console", "Executable: " + executable);
-        log.debug("console", "Executable length: " + executable.length);
-
-        if (!allowedCommandList.includes(executable)) {
-            throw new Error("Command not allowed.");
-        }
         super.write(input);
     }
 }

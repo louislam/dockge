@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { MainRouter } from "./routers/main-router";
 import * as fs from "node:fs";
 import { PackageJson } from "type-fest";
@@ -17,19 +18,25 @@ import { Settings } from "./settings";
 import checkVersion from "./check-version";
 import dayjs from "dayjs";
 import { R } from "redbean-node";
-import { genSecret, isDev } from "./util-common";
+import { genSecret, isDev, LooseObject } from "../common/util-common";
 import { generatePasswordHash } from "./password-hash";
 import { Bean } from "redbean-node/dist/bean";
 import { Arguments, Config, DockgeSocket } from "./util-server";
-import { DockerSocketHandler } from "./socket-handlers/docker-socket-handler";
+import { DockerSocketHandler } from "./agent-socket-handlers/docker-socket-handler";
 import expressStaticGzip from "express-static-gzip";
 import path from "path";
-import { TerminalSocketHandler } from "./socket-handlers/terminal-socket-handler";
+import { TerminalSocketHandler } from "./agent-socket-handlers/terminal-socket-handler";
 import { Stack } from "./stack";
 import { Cron } from "croner";
 import gracefulShutdown from "http-graceful-shutdown";
 import User from "./models/user";
-import childProcess from "child_process";
+import childProcessAsync from "promisify-child-process";
+import { AgentManager } from "./agent-manager";
+import { AgentProxySocketHandler } from "./socket-handlers/agent-proxy-socket-handler";
+import { AgentSocketHandler } from "./agent-socket-handler";
+import { AgentSocket } from "../common/agent-socket";
+import { ManageAgentSocketHandler } from "./socket-handlers/manage-agent-socket-handler";
+import { Terminal } from "./terminal";
 
 export class DockgeServer {
     app : Express;
@@ -47,10 +54,19 @@ export class DockgeServer {
     ];
 
     /**
-     * List of socket handlers
+     * List of socket handlers (no agent support)
      */
     socketHandlerList : SocketHandler[] = [
         new MainSocketHandler(),
+        new ManageAgentSocketHandler(),
+    ];
+
+    agentProxySocketHandler = new AgentProxySocketHandler();
+
+    /**
+     * List of socket handlers (support agent)
+     */
+    agentSocketHandlerList : AgentSocketHandler[] = [
         new DockerSocketHandler(),
         new TerminalSocketHandler(),
     ];
@@ -120,6 +136,11 @@ export class DockgeServer {
             stacksDir: {
                 type: String,
                 optional: true,
+            },
+            enableConsole: {
+                type: Boolean,
+                optional: true,
+                defaultValue: false,
             }
         });
 
@@ -133,6 +154,7 @@ export class DockgeServer {
         this.config.hostname = args.hostname || process.env.DOCKGE_HOSTNAME || undefined;
         this.config.dataDir = args.dataDir || process.env.DOCKGE_DATA_DIR || "./data/";
         this.config.stacksDir = args.stacksDir || process.env.DOCKGE_STACKS_DIR || defaultStacksDir;
+        this.config.enableConsole = args.enableConsole || process.env.DOCKGE_ENABLE_CONSOLE === "true" || false;
         this.stacksDir = this.config.stacksDir;
 
         log.debug("server", this.config);
@@ -148,9 +170,6 @@ export class DockgeServer {
                 process.exit(1);
             }
         }
-
-        // Create all the necessary directories
-        this.initDataDir();
 
         // Create express
         this.app = express();
@@ -194,22 +213,87 @@ export class DockgeServer {
         // Create Socket.io
         this.io = new socketIO.Server(this.httpServer, {
             cors,
+            allowRequest: (req, callback) => {
+                let isOriginValid = true;
+                const bypass = isDev || process.env.UPTIME_KUMA_WS_ORIGIN_CHECK === "bypass";
+
+                if (!bypass) {
+                    let host = req.headers.host;
+
+                    // If this is set, it means the request is from the browser
+                    let origin = req.headers.origin;
+
+                    // If this is from the browser, check if the origin is allowed
+                    if (origin) {
+                        try {
+                            let originURL = new URL(origin);
+
+                            if (host !== originURL.host) {
+                                isOriginValid = false;
+                                log.error("auth", `Origin (${origin}) does not match host (${host}), IP: ${req.socket.remoteAddress}`);
+                            }
+                        } catch (e) {
+                            // Invalid origin url, probably not from browser
+                            isOriginValid = false;
+                            log.error("auth", `Invalid origin url (${origin}), IP: ${req.socket.remoteAddress}`);
+                        }
+                    } else {
+                        log.info("auth", `Origin is not set, IP: ${req.socket.remoteAddress}`);
+                    }
+                } else {
+                    log.debug("auth", "Origin check is bypassed");
+                }
+
+                callback(null, isOriginValid);
+            }
         });
 
         this.io.on("connection", async (socket: Socket) => {
-            log.info("server", "Socket connected!");
+            let dockgeSocket = socket as DockgeSocket;
+            dockgeSocket.instanceManager = new AgentManager(dockgeSocket);
+            dockgeSocket.emitAgent = (event : string, ...args : unknown[]) => {
+                let obj = args[0];
+                if (typeof(obj) === "object") {
+                    let obj2 = obj as LooseObject;
+                    obj2.endpoint = dockgeSocket.endpoint;
+                }
+                dockgeSocket.emit("agent", event, ...args);
+            };
 
-            this.sendInfo(socket, true);
+            if (typeof(socket.request.headers.endpoint) === "string") {
+                dockgeSocket.endpoint = socket.request.headers.endpoint;
+            } else {
+                dockgeSocket.endpoint = "";
+            }
+
+            if (dockgeSocket.endpoint) {
+                log.info("server", "Socket connected (agent), as endpoint " + dockgeSocket.endpoint);
+            } else {
+                log.info("server", "Socket connected (direct)");
+            }
+
+            this.sendInfo(dockgeSocket, true);
 
             if (this.needSetup) {
                 log.info("server", "Redirect to setup page");
-                socket.emit("setup");
+                dockgeSocket.emit("setup");
             }
 
-            // Create socket handlers
+            // Create socket handlers (original, no agent support)
             for (const socketHandler of this.socketHandlerList) {
-                socketHandler.create(socket as DockgeSocket, this);
+                socketHandler.create(dockgeSocket, this);
             }
+
+            // Create Agent Socket
+            let agentSocket = new AgentSocket();
+
+            // Create agent socket handlers
+            for (const socketHandler of this.agentSocketHandlerList) {
+                socketHandler.create(dockgeSocket, this, agentSocket);
+            }
+
+            // Create agent proxy socket handlers
+            this.agentProxySocketHandler.create2(dockgeSocket, this, agentSocket);
 
             // ***************************
             // Better do anything after added all socket handlers here
@@ -218,11 +302,17 @@ export class DockgeServer {
             log.debug("auth", "check auto login");
             if (await Settings.get("disableAuth")) {
                 log.info("auth", "Disabled Auth: auto login to admin");
-                this.afterLogin(socket as DockgeSocket, await R.findOne("user") as User);
-                socket.emit("autoLogin");
+                this.afterLogin(dockgeSocket, await R.findOne("user") as User);
+                dockgeSocket.emit("autoLogin");
             } else {
                 log.debug("auth", "need auth");
             }
+
+            // Socket disconnect
+            dockgeSocket.on("disconnect", () => {
+                log.info("server", "Socket disconnected!");
+                dockgeSocket.instanceManager.disconnectAll();
+            });
 
         });
 
@@ -230,6 +320,11 @@ export class DockgeServer {
 
         });
 
+        if (isDev) {
+            setInterval(() => {
+                log.debug("terminal", "Terminal count: " + Terminal.getTerminalCount());
+            }, 5000);
+        }
     }
 
     async afterLogin(socket : DockgeSocket, user : User) {
@@ -243,12 +338,20 @@ export class DockgeServer {
         } catch (e) {
             log.error("server", e);
         }
+
+        socket.instanceManager.sendAgentList();
+
+        // Also connect to other dockge instances
+        socket.instanceManager.connectAll();
     }
 
     /**
      *
      */
     async serve() {
+        // Create all the necessary directories
+        this.initDataDir();
+
         // Connect to database
         try {
             await Database.init(this);
@@ -285,21 +388,22 @@ export class DockgeServer {
         }
 
         // Listen
-        this.httpServer.listen(5001, this.config.hostname, () => {
+        this.httpServer.listen(this.config.port, this.config.hostname, () => {
             if (this.config.hostname) {
                 log.info( "server", `Listening on ${this.config.hostname}:${this.config.port}`);
             } else {
                 log.info("server", `Listening on ${this.config.port}`);
             }
 
-            // Run every 5 seconds
-            Cron("*/2 * * * * *", {
+            // Run every 10 seconds
+            Cron("*/10 * * * * *", {
                 protect: true,  // Enabled over-run protection.
             }, () => {
-                log.debug("server", "Cron job running");
+                //log.debug("server", "Cron job running");
                 this.sendStackList(true);
             });
 
+            checkVersion.startInterval();
         });
 
         gracefulShutdown(this.httpServer, {
@@ -477,26 +581,34 @@ export class DockgeServer {
         return jwtSecretBean;
     }
 
-    sendStackList(useCache = false) {
-        let roomList = this.io.sockets.adapter.rooms.keys();
-        let map : Map<string, object> | undefined;
+    /**
+     * Send stack list to all connected sockets
+     * @param useCache
+     */
+    async sendStackList(useCache = false) {
+        let socketList = this.io.sockets.sockets.values();
 
-        for (let room of roomList) {
+        let stackList;
+
+        for (let socket of socketList) {
+            let dockgeSocket = socket as DockgeSocket;
+
             // Check if the room is a number (user id)
-            if (Number(room)) {
+            if (dockgeSocket.userID) {
 
-                // Get the list only if there is a room
-                if (!map) {
-                    map = new Map();
-                    let stackList = Stack.getStackList(this, useCache);
-
-                    for (let [ stackName, stack ] of stackList) {
-                        map.set(stackName, stack.toSimpleJSON());
-                    }
+                // Get the list only if there is a logged in user
+                if (!stackList) {
+                    stackList = await Stack.getStackList(this, useCache);
                 }
 
-                log.debug("server", "Send stack list to room " + room);
-                this.io.to(room).emit("stackList", {
+                let map : Map<string, object> = new Map();
+
+                for (let [ stackName, stack ] of stackList) {
+                    map.set(stackName, stack.toSimpleJSON(dockgeSocket.endpoint));
+                }
+
+                log.debug("server", "Send stack list to user: " + dockgeSocket.id + " (" + dockgeSocket.endpoint + ")");
+                dockgeSocket.emitAgent("stackList", {
                     ok: true,
                     stackList: Object.fromEntries(map),
                 });
@@ -504,27 +616,15 @@ export class DockgeServer {
         }
     }
 
-    sendStackStatusList() {
-        let statusList = Stack.getStatusList();
+    async getDockerNetworkList() : Promise<string[]> {
+        let res = await childProcessAsync.spawn("docker", [ "network", "ls", "--format", "{{.Name}}" ], {
+            encoding: "utf-8",
+        });
 
-        let roomList = this.io.sockets.adapter.rooms.keys();
-
-        for (let room of roomList) {
-            // Check if the room is a number (user id)
-            if (Number(room)) {
-                log.debug("server", "Send stack status list to room " + room);
-                this.io.to(room).emit("stackStatusList", {
-                    ok: true,
-                    stackStatusList: Object.fromEntries(statusList),
-                });
-            } else {
-                log.debug("server", "Skip sending stack status list to room " + room);
-            }
+        if (!res.stdout) {
+            return [];
         }
-    }
 
-    getDockerNetworkList() : string[] {
-        let res = childProcess.spawnSync("docker", [ "network", "ls", "--format", "{{.Name}}" ]);
         let list = res.stdout.toString().split("\n");
 
         // Remove empty string item
@@ -562,4 +662,35 @@ export class DockgeServer {
     finalFunction() {
         log.info("server", "Graceful shutdown successful!");
     }
+
+    /**
+     * Force connected sockets of a user to refresh and disconnect.
+     * Used for resetting password.
+     * @param {string} userID
+     * @param {string?} currentSocketID
+     */
+    disconnectAllSocketClients(userID: number | undefined, currentSocketID? : string) {
+        for (const rawSocket of this.io.sockets.sockets.values()) {
+            let socket = rawSocket as DockgeSocket;
+            if ((!userID || socket.userID === userID) && socket.id !== currentSocketID) {
+                try {
+                    socket.emit("refresh");
+                    socket.disconnect();
+                } catch (e) {
+
+                }
+            }
+        }
+    }
+
+    isSSL() {
+        return this.config.sslKey && this.config.sslCert;
+    }
+
+    getLocalWebSocketURL() {
+        const protocol = this.isSSL() ? "wss" : "ws";
+        const host = this.config.hostname || "localhost";
+        return `${protocol}://${host}:${this.config.port}`;
+    }
+
 }

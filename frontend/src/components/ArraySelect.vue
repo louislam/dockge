@@ -4,7 +4,7 @@
             <ul v-if="isArrayInited" class="list-group">
                 <li v-for="(value, index) in array" :key="index" class="list-group-item">
                     <select v-model="array[index]" class="no-bg domain-input">
-                        <option value="">Select a network...</option>
+                        <option value="">{{ $t(`Select a network...`) }}</option>
                         <option v-for="option in options" :key="option" :value="option">{{ option }}</option>
                     </select>
 
@@ -49,8 +49,7 @@ export default {
         array() {
             // Create the array if not exists, it should be safe.
             if (!this.service[this.name]) {
-                // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-                this.service[this.name] = [];
+                return [];
             }
             return this.service[this.name];
         },
@@ -89,6 +88,10 @@ export default {
     },
     methods: {
         addField() {
+            // Create the array if not exists.
+            if (!this.service[this.name]) {
+                this.service[this.name] = [];
+            }
             this.array.push("");
         },
         remove(index) {

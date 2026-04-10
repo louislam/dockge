@@ -1,51 +1,52 @@
-import { SocketHandler } from "../socket-handler.js";
+import { AgentSocketHandler } from "../agent-socket-handler";
 import { DockgeServer } from "../dockge-server";
-import { callbackError, checkLogin, DockgeSocket, ValidationError } from "../util-server";
+import { callbackError, callbackResult, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { Stack } from "../stack";
+import { AgentSocket } from "../../common/agent-socket";
 
-// @ts-ignore
-import composerize from "composerize";
+export class DockerSocketHandler extends AgentSocketHandler {
+    create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
+        // Do not call super.create()
 
-export class DockerSocketHandler extends SocketHandler {
-    create(socket : DockgeSocket, server : DockgeServer) {
-
-        socket.on("deployStack", async (name : unknown, composeYAML : unknown, isAdd : unknown, callback) => {
+        agentSocket.on("deployStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
             try {
                 checkLogin(socket);
-                const stack = this.saveStack(socket, server, name, composeYAML, isAdd);
+                const stack = await this.saveStack(server, name, composeYAML, composeENV, isAdd);
                 await stack.deploy(socket);
                 server.sendStackList();
-                callback({
+                callbackResult({
                     ok: true,
                     msg: "Deployed",
-                });
+                    msgi18n: true,
+                }, callback);
                 stack.joinCombinedTerminal(socket);
             } catch (e) {
                 callbackError(e, callback);
             }
         });
 
-        socket.on("saveStack", async (name : unknown, composeYAML : unknown, isAdd : unknown, callback) => {
+        agentSocket.on("saveStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
             try {
                 checkLogin(socket);
-                this.saveStack(socket, server, name, composeYAML, isAdd);
-                callback({
+                await this.saveStack(server, name, composeYAML, composeENV, isAdd);
+                callbackResult({
                     ok: true,
-                    "msg": "Saved"
-                });
+                    msg: "Saved",
+                    msgi18n: true,
+                }, callback);
                 server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
             }
         });
 
-        socket.on("deleteStack", async (name : unknown, callback) => {
+        agentSocket.on("deleteStack", async (name : unknown, callback) => {
             try {
                 checkLogin(socket);
                 if (typeof(name) !== "string") {
                     throw new ValidationError("Name must be a string");
                 }
-                const stack = Stack.getStack(server, name);
+                const stack = await Stack.getStack(server, name);
 
                 try {
                     await stack.delete(socket);
@@ -55,17 +56,18 @@ export class DockerSocketHandler extends SocketHandler {
                 }
 
                 server.sendStackList();
-                callback({
+                callbackResult({
                     ok: true,
-                    msg: "Deleted"
-                });
+                    msg: "Deleted",
+                    msgi18n: true,
+                }, callback);
 
             } catch (e) {
                 callbackError(e, callback);
             }
         });
 
-        socket.on("getStack", (stackName : unknown, callback) => {
+        agentSocket.on("getStack", async (stackName : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -73,35 +75,38 @@ export class DockerSocketHandler extends SocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
-                const stack = Stack.getStack(server, stackName);
+                const stack = await Stack.getStack(server, stackName);
 
-                stack.joinCombinedTerminal(socket);
+                if (stack.isManagedByDockge) {
+                    stack.joinCombinedTerminal(socket);
+                }
 
-                callback({
+                callbackResult({
                     ok: true,
-                    stack: stack.toJSON(),
-                });
+                    stack: await stack.toJSON(socket.endpoint),
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
         });
 
         // requestStackList
-        socket.on("requestStackList", async (callback) => {
+        agentSocket.on("requestStackList", async (callback) => {
             try {
                 checkLogin(socket);
                 server.sendStackList();
-                callback({
+                callbackResult({
                     ok: true,
-                    msg: "Updated"
-                });
+                    msg: "Updated",
+                    msgi18n: true,
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
         });
 
         // startStack
-        socket.on("startStack", async (stackName : unknown, callback) => {
+        agentSocket.on("startStack", async (stackName : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -109,12 +114,13 @@ export class DockerSocketHandler extends SocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
-                const stack = Stack.getStack(server, stackName);
+                const stack = await Stack.getStack(server, stackName);
                 await stack.start(socket);
-                callback({
+                callbackResult({
                     ok: true,
-                    msg: "Started"
-                });
+                    msg: "Started",
+                    msgi18n: true,
+                }, callback);
                 server.sendStackList();
 
                 stack.joinCombinedTerminal(socket);
@@ -125,7 +131,7 @@ export class DockerSocketHandler extends SocketHandler {
         });
 
         // stopStack
-        socket.on("stopStack", async (stackName : unknown, callback) => {
+        agentSocket.on("stopStack", async (stackName : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -133,12 +139,13 @@ export class DockerSocketHandler extends SocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
-                const stack = Stack.getStack(server, stackName);
+                const stack = await Stack.getStack(server, stackName);
                 await stack.stop(socket);
-                callback({
+                callbackResult({
                     ok: true,
-                    msg: "Stopped"
-                });
+                    msg: "Stopped",
+                    msgi18n: true,
+                }, callback);
                 server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
@@ -146,7 +153,7 @@ export class DockerSocketHandler extends SocketHandler {
         });
 
         // restartStack
-        socket.on("restartStack", async (stackName : unknown, callback) => {
+        agentSocket.on("restartStack", async (stackName : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -154,12 +161,13 @@ export class DockerSocketHandler extends SocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
-                const stack = Stack.getStack(server, stackName);
+                const stack = await Stack.getStack(server, stackName);
                 await stack.restart(socket);
-                callback({
+                callbackResult({
                     ok: true,
-                    msg: "Restarted"
-                });
+                    msg: "Restarted",
+                    msgi18n: true,
+                }, callback);
                 server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
@@ -167,7 +175,7 @@ export class DockerSocketHandler extends SocketHandler {
         });
 
         // updateStack
-        socket.on("updateStack", async (stackName : unknown, callback) => {
+        agentSocket.on("updateStack", async (stackName : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -175,12 +183,35 @@ export class DockerSocketHandler extends SocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
-                const stack = Stack.getStack(server, stackName);
+                const stack = await Stack.getStack(server, stackName);
                 await stack.update(socket);
-                callback({
+                callbackResult({
                     ok: true,
-                    msg: "Updated"
-                });
+                    msg: "Updated",
+                    msgi18n: true,
+                }, callback);
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // down stack
+        agentSocket.on("downStack", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = await Stack.getStack(server, stackName);
+                await stack.down(socket);
+                callbackResult({
+                    ok: true,
+                    msg: "Downed",
+                    msgi18n: true,
+                }, callback);
                 server.sendStackList();
             } catch (e) {
                 callbackError(e, callback);
@@ -188,7 +219,7 @@ export class DockerSocketHandler extends SocketHandler {
         });
 
         // Services status
-        socket.on("serviceStatusList", async (stackName : unknown, callback) => {
+        agentSocket.on("serviceStatusList", async (stackName : unknown, callback) => {
             try {
                 checkLogin(socket);
 
@@ -196,52 +227,33 @@ export class DockerSocketHandler extends SocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
-                const stack = Stack.getStack(server, stackName);
+                const stack = await Stack.getStack(server, stackName, true);
                 const serviceStatusList = Object.fromEntries(await stack.getServiceStatusList());
-                callback({
+                callbackResult({
                     ok: true,
                     serviceStatusList,
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
         });
 
         // getExternalNetworkList
-        socket.on("getDockerNetworkList", async (callback) => {
+        agentSocket.on("getDockerNetworkList", async (callback) => {
             try {
                 checkLogin(socket);
-                const dockerNetworkList = server.getDockerNetworkList();
-                callback({
+                const dockerNetworkList = await server.getDockerNetworkList();
+                callbackResult({
                     ok: true,
                     dockerNetworkList,
-                });
-            } catch (e) {
-                callbackError(e, callback);
-            }
-        });
-
-        // composerize
-        socket.on("composerize", async (dockerRunCommand : unknown, callback) => {
-            try {
-                checkLogin(socket);
-
-                if (typeof(dockerRunCommand) !== "string") {
-                    throw new ValidationError("dockerRunCommand must be a string");
-                }
-
-                const composeTemplate = composerize(dockerRunCommand);
-                callback({
-                    ok: true,
-                    composeTemplate,
-                });
+                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }
         });
     }
 
-    saveStack(socket : DockgeSocket, server : DockgeServer, name : unknown, composeYAML : unknown, isAdd : unknown) : Stack {
+    async saveStack(server : DockgeServer, name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown) : Promise<Stack> {
         // Check types
         if (typeof(name) !== "string") {
             throw new ValidationError("Name must be a string");
@@ -249,12 +261,15 @@ export class DockerSocketHandler extends SocketHandler {
         if (typeof(composeYAML) !== "string") {
             throw new ValidationError("Compose YAML must be a string");
         }
+        if (typeof(composeENV) !== "string") {
+            throw new ValidationError("Compose ENV must be a string");
+        }
         if (typeof(isAdd) !== "boolean") {
             throw new ValidationError("isAdd must be a boolean");
         }
 
-        const stack = new Stack(server, name, composeYAML);
-        stack.save(isAdd);
+        const stack = new Stack(server, name, composeYAML, composeENV, false);
+        await stack.save(isAdd);
         return stack;
     }
 

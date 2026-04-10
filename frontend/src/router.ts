@@ -14,6 +14,7 @@ const Settings = () => import("./pages/Settings.vue");
 import Appearance from "./components/settings/Appearance.vue";
 import General from "./components/settings/General.vue";
 const Security = () => import("./components/settings/Security.vue");
+const GlobalEnv = () => import("./components/settings/GlobalEnv.vue");
 import About from "./components/settings/About.vue";
 
 const routes = [
@@ -35,20 +36,31 @@ const routes = [
                                 component: Compose,
                             },
                             {
-                                path: "/compose/:stackName",
-                                name: "compose",
+                                path: "/compose/:stackName/:endpoint",
                                 component: Compose,
-                                props: true,
+                            },
+                            {
+                                path: "/compose/:stackName",
+                                component: Compose,
                             },
                             {
                                 path: "/terminal/:stackName/:serviceName/:type",
                                 component: ContainerTerminal,
                                 name: "containerTerminal",
                             },
+                            {
+                                path: "/terminal/:stackName/:serviceName/:type/:endpoint",
+                                component: ContainerTerminal,
+                                name: "containerTerminalEndpoint",
+                            },
                         ]
                     },
                     {
                         path: "/console",
+                        component: Console,
+                    },
+                    {
+                        path: "/console/:endpoint",
                         component: Console,
                     },
                     {
@@ -66,6 +78,10 @@ const routes = [
                             {
                                 path: "security",
                                 component: Security,
+                            },
+                            {
+                                path: "globalEnv",
+                                component: GlobalEnv,
                             },
                             {
                                 path: "about",

@@ -1,13 +1,17 @@
 /*
  * Common utilities for backend and frontend
  */
-import { Document } from "yaml";
+import yaml, { Document, Pair, Scalar } from "yaml";
+import { DotenvParseOutput } from "dotenv";
 
 // Init dayjs
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import relativeTime from "dayjs/plugin/relativeTime";
+// @ts-ignore
+import { replaceVariablesSync } from "@inventage/envsubst";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(relativeTime);
@@ -15,6 +19,11 @@ dayjs.extend(relativeTime);
 export interface LooseObject {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any
+}
+
+export interface BaseRes {
+    ok: boolean;
+    msg?: string;
 }
 
 let randomBytes : (numBytes: number) => Uint8Array;
@@ -33,6 +42,8 @@ async function initRandomBytes() {
         randomBytes = (await import("node:crypto")).randomBytes;
     }
 }
+
+export const ALL_ENDPOINTS = "##ALL_DOCKGE_ENDPOINTS##";
 
 // Stack Status
 export const UNKNOWN = 0;
@@ -96,15 +107,11 @@ export const COMBINED_TERMINAL_ROWS = 20;
 
 export const ERROR_TYPE_VALIDATION = 1;
 
-export const allowedCommandList : string[] = [
-    "docker",
-    "ls",
-    "cd",
-    "dir",
-];
-
-export const allowedRawKeys = [
-    "\u0003", // Ctrl + C
+export const acceptedComposeFileNames = [
+    "compose.yaml",
+    "docker-compose.yaml",
+    "docker-compose.yml",
+    "compose.yml",
 ];
 
 /**
@@ -190,20 +197,20 @@ export function getCryptoRandomInt(min: number, max: number):number {
     }
 }
 
-export function getComposeTerminalName(stack : string) {
-    return "compose-" + stack;
+export function getComposeTerminalName(endpoint : string, stack : string) {
+    return "compose-" + endpoint + "-" + stack;
 }
 
-export function getCombinedTerminalName(stack : string) {
-    return "combined-" + stack;
+export function getCombinedTerminalName(endpoint : string, stack : string) {
+    return "combined-" + endpoint + "-" + stack;
 }
 
-export function getContainerTerminalName(container : string) {
-    return "container-" + container;
+export function getContainerTerminalName(endpoint : string, container : string) {
+    return "container-" + endpoint + "-" + container;
 }
 
-export function getContainerExecTerminalName(stackName : string, container : string, index : number) {
-    return "container-exec-" + container + "-" + index;
+export function getContainerExecTerminalName(endpoint : string, stackName : string, container : string, index : number) {
+    return "container-exec-" + endpoint + "-" + stackName + "-" + container + "-" + index;
 }
 
 export function copyYAMLComments(doc : Document, src : Document) {
@@ -218,42 +225,63 @@ export function copyYAMLComments(doc : Document, src : Document) {
 
 /**
  * Copy yaml comments from srcItems to items
- * Typescript is super annoying here, so I have to use any here
- * TODO: Since comments are belong to the array index, the comments will be lost if the order of the items is changed or removed or added.
+ * Attempts to preserve comments by matching content rather than just array indices
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function copyYAMLCommentsItems(items : any, srcItems : any) {
+function copyYAMLCommentsItems(items: any, srcItems: any) {
     if (!items || !srcItems) {
         return;
     }
 
+    // First pass - try to match items by their content
     for (let i = 0; i < items.length; i++) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const item : any = items[i];
+        const item: any = items[i];
 
+        // Try to find matching source item by content
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const srcItem : any = srcItems[i];
+        const srcIndex = srcItems.findIndex((srcItem: any) =>
+            JSON.stringify(srcItem.value) === JSON.stringify(item.value) &&
+            JSON.stringify(srcItem.key) === JSON.stringify(item.key)
+        );
 
-        if (!srcItem) {
-            continue;
-        }
+        if (srcIndex !== -1) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const srcItem: any = srcItems[srcIndex];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const nextSrcItem: any = srcItems[srcIndex + 1];
 
-        if (item.key && srcItem.key) {
-            item.key.comment = srcItem.key.comment;
-            item.key.commentBefore = srcItem.key.commentBefore;
-        }
+            if (item.key && srcItem.key) {
+                item.key.comment = srcItem.key.comment;
+                item.key.commentBefore = srcItem.key.commentBefore;
+            }
 
-        if (srcItem.comment) {
-            item.comment = srcItem.comment;
-        }
+            if (srcItem.comment) {
+                item.comment = srcItem.comment;
+            }
 
-        if (item.value && srcItem.value) {
-            if (typeof item.value === "object" && typeof srcItem.value === "object") {
-                item.value.comment = srcItem.value.comment;
-                item.value.commentBefore = srcItem.value.commentBefore;
+            // Handle comments between array items
+            if (nextSrcItem && nextSrcItem.commentBefore) {
+                if (items[i + 1]) {
+                    items[i + 1].commentBefore = nextSrcItem.commentBefore;
+                }
+            }
 
-                if (item.value.items && srcItem.value.items) {
-                    copyYAMLCommentsItems(item.value.items, srcItem.value.items);
+            // Handle trailing comments after array items
+            if (srcItem.value && srcItem.value.comment) {
+                if (item.value) {
+                    item.value.comment = srcItem.value.comment;
+                }
+            }
+
+            if (item.value && srcItem.value) {
+                if (typeof item.value === "object" && typeof srcItem.value === "object") {
+                    item.value.comment = srcItem.value.comment;
+                    item.value.commentBefore = srcItem.value.commentBefore;
+
+                    if (item.value.items && srcItem.value.items) {
+                        copyYAMLCommentsItems(item.value.items, srcItem.value.items);
+                    }
                 }
             }
         }
@@ -271,18 +299,28 @@ function copyYAMLCommentsItems(items : any, srcItems : any) {
  *   - "8000-9000:80"
  *   - "127.0.0.1:8001:8001"
  *   - "127.0.0.1:5000-5010:5000-5010"
+ *   - "0.0.0.0:8080->8080/tcp"
  *   - "6060:6060/udp"
  * @param input
- * @param defaultHostname
+ * @param hostname
  */
-export function parseDockerPort(input : string, defaultHostname : string = "localhost") {
-    let hostname = defaultHostname;
+export function parseDockerPort(input : string, hostname : string) {
     let port;
     let display;
 
     const parts = input.split("/");
-    const part1 = parts[0];
+    let part1 = parts[0];
     let protocol = parts[1] || "tcp";
+
+    // coming from docker ps, split host part
+    const arrow = part1.indexOf("->");
+    if (arrow >= 0) {
+        part1 = part1.split("->")[0];
+        const colon = part1.indexOf(":");
+        if (colon >= 0) {
+            part1 = part1.split(":")[1];
+        }
+    }
 
     // Split the last ":"
     const lastColon = part1.lastIndexOf(":");
@@ -340,3 +378,53 @@ export function parseDockerPort(input : string, defaultHostname : string = "loca
         display: display,
     };
 }
+
+export function envsubst(string : string, variables : LooseObject) : string {
+    return replaceVariablesSync(string, variables)[0];
+}
+
+/**
+ * Traverse all values in the yaml and for each value, if there are template variables, replace it environment variables
+ * Emulates the behavior of how docker-compose handles environment variables in yaml files
+ * @param content Yaml string
+ * @param env Environment variables
+ * @returns string Yaml string with environment variables replaced
+ */
+export function envsubstYAML(content : string, env : DotenvParseOutput) : string {
+    const doc = yaml.parseDocument(content);
+    if (doc.contents) {
+        // @ts-ignore
+        for (const item of doc.contents.items) {
+            traverseYAML(item, env);
+        }
+    }
+    return doc.toString();
+}
+
+/**
+ * Used for envsubstYAML(...)
+ * @param pair
+ * @param env
+ */
+function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
+    // @ts-ignore
+    if (pair.value && pair.value.items) {
+        // @ts-ignore
+        for (const item of pair.value.items) {
+            if (item instanceof Pair) {
+                traverseYAML(item, env);
+            } else if (item instanceof Scalar) {
+                let value = item.value as unknown;
+
+                if (typeof(value) === "string") {
+                    item.value = envsubst(value, env);
+                }
+            }
+        }
+    // @ts-ignore
+    } else if (pair.value && typeof(pair.value.value) === "string") {
+        // @ts-ignore
+        pair.value.value = envsubst(pair.value.value, env);
+    }
+}
+
