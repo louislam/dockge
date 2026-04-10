@@ -81,7 +81,7 @@ curl "https://dockge.kuma.pet/compose.yaml?port=5001&stacksPath=/opt/stacks" --o
 - port=`5001`
 - stacksPath=`/opt/stacks`
 
-ALSO, once compose is generated/downloaded, add the `PUID` and `PGID` section below to your compose `environment:` section to set stack ownership, otherwise default is `root`
+Also, once compose is generated/downloaded, add the `PUID` and `PGID` section below to your compose `environment:` section to set stack ownership, otherwise default is `root`
 
 ```
       # Both PUID and PGID must be set for it to do anything
@@ -92,7 +92,8 @@ ALSO, once compose is generated/downloaded, add the `PUID` and `PGID` section be
 Interactive compose.yaml generator is available on: 
 https://dockge.kuma.pet
 
-##OR copy and paste your compose from the following:
+### -OR-
+Copy and paste your compose from the following:
 
 If you want to store your stacks in another directory, you can change the `DOCKGE_STACKS_DIR` environment variable and volumes.
 
