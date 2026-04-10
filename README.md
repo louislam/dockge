@@ -81,8 +81,50 @@ curl "https://dockge.kuma.pet/compose.yaml?port=5001&stacksPath=/opt/stacks" --o
 - port=`5001`
 - stacksPath=`/opt/stacks`
 
+ALSO, once compose is generated/downloaded, add the `PUID` and `PGID` section below to your compose `environment:` section to set stack ownership, otherwise default is `root`
+
+```
+      # Both PUID and PGID must be set for it to do anything
+      - PUID=1000 # Set the stack file/dir ownership to this user
+      - PGID=1000 # Set the stack file/dir ownership to this group
+```
+
 Interactive compose.yaml generator is available on: 
 https://dockge.kuma.pet
+
+##OR copy and paste your compose from the following:
+
+If you want to store your stacks in another directory, you can change the `DOCKGE_STACKS_DIR` environment variable and volumes.
+
+compose:
+```
+services:
+  dockge:
+    image: louislam/dockge:1
+    restart: unless-stopped
+    ports:
+      # Host Port:Container Port
+      - 5001:5001
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/app/data
+        
+      # If you want to use private registries, you need to share the auth file with Dockge:
+      # - /root/.docker/:/root/.docker
+
+      # Stacks Directory
+      # Your stacks directory in the host (The paths inside container must be the same as the host)
+      # ⚠️ If you did it wrong, your data could end up be written into a wrong path.
+      # ✔️ CORRECT EXAMPLE: - /my-stacks:/my-stacks (Both paths match)
+      # ❌ WRONG EXAMPLE: - /docker:/my-stacks (Both paths do not match)
+      - /opt/stacks:/opt/stacks
+    environment:
+      # Tell Dockge where your stacks directory is
+      - DOCKGE_STACKS_DIR=/opt/stacks
+      # Both PUID and PGID must be set for it to do anything
+      - PUID=1000 # Set the stack file/dir ownership to this user
+      - PGID=1000 # Set the stack file/dir ownership to this group
+```
 
 ## How to Update
 
