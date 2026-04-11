@@ -4,7 +4,7 @@
             <h1 v-if="isAdd" class="mb-3">{{$t("compose")}}</h1>
             <h1 v-else class="mb-3">
                 <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
-                <span v-if="$root.agentCount > 1" class="agent-name">
+                <span v-if="$root.agentCount > 1 && endpoint !== ''" class="agent-name">
                     ({{ endpointDisplay }})
                 </span>
             </h1>
@@ -99,7 +99,7 @@
                                 <label for="name" class="form-label">{{ $t("dockgeAgent") }}</label>
                                 <select v-model="stack.endpoint" class="form-select">
                                     <option v-for="(agent, endpoint) in $root.agentList" :key="endpoint" :value="endpoint" :disabled="$root.agentStatusList[endpoint] != 'online'">
-                                        ({{ $root.agentStatusList[endpoint] }}) {{ (agent.name !== '') ? agent.name : agent.url || $t("Controller") }}
+                                        ({{ $root.agentStatusList[endpoint] }}) {{ (agent.name !== '') ? agent.name : agent.url || $t("Current") }}
                                     </option>
                                 </select>
                             </div>
