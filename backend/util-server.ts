@@ -30,6 +30,7 @@ export interface Arguments {
     hostname? : string;
     dataDir? : string;
     stacksDir? : string;
+    enableConsole? : boolean;
 }
 
 // Some config values are required

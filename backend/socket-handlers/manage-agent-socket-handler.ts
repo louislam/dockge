@@ -20,7 +20,7 @@ export class ManageAgentSocketHandler extends SocketHandler {
                 let data = requestData as LooseObject;
                 let manager = socket.instanceManager;
                 await manager.test(data.url, data.username, data.password);
-                await manager.add(data.url, data.username, data.password);
+                await manager.add(data.url, data.username, data.password, data.name);
 
                 // connect to the agent
                 manager.connect(data.url, data.username, data.password);
@@ -60,6 +60,28 @@ export class ManageAgentSocketHandler extends SocketHandler {
                 callbackResult({
                     ok: true,
                     msg: "agentRemovedSuccessfully",
+                    msgi18n: true,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // updateAgent
+        socket.on("updateAgent", async (name : string, updatedName : string, callback : unknown) => {
+            try {
+                log.debug("manage-agent-socket-handler", "updateAgent");
+                checkLogin(socket);
+
+                let manager = socket.instanceManager;
+                await manager.update(name, updatedName);
+
+                server.disconnectAllSocketClients(undefined, socket.id);
+                manager.sendAgentList();
+
+                callbackResult({
+                    ok: true,
+                    msg: "agentUpdatedSuccessfully",
                     msgi18n: true,
                 }, callback);
             } catch (e) {
