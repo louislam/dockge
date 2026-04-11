@@ -50,13 +50,13 @@
 
                             <!-- Agent Display Name -->
                             <template v-if="$root.agentStatusList[endpoint]">
-                                <span v-if="endpoint === '' && agent.name === ''" class="badge bg-secondary me-2">Controller</span>
+                                <span v-if="endpoint === '' && agent.name === ''" class="badge bg-secondary me-2">Current</span>
                                 <span v-else-if="agent.name === ''" :href="agent.url" class="me-2">{{ endpoint }}</span>
                                 <span v-else :href="agent.url" class="me-2">{{ agent.name }}</span>
                             </template>
 
                             <!-- Edit Name  -->
-                            <font-awesome-icon icon="pen-to-square" @click="showEditAgentNameDialog[agent.name] = !showEditAgentNameDialog[agent.Name]" />
+                            <font-awesome-icon v-if="agent.name !== ''" icon="pen-to-square" @click="showEditAgentNameDialog[agent.name] = !showEditAgentNameDialog[agent.Name]" />
 
                             <!-- Edit Dialog -->
                             <BModal v-model="showEditAgentNameDialog[agent.name]" :no-close-on-backdrop="true" :close-on-esc="true" :okTitle="$t('Update Name')" okVariant="info" @ok="updateName(agent.url, agent.updatedName)">
