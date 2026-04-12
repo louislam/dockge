@@ -25,6 +25,7 @@
     "saveStackDraft": "Save",
     "notAvailableShort": "N/A",
     "deleteStackMsg": "Are you sure you want to delete this stack?",
+    "cancel": "Cancel",
     "stackNotManagedByDockgeMsg": "This stack is not managed by Dockge.",
     "primaryHostname": "Primary Hostname",
     "general": "General",
@@ -113,7 +114,10 @@
     "agentRemovedSuccessfully": "Agent removed successfully.",
     "removeAgent": "Remove Agent",
     "removeAgentMsg": "Are you sure you want to remove this agent?",
+    "GlobalEnv": "Global .env",
     "LongSyntaxNotSupported": "Long syntax is not supported here. Please use the YAML editor.",
+    "name": "Dockge Agent Display name",
+    "updatedName": "New Dockge Agent Display name",
     "Saved": "Saved",
     "Deployed": "Deployed",
     "Deleted": "Deleted",
@@ -133,5 +137,10 @@
     "memory": "Memory",
     "memoryAbbreviated": "Mem",
     "networkIO": "Network I/O",
-    "blockIO": "Block I/O"
+    "blockIO": "Block I/O",
+    "Console is not enabled": "Console is not enabled",
+    "ConsoleNotEnabledMSG1": "Console is a powerful tool that allows you to execute any commands such as <code>docker</code>, <code>rm</code> within the Dockge's container in this Web UI.",
+    "ConsoleNotEnabledMSG2": "It might be dangerous since this Dockge container is connecting to the host's Docker daemon. Also Dockge could be possibly taken down by commands like <code>rm -rf</code>" ,
+    "ConsoleNotEnabledMSG3": "If you understand the risk, you can enable it by setting <code>DOCKGE_ENABLE_CONSOLE=true</code> in the environment variables.",
+    "confirmLeaveStack": "You are currently editing a stack. Are you sure you want to leave?"
 }

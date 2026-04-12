@@ -19,45 +19,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Code
+        run: |  # Mainly for Windows
+          git config --global core.autocrlf false
+          git config --global core.eol lf
         uses: actions/checkout@v4
-
-      - run: git config --global core.autocrlf false  # Mainly for Windows
-      - uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{matrix.node}}
 
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
-        with:
-          version: 8
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Lint
-        run: pnpm run lint
+        run: npm run lint
 
       - name: Check Typescript
-        run: pnpm run check-ts
+        run: npm run check-ts
 
       - name: Build
-        run: pnpm run build:frontend
+        run: npm run build:frontend
       # more things can be add later like tests etc..
 

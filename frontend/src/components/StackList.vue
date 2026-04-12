@@ -3,7 +3,8 @@
         <div class="list-header">
             <div class="header-top">
                 <!-- TODO -->
-                <button v-if="false" class="btn btn-outline-normal ms-2" :class="{ 'active': selectMode }" type="button" @click="selectMode = !selectMode">
+                <button v-if="false" class="btn btn-outline-normal ms-2" :class="{ 'active': selectMode }" type="button"
+                    @click="selectMode = !selectMode">
                     {{ $t("Select") }}
                 </button>
 
@@ -28,34 +29,36 @@
 
             <!-- TODO: Selection Controls -->
             <div v-if="selectMode && false" class="selection-controls px-2 pt-2">
-                <input
-                    v-model="selectAll"
-                    class="form-check-input select-input"
-                    type="checkbox"
-                />
+                <input v-model="selectAll" class="form-check-input select-input" type="checkbox" />
 
-                <button class="btn-outline-normal" @click="pauseDialog"><font-awesome-icon icon="pause" size="sm" /> {{ $t("Pause") }}</button>
-                <button class="btn-outline-normal" @click="resumeSelected"><font-awesome-icon icon="play" size="sm" /> {{ $t("Resume") }}</button>
+                <button class="btn-outline-normal" @click="pauseDialog"><font-awesome-icon icon="pause" size="sm" /> {{
+                    $t("Pause") }}</button>
+                <button class="btn-outline-normal" @click="resumeSelected"><font-awesome-icon icon="play" size="sm" />
+                    {{ $t("Resume") }}</button>
 
                 <span v-if="selectedStackCount > 0">
-                    {{ $t("selectedStackCount", [ selectedStackCount ]) }}
+                    {{ $t("selectedStackCount", [selectedStackCount]) }}
                 </span>
             </div>
         </div>
         <div ref="stackList" class="stack-list" :class="{ scrollbar: scrollbar }" :style="stackListStyle">
-            <div v-if="Object.keys(sortedStackList).length === 0" class="text-center mt-3">
+            <div v-if="agentStackList[0] && agentStackList[0].stacks.length === 0" class="text-center mt-3">
                 <router-link to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
             </div>
-
-            <StackListItem
-                v-for="(item, index) in sortedStackList"
-                :key="index"
-                :stack="item"
-                :isSelectMode="selectMode"
-                :isSelected="isSelected"
-                :select="select"
-                :deselect="deselect"
-            />
+            <div class="stack-list-inner" v-for="(agent, index) in agentStackList" :key="index">
+                <div v-if="$root.agentCount > 1" class="p-2 agent-select"
+                    @click="closedAgents.set(agent.endpoint, !closedAgents.get(agent.endpoint))">
+                    <span class="me-1">
+                        <font-awesome-icon v-show="closedAgents.get(agent.endpoint)" icon="chevron-circle-right" />
+                        <font-awesome-icon v-show="!closedAgents.get(agent.endpoint)" icon="chevron-circle-down" />
+                    </span>
+                    <span v-if="agent.endpoint === 'current'">{{ $t("currentEndpoint") }}</span>
+                    <span v-else>{{ agent.endpoint }}</span>
+                </div>
+                <StackListItem v-show="$root.agentCount === 1 || !closedAgents.get(agent.endpoint)"
+                    v-for="(item, index) in agent.stacks" :key="index" :stack="item" :isSelectMode="selectMode"
+                    :isSelected="isSelected" :select="select" :deselect="deselect" />
+            </div>
         </div>
     </div>
 
@@ -92,7 +95,8 @@ export default {
                 status: null,
                 active: null,
                 tags: null,
-            }
+            },
+            closedAgents: new Map(),
         };
     },
     computed: {
@@ -119,7 +123,7 @@ export default {
          * Returns a sorted list of stacks based on the applied filters and search text.
          * @returns {Array} The sorted list of stacks.
          */
-        sortedStackList() {
+        agentStackList() {
             let result = Object.values(this.$root.completeStackList);
 
             result = result.filter(stack => {
@@ -187,6 +191,29 @@ export default {
                 return m1.name.localeCompare(m2.name);
             });
 
+            // Group stacks by endpoint, sorting them so the local endpoint is first
+            // and the rest are sorted alphabetically
+            result = [
+                ...result.reduce((acc, stack) => {
+                    const endpoint = stack.endpoint || 'current';
+                    if (!acc.has(endpoint)) {
+                        acc.set(endpoint, []);
+                    }
+                    acc.get(endpoint).push(stack);
+                    return acc;
+                }, new Map()).entries()
+            ].map(([endpoint, stacks]) => ({
+                endpoint,
+                stacks
+            })).sort((a, b) => {
+                if (a.endpoint === 'current' && b.endpoint !== 'current') {
+                    return -1;
+                } else if (a.endpoint !== 'current' && b.endpoint === 'current') {
+                    return 1;
+                }
+                return a.endpoint.localeCompare(b.endpoint);
+            });
+
             return result;
         },
 
@@ -221,7 +248,7 @@ export default {
     },
     watch: {
         searchText() {
-            for (let stack of this.sortedStackList) {
+            for (let stack of this.agentStackList) {
                 if (!this.selectedStacks[stack.id]) {
                     if (this.selectAll) {
                         this.disableSelectAllWatcher = true;
@@ -236,7 +263,7 @@ export default {
                 this.selectedStacks = {};
 
                 if (this.selectAll) {
-                    this.sortedStackList.forEach((item) => {
+                    this.agentStackList.forEach((item) => {
                         this.selectedStacks[item.id] = true;
                     });
                 }
@@ -331,7 +358,7 @@ export default {
         pauseSelected() {
             Object.keys(this.selectedStacks)
                 .filter(id => this.$root.stackList[id].active)
-                .forEach(id => this.$root.getSocket().emit("pauseStack", id, () => {}));
+                .forEach(id => this.$root.getSocket().emit("pauseStack", id, () => { }));
 
             this.cancelSelectMode();
         },
@@ -342,7 +369,7 @@ export default {
         resumeSelected() {
             Object.keys(this.selectedStacks)
                 .filter(id => !this.$root.stackList[id].active)
-                .forEach(id => this.$root.getSocket().emit("resumeStack", id, () => {}));
+                .forEach(id => this.$root.getSocket().emit("resumeStack", id, () => { }));
 
             this.cancelSelectMode();
         },
@@ -444,4 +471,15 @@ export default {
     gap: 10px;
 }
 
+.agent-select {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: $dark-font-color3;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
 </style>

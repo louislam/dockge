@@ -131,10 +131,15 @@ export default defineComponent({
     methods: {
 
         endpointDisplayFunction(endpoint : string) {
-            if (endpoint) {
-                return endpoint;
-            } else {
-                return this.$t("currentEndpoint");
+            for (const [k, v] of Object.entries(this.$data.agentList)) {
+                if (endpoint) {
+                    if (endpoint === v["endpoint"] && v["name"] !== "") {
+                        return v["name"];
+                    }
+                    if (endpoint === v["endpoint"] && v["name"] === "" ) {
+                        return endpoint;
+                    }
+                }
             }
         },
 
@@ -279,7 +284,6 @@ export default defineComponent({
             });
 
             socket.on("agentList", (res) => {
-                console.log(res);
                 if (res.ok) {
                     this.agentList = res.agentList;
                 }

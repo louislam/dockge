@@ -1,7 +1,7 @@
 <template>
     <div class="shadow-box big-padding mb-3 container">
         <div class="row">
-            <div class="col-7">
+            <div class="col-5">
                 <h4>{{ name }}</h4>
                 <div class="image mb-2">
                     <span class="me-1">{{ imageName }}:</span><span class="tag">{{ imageTag }}</span>
@@ -9,17 +9,40 @@
                 <div v-if="!isEditMode">
                     <span class="badge me-1" :class="bgStyle">{{ status }}</span>
 
-                    <a v-for="port in envsubstService.ports" :key="port" :href="parsePort(port).url" target="_blank">
+                    <a v-for="port in (ports ?? envsubstService.ports)" :key="port" :href="parsePort(port).url" target="_blank">
                         <span class="badge me-1 bg-secondary">{{ parsePort(port).display }}</span>
                     </a>
                 </div>
             </div>
-            <div class="col-5">
+            <div class="col-7">
                 <div class="function">
-                    <router-link v-if="!isEditMode" class="btn btn-normal" :to="terminalRouteLink" disabled="">
-                        <font-awesome-icon icon="terminal" />
-                        Bash
-                    </router-link>
+                    <div class="btn-group me-2" role="group">
+                        <router-link v-if="!isEditMode && (status === 'running' || status === 'healthy')" class="btn btn-normal" :to="terminalRouteLink" disabled="">
+                            <font-awesome-icon icon="terminal" />
+                            Bash
+                        </router-link>
+                        <button v-if="this.serviceCount > 1 && !isEditMode && status !== 'running' && status !== 'healthy'"
+                                class="btn btn-primary"
+                                :disabled="processing"
+                                @click="startService">
+                            <font-awesome-icon icon="play" class="me-1" />
+                            {{ $t("startStack") }}
+                        </button>
+                        <button v-if="this.serviceCount > 1 && !isEditMode && (status === 'running' || status === 'healthy' || status === 'unhealthy')"
+                                class="btn btn-normal"
+                                :disabled="processing"
+                                @click="restartService">
+                            <font-awesome-icon icon="rotate" class="me-1" />
+                            {{ $t("restartStack") }}
+                        </button>
+                        <button v-if="this.serviceCount > 1 && !isEditMode && (status === 'running' || status === 'healthy' || status === 'unhealthy')"
+                                class="btn btn-normal"
+                                :disabled="processing"
+                                @click="stopService">
+                            <font-awesome-icon icon="stop" class="me-1" />
+                            {{ $t("stopStack") }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -194,6 +217,9 @@ export default defineComponent({
         }
     },
     emits: [
+        "start-service",
+        "stop-service",
+        "restart-service"
     ],
     data() {
         return {
@@ -263,6 +289,10 @@ export default defineComponent({
             return this.jsonObject.services[this.name];
         },
 
+        serviceCount() {
+            return Object.keys(this.jsonObject.services).length;
+        },
+        
         jsonObject() {
             return this.$parent.$parent.jsonConfig;
         },
@@ -333,6 +363,16 @@ export default defineComponent({
         remove() {
             delete this.jsonObject.services[this.name];
         },
+        startService() {
+            this.$emit("start-service", this.name);
+        },
+        stopService() {
+            this.$emit("stop-service", this.name);
+        },
+        restartService() {
+            this.$emit("restart-service", this.name);
+        }
+
     }
 });
 </script>

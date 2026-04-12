@@ -32,6 +32,9 @@ const languageList = {
     "hu": "Magyar",
     "ca": "Català",
     "ga": "Gaeilge",
+    "de-CH": "Schwiizerdütsch",
+    "mag": "मगही",
+    "mai": "मैथिली",
 };
 
 let messages = {
