@@ -135,5 +135,12 @@
     "ConsoleNotEnabledMSG2": "Може да е опасно, тъй като този Dockge контейнер се свързва с Docker демона на хоста. Освен това Dockge може да бъде свален от команди като <code>rm -rf</code>",
     "ConsoleNotEnabledMSG3": "Ако осъзнавате риска, можете да го активирате, като зададете <code>DOCKGE_ENABLE_CONSOLE=true</code> в променливите на средата.",
     "confirmLeaveStack": "В момента редактирате стек. Сигурни ли сте, че искате да напуснете?",
-    "GlobalEnv": "Глобален .env"
+    "GlobalEnv": "Глобален .env",
+    "name": "Показвано име на Dockge агента",
+    "updatedName": "Ново показвано име на Dockge агента",
+    "memory": "Памет",
+    "memoryAbbreviated": "П-т",
+    "networkIO": "Мрежa вх/изх",
+    "blockIO": "Блок вх/изх",
+    "CPU": "Процесор"
 }
