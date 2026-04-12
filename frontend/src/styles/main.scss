@@ -693,5 +693,18 @@ code {
     outline: none !important;
 }
 
+.dark {
+    .table thead td,
+    .table thead th,
+    .table-responsive {
+        background-color: $dark-bg !important;
+        color: $dark-font-color !important;
+    }
+    .table-hover>tbody>tr:hover>* {
+        color: $dark-font-color2 !important;
+        background-color: $dark-bg2 !important;
+    }
+}
+
 // Localization
 @import "localization.scss";

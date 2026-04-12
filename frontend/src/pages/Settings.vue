@@ -83,6 +83,9 @@ export default {
                 security: {
                     title: this.$t("Security"),
                 },
+                registries: {
+                    title: this.$t("Registries"),
+                },
                 globalEnv: {
                     title: this.$t("GlobalEnv"),
                 },
