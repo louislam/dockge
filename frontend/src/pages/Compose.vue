@@ -221,15 +221,6 @@
                             <NetworkInput />
                         </div>
                     </div>
-
-                    <!-- <div class="shadow-box big-padding mb-3">
-                        <div class="mb-3">
-                            <label for="name" class="form-label"> Search Templates</label>
-                            <input id="name" v-model="name" type="text" class="form-control" placeholder="Search..." required>
-                        </div>
-
-                        <prism-editor v-if="false" v-model="yamlConfig" class="yaml-editor" :highlight="highlighter" line-numbers @input="yamlCodeChange"></prism-editor>
-                    </div>-->
                 </div>
             </div>
 
@@ -250,9 +241,8 @@ import CodeMirror from "vue-codemirror6";
 import { yaml } from "@codemirror/lang-yaml";
 import { python } from "@codemirror/lang-python";
 import { dracula as editorTheme } from "thememirror";
-import { lineNumbers, EditorView } from "@codemirror/view";
+import { lineNumbers, EditorView, Decoration, ViewPlugin } from "@codemirror/view";
 import { parseDocument, Document } from "yaml";
-import { Decoration, ViewPlugin } from "@codemirror/view";
 import { RangeSetBuilder } from "@codemirror/state";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
@@ -283,11 +273,6 @@ let yamlErrorTimeout = null;
 
 let serviceStatusTimeout = null;
 let dockerStatsTimeout = null;
-let prismjsSymbolDefinition = {
-    "symbol": {
-        pattern: /(?<!\$)\$(\{[^{}]*\}|\w+)/,
-    }
-};
 
 // Highlight $VAR and ${VAR}
 const variableHighlight = ViewPlugin.fromClass(class {
@@ -363,7 +348,8 @@ export default {
             EditorView.focusChangeEffect.of(focusEffectHandler)
         ];
 
-        return { extensions,
+        return {
+            extensions,
             extensionsEnv,
             editorFocus };
     },
@@ -818,7 +804,7 @@ export default {
         },
 
         checkYAML() {
-
+            // TODO: implement validation
         },
 
         addContainer() {
