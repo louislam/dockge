@@ -135,5 +135,12 @@
     "ConsoleNotEnabledMSG2": "Může to být nebezpečné, protože tento kontejner Dockge se připojuje k démonu Docker hostitele. Dockge může být také vyřazen z provozu příkazy jako <code>rm -rf</code>",
     "Downed": "Sestřelený",
     "CurrentHostname": "(Nenastaveno: Použít aktuální název hostitele)",
-    "GlobalEnv": "Globální .env"
+    "GlobalEnv": "Globální .env",
+    "name": "Zobrazovaný název agenta Dockge",
+    "updatedName": "Nové zobrazované jméno agenta Dockge",
+    "CPU": "CPU",
+    "memory": "Paměť",
+    "memoryAbbreviated": "Pam",
+    "networkIO": "Síťové vstupy a výstupy",
+    "blockIO": "Blokové I/O"
 }
