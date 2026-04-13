@@ -135,5 +135,12 @@
     "cancel": "Cealaigh",
     "ConsoleNotEnabledMSG1": "Is uirlis chumhachtach é an consól a ligeann duit aon orduithe ar nós <code>docker</code>, <code>rm</code> a fhorghníomhú laistigh de choimeádán an Dockge sa Chomhéadan Gréasáin seo.",
     "ConsoleNotEnabledMSG2": "D’fhéadfadh sé a bheith contúirteach ós rud é go bhfuil an coimeádán Dockge seo ag ceangal le daemon Docker an óstaigh. Chomh maith leis sin, d’fhéadfaí Dockge a bhaint anuas le horduithe cosúil le <code>rm -rf</code>",
-    "GlobalEnv": ".env domhanda"
+    "GlobalEnv": ".env domhanda",
+    "name": "Ainm taispeána Gníomhaire Dockge",
+    "updatedName": "Ainm taispeána nua Gníomhaire Dockge",
+    "CPU": "LAP",
+    "memory": "Cuimhne",
+    "memoryAbbreviated": "Cuimhne",
+    "networkIO": "Ionchur/Aschur Líonra",
+    "blockIO": "Bloc I/O"
 }
