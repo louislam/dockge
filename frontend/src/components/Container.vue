@@ -382,7 +382,7 @@ export default defineComponent({
 
 .container {
     .image {
-        font-size: 0.8rem;
+        font-size: 0.6rem;
         color: #6c757d;
         .tag {
             color: #33383b;

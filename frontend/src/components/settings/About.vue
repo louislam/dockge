@@ -51,11 +51,11 @@ export default {
 }
 
 .update-link {
-    font-size: 0.8em;
+    font-size: 0.6em;
 }
 
 .frontend-version {
-    font-size: 0.9em;
+    font-size: 0.67em;
     color: #cccccc;
 
     .dark & {

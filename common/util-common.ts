@@ -70,13 +70,13 @@ export function statusName(status : number) : string {
 export function statusNameShort(status : number) : string {
     switch (status) {
         case CREATED_FILE:
-            return "inactive";
+            return "I";
         case CREATED_STACK:
-            return "inactive";
+            return "I";
         case RUNNING:
-            return "active";
+            return "A";
         case EXITED:
-            return "exited";
+            return "E";
         default:
             return "?";
     }
@@ -99,11 +99,11 @@ export function statusColor(status : number) : string {
 
 export const isDev = process.env.NODE_ENV === "development";
 export const TERMINAL_COLS = 105;
-export const TERMINAL_ROWS = 10;
-export const PROGRESS_TERMINAL_ROWS = 8;
+export const TERMINAL_ROWS = 15;
+export const PROGRESS_TERMINAL_ROWS = 15;
 
-export const COMBINED_TERMINAL_COLS = 58;
-export const COMBINED_TERMINAL_ROWS = 20;
+export const COMBINED_TERMINAL_COLS = 120;
+export const COMBINED_TERMINAL_ROWS = 40;
 
 export const ERROR_TYPE_VALIDATION = 1;
 
