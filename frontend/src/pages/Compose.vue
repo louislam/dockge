@@ -63,8 +63,8 @@
 
             <!-- URLs -->
             <div v-if="urls.length > 0" class="mb-3">
-                <a v-for="(url, index) in urls" :key="index" target="_blank" :href="url.url">
-                    <span class="badge bg-secondary me-2">{{ url.display }}</span>
+                <a v-for="(urlItem, index) in urls" :key="index" target="_blank" :href="urlItem.url">
+                    <span class="badge bg-secondary me-2">{{ urlItem.display }}</span>
                 </a>
             </div>
 
@@ -98,8 +98,8 @@
                             <div class="mt-3">
                                 <label for="name" class="form-label">{{ $t("dockgeAgent") }}</label>
                                 <select v-model="stack.endpoint" class="form-select">
-                                    <option v-for="(agent, endpoint) in $root.agentList" :key="endpoint" :value="endpoint" :disabled="$root.agentStatusList[endpoint] != 'online'">
-                                        ({{ $root.agentStatusList[endpoint] }}) {{ (agent.name !== '') ? agent.name : agent.url || $t("Current") }}
+                                    <option v-for="(agent, agentEndpoint) in $root.agentList" :key="agentEndpoint" :value="agentEndpoint" :disabled="$root.agentStatusList[agentEndpoint] != 'online'">
+                                        ({{ $root.agentStatusList[agentEndpoint] }}) {{ (agent.name !== '') ? agent.name : agent.url || $t("Current") }}
                                     </option>
                                 </select>
                             </div>
@@ -310,7 +310,7 @@ const variableHighlight = ViewPlugin.fromClass(class {
 }, {
     decorations: v => v.decorations
 });
-    
+
 export default {
     components: {
         NetworkInput,
