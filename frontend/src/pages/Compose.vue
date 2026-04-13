@@ -63,8 +63,8 @@
 
             <!-- URLs -->
             <div v-if="urls.length > 0" class="mb-3">
-                <a v-for="(url, index) in urls" :key="index" target="_blank" :href="url.url">
-                    <span class="badge bg-secondary me-2">{{ url.display }}</span>
+                <a v-for="(urlItem, index) in urls" :key="index" target="_blank" :href="urlItem.url">
+                    <span class="badge bg-secondary me-2">{{ urlItem.display }}</span>
                 </a>
             </div>
 
@@ -98,8 +98,8 @@
                             <div class="mt-3">
                                 <label for="name" class="form-label">{{ $t("dockgeAgent") }}</label>
                                 <select v-model="stack.endpoint" class="form-select">
-                                    <option v-for="(agent, endpoint) in $root.agentList" :key="endpoint" :value="endpoint" :disabled="$root.agentStatusList[endpoint] != 'online'">
-                                        ({{ $root.agentStatusList[endpoint] }}) {{ (agent.name !== '') ? agent.name : agent.url || $t("Current") }}
+                                    <option v-for="(agent, agentEndpoint) in $root.agentList" :key="agentEndpoint" :value="agentEndpoint" :disabled="$root.agentStatusList[agentEndpoint] != 'online'">
+                                        ({{ $root.agentStatusList[agentEndpoint] }}) {{ (agent.name !== '') ? agent.name : agent.url || $t("Current") }}
                                     </option>
                                 </select>
                             </div>
@@ -221,15 +221,6 @@
                             <NetworkInput />
                         </div>
                     </div>
-
-                    <!-- <div class="shadow-box big-padding mb-3">
-                        <div class="mb-3">
-                            <label for="name" class="form-label"> Search Templates</label>
-                            <input id="name" v-model="name" type="text" class="form-control" placeholder="Search..." required>
-                        </div>
-
-                        <prism-editor v-if="false" v-model="yamlConfig" class="yaml-editor" :highlight="highlighter" line-numbers @input="yamlCodeChange"></prism-editor>
-                    </div>-->
                 </div>
             </div>
 
@@ -250,9 +241,9 @@ import CodeMirror from "vue-codemirror6";
 import { yaml } from "@codemirror/lang-yaml";
 import { python } from "@codemirror/lang-python";
 import { dracula as editorTheme } from "thememirror";
-import { lineNumbers, EditorView } from "@codemirror/view";
+import { lineNumbers, EditorView, Decoration, ViewPlugin } from "@codemirror/view";
 import { parseDocument, Document } from "yaml";
-
+import { RangeSetBuilder } from "@codemirror/state";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
     COMBINED_TERMINAL_COLS,
@@ -282,11 +273,43 @@ let yamlErrorTimeout = null;
 
 let serviceStatusTimeout = null;
 let dockerStatsTimeout = null;
-let prismjsSymbolDefinition = {
-    "symbol": {
-        pattern: /(?<!\$)\$(\{[^{}]*\}|\w+)/,
+
+// Highlight $VAR and ${VAR}
+const variableHighlight = ViewPlugin.fromClass(class {
+    constructor(view) {
+        this.decorations = this.buildDecorations(view);
     }
-};
+
+    update(update) {
+        if (update.docChanged || update.viewportChanged) {
+            this.decorations = this.buildDecorations(update.view);
+        }
+    }
+
+    buildDecorations(view) {
+        const builder = new RangeSetBuilder();
+
+        for (const { from, to } of view.visibleRanges) {
+            const text = view.state.doc.sliceString(from, to);
+            const variableRegex = /\$\{?[A-Za-z0-9_]+\}?/g;
+            let match;
+            while ((match = variableRegex.exec(text)) !== null) {
+                const start = from + match.index;
+                const end = start + match[0].length;
+
+                builder.add(
+                    start,
+                    end,
+                    Decoration.mark({ class: "cm-variable-highlight" })
+                );
+            }
+        }
+
+        return builder.finish();
+    }
+}, {
+    decorations: v => v.decorations
+});
 
 export default {
     components: {
@@ -312,6 +335,7 @@ export default {
         const extensions = [
             editorTheme,
             yaml(),
+            variableHighlight,
             lineNumbers(),
             EditorView.focusChangeEffect.of(focusEffectHandler)
         ];
@@ -319,11 +343,13 @@ export default {
         const extensionsEnv = [
             editorTheme,
             python(),
+            variableHighlight,
             lineNumbers(),
             EditorView.focusChangeEffect.of(focusEffectHandler)
         ];
 
-        return { extensions,
+        return {
+            extensions,
             extensionsEnv,
             editorFocus };
     },
@@ -778,7 +804,7 @@ export default {
         },
 
         checkYAML() {
-
+            // TODO: implement validation
         },
 
         addContainer() {
@@ -856,6 +882,11 @@ export default {
 
 .terminal {
     height: 200px;
+}
+
+:deep(.cm-variable-highlight) {
+    color: #fe6000;
+    font-weight: 600;
 }
 
 .editor-box {
