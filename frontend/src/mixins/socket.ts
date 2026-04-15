@@ -167,7 +167,8 @@ export default defineComponent({
                 this.socketIO.connecting = true;
             }, 1500);
 
-            socket = io(url);
+            // Construct the socket URL by using the HTML document's `base` value of `href` as the path
+            socket = io(url, { path: new URL("socket.io", document.baseURI).pathname });
 
             // Handling events from agents
             let agentSocket = new AgentSocket();
