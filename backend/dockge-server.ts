@@ -21,7 +21,7 @@ import { R } from "redbean-node";
 import { genSecret, isDev, LooseObject } from "../common/util-common";
 import { generatePasswordHash } from "./password-hash";
 import { Bean } from "redbean-node/dist/bean";
-import { Arguments, Config, DockgeSocket } from "./util-server";
+import { Arguments, Config, DockgeSocket, normalizedBasePath } from "./util-server";
 import { DockerSocketHandler } from "./agent-socket-handlers/docker-socket-handler";
 import expressStaticGzip from "express-static-gzip";
 import path from "path";
@@ -37,6 +37,7 @@ import { AgentSocketHandler } from "./agent-socket-handler";
 import { AgentSocket } from "../common/agent-socket";
 import { ManageAgentSocketHandler } from "./socket-handlers/manage-agent-socket-handler";
 import { Terminal } from "./terminal";
+import { parse as parseHtml } from "node-html-parser";
 
 export class DockgeServer {
     app : Express;
@@ -141,6 +142,10 @@ export class DockgeServer {
                 type: Boolean,
                 optional: true,
                 defaultValue: false,
+            },
+            basePath: {
+                type: String,
+                optional: true,
             }
         });
 
@@ -155,7 +160,15 @@ export class DockgeServer {
         this.config.dataDir = args.dataDir || process.env.DOCKGE_DATA_DIR || "./data/";
         this.config.stacksDir = args.stacksDir || process.env.DOCKGE_STACKS_DIR || defaultStacksDir;
         this.config.enableConsole = args.enableConsole || process.env.DOCKGE_ENABLE_CONSOLE === "true" || false;
+        this.config.basePath = args.basePath || process.env.DOCKGE_BASE_PATH || "/";
         this.stacksDir = this.config.stacksDir;
+
+        // Normalize base path for internal handling by removing any trailing `/`
+        if (this.config.basePath !== "/" && this.config.basePath.endsWith("/")) {
+            const oldBasePath = this.config.basePath;
+            this.config.basePath = this.config.basePath.slice(0, -1);
+            console.log("Remove trailing slash: ", oldBasePath, this.config.basePath);
+        }
 
         log.debug("server", this.config);
 
@@ -170,6 +183,8 @@ export class DockgeServer {
                 process.exit(1);
             }
         }
+
+        this.mutateIndexHTML();
 
         // Create express
         this.app = express();
@@ -187,13 +202,27 @@ export class DockgeServer {
             this.httpServer = http.createServer(this.app);
         }
 
+        log.info("server", "Base path: " + this.config.basePath);
+
+        // Trailing slash redirect (e.g. `/dockge` → `/dockge/`)
+        if (this.config.basePath !== "/") {
+            this.app.get(this.config.basePath, async (request, response, next) => {
+                if (request.path === this.config.basePath) {
+                    response.redirect(normalizedBasePath(this.config.basePath));
+                    response.end();
+                } else {
+                    next();
+                }
+            });
+        }
+
         // Binding Routers
         for (const router of this.routerList) {
-            this.app.use(router.create(this.app, this));
+            this.app.use(normalizedBasePath(this.config.basePath), router.create(this.app, this));
         }
 
         // Static files
-        this.app.use("/", expressStaticGzip("frontend-dist", {
+        this.app.use(normalizedBasePath(this.config.basePath), expressStaticGzip("frontend-dist", {
             enableBrotli: true,
         }));
 
@@ -212,6 +241,7 @@ export class DockgeServer {
 
         // Create Socket.io
         this.io = new socketIO.Server(this.httpServer, {
+            path: normalizedBasePath(this.config.basePath, "socket.io"),
             cors,
             allowRequest: (req, callback) => {
                 let isOriginValid = true;
@@ -722,4 +752,15 @@ export class DockgeServer {
         return `${protocol}://${host}:${this.config.port}`;
     }
 
+    /**
+     * Mutates the `base` element's `href` within {@link indexHTML} to point to {@link Config.basePath}. Adds a trailing
+     * slash to base path if Dockge us not served under root, as otherwise the browser would interpret the last segment
+     * as a file, in effect truncating the base path (e.g. `/dockge` → `/`).
+     */
+    mutateIndexHTML() {
+        const html = parseHtml(this.indexHTML);
+        const base = html.querySelector("head base");
+        base?.setAttribute("href", normalizedBasePath(this.config.basePath));
+        this.indexHTML = html.toString();
+    }
 }
