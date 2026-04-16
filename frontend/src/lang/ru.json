@@ -135,5 +135,12 @@
     "Lost connection to the socket server. Reconnecting...": "Потеряно соединение с сокет-сервером. Повторное подключение…",
     "Saved": "Сохранено",
     "Deployed": "Развернуто",
-    "GlobalEnv": "Глобальный .env"
+    "GlobalEnv": "Глобальный .env",
+    "name": "Отображаемое имя агента Dockge",
+    "CPU": "ЦП",
+    "memory": "Память",
+    "networkIO": "Сетевой ввод-вывод",
+    "blockIO": "Блочный ввод-вывод",
+    "memoryAbbreviated": "Память",
+    "updatedName": "Новое отображаемое имя агента Dockge"
 }
