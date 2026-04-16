@@ -122,11 +122,17 @@
     "Downed": "Вимкнено",
     "Switch to sh": "Перемкнути на sh",
     "terminal": "Термінал",
-    "New Container Name...": "Нова назва контейнера...",
-    "Network name...": "Назва мережі...",
-    "Select a network...": "Вибрати мережу...",
-    "Lost connection to the socket server. Reconnecting...": "Втрачено зв'язок з сервером сокетів. Повторне підключення...",
+    "New Container Name...": "Нова назва контейнера…",
+    "Network name...": "Назва мережі…",
+    "Select a network...": "Вибрати мережу…",
+    "Lost connection to the socket server. Reconnecting...": "Втрачено зв'язок з сервером сокетів. Повторне підключення…",
     "Restarted": "Перезапущено",
     "CurrentHostname": "(Не встановлено: використовувати поточну назву хосту)",
-    "NoNetworksAvailable": "Немає доступних мереж. Спочатку потрібно додати внутрішні мережі або увімкнути зовнішні мережі в правій частині."
+    "NoNetworksAvailable": "Немає доступних мереж. Спочатку потрібно додати внутрішні мережі або увімкнути зовнішні мережі в правій частині.",
+    "cancel": "Скасувати",
+    "Console is not enabled": "Консоль не увімкнено",
+    "ConsoleNotEnabledMSG1": "Console - це потужний інструмент, який дозволяє виконувати будь-які команди, такі як <code>docker</code>, <code>rm</code>, у контейнері Dockge у цьому веб-інтерфейсі.",
+    "ConsoleNotEnabledMSG3": "Якщо ви розумієте ризик, ви можете увімкнути її, встановивши <code>DOCKGE_ENABLE_CONSOLE=true</code> у змінних оточення.",
+    "confirmLeaveStack": "Ви зараз редагуєте стек. Ви впевнені, що хочете вийти?",
+    "ConsoleNotEnabledMSG2": "Це може бути небезпечно, оскільки цей контейнер Dockge підключається до демона Docker на хості. Також Dockge може бути знищено командами на кшталт <code>rm -rf</code>"
 }
