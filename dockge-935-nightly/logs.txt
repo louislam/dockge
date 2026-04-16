@@ -1,0 +1,53 @@
+
+        "Image": "sha256:b83496e393c4c7434ed49053e08701966cce6f2dd31e9052760820a43fb6d512",
+            "Image": "louislam/dockge:nightly",
+        "ImageManifestDescriptor": {
+
+
+
+Apr 13 20:56:23 vmubuntuserver dockerd[139641]: time="2026-04-13T20:56:23.116899200Z" level=info msg="stopping event stream following graceful shutdown" error="<nil>" module=libcontainerd namespace=moby
+Apr 13 20:56:23 vmubuntuserver dockerd[139641]: time="2026-04-13T20:56:23.117164774Z" level=info msg="Daemon shutdown complete"
+Apr 13 20:56:23 vmubuntuserver systemd[1]: docker.service: Deactivated successfully.
+
+○ docker.socket - Docker Socket for the API
+     Loaded: loaded (/usr/lib/systemd/system/docker.socket; disabled; preset: enabled)
+     Active: inactive (dead) since Mon 2026-04-13 20:56:23 UTC; 1min 58s ago
+   Duration: 14.648s
+   Triggers: ● docker.service
+     Listen: /run/docker.sock (Stream)
+        CPU: 437us
+
+Apr 13 20:56:08 vmubuntuserver systemd[1]: Starting docker.socket - Docker Socket for the API...
+Apr 13 20:56:08 vmubuntuserver systemd[1]: Listening on docker.socket - Docker Socket for the API.
+Apr 13 20:56:23 vmubuntuserver systemd[1]: docker.socket: Deactivated successfully.
+Apr 13 20:56:23 vmubuntuserver systemd[1]: Closed docker.socket - Docker Socket for the API.
+
+2026-04-13T11:11:42.644362068Z [36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m Welcome to dockge!
+2026-04-13T11:11:42.645038171Z [36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m NODE_ENV: production
+2026-04-13T11:11:42.647670086Z [36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m Server Type: HTTP
+2026-04-13T11:11:42.652674893Z [36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m Data Dir: ./data/
+2026-04-13T11:11:42.653844784Z [36m2026-04-13T11:11:42Z[0m [[38;5;117mDB[0m] [36mINFO:[0m Database Type: sqlite
+2026-04-13T11:11:42.725495134Z [36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m Connected to the database
+2026-04-13T11:11:42.740706282Z [36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m Listening on 5001
+
+[36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m Welcome to dockge!
+[36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m NODE_ENV: production
+[36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m Server Type: HTTP
+[36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m Data Dir: ./data/
+[36m2026-04-13T11:11:42Z[0m [[38;5;117mDB[0m] [36mINFO:[0m Database Type: sqlite
+[36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m Connected to the database
+[36m2026-04-13T11:11:42Z[0m [[32mSERVER[0m] [36mINFO:[0m Listening on 5001
+
+[36m2026-04-13T10:04:27Z[0m [[32mSERVER[0m] [36mINFO:[0m Shutdown requested
+[36m2026-04-13T10:04:27Z[0m [[32mSERVER[0m] [36mINFO:[0m Called signal: SIGTERM
+[36m2026-04-13T10:04:27Z[0m [[38;5;117mDB[0m] [36mINFO:[0m Closing the database
+[36m2026-04-13T10:04:29Z[0m [[38;5;117mDB[0m] [36mINFO:[0m Database closed
+[36m2026-04-13T10:04:29Z[0m [[32mSERVER[0m] [36mINFO:[0m Graceful shutdown successful!
+[36m2026-04-13T10:07:40Z[0m [[32mSERVER[0m] [36mINFO:[0m Welcome to dockge!
+[36m2026-04-13T10:07:40Z[0m [[32mSERVER[0m] [36mINFO:[0m NODE_ENV: production
+[36m2026-04-13T10:07:40Z[0m [[32mSERVER[0m] [36mINFO:[0m Server Type: HTTP
+[36m2026-04-13T10:07:40Z[0m [[32mSERVER[0m] [36mINFO:[0m Data Dir: ./data/
+[36m2026-04-13T10:07:40Z[0m [[38;5;117mDB[0m] [36mINFO:[0m Database Type: sqlite
+[36m2026-04-13T10:07:40Z[0m [[32mSERVER[0m] [36mINFO:[0m Connected to the database
+[36m2026-04-13T10:07:40Z[0m [[32mSERVER[0m] [36mINFO:[0m No user, need setup
+[36m2026-04-13T10:07:40Z[0m [[32mSERVER[0m] [36mINFO:[0m Listening on 5001
