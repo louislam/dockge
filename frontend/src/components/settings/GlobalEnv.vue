@@ -57,7 +57,8 @@ export default {
             EditorView.focusChangeEffect.of(focusEffectHandler),
         ];
 
-        return { editorFocus, extensionsEnv };
+        return { editorFocus,
+            extensionsEnv };
     },
 
     computed: {

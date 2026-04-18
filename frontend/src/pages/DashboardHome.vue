@@ -40,7 +40,7 @@
                     <div class="shadow-box big-padding">
                         <h4 class="mb-3">{{ $tc("dockgeAgent", 2) }} <span class="badge bg-warning" style="font-size: 12px;">beta</span></h4>
 
-                        <div v-for="(agent, endpoint) in $root.agentList" :key="endpoint" class="mb-3 agent">
+                        <div v-for="(agentItem, endpoint) in $root.agentList" :key="endpoint" class="mb-3 agent">
                             <!-- Agent Status -->
                             <template v-if="$root.agentStatusList[endpoint]">
                                 <span v-if="$root.agentStatusList[endpoint] === 'online'" class="badge bg-primary me-2">{{ $t("agentOnline") }}</span>
@@ -50,26 +50,26 @@
 
                             <!-- Agent Display Name -->
                             <template v-if="$root.agentStatusList[endpoint]">
-                                <span v-if="endpoint === '' && agent.name === ''" class="badge bg-secondary me-2">Current</span>
-                                <span v-else-if="agent.name === ''" :href="agent.url" class="me-2">{{ endpoint }}</span>
-                                <span v-else :href="agent.url" class="me-2">{{ agent.name }}</span>
+                                <span v-if="endpoint === '' && agentItem.name === ''" class="badge bg-secondary me-2">Current</span>
+                                <span v-else-if="agentItem.name === ''" :href="agentItem.url" class="me-2">{{ endpoint }}</span>
+                                <span v-else :href="agentItem.url" class="me-2">{{ agentItem.name }}</span>
                             </template>
 
                             <!-- Edit Name  -->
-                            <font-awesome-icon v-if="agent.name !== ''" icon="pen-to-square" @click="showEditAgentNameDialog[agent.name] = !showEditAgentNameDialog[agent.Name]" />
+                            <font-awesome-icon v-if="agentItem.name !== ''" icon="pen-to-square" @click="showEditAgentNameDialog[agentItem.name] = !showEditAgentNameDialog[agentItem.Name]" />
 
                             <!-- Edit Dialog -->
-                            <BModal v-model="showEditAgentNameDialog[agent.name]" :no-close-on-backdrop="true" :close-on-esc="true" :okTitle="$t('Update Name')" okVariant="info" @ok="updateName(agent.url, agent.updatedName)">
-                                <label for="Update Name" class="form-label">Current value: {{ $t(agent.name) }}</label>
-                                <input id="updatedName" v-model="agent.updatedName" type="text" class="form-control" optional>
+                            <BModal v-model="showEditAgentNameDialog[agentItem.name]" :no-close-on-backdrop="true" :close-on-esc="true" :okTitle="$t('Update Name')" okVariant="info" @ok="updateName(agentItem.url, agentItem.updatedName)">
+                                <label for="Update Name" class="form-label">Current value: {{ $t(agentItem.name) }}</label>
+                                <input id="updatedName" v-model="agentItem.updatedName" type="text" class="form-control" optional>
                             </BModal>
 
                             <!-- Remove Button -->
-                            <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="showRemoveAgentDialog[agent.url] = !showRemoveAgentDialog[agent.url]" />
+                            <font-awesome-icon v-if="endpoint !== ''" class="ms-2 remove-agent" icon="trash" @click="showRemoveAgentDialog[agentItem.url] = !showRemoveAgentDialog[agentItem.url]" />
 
                             <!-- Remove Agent Dialog -->
-                            <BModal v-model="showRemoveAgentDialog[agent.url]" :okTitle="$t('removeAgent')" okVariant="danger" @ok="removeAgent(agent.url)">
-                                <p>{{ agent.url }}</p>
+                            <BModal v-model="showRemoveAgentDialog[agentItem.url]" :okTitle="$t('removeAgent')" okVariant="danger" @ok="removeAgent(agentItem.url)">
+                                <p>{{ agentItem.url }}</p>
                                 {{ $t("removeAgentMsg") }}
                             </BModal>
                         </div>

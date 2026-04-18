@@ -7,9 +7,22 @@
 
             <div v-else class="alert alert-warning shadow-box" role="alert">
                 <h4 class="alert-heading">{{ $t("Console is not enabled") }}</h4>
-                <p v-html="$t('ConsoleNotEnabledMSG1')"></p>
-                <p v-html="$t('ConsoleNotEnabledMSG2')"></p>
-                <p v-html="$t('ConsoleNotEnabledMSG3')"></p>
+                <i18n-t keypath="ConsoleNotEnabledMSG1" tag="p">
+                    <template #docker><code>{{ $t('dockerCode') }}</code></template>
+                    <template #rm><code>{{ $t('rmCode') }}</code></template>
+                </i18n-t>
+
+                <i18n-t keypath="ConsoleNotEnabledMSG2" tag="p">
+                    <template #rmRf>
+                        <code>{{ $t('rmRfCode') }}</code>
+                    </template>
+                </i18n-t>
+
+                <i18n-t keypath="ConsoleNotEnabledMSG3" tag="p">
+                    <template #envVar>
+                        <code>{{ $t('envVarCode') }}</code>
+                    </template>
+                </i18n-t>
             </div>
         </div>
     </transition>
@@ -37,7 +50,7 @@ export default {
         });
     },
     methods: {
-        
+
     }
 };
 </script>
