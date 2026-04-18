@@ -188,6 +188,12 @@ export class Stack {
                 throw new ValidationError("Stack name already exists");
             }
 
+            // If this is a new stack that has no compose file yet, use the stack name as directory
+            if (dir === "") {
+                this._configFilePath = path.join(this.server.stacksDir, this.name);
+                dir = this.path;
+            }
+
             // Create the stack folder
             await fsAsync.mkdir(dir);
         } else {
@@ -412,7 +418,7 @@ export class Stack {
     static async getStack(server: DockgeServer, stackName: string, skipFSOperations = false) : Promise<Stack> {
         let stack: Stack | undefined;
         if (!skipFSOperations) {
-            let stackList = await this.getStackList(server, true);
+            let stackList = await this.getStackList(server);
             stack = stackList.get(stackName);
             if (!stack || !await fileExists(stack.path) || !(await fsAsync.stat(stack.path)).isDirectory() ) {
                 throw new ValidationError(`getStack; Stack ${stackName} not found`);
