@@ -31,6 +31,7 @@ export interface Arguments {
     dataDir? : string;
     stacksDir? : string;
     enableConsole? : boolean;
+    basePath?: string;
 }
 
 // Some config values are required
@@ -103,4 +104,16 @@ export function fileExists(file : string) {
     return fs.promises.access(file, fs.constants.F_OK)
         .then(() => true)
         .catch(() => false);
+}
+
+/**
+ * Normalizes given {@link basePath} to be never `undefined` and end with with a slash, optionally with {@link extra}
+ * appended. If {@link basePath} is `undefined`, `/` is substituted.
+ *
+ * @param basePath value or undefined
+ * @param extra optional value to append
+ * @returns normalized value
+ */
+export function normalizedBasePath(basePath: string | undefined, extra: string | undefined = undefined) {
+    return ((basePath !== undefined && basePath !== "/") ? basePath + "/" : "/") + (extra ?? "");
 }

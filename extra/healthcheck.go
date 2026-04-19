@@ -52,7 +52,12 @@ func main() {
 		protocol = "http"
 	}
 
-	url := protocol + "://" + hostname + ":" + port
+	path := os.Getenv("DOCKGE_BASE_PATH")
+	if len(path) == 0 {
+		path = "/"
+	}
+
+	url := protocol + "://" + hostname + ":" + port + path
 
 	log.Println("Checking " + url)
 	resp, err := client.Get(url)
