@@ -183,7 +183,7 @@ export default {
         display: inline-block;
         height: 100%;
         padding: 8px 10px 0;
-        font-size: 13px;
+        font-size: 10px;
         color: #c1c1c1;
         overflow: hidden;
         text-decoration: none;
@@ -194,7 +194,7 @@ export default {
         }
 
         div {
-            font-size: 20px;
+            font-size: 15px;
         }
     }
 }
@@ -242,7 +242,7 @@ main {
         padding-left: 0;
         padding-bottom: 0;
         margin-top: 8px !important;
-        border-radius: 16px;
+        border-radius: 2px;
         overflow: hidden;
 
         .dropdown-divider {
@@ -252,7 +252,7 @@ main {
         }
 
         .dropdown-item-text {
-            font-size: 14px;
+            font-size: 11px;
             padding-bottom: 0.7rem;
         }
 
@@ -291,7 +291,7 @@ main {
         margin-right: 5px;
         border-radius: 50rem;
         font-weight: bold;
-        font-size: 10px;
+        font-size: 8px;
     }
 }
 

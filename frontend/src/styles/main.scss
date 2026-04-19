@@ -7,15 +7,15 @@
 }
 
 h1 {
-    font-size: 32px;
+    font-size: 24px;
 }
 
 h2 {
-    font-size: 26px;
+    font-size: 20px;
 }
 
 textarea.form-control {
-    border-radius: 19px;
+    border-radius: 2px;
 }
 
 ::-webkit-scrollbar {
@@ -45,7 +45,7 @@ textarea.form-control {
 }
 
 .list-group {
-    border-radius: 0.75rem;
+    border-radius: 2px;
 
     .dark & {
         .list-group-item {
@@ -77,7 +77,7 @@ optgroup {
 // Scrollbar
 ::-webkit-scrollbar-thumb {
     background: #ccc;
-    border-radius: 20px;
+    border-radius: 2px;
 }
 
 .modal {
@@ -85,7 +85,7 @@ optgroup {
 }
 
 .modal-content {
-    border-radius: 1rem;
+    border-radius: 2px;
     box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
 
     .dark & {
@@ -95,14 +95,14 @@ optgroup {
 }
 
 .VuePagination__count {
-    font-size: 13px;
+    font-size: 10px;
     text-align: center;
 }
 
 .shadow-box {
     box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 2px;
 
     &.big-padding {
         padding: 20px;
@@ -115,7 +115,7 @@ optgroup {
 }
 
 .btn-sm {
-    border-radius: 25px;
+    border-radius: 2px;
 }
 
 .btn-primary {
@@ -169,7 +169,7 @@ optgroup {
 .btn-outline-normal {
     padding: 4px 10px;
     border: 1px solid #ced4da;
-    border-radius: 25px;
+    border-radius: 2px;
     background-color: transparent;
 
     .dark & {
@@ -494,7 +494,7 @@ optgroup {
         align-items: center;
         height: 52px;
         text-decoration: none;
-        border-radius: 10px;
+        border-radius: 2px;
         transition: all ease-in-out 0.15s;
         width: 100%;
         padding: 0 8px;
@@ -546,7 +546,7 @@ optgroup {
 [contenteditable=true] {
     transition: all $easing-in 0.2s;
     background-color: rgba(239, 239, 239, 0.7);
-    border-radius: 8px;
+    border-radius: 2px;
 
     &.no-bg {
         background-color: transparent !important;
@@ -569,7 +569,7 @@ optgroup {
     &::after {
         margin-left: 5px;
         content: "🖊️";
-        font-size: 13px;
+        font-size: 10px;
         color: #eee;
     }
     */
@@ -586,7 +586,7 @@ optgroup {
 }
 
 .vue-image-crop-upload .vicp-wrap {
-    border-radius: 10px !important;
+    border-radius: 2px !important;
 }
 
 .spinner {
@@ -606,7 +606,7 @@ h5.settings-subheading::after {
 .code-editor, .css-editor {
     /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
 
-    border-radius: 1rem;
+    border-radius: 2px;
     padding: 10px 5px;
     border: 1px solid #ced4da;
 
@@ -634,7 +634,7 @@ $shadow-box-padding: 20px;
     z-index: 100;
     background-color: rgba(white, 0.2);
     backdrop-filter: blur(2px);
-    border-radius: 0 0 10px 10px;
+    border-radius: 0 0 2px 2px;
 
     .dark & {
         background-color: rgba($dark-header-bg, 0.9);
@@ -656,11 +656,11 @@ $shadow-box-padding: 20px;
 code {
     padding: .2em .4em;
     margin: 0;
-    font-size: 85%;
+    font-size: 64%;
     white-space: break-spaces;
     background-color: rgba(239, 239, 239, 0.15);
 
-    border-radius: 6px;
+    border-radius: 2px;
     font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     color: black;
 
