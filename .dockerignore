@@ -9,9 +9,9 @@ tmp
 
 # Docker extra
 docker
-frontend
 .editorconfig
 .eslintrc.cjs
 .git
 .gitignore
-README.md
+.github
+*.md
