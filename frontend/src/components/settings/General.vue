@@ -57,6 +57,23 @@
                 <div class="form-text"></div>
             </div>
 
+            <!-- Default Compose Template -->
+            <div class="mb-4">
+                <label class="form-label" for="defaultTemplateURL">
+                    {{ $t("defaultComposeTemplate") }}
+                </label>
+
+                <code-mirror
+                    ref="editor"
+                    v-model="settings.template"
+                    :extensions="extensions"
+                    minimal
+                    wrap="true"
+                    dark="true"
+                    tab="true"
+                />
+            </div>
+
             <!-- Save Button -->
             <div>
                 <button class="btn btn-primary" type="submit">
@@ -71,10 +88,26 @@
 
 import dayjs from "dayjs";
 import { timezoneList } from "../../util-frontend";
+import CodeMirror from "vue-codemirror6";
+import { yaml } from "@codemirror/lang-yaml";
+import { dracula as editorTheme } from "thememirror";
+import { lineNumbers } from "@codemirror/view";
+import { defaultComposeTemplate } from "../../../../common/util-common.ts";
 
 export default {
     components: {
+        CodeMirror
+    },
 
+    setup() {
+        const extensions = [
+            editorTheme,
+            yaml(),
+            lineNumbers(),
+        ];
+        return {
+            extensions: extensions
+        };
     },
 
     data() {
@@ -85,7 +118,11 @@ export default {
 
     computed: {
         settings() {
-            return this.$parent.$parent.$parent.settings;
+            const settings = this.$parent.$parent.$parent.settings;
+            if (!settings.template) {
+                settings.template = defaultComposeTemplate;
+            }
+            return settings;
         },
         saveSettings() {
             return this.$parent.$parent.$parent.saveSettings;
