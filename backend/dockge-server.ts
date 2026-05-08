@@ -215,6 +215,7 @@ export class DockgeServer {
             cors,
             allowRequest: (req, callback) => {
                 let isOriginValid = true;
+                // Restore this
                 const bypass = isDev || process.env.UPTIME_KUMA_WS_ORIGIN_CHECK === "bypass";
 
                 if (!bypass) {
@@ -228,7 +229,8 @@ export class DockgeServer {
                         try {
                             let originURL = new URL(origin);
 
-                            if (host !== originURL.host) {
+                            let hostWithoutPort = host.split(":")[0];
+                            if (hostWithoutPort !== originURL.hostname) {
                                 isOriginValid = false;
                                 log.error("auth", `Origin (${origin}) does not match host (${host}), IP: ${req.socket.remoteAddress}`);
                             }
