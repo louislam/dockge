@@ -18,6 +18,13 @@ export class ManageAgentSocketHandler extends SocketHandler {
                 }
 
                 let data = requestData as LooseObject;
+                if (typeof(data.url) !== "string" || typeof(data.username) !== "string" || typeof(data.password) !== "string") {
+                    throw new Error("Invalid agent data");
+                }
+                if (typeof(data.name) !== "string") {
+                    data.name = "";
+                }
+
                 let manager = socket.instanceManager;
                 await manager.test(data.url, data.username, data.password);
                 await manager.add(data.url, data.username, data.password, data.name);
@@ -68,13 +75,18 @@ export class ManageAgentSocketHandler extends SocketHandler {
         });
 
         // updateAgent
-        socket.on("updateAgent", async (name : string, updatedName : string, callback : unknown) => {
+        socket.on("updateAgent", async (url : unknown, updatedName : unknown, callback : unknown) => {
             try {
                 log.debug("manage-agent-socket-handler", "updateAgent");
                 checkLogin(socket);
 
+                if (typeof(url) !== "string") {
+                    throw new Error("URL must be a string");
+                }
+                const displayName = typeof(updatedName) === "string" ? updatedName : "";
+
                 let manager = socket.instanceManager;
-                await manager.update(name, updatedName);
+                await manager.update(url, displayName);
 
                 server.disconnectAllSocketClients(undefined, socket.id);
                 manager.sendAgentList();

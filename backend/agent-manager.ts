@@ -83,7 +83,7 @@ export class AgentManager {
         bean.url = url;
         bean.username = username;
         bean.password = password;
-        bean.name = name;
+        bean.name = (name || "").trim();
         await R.store(bean);
         return bean;
     }
@@ -118,7 +118,7 @@ export class AgentManager {
             url,
         ]);
         if (agent) {
-            agent.name = updatedName;
+            agent.name = (updatedName || "").trim();
             await R.store(agent);
         } else {
             throw new Error("Agent not found");

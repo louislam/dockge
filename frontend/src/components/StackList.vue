@@ -60,8 +60,10 @@
                         <font-awesome-icon v-show="closedAgents.get(agent.endpoint)" icon="chevron-circle-right" />
                         <font-awesome-icon v-show="!closedAgents.get(agent.endpoint)" icon="chevron-circle-down" />
                     </span>
-                    <span v-if="agent.endpoint === 'current'">{{ $t("currentEndpoint") }}</span>
-                    <span v-else>{{ agent.endpoint }}</span>
+                    <span>{{ agentDisplayName(agent.endpoint) }}</span>
+                    <small v-if="agentDisplayName(agent.endpoint) !== agentEndpoint(agent.endpoint)" class="ms-2 opacity-75">
+                        {{ agentEndpoint(agent.endpoint) }}
+                    </small>
                 </div>
                 <StackListItem
                     v-for="(item, index) in agent.stacks"
@@ -142,8 +144,10 @@ export default {
                 let searchTextMatch = true;
                 if (this.searchText !== "") {
                     const loweredSearchText = this.searchText.toLowerCase();
+                    const agentDisplay = this.agentDisplayName(stack.endpoint || "current").toLowerCase();
                     searchTextMatch =
                         stack.name.toLowerCase().includes(loweredSearchText)
+                        || agentDisplay.includes(loweredSearchText)
                         || stack.tags.find(tag => tag.name.toLowerCase().includes(loweredSearchText)
                             || tag.value?.toLowerCase().includes(loweredSearchText));
                 }
@@ -221,7 +225,7 @@ export default {
                 } else if (a.endpoint !== "current" && b.endpoint === "current") {
                     return 1;
                 }
-                return a.endpoint.localeCompare(b.endpoint);
+                return this.agentDisplayName(a.endpoint).localeCompare(this.agentDisplayName(b.endpoint));
             });
 
             return result;
@@ -313,6 +317,12 @@ export default {
          */
         clearSearchText() {
             this.searchText = "";
+        },
+        agentEndpoint(endpoint) {
+            return endpoint === "current" ? this.$t("currentEndpoint") : endpoint;
+        },
+        agentDisplayName(endpoint) {
+            return endpoint === "current" ? this.$t("currentEndpoint") : this.$root.endpointDisplayFunction(endpoint);
         },
         /**
          * Update the StackList Filter

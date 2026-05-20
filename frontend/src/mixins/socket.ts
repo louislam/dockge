@@ -131,16 +131,13 @@ export default defineComponent({
     methods: {
 
         endpointDisplayFunction(endpoint : string) {
-            for (const [ k, v ] of Object.entries(this.$data.agentList)) {
-                if (endpoint) {
-                    if (endpoint === v["endpoint"] && v["name"] !== "") {
-                        return v["name"];
-                    }
-                    if (endpoint === v["endpoint"] && v["name"] === "" ) {
-                        return endpoint;
-                    }
-                }
+            if (!endpoint) {
+                return this.$t("currentEndpoint");
             }
+
+            const agent = this.$data.agentList[endpoint];
+            const name = typeof agent?.name === "string" ? agent.name.trim() : "";
+            return name || endpoint;
         },
 
         /**

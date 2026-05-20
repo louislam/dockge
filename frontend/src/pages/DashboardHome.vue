@@ -49,19 +49,17 @@
                             </template>
 
                             <!-- Agent Display Name -->
-                            <template v-if="$root.agentStatusList[endpoint]">
-                                <span v-if="endpoint === '' && agentItem.name === ''" class="badge bg-secondary me-2">Current</span>
-                                <span v-else-if="agentItem.name === ''" :href="agentItem.url" class="me-2">{{ endpoint }}</span>
-                                <span v-else :href="agentItem.url" class="me-2">{{ agentItem.name }}</span>
-                            </template>
+                            <span v-if="endpoint === ''" class="badge bg-secondary me-2">{{ $t("currentEndpoint") }}</span>
+                            <span v-else class="me-2" :title="agentItem.url">{{ agentDisplayName(endpoint) }}</span>
+                            <small v-if="endpoint !== '' && agentItem.name" class="text-muted me-2">{{ endpoint }}</small>
 
                             <!-- Edit Name  -->
-                            <font-awesome-icon v-if="agentItem.name !== ''" icon="pen-to-square" @click="showEditAgentNameDialog[agentItem.name] = !showEditAgentNameDialog[agentItem.Name]" />
+                            <font-awesome-icon v-if="endpoint !== ''" class="edit-agent" icon="edit" @click="openEditAgentNameDialog(agentItem)" />
 
                             <!-- Edit Dialog -->
-                            <BModal v-model="showEditAgentNameDialog[agentItem.name]" :no-close-on-backdrop="true" :close-on-esc="true" :okTitle="$t('Update Name')" okVariant="info" @ok="updateName(agentItem.url, agentItem.updatedName)">
-                                <label for="Update Name" class="form-label">Current value: {{ $t(agentItem.name) }}</label>
-                                <input id="updatedName" v-model="agentItem.updatedName" type="text" class="form-control" optional>
+                            <BModal v-if="endpoint !== ''" v-model="showEditAgentNameDialog[agentItem.url]" :no-close-on-backdrop="true" :close-on-esc="true" :okTitle="$t('updateAgentDisplayName')" okVariant="info" @ok="updateName(agentItem.url, agentItem.updatedName)">
+                                <label for="updatedName" class="form-label">{{ $t("agentDisplayName") }}</label>
+                                <input id="updatedName" v-model="agentItem.updatedName" type="text" class="form-control" :placeholder="endpoint">
                             </BModal>
 
                             <!-- Remove Button -->
@@ -94,8 +92,8 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="name" class="form-label">{{ $t("Friendly Name") }}</label>
-                                <input id="name" v-model="agent.name" type="text" class="form-control" optional>
+                                <label for="agentDisplayName" class="form-label">{{ $t("agentDisplayName") }}</label>
+                                <input id="agentDisplayName" v-model="agent.name" type="text" class="form-control" :placeholder="$t('agentDisplayNamePlaceholder')">
                             </div>
 
                             <button type="submit" class="btn btn-primary" :disabled="connectingAgent">
@@ -198,6 +196,8 @@ export default {
                         url: "http://",
                         username: "",
                         password: "",
+                        name: "",
+                        updatedName: "",
                     };
                 }
 
@@ -219,15 +219,21 @@ export default {
             });
         },
 
+        agentDisplayName(endpoint) {
+            return this.$root.endpointDisplayFunction(endpoint);
+        },
+
+        openEditAgentNameDialog(agentItem) {
+            agentItem.updatedName = agentItem.name || "";
+            this.showEditAgentNameDialog[agentItem.url] = true;
+        },
+
         updateName(url, updatedName) {
             this.$root.getSocket().emit("updateAgent", url, updatedName, (res) => {
                 this.$root.toastRes(res);
 
                 if (res.ok) {
-                    this.showAgentForm = false;
-                    this.agent = {
-                        updatedName: "",
-                    };
+                    this.agent.updatedName = "";
                 }
             });
         },
@@ -371,6 +377,10 @@ table {
 .remove-agent {
     cursor: pointer;
     color: rgba(255, 255, 255, 0.3);
+}
+
+.edit-agent {
+    cursor: pointer;
 }
 
 .agent {

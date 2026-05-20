@@ -128,5 +128,9 @@
     "Network name...": "网络名称...",
     "Select a network...": "选择网络...",
     "NoNetworksAvailable": "网络不可用.你需要在正确的方向先添加内部网络或者启用外部网络.",
-    "Downed": "已宕机"
+    "Downed": "已宕机",
+    "agentDisplayName": "显示名称",
+    "agentDisplayNamePlaceholder": "可选，用来替代端点显示",
+    "updateAgentDisplayName": "更新显示名称",
+    "agentUpdatedSuccessfully": "代理更新成功。"
 }

@@ -148,5 +148,9 @@
     "rmCode": "rm",
     "rmRfCode": "rm -rf",
     "envVarCode": "DOCKGE_ENABLE_CONSOLE=true",
-    "confirmLeaveStack": "You are currently editing a stack. Are you sure you want to leave?"
+    "confirmLeaveStack": "You are currently editing a stack. Are you sure you want to leave?",
+    "agentDisplayName": "Display name",
+    "agentDisplayNamePlaceholder": "Optional name shown instead of the endpoint",
+    "updateAgentDisplayName": "Update Display Name",
+    "agentUpdatedSuccessfully": "Agent updated successfully."
 }
