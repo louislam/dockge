@@ -151,10 +151,26 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Combined Terminal Output -->
                     <div v-show="!isEditMode">
-                        <h4 class="mb-3">{{ $t("terminal") }}</h4>
+                        <!-- Added input for filter -->
+                       <div class="terminal-header-inline"
+                            style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px; padding: 5px 0;">
+                            <h4 class="mb-0">{{ $t("terminal") }}</h4>
+                            <div class="dockge-search-wrapper"
+                                style="position: relative; display: flex; align-items: center; width: 100%; max-width: 450px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    style="position: absolute; left: 14px; width: 16px; height: 16px; color: #6e7681; pointer-events: none;">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <input :value="filterText" @input="onFilterInput($event)"
+                                    placeholder="Log filter (e.g. error or success)" class="filter-input-pill-inline"
+                                    style="background-color: #0d1117; color: #c9d1d9; border: 1px solid #30363d; padding: 8px 14px 8px 42px; border-radius: 20px; font-size: 14px; width: 100%; outline: none;" />
+                            </div>
+                        </div>
                         <Terminal
                             ref="combinedTerminal"
                             class="mb-3 terminal"
@@ -162,7 +178,7 @@
                             :endpoint="endpoint"
                             :rows="combinedTerminalRows"
                             :cols="combinedTerminalCols"
-                            style="height: 315px;"
+                            style="height: 915px;"
                         ></Terminal>
                     </div>
                 </div>
@@ -344,6 +360,7 @@ export default {
             newContainerName: "",
             stopServiceStatusTimeout: false,
             stopDockerStatsTimeout: false,
+            filterText: "",
         };
     },
     computed: {
@@ -842,6 +859,16 @@ export default {
                 }
             });
         },
+
+        // The input handler passes the filter text to the terminal and starts redrawing the logs
+        onFilterInput(event) {
+            const val = event.target.value;
+            this.filterText = val;
+            if (this.$refs.combinedTerminal) {
+                this.$refs.combinedTerminal.filterQuery = val;
+                this.$refs.combinedTerminal.applyFilter();
+            }
+        },
     }
 };
 </script>
@@ -861,5 +888,12 @@ export default {
 .agent-name {
     font-size: 13px;
     color: $dark-font-color3;
+}
+</style>
+
+<style scoped>
+.filter-input-pill-inline:focus {
+    border-color: #58a6ff !important;
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15) !important;
 }
 </style>
