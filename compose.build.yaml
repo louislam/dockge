@@ -1,0 +1,6 @@
+services:
+  dockge:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+      target: release

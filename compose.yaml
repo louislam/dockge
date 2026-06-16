@@ -1,6 +1,6 @@
 services:
   dockge:
-    image: louislam/dockge:1
+    image: registry.ntwc.top/nightwatcher314/dockge:1
     restart: unless-stopped
     ports:
       # Host Port : Container Port

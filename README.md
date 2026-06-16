@@ -6,7 +6,7 @@
 
 A fancy, easy-to-use and reactive self-hosted docker compose.yaml stack-oriented manager.
 
-[![GitHub Repo stars](https://img.shields.io/github/stars/louislam/dockge?logo=github&style=flat)](https://github.com/louislam/dockge) [![Docker Pulls](https://img.shields.io/docker/pulls/louislam/dockge?logo=docker)](https://hub.docker.com/r/louislam/dockge/tags) [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/louislam/dockge/latest?label=docker%20image%20ver.)](https://hub.docker.com/r/louislam/dockge/tags) [![GitHub last commit (branch)](https://img.shields.io/github/last-commit/louislam/dockge/master?logo=github)](https://github.com/louislam/dockge/commits/master/)
+[![GitHub Repo stars](https://img.shields.io/github/stars/NightWatcher314/dockge?logo=github&style=flat)](https://github.com/NightWatcher314/dockge) [![Docker Pulls](https://img.shields.io/badge/image-registry.ntwc.top%2Fnightwatcher314%2Fdockge-blue)](https://github.com/NightWatcher314/dockge) [![Docker Image Version (latest semver)](https://img.shields.io/badge/version-self--hosted-blue)](https://github.com/NightWatcher314/dockge) [![GitHub last commit (branch)](https://img.shields.io/github/last-commit/NightWatcher314/dockge/master?logo=github)](https://github.com/NightWatcher314/dockge/commits/master/)
 
 <img src="https://github.com/louislam/dockge/assets/1336778/26a583e1-ecb1-4a8d-aedf-76157d714ad7" width="900" alt="" />
 
@@ -49,39 +49,63 @@ Requirements:
 
 ### Basic
 
+This fork is deployed from our own GitHub repository and container image.
+
+- Repository: `https://github.com/NightWatcher314/dockge`
+- Image: `registry.ntwc.top/nightwatcher314/dockge:1`
 - Default Stacks Directory: `/opt/stacks`
 - Default Port: 5001
 
-```
-# Create directories that store your stacks and stores Dockge's stack
+```bash
+# Create directories that store your stacks and Dockge's own stack
 mkdir -p /opt/stacks /opt/dockge
 cd /opt/dockge
 
-# Download the compose.yaml
-curl https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml --output compose.yaml
+# Download our compose.yaml
+curl -L https://raw.githubusercontent.com/NightWatcher314/dockge/master/compose.yaml --output compose.yaml
 
 # Start the server
 docker compose up -d
-
-# If you are using docker-compose V1 or Podman
-# docker-compose up -d
 ```
 
 Dockge is now running on http://localhost:5001
 
+### Build From This Repository
+
+Use this when you want to build the image yourself instead of only pulling
+`registry.ntwc.top/nightwatcher314/dockge:1`. The release image depends on the
+local base and healthcheck images, so build those first.
+
+```bash
+git clone https://github.com/NightWatcher314/dockge.git /opt/dockge
+cd /opt/dockge
+
+# Build helper images used by docker/Dockerfile
+docker build -t registry.ntwc.top/nightwatcher314/dockge:build-healthcheck -f docker/BuildHealthCheck.Dockerfile .
+docker build -t registry.ntwc.top/nightwatcher314/dockge:base -f docker/Base.Dockerfile .
+
+# Build and start the Dockge service using the build override
+docker compose -f compose.yaml -f compose.build.yaml build dockge
+docker compose -f compose.yaml -f compose.build.yaml up -d dockge
+```
+
+To publish the built image to our registry after the compose build, run:
+
+```bash
+docker compose -f compose.yaml -f compose.build.yaml push dockge
+```
+
+If you are using docker-compose V1 or Podman, use the equivalent
+`docker-compose ...` or `podman compose ...` commands.
+
 ### Advanced
 
-If you want to store your stacks in another directory, you can generate your compose.yaml file by using the following URL with custom query strings.
+If you want to store your stacks in another directory, edit `compose.yaml` and
+change both the `DOCKGE_STACKS_DIR` environment variable and the stack-directory
+volume mount. The host path and container path must match.
 
-```
-# Download your compose.yaml
-curl "https://dockge.kuma.pet/compose.yaml?port=5001&stacksPath=/opt/stacks" --output compose.yaml
-```
-
-- port=`5001`
-- stacksPath=`/opt/stacks`
-
-Also, once compose is generated/downloaded, add the `PUID` and `PGID` section below to your compose `environment:` section to set stack ownership, otherwise default is `root`
+Once compose is edited, add the `PUID` and `PGID` section below to your compose
+`environment:` section to set stack ownership, otherwise default is `root`
 
 ```
       # Both PUID and PGID must be set for it to do anything
@@ -89,19 +113,13 @@ Also, once compose is generated/downloaded, add the `PUID` and `PGID` section be
       - PGID=1000 # Set the stack file/dir ownership to this group
 ```
 
-Interactive compose.yaml generator is available on: 
-https://dockge.kuma.pet
-
-### -OR-
 Copy and paste your compose from the following:
-
-If you want to store your stacks in another directory, you can change the `DOCKGE_STACKS_DIR` environment variable and volumes.
 
 compose:
 ```
 services:
   dockge:
-    image: louislam/dockge:1
+    image: registry.ntwc.top/nightwatcher314/dockge:1
     restart: unless-stopped
     ports:
       # Host Port:Container Port
@@ -157,17 +175,17 @@ If you love this project, please consider giving it a ⭐.
 ## 🗣️ Community and Contribution
 
 ### Bug Report
-https://github.com/louislam/dockge/issues
+https://github.com/NightWatcher314/dockge/issues
 
 ### Ask for Help / Discussions
-https://github.com/louislam/dockge/discussions
+https://github.com/NightWatcher314/dockge/discussions
 
 ### Translation
-If you want to translate Dockge into your language, please read [Translation Guide](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md)
+If you want to translate Dockge into your language, please read [Translation Guide](https://github.com/NightWatcher314/dockge/blob/master/frontend/src/lang/README.md)
 
 ### Create a Pull Request
 
-Be sure to read the [guide](https://github.com/louislam/dockge/blob/master/CONTRIBUTING.md), as we don't accept all types of pull requests and don't want to waste your time.
+Be sure to read the [guide](https://github.com/NightWatcher314/dockge/blob/master/CONTRIBUTING.md), as we don't accept all types of pull requests and don't want to waste your time.
 
 ## FAQ
 
