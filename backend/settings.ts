@@ -3,6 +3,7 @@ import { log } from "./log";
 import { LooseObject } from "../common/util-common";
 
 export class Settings {
+    static sensitiveKeys = new Set([ "apiKey" ]);
 
     /**
      *  Example:
@@ -47,7 +48,7 @@ export class Settings {
         // Query from cache
         if (key in Settings.cacheList) {
             const v = Settings.cacheList[key].value;
-            log.debug("settings", `Get Setting (cache): ${key}: ${v}`);
+            log.debug("settings", `Get Setting (cache): ${key}: ${Settings.sensitiveKeys.has(key) ? "[redacted]" : v}`);
             return v;
         }
 
@@ -57,7 +58,7 @@ export class Settings {
 
         try {
             const v = JSON.parse(value);
-            log.debug("settings", `Get Setting: ${key}: ${v}`);
+            log.debug("settings", `Get Setting: ${key}: ${Settings.sensitiveKeys.has(key) ? "[redacted]" : v}`);
 
             Settings.cacheList[key] = {
                 value: v,
@@ -171,4 +172,3 @@ export class Settings {
         }
     }
 }
-

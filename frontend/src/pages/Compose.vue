@@ -41,6 +41,11 @@
                         {{ $t("updateStack") }}
                     </button>
 
+                    <button v-if="!isEditMode && endpoint === ''" class="btn btn-normal" :disabled="processing" @click="checkStackUpdates">
+                        <font-awesome-icon icon="search" class="me-1" />
+                        {{ $t("Check Updates") }}
+                    </button>
+
                     <button v-if="!isEditMode && active" class="btn btn-normal" :disabled="processing" @click="stopStack">
                         <font-awesome-icon icon="stop" class="me-1" />
                         {{ $t("stopStack") }}
@@ -59,6 +64,18 @@
                     <font-awesome-icon icon="trash" class="me-1" />
                     {{ $t("deleteStack") }}
                 </button>
+
+                <div v-if="!isEditMode && endpoint === ''" class="form-check form-switch d-inline-flex ms-3 align-items-center">
+                    <input
+                        id="autoUpdate"
+                        v-model="autoUpdate"
+                        class="form-check-input"
+                        type="checkbox"
+                        :disabled="processing"
+                        @change="setAutoUpdate"
+                    >
+                    <label class="form-check-label ms-2" for="autoUpdate">{{ $t("Auto Update") }}</label>
+                </div>
             </div>
 
             <!-- URLs -->
@@ -325,6 +342,7 @@ export default {
     yamlDoc: null,  // For keeping the yaml comments
     data() {
         return {
+            autoUpdate: false,
             jsonConfig: {},
             envsubstJSONConfig: {},
             yamlError: "",
@@ -595,6 +613,7 @@ export default {
                     this.yamlCodeChange();
                     this.processing = false;
                     this.bindTerminal();
+                    this.loadAutoUpdate();
                 } else {
                     this.$root.toastRes(res);
                 }
@@ -700,6 +719,34 @@ export default {
             this.$root.emitAgent(this.endpoint, "updateStack", this.stack.name, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
+            });
+        },
+
+        checkStackUpdates() {
+            this.processing = true;
+            this.$root.getSocket().emit("checkStackUpdates", this.stack.name, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+            });
+        },
+
+        loadAutoUpdate() {
+            if (this.endpoint !== "") {
+                return;
+            }
+            this.$root.getSocket().emit("getAutoUpdate", this.stack.name, (res) => {
+                if (res.ok) {
+                    this.autoUpdate = res.enabled;
+                }
+            });
+        },
+
+        setAutoUpdate() {
+            this.$root.getSocket().emit("setAutoUpdate", this.stack.name, this.autoUpdate, (res) => {
+                this.$root.toastRes(res);
+                if (!res.ok) {
+                    this.loadAutoUpdate();
+                }
             });
         },
 

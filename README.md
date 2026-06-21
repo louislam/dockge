@@ -134,6 +134,34 @@ cd /opt/dockge
 docker compose pull && docker compose up -d
 ```
 
+## REST API
+
+Dockge exposes an optional API for local stack integrations such as Home Assistant.
+Configure an API key in **Settings > Integrations**, or set the
+`DOCKGE_API_KEY` environment variable. Send the key in the `X-API-Key` header.
+
+Available endpoints:
+
+- `GET /api/health`
+- `GET /api/events` (Server-Sent Events)
+- `GET /api/agents`
+- `GET /api/stacks`
+- `GET /api/stacks/:name/status`
+- `POST /api/stacks/:name/start`
+- `POST /api/stacks/:name/stop`
+- `POST /api/stacks/:name/restart`
+- `POST /api/stacks/:name/update`
+- `POST /api/stacks/:name/check-updates`
+- `GET|PUT /api/stacks/:name/auto-update`
+- `POST /api/update-all`
+- `GET|PUT /api/scheduler`
+- `POST /api/scheduler/trigger`
+- `GET /api/update-history`
+- `POST /api/system/prune`
+
+Stack service responses include the optional OCI
+`org.opencontainers.image.version` label as `imageVersion`.
+
 ## Screenshots
 
 ![](https://github.com/louislam/dockge/assets/1336778/e7ff0222-af2e-405c-b533-4eab04791b40)
