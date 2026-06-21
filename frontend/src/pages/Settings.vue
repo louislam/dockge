@@ -83,6 +83,12 @@ export default {
                 security: {
                     title: this.$t("Security"),
                 },
+                integrations: {
+                    title: this.$t("Integrations"),
+                },
+                updates: {
+                    title: this.$t("Updates"),
+                },
                 globalEnv: {
                     title: this.$t("GlobalEnv"),
                 },

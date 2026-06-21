@@ -33,6 +33,12 @@
                     </router-link>
                 </li>
 
+                <li v-if="$root.loggedIn" class="nav-item me-2">
+                    <router-link to="/update-history" class="nav-link">
+                        <font-awesome-icon icon="list" /> {{ $t("Update History") }}
+                    </router-link>
+                </li>
+
                 <li v-if="$root.loggedIn" class="nav-item">
                     <div class="dropdown dropdown-profile-pic">
                         <div class="nav-link" data-bs-toggle="dropdown">
