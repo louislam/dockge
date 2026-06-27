@@ -3,6 +3,7 @@ import { DockgeServer } from "../dockge-server";
 import { callbackError, callbackResult, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { Stack } from "../stack";
 import { AgentSocket } from "../../common/agent-socket";
+import { spawn } from "child_process";
 
 export class DockerSocketHandler extends AgentSocketHandler {
     create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
@@ -331,6 +332,32 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 callbackError(e, callback);
             }
         });
+
+        agentSocket.on("dockerLogin", async (registryServer : unknown, username : unknown, password : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(registryServer) !== "string") {
+                    throw new ValidationError("Registry server must be a string");
+                }
+                if (typeof(username) !== "string" || username.trim() === "") {
+                    throw new ValidationError("Username is required");
+                }
+                if (typeof(password) !== "string" || password === "") {
+                    throw new ValidationError("Password is required");
+                }
+
+                await this.dockerLogin(registryServer.trim(), username.trim(), password);
+
+                callbackResult({
+                    ok: true,
+                    msg: "dockerRegistryLoginSuccess",
+                    msgi18n: true,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
     }
 
     async saveStack(server : DockgeServer, name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown) : Promise<Stack> {
@@ -353,5 +380,49 @@ export class DockerSocketHandler extends AgentSocketHandler {
         return stack;
     }
 
-}
+    /**
+     * Log Docker in to a registry using stdin for the password so it is not exposed in process arguments.
+     * @param registryServer Registry host to log in to, or an empty string for Docker Hub
+     * @param username Registry username
+     * @param password Registry password or access token
+     * @returns Resolves when docker login succeeds
+     */
+    dockerLogin(registryServer : string, username : string, password : string) : Promise<void> {
+        const args = [ "login", "--username", username, "--password-stdin" ];
+        if (registryServer !== "") {
+            args.push(registryServer);
+        }
 
+        return new Promise((resolve, reject) => {
+            const child = spawn("docker", args, {
+                stdio: [ "pipe", "pipe", "pipe" ],
+            });
+
+            let stdout = "";
+            let stderr = "";
+
+            child.stdout.on("data", (data) => {
+                stdout += data.toString();
+            });
+
+            child.stderr.on("data", (data) => {
+                stderr += data.toString();
+            });
+
+            child.on("error", (error) => {
+                reject(error);
+            });
+
+            child.on("close", (code) => {
+                if (code === 0) {
+                    resolve();
+                } else {
+                    reject(new Error((stderr || stdout || "Docker login failed").trim()));
+                }
+            });
+
+            child.stdin.end(`${password}\n`);
+        });
+    }
+
+}
