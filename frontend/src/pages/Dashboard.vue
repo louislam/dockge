@@ -1,9 +1,9 @@
 <template>
     <div class="container-fluid">
         <div class="row">
-            <div v-if="!$root.isMobile" class="col-12 col-md-4 col-xl-3">
+            <div v-if="!$root.isMobile || $route.name === 'DashboardHome'" class="col-12 col-md-4 col-xl-3 mb-3">
                 <div>
-                    <router-link to="/compose" class="btn btn-primary mb-3"><font-awesome-icon icon="plus" /> {{ $t("compose") }}</router-link>
+                    <router-link to="/compose" class="btn btn-primary mb-3 w-100"><font-awesome-icon icon="plus" /> {{ $t("compose") }}</router-link>
                 </div>
                 <StackList :scrollbar="true" />
             </div>

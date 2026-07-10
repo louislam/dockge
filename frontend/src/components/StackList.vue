@@ -117,6 +117,11 @@ export default {
          * @returns {object} Style for stack list
          */
         boxStyle() {
+            if (this.$root.isMobile) {
+                return {
+                    height: "auto",
+                };
+            }
             if (window.innerWidth > 550) {
                 return {
                     height: `calc(100vh - 160px + ${this.windowTop}px)`,
@@ -126,7 +131,6 @@ export default {
                     height: "calc(100vh - 160px)",
                 };
             }
-
         },
 
         /**
@@ -232,6 +236,11 @@ export default {
         },
 
         stackListStyle() {
+            if (this.$root.isMobile) {
+                return {
+                    height: "auto",
+                };
+            }
             //let listHeaderHeight = 107;
             let listHeaderHeight = 60;
 

@@ -328,7 +328,6 @@ export default {
 
 .num {
     font-size: 30px;
-
     font-weight: bold;
     display: block;
 
@@ -338,6 +337,19 @@ export default {
 
     &.exited {
         color: $danger;
+    }
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+@media (max-width: 550px) {
+    h3 {
+        font-size: 1.1rem !important;
+    }
+    .num {
+        font-size: 24px !important;
     }
 }
 

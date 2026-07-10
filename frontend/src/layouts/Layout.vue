@@ -9,79 +9,73 @@
             </div>
         </div>
 
-        <!-- Desktop header -->
-        <header v-if="! $root.isMobile" class="d-flex flex-wrap justify-content-center py-3 mb-3 border-bottom">
-            <router-link to="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
-                <object class="bi me-2 ms-4" width="40" height="40" data="/icon.svg" />
+        <!-- Responsive header -->
+        <header class="d-flex align-items-center justify-content-between py-3 mb-3 border-bottom px-4">
+            <router-link to="/" class="d-flex align-items-center text-dark text-decoration-none">
+                <object class="bi me-2" width="30" height="30" data="/icon.svg" />
                 <span class="fs-4 title">Dockge</span>
             </router-link>
 
-            <a v-if="hasNewVersion" target="_blank" href="https://github.com/louislam/dockge/releases" class="btn btn-warning me-3">
-                <font-awesome-icon icon="arrow-alt-circle-up" /> {{ $t("newUpdate") }}
-            </a>
+            <div class="d-flex align-items-center">
+                <a v-if="hasNewVersion" target="_blank" href="https://github.com/louislam/dockge/releases" class="btn btn-warning me-3 btn-sm">
+                    <font-awesome-icon icon="arrow-alt-circle-up" /> {{ $t("newUpdate") }}
+                </a>
 
-            <ul class="nav nav-pills">
-                <li v-if="$root.loggedIn" class="nav-item me-2">
-                    <router-link to="/" class="nav-link">
-                        <font-awesome-icon icon="home" /> {{ $t("home") }}
-                    </router-link>
-                </li>
+                <!-- Desktop-only navigation pills -->
+                <ul v-if="!$root.isMobile && $root.loggedIn" class="nav nav-pills align-items-center me-2">
+                    <li class="nav-item">
+                        <router-link to="/" class="nav-link">
+                            <font-awesome-icon icon="home" /> {{ $t("home") }}
+                        </router-link>
+                    </li>
 
-                <li v-if="$root.loggedIn" class="nav-item me-2">
-                    <router-link to="/console" class="nav-link">
-                        <font-awesome-icon icon="terminal" /> {{ $t("console") }}
-                    </router-link>
-                </li>
+                    <li class="nav-item">
+                        <router-link to="/console" class="nav-link">
+                            <font-awesome-icon icon="terminal" /> {{ $t("console") }}
+                        </router-link>
+                    </li>
+                </ul>
 
-                <li v-if="$root.loggedIn" class="nav-item">
-                    <div class="dropdown dropdown-profile-pic">
-                        <div class="nav-link" data-bs-toggle="dropdown">
-                            <div class="profile-pic">{{ $root.usernameFirstChar }}</div>
-                            <font-awesome-icon icon="angle-down" />
-                        </div>
-
-                        <!-- Header's Dropdown Menu -->
-                        <ul class="dropdown-menu">
-                            <!-- Username -->
-                            <li>
-                                <i18n-t v-if="$root.username != null" tag="span" keypath="signedInDisp" class="dropdown-item-text">
-                                    <strong>{{ $root.username }}</strong>
-                                </i18n-t>
-                                <span v-if="$root.username == null" class="dropdown-item-text">{{ $t("signedInDispDisabled") }}</span>
-                            </li>
-
-                            <li><hr class="dropdown-divider"></li>
-
-                            <!-- Functions -->
-
-                            <!--<li>
-                                <router-link to="/registry" class="dropdown-item" :class="{ active: $route.path.includes('settings') }">
-                                    <font-awesome-icon icon="warehouse" /> {{ $t("registry") }}
-                                </router-link>
-                            </li>-->
-
-                            <li>
-                                <button class="dropdown-item" @click="scanFolder">
-                                    <font-awesome-icon icon="arrows-rotate" /> {{ $t("scanFolder") }}
-                                </button>
-                            </li>
-
-                            <li>
-                                <router-link to="/settings/general" class="dropdown-item" :class="{ active: $route.path.includes('settings') }">
-                                    <font-awesome-icon icon="cog" /> {{ $t("Settings") }}
-                                </router-link>
-                            </li>
-
-                            <li>
-                                <button class="dropdown-item" @click="$root.logout">
-                                    <font-awesome-icon icon="sign-out-alt" />
-                                    {{ $t("Logout") }}
-                                </button>
-                            </li>
-                        </ul>
+                <!-- Profile Dropdown (visible on both Desktop and Mobile) -->
+                <div v-if="$root.loggedIn" class="dropdown dropdown-profile-pic">
+                    <div class="nav-link" data-bs-toggle="dropdown">
+                        <div class="profile-pic">{{ $root.usernameFirstChar }}</div>
+                        <font-awesome-icon icon="angle-down" />
                     </div>
-                </li>
-            </ul>
+
+                    <!-- Header's Dropdown Menu -->
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <!-- Username -->
+                        <li>
+                            <i18n-t v-if="$root.username != null" tag="span" keypath="signedInDisp" class="dropdown-item-text">
+                                <strong>{{ $root.username }}</strong>
+                            </i18n-t>
+                            <span v-if="$root.username == null" class="dropdown-item-text">{{ $t("signedInDispDisabled") }}</span>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <button class="dropdown-item" @click="scanFolder">
+                                <font-awesome-icon icon="arrows-rotate" /> {{ $t("scanFolder") }}
+                            </button>
+                        </li>
+
+                        <li>
+                            <router-link to="/settings/general" class="dropdown-item" :class="{ active: $route.path.includes('settings') }">
+                                <font-awesome-icon icon="cog" /> {{ $t("Settings") }}
+                            </router-link>
+                        </li>
+
+                        <li>
+                            <button class="dropdown-item" @click="$root.logout">
+                                <font-awesome-icon icon="sign-out-alt" />
+                                {{ $t("Logout") }}
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </header>
 
         <main>
@@ -92,6 +86,18 @@
             <router-view v-if="$root.loggedIn" />
             <Login v-if="! $root.loggedIn && $root.allowLoginDialog" />
         </main>
+
+        <!-- Mobile Bottom Nav -->
+        <div v-if="$root.isMobile && $root.loggedIn" class="bottom-nav">
+            <router-link to="/" class="nav-link">
+                <div><font-awesome-icon icon="home" /></div>
+                {{ $t("home") }}
+            </router-link>
+            <router-link to="/console" class="nav-link">
+                <div><font-awesome-icon icon="terminal" /></div>
+                {{ $t("console") }}
+            </router-link>
+        </div>
     </div>
 </template>
 
@@ -179,7 +185,7 @@ export default {
 
     a {
         text-align: center;
-        width: 25%;
+        width: 50%;
         display: inline-block;
         height: 100%;
         padding: 8px 10px 0;
@@ -201,6 +207,10 @@ export default {
 
 main {
     min-height: calc(100vh - 160px);
+}
+
+.mobile main {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
 }
 
 .title {

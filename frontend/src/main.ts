@@ -54,7 +54,14 @@ function rootApp() {
                 loggedIn: false,
                 allowLoginDialog: false,
                 username: null,
+                isMobile: false,
             };
+        },
+        mounted() {
+            this.isMobile = window.innerWidth < 768;
+            window.addEventListener("resize", () => {
+                this.isMobile = window.innerWidth < 768;
+            });
         },
         computed: {
 

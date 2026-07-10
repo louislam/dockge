@@ -27,6 +27,9 @@
                 </div>
                 <div class="settings-content col-lg-9 col-md-7">
                     <div v-if="currentPage" class="settings-content-header">
+                        <router-link v-if="$root.isMobile" to="/settings" class="btn btn-outline-normal btn-sm me-2">
+                            <font-awesome-icon icon="chevron-left" />
+                        </router-link>
                         {{ subMenus[currentPage].title }}
                     </div>
                     <div class="mx-3">
