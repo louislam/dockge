@@ -32,12 +32,12 @@ Access the dashboard at http://localhost:5001.
 
 ## Custom Configuration
 
-If you want to customize your stack storage directory, edit the DOCKGE_STACKS_DIR environment variable and volumes inside compose.yaml:
+If you want to customize your stack storage directory, edit the BOCKGE_STACKS_DIR environment variable and volumes inside compose.yaml:
 
 ```yaml
 services:
   bockge:
-    image: dsbok/dockge:latest
+    image: dsbok/bockge:latest
     restart: unless-stopped
     ports:
       - 5001:5001
@@ -46,7 +46,7 @@ services:
       - ./data:/app/data
       - /opt/stacks:/opt/stacks
     environment:
-      - DOCKGE_STACKS_DIR=/opt/stacks
+      - BOCKGE_STACKS_DIR=/opt/stacks
 ```
 
 ## How to Update

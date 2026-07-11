@@ -1,6 +1,6 @@
 services:
   bockge:
-    image: louislam/bockge:1
+    image: dsbok/bockge:latest
     restart: unless-stopped
     ports:
       # Host Port : Container Port
