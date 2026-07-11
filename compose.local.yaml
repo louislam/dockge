@@ -2,7 +2,7 @@ services:
   bockge:
     build:
       context: .
-      dockerfile: docker/Dockerfile.local
+      dockerfile: docker/Dockerfile
     restart: unless-stopped
     ports:
       - 5001:5001
