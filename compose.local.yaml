@@ -1,5 +1,5 @@
 services:
-  dockge:
+  bockge:
     build:
       context: .
       dockerfile: docker/Dockerfile.local

@@ -72,7 +72,7 @@ export default {
             }
 
             .stat-label::after {
-                content: ':'
+                content: ': '
             }
         }
     }
@@ -80,7 +80,7 @@ export default {
 
 .stats {
     font-size: 0.8rem;
-    color: #6c757d;
+    color: var(--m3-on-surface-variant) !important;
 }
 
 .stat-label {
@@ -89,6 +89,6 @@ export default {
 
 .stats-title {
     font-size: 0.9rem;
-    color: var(--bs-heading-color);
+    color: var(--m3-on-surface) !important;
 }
 </style>

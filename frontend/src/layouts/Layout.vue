@@ -1,5 +1,5 @@
 <template>
-    <div :class="classes">
+    <div :class="classes" class="app-layout">
         <div v-if="! $root.socketIO.connected && ! $root.socketIO.firstConnect" class="lost-connection">
             <div class="container-fluid">
                 {{ $root.socketIO.connectionErrorMsg }}
@@ -9,93 +9,120 @@
             </div>
         </div>
 
-        <!-- Responsive header -->
-        <header class="d-flex align-items-center justify-content-between py-3 mb-3 border-bottom px-4">
-            <router-link to="/" class="d-flex align-items-center text-dark text-decoration-none">
-                <object class="bi me-2" width="30" height="30" data="/icon.svg" />
-                <span class="fs-4 title">Dockge</span>
+        <!-- Left Drawer (Desktop) -->
+        <aside v-if="$root.loggedIn" class="nav-drawer d-none d-md-flex">
+            <!-- Brand -->
+            <router-link to="/" class="brand-section">
+                <object class="brand-icon me-2" width="28" height="28" data="/icon.svg" />
+                <span class="brand-title">Bockge</span>
             </router-link>
 
-            <div class="d-flex align-items-center">
-                <a v-if="hasNewVersion" target="_blank" href="https://github.com/louislam/dockge/releases" class="btn btn-warning me-3 btn-sm">
-                    <font-awesome-icon icon="arrow-alt-circle-up" /> {{ $t("newUpdate") }}
-                </a>
+            <!-- Compose Button -->
+            <div class="px-3 mb-3">
+                <router-link to="/compose" class="btn btn-primary w-100 compose-btn py-2 d-flex align-items-center justify-content-center gap-2">
+                    <font-awesome-icon icon="plus" />
+                    <span>{{ $t("compose") }}</span>
+                </router-link>
+            </div>
 
-                <!-- Desktop-only navigation pills -->
-                <ul v-if="!$root.isMobile && $root.loggedIn" class="nav nav-pills align-items-center me-2">
-                    <li class="nav-item">
-                        <router-link to="/" class="nav-link">
-                            <font-awesome-icon icon="home" /> {{ $t("home") }}
-                        </router-link>
-                    </li>
+            <!-- Nav Links -->
+            <ul class="drawer-nav">
+                <li>
+                    <router-link to="/" class="drawer-link" :class="{ active: $route.path === '/' }">
+                        <font-awesome-icon icon="home" />
+                        <span>{{ $t("home") }}</span>
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="/images" class="drawer-link" :class="{ active: $route.path === '/images' }">
+                        <font-awesome-icon icon="images" />
+                        <span>Images</span>
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="/settings/general" class="drawer-link" :class="{ active: $route.path.startsWith('/settings') }">
+                        <font-awesome-icon icon="cog" />
+                        <span>{{ $t("Settings") }}</span>
+                    </router-link>
+                </li>
+            </ul>
 
-                    <li class="nav-item">
-                        <router-link to="/console" class="nav-link">
-                            <font-awesome-icon icon="terminal" /> {{ $t("console") }}
-                        </router-link>
-                    </li>
-                </ul>
+            <div class="drawer-divider mx-3 my-3"></div>
 
-                <!-- Profile Dropdown (visible on both Desktop and Mobile) -->
-                <div v-if="$root.loggedIn" class="dropdown dropdown-profile-pic">
-                    <div class="nav-link" data-bs-toggle="dropdown">
-                        <div class="profile-pic">{{ $root.usernameFirstChar }}</div>
-                        <font-awesome-icon icon="angle-down" />
-                    </div>
+            <!-- Scrollable Stack List -->
+            <div class="stack-list-wrapper">
+                <StackList :scrollbar="true" />
+            </div>
 
-                    <!-- Header's Dropdown Menu -->
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <!-- Username -->
-                        <li>
-                            <i18n-t v-if="$root.username != null" tag="span" keypath="signedInDisp" class="dropdown-item-text">
-                                <strong>{{ $root.username }}</strong>
-                            </i18n-t>
-                            <span v-if="$root.username == null" class="dropdown-item-text">{{ $t("signedInDispDisabled") }}</span>
-                        </li>
-
-                        <li><hr class="dropdown-divider"></li>
-
-                        <li>
-                            <button class="dropdown-item" @click="scanFolder">
-                                <font-awesome-icon icon="arrows-rotate" /> {{ $t("scanFolder") }}
-                            </button>
-                        </li>
-
-                        <li>
-                            <router-link to="/settings/general" class="dropdown-item" :class="{ active: $route.path.includes('settings') }">
-                                <font-awesome-icon icon="cog" /> {{ $t("Settings") }}
-                            </router-link>
-                        </li>
-
-                        <li>
-                            <button class="dropdown-item" @click="$root.logout">
-                                <font-awesome-icon icon="sign-out-alt" />
-                                {{ $t("Logout") }}
-                            </button>
-                        </li>
-                    </ul>
+            <!-- Profile & Logout -->
+            <div class="drawer-footer d-flex align-items-center justify-content-between p-3">
+                <div class="d-flex align-items-center gap-2 text-truncate">
+                    <div class="profile-pic">{{ $root.usernameFirstChar }}</div>
+                    <span class="username-text text-truncate">{{ $root.username }}</span>
                 </div>
+                <button class="logout-btn" @click="$root.logout" title="Logout">
+                    <font-awesome-icon icon="sign-out-alt" />
+                </button>
             </div>
-        </header>
+        </aside>
 
-        <main>
-            <div v-if="$root.socketIO.connecting" class="container mt-5">
-                <h4>{{ $t("connecting...") }}</h4>
-            </div>
+        <!-- Right Content / Main App Area -->
+        <div class="content-pane">
+            <!-- Mobile Header -->
+            <header v-if="$root.loggedIn" class="mobile-header d-flex d-md-none align-items-center justify-content-between py-2 px-3 border-bottom">
+                <router-link to="/" class="d-flex align-items-center brand-link text-decoration-none">
+                    <object class="bi me-2" width="24" height="24" data="/icon.svg" />
+                    <span class="fs-5 title">Bockge</span>
+                </router-link>
 
-            <router-view v-if="$root.loggedIn" />
-            <Login v-if="! $root.loggedIn && $root.allowLoginDialog" />
-        </main>
+                <div class="d-flex align-items-center">
+
+                    <div v-if="$root.loggedIn" class="dropdown dropdown-profile-pic">
+                        <div class="nav-link" data-bs-toggle="dropdown">
+                            <div class="profile-pic">{{ $root.usernameFirstChar }}</div>
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><span class="dropdown-item-text">Signed in as <strong>{{ $root.username }}</strong></span></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <router-link to="/settings" class="dropdown-item">
+                                    <font-awesome-icon icon="cog" /> {{ $t("Settings") }}
+                                </router-link>
+                            </li>
+                            <li>
+                                <button class="dropdown-item text-danger" @click="$root.logout">
+                                    <font-awesome-icon icon="sign-out-alt" /> {{ $t("Logout") }}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="main-body">
+                <div v-if="$root.socketIO.connecting" class="container mt-5">
+                    <h4>{{ $t("connecting...") }}</h4>
+                </div>
+
+                <router-view v-if="$root.loggedIn" />
+                <Login v-if="! $root.loggedIn && $root.allowLoginDialog" />
+            </main>
+        </div>
 
         <!-- Mobile Bottom Nav -->
-        <div v-if="$root.isMobile && $root.loggedIn" class="bottom-nav">
+        <div v-if="$root.loggedIn" class="bottom-nav d-block d-md-none">
             <router-link to="/" class="nav-link">
                 <div><font-awesome-icon icon="home" /></div>
                 {{ $t("home") }}
             </router-link>
-            <router-link to="/console" class="nav-link">
-                <div><font-awesome-icon icon="terminal" /></div>
-                {{ $t("console") }}
+            <router-link to="/images" class="nav-link">
+                <div><font-awesome-icon icon="images" /></div>
+                Images
+            </router-link>
+            <router-link to="/settings" class="nav-link">
+                <div><font-awesome-icon icon="cog" /></div>
+                {{ $t("Settings") }}
             </router-link>
         </div>
     </div>
@@ -103,24 +130,21 @@
 
 <script>
 import Login from "../components/Login.vue";
+import StackList from "../components/StackList.vue";
 import { compareVersions } from "compare-versions";
 import { ALL_ENDPOINTS } from "../../../common/util-common";
 
 export default {
-
     components: {
         Login,
+        StackList,
     },
 
     data() {
-        return {
-
-        };
+        return {};
     },
 
     computed: {
-
-        // Theme or Mobile
         classes() {
             const classes = {};
             classes[this.$root.theme] = true;
@@ -129,25 +153,8 @@ export default {
         },
 
         hasNewVersion() {
-            if (this.$root.info.latestVersion && this.$root.info.version) {
-                return compareVersions(this.$root.info.latestVersion, this.$root.info.version) >= 1;
-            } else {
-                return false;
-            }
+            return false;
         },
-
-    },
-
-    watch: {
-
-    },
-
-    mounted() {
-
-    },
-
-    beforeUnmount() {
-
     },
 
     methods: {
@@ -157,16 +164,158 @@ export default {
             });
         },
     },
-
 };
 </script>
 
 <style lang="scss" scoped>
 @import "../styles/vars.scss";
 
-.nav-link {
-    &.status-page {
-        background-color: rgba(255, 255, 255, 0.1);
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.nav-drawer {
+    width: 280px;
+    min-width: 280px;
+    height: 100vh;
+    background-color: var(--m3-surface-container);
+    border-right: 1px solid rgba(120, 120, 120, 0.15);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.brand-section {
+    display: flex;
+    align-items: center;
+    padding: 24px;
+    text-decoration: none;
+    color: var(--m3-on-surface);
+
+    .brand-title {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.15px;
+    }
+}
+
+.compose-btn {
+    border-radius: 16px !important;
+    font-weight: 600;
+}
+
+.drawer-nav {
+    list-style: none;
+    padding: 0 12px;
+    margin: 0;
+
+    li {
+        margin-bottom: 4px;
+    }
+}
+
+.drawer-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--m3-button-radius);
+    color: var(--m3-on-surface-variant);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background-color: rgba(120, 120, 120, 0.08);
+        color: var(--m3-on-surface);
+    }
+
+    &.active {
+        background-color: var(--m3-primary-container) !important;
+        color: var(--m3-on-primary-container) !important;
+    }
+}
+
+.drawer-divider {
+    height: 1px;
+    background-color: rgba(120, 120, 120, 0.15);
+}
+
+.stack-list-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 8px 12px;
+}
+
+.drawer-footer {
+    border-top: 1px solid rgba(120, 120, 120, 0.15);
+    background-color: rgba(120, 120, 120, 0.02);
+
+    .username-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--m3-on-surface);
+        max-width: 140px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.profile-pic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--m3-primary);
+    color: var(--m3-on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.logout-btn {
+    background: none;
+    border: none;
+    color: var(--m3-outline);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background-color: rgba(239, 68, 68, 0.08);
+        color: #ef4444;
+    }
+}
+
+.content-pane {
+    flex-grow: 1;
+    margin-left: 280px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--m3-surface);
+}
+
+.main-body {
+    flex-grow: 1;
+    padding: 0;
+}
+
+// Mobile overrides via Media Query (pure CSS)
+@media (max-width: 767.98px) {
+    .content-pane {
+        margin-left: 0 !important;
+        padding-bottom: calc(90px + env(safe-area-inset-bottom)) !important;
     }
 }
 
@@ -177,146 +326,60 @@ export default {
     height: calc(60px + env(safe-area-inset-bottom));
     width: 100%;
     left: 0;
-    background-color: #fff;
-    box-shadow: 0 15px 47px 0 rgba(0, 0, 0, 0.05), 0 5px 14px 0 rgba(0, 0, 0, 0.05);
+    background-color: var(--m3-surface-container) !important;
+    border-top: 1px solid rgba(120, 120, 120, 0.15);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
     text-align: center;
     white-space: nowrap;
     padding: 0 10px env(safe-area-inset-bottom);
 
     a {
         text-align: center;
-        width: 50%;
+        width: 33.33%;
         display: inline-block;
         height: 100%;
         padding: 8px 10px 0;
         font-size: 13px;
-        color: #c1c1c1;
+        color: var(--m3-on-surface-variant);
         overflow: hidden;
         text-decoration: none;
 
         &.router-link-exact-active, &.active {
-            color: $primary;
+            color: var(--m3-primary) !important;
             font-weight: bold;
+
+            div {
+                background-color: var(--m3-primary-container);
+                color: var(--m3-on-primary-container);
+            }
         }
 
         div {
-            font-size: 20px;
+            font-size: 18px;
+            border-radius: var(--m3-button-radius);
+            padding: 4px 16px;
+            display: inline-block;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
     }
 }
 
-main {
-    min-height: calc(100vh - 160px);
-}
-
-.mobile main {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom));
-}
-
-.title {
-    font-weight: bold;
-}
-
-.nav {
-    margin-right: 25px;
-}
-
 .lost-connection {
     padding: 5px;
-    background-color: crimson;
-    color: white;
+    background-color: var(--m3-danger-container);
+    color: var(--m3-on-danger-container);
     position: fixed;
     width: 100%;
     z-index: 99999;
 }
 
-// Profile Pic Button with Dropdown
-.dropdown-profile-pic {
-    user-select: none;
+.mobile-header {
+    background-color: var(--m3-surface-container) !important;
+    border-bottom: 1px solid rgba(120, 120, 120, 0.15) !important;
 
-    .nav-link {
-        cursor: pointer;
-        display: flex;
-        gap: 6px;
-        align-items: center;
-        background-color: rgba(200, 200, 200, 0.2);
-        padding: 0.5rem 0.8rem;
-
-        &:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-    }
-
-    .dropdown-menu {
-        transition: all 0.2s;
-        padding-left: 0;
-        padding-bottom: 0;
-        margin-top: 8px !important;
-        border-radius: 16px;
-        overflow: hidden;
-
-        .dropdown-divider {
-            margin: 0;
-            border-top: 1px solid rgba(0, 0, 0, 0.4);
-            background-color: transparent;
-        }
-
-        .dropdown-item-text {
-            font-size: 14px;
-            padding-bottom: 0.7rem;
-        }
-
-        .dropdown-item {
-            padding: 0.7rem 1rem;
-        }
-
-        .dark & {
-            background-color: $dark-bg;
-            color: $dark-font-color;
-            border-color: $dark-border-color;
-
-            .dropdown-item {
-                color: $dark-font-color;
-
-                &.active {
-                    color: $dark-font-color2;
-                    background-color: $highlight !important;
-                }
-
-                &:hover {
-                    background-color: $dark-bg2;
-                }
-            }
-        }
-    }
-
-    .profile-pic {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        background-color: $primary;
-        width: 24px;
-        height: 24px;
-        margin-right: 5px;
-        border-radius: 50rem;
-        font-weight: bold;
-        font-size: 10px;
-    }
-}
-
-.dark {
-    header {
-        background-color: $dark-header-bg;
-        border-bottom-color: $dark-header-bg !important;
-
-        span {
-            color: #f0f6fc;
-        }
-    }
-
-    .bottom-nav {
-        background-color: $dark-bg;
+    .brand-link {
+        color: var(--m3-on-surface) !important;
+        font-weight: 600;
     }
 }
 </style>

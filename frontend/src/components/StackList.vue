@@ -1,52 +1,6 @@
 <template>
     <div class="shadow-box mb-3" :style="boxStyle">
-        <div class="list-header">
-            <div class="header-top">
-                <!-- TODO -->
-                <button
-                    v-if="false" class="btn btn-outline-normal ms-2" :class="{ 'active': selectMode }" type="button"
-                    @click="selectMode = !selectMode"
-                >
-                    {{ $t("Select") }}
-                </button>
 
-                <div class="placeholder"></div>
-                <div class="search-wrapper">
-                    <a v-if="searchText == ''" class="search-icon">
-                        <font-awesome-icon icon="search" />
-                    </a>
-                    <a v-if="searchText != ''" class="search-icon" style="cursor: pointer" @click="clearSearchText">
-                        <font-awesome-icon icon="times" />
-                    </a>
-                    <form>
-                        <input v-model="searchText" class="form-control search-input" autocomplete="off" />
-                    </form>
-                </div>
-            </div>
-
-            <!-- TODO -->
-            <div v-if="false" class="header-filter">
-                <!--<StackListFilter :filterState="filterState" @update-filter="updateFilter" />-->
-            </div>
-
-            <!-- TODO: Selection Controls -->
-            <div v-if="selectMode && false" class="selection-controls px-2 pt-2">
-                <input v-model="selectAll" class="form-check-input select-input" type="checkbox" />
-
-                <button class="btn-outline-normal" @click="pauseDialog">
-                    <font-awesome-icon icon="pause" size="sm" /> {{
-                        $t("Pause") }}
-                </button>
-                <button class="btn-outline-normal" @click="resumeSelected">
-                    <font-awesome-icon icon="play" size="sm" />
-                    {{ $t("Resume") }}
-                </button>
-
-                <span v-if="selectedStackCount > 0">
-                    {{ $t("selectedStackCount", [selectedStackCount]) }}
-                </span>
-            </div>
-        </div>
         <div ref="stackList" class="stack-list" :class="{ scrollbar: scrollbar }" :style="stackListStyle">
             <div v-if="agentStackList[0] && agentStackList[0].stacks.length === 0" class="text-center mt-3">
                 <router-link to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
@@ -117,7 +71,7 @@ export default {
          * @returns {object} Style for stack list
          */
         boxStyle() {
-            if (this.$root.isMobile) {
+            if (window.innerWidth < 768) {
                 return {
                     height: "auto",
                 };
@@ -443,27 +397,41 @@ export default {
 }
 
 .search-wrapper {
+    position: relative;
     display: flex;
     align-items: center;
-}
 
-.search-icon {
-    padding: 10px;
-    color: #c0c0c0;
+    .search-icon {
+        position: absolute;
+        left: 8px;
+        z-index: 10;
+        color: var(--m3-on-surface-variant);
+        padding: 6px;
 
-    // Clear filter button (X)
-    svg[data-icon="times"] {
-        cursor: pointer;
-        transition: all ease-in-out 0.1s;
+        // Clear filter button (X)
+        svg[data-icon="times"] {
+            cursor: pointer;
+            transition: all ease-in-out 0.1s;
 
-        &:hover {
-            opacity: 0.5;
+            &:hover {
+                opacity: 0.5;
+            }
         }
     }
 }
 
 .search-input {
     max-width: 15em;
+    padding-left: 36px !important;
+    border-radius: var(--m3-button-radius) !important;
+    background-color: var(--m3-surface-variant) !important;
+    color: var(--m3-on-surface) !important;
+    border: none !important;
+
+    &:focus {
+        background-color: var(--m3-surface-container) !important;
+        box-shadow: 0 0 0 2px var(--m3-primary) !important;
+    }
 }
 
 .stack-item {

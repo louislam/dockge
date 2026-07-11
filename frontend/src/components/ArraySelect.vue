@@ -105,22 +105,31 @@ export default {
 @import "../styles/vars.scss";
 
 .list-group {
-    background-color: $dark-bg2;
+    background-color: var(--m3-surface-variant) !important;
+    border: 1px solid rgba(120, 120, 120, 0.15) !important;
 
     li {
         display: flex;
         align-items: center;
         padding: 10px 0 10px 10px;
+        background-color: transparent !important;
+        border-color: rgba(120, 120, 120, 0.15) !important;
 
         .domain-input {
             flex-grow: 1;
-            background-color: $dark-bg2;
+            background-color: transparent !important;
             border: none;
-            color: $dark-font-color;
+            color: var(--m3-on-surface) !important;
             outline: none;
 
+            option {
+                background-color: var(--m3-surface-variant) !important;
+                color: var(--m3-on-surface) !important;
+            }
+
             &::placeholder {
-                color: #1d2634;
+                color: var(--m3-on-surface-variant) !important;
+                opacity: 0.5;
             }
         }
     }

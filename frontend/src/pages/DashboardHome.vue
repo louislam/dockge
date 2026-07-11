@@ -8,31 +8,118 @@
             <div class="row first-row">
                 <!-- Left -->
                 <div class="col-md-7">
-                    <!-- Stats -->
-                    <div class="shadow-box big-padding text-center mb-4">
-                        <div class="row">
-                            <div class="col">
-                                <h3>{{ $t("active") }}</h3>
-                                <span class="num active">{{ activeNum }}</span>
+                    <!-- Stats Grid -->
+                    <div class="row mb-4 g-3">
+                        <div class="col-4">
+                            <div class="shadow-box text-center stat-card active-card py-2">
+                                <span class="stat-label d-block mb-1">{{ $t("active") }}</span>
+                                <span class="num active font-semibold">{{ activeNum }}</span>
                             </div>
-                            <div class="col">
-                                <h3>{{ $t("exited") }}</h3>
-                                <span class="num exited">{{ exitedNum }}</span>
+                        </div>
+                        <div class="col-4">
+                            <div class="shadow-box text-center stat-card exited-card py-2">
+                                <span class="stat-label d-block mb-1">{{ $t("exited") }}</span>
+                                <span class="num exited font-semibold">{{ exitedNum }}</span>
                             </div>
-                            <div class="col">
-                                <h3>{{ $t("inactive") }}</h3>
-                                <span class="num inactive">{{ inactiveNum }}</span>
+                        </div>
+                        <div class="col-4">
+                            <div class="shadow-box text-center stat-card inactive-card py-2">
+                                <span class="stat-label d-block mb-1">{{ $t("inactive") }}</span>
+                                <span class="num inactive font-semibold">{{ inactiveNum }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Docker Run -->
-                    <h2 class="mb-3">{{ $t("Docker Run") }}</h2>
-                    <div class="mb-3">
-                        <textarea id="name" v-model="dockerRunCommand" type="text" class="form-control docker-run shadow-box" required placeholder="docker run ..."></textarea>
+                    <!-- Server System Info -->
+                    <h2 class="mb-3 mt-4">{{ $t("System Resource Usage") }}</h2>
+                    <div class="shadow-box stat-card mb-4 p-4" style="background-color: var(--m3-surface-container); border: 1px solid rgba(120, 120, 120, 0.15) !important;">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>CPU Usage</span>
+                                <span class="font-semibold">{{ serverStats.cpu }}%</span>
+                            </div>
+                            <div class="progress" style="height: 8px; border-radius: 4px; background-color: var(--m3-surface-container-high);">
+                                <div class="progress-bar bg-primary" role="progressbar" :style="{ width: serverStats.cpu + '%' }"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>RAM Usage</span>
+                                <span class="font-semibold">{{ serverStats.ram.used }} / {{ serverStats.ram.total }} ({{ serverStats.ram.percent }}%)</span>
+                            </div>
+                            <div class="progress" style="height: 8px; border-radius: 4px; background-color: var(--m3-surface-container-high);">
+                                <div class="progress-bar bg-success" role="progressbar" :style="{ width: serverStats.ram.percent + '%' }"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Storage Usage</span>
+                                <span class="font-semibold">{{ serverStats.storage.used }} / {{ serverStats.storage.total }} ({{ serverStats.storage.percent }}%)</span>
+                            </div>
+                            <div class="progress" style="height: 8px; border-radius: 4px; background-color: var(--m3-surface-container-high);">
+                                <div class="progress-bar bg-warning" role="progressbar" :style="{ width: serverStats.storage.percent + '%' }"></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <button class="btn-normal btn mb-4" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
+                    <!-- Network & IP Info -->
+                    <h2 class="mb-3 mt-4">{{ $t("Network & IP Addresses") }}</h2>
+                    <div class="shadow-box stat-card mb-4 p-4" style="background-color: var(--m3-surface-container); border: 1px solid rgba(120, 120, 120, 0.15) !important;">
+                        <div v-if="serverStats.network && serverStats.network.length > 0">
+                            <div v-for="net in serverStats.network" :key="net.address" class="d-flex justify-content-between align-items-center mb-2 py-1 border-bottom border-secondary border-opacity-10">
+                                <span class="badge bg-secondary" style="font-size: 11px;">{{ net.name }}</span>
+                                <span class="font-monospace text-primary fw-semibold">{{ net.address }}</span>
+                            </div>
+                        </div>
+                        <div v-else class="text-secondary text-center">
+                            No network interfaces detected
+                        </div>
+
+                        <!-- Network Speed & Diagnostics -->
+                        <div class="row mt-4 pt-3 border-top border-secondary border-opacity-20 g-2">
+                            <div class="col-6">
+                                <span class="text-secondary small d-block">Incoming (RX)</span>
+                                <span class="font-monospace fw-bold text-success">{{ serverStats.networkSpeed?.rx || '0 B/s' }}</span>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-secondary small d-block">Outgoing (TX)</span>
+                                <span class="font-monospace fw-bold text-info">{{ serverStats.networkSpeed?.tx || '0 B/s' }}</span>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <span class="text-secondary small d-block">Primary DNS</span>
+                                <span class="font-monospace text-warning fw-semibold text-truncate d-block" style="font-size: 13px;">{{ serverStats.dns || 'N/A' }}</span>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <span class="text-secondary small d-block">Ping Latency</span>
+                                <span class="font-monospace text-primary fw-bold">{{ serverStats.ping || 'N/A' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Details Info -->
+                    <h2 class="mb-3 mt-4">{{ $t("System Information") }}</h2>
+                    <div class="shadow-box stat-card mb-4 p-4" style="background-color: var(--m3-surface-container); border: 1px solid rgba(120, 120, 120, 0.15) !important;">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <span class="text-secondary small d-block">OS Type</span>
+                                <span class="fw-semibold">{{ serverStats.system?.os || 'N/A' }}</span>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-secondary small d-block">Kernel Version</span>
+                                <span class="fw-semibold text-truncate d-block" style="font-size: 13px;" :title="serverStats.system?.osVersion">{{ serverStats.system?.osVersion || 'N/A' }}</span>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-secondary small d-block">Architecture</span>
+                                <span class="fw-semibold">{{ serverStats.system?.arch || 'N/A' }}</span>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-secondary small d-block">Docker Version</span>
+                                <span class="fw-semibold text-primary font-monospace">{{ serverStats.system?.dockerVersion || 'N/A' }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!-- Right -->
                 <div class="col-md-5">
@@ -135,7 +222,32 @@ export default {
             },
             importantHeartBeatListLength: 0,
             displayedRecords: [],
-            dockerRunCommand: "",
+            serverStats: {
+                cpu: 0,
+                ram: {
+                    total: "0 GB",
+                    used: "0 GB",
+                    percent: 0
+                },
+                storage: {
+                    total: "0 GB",
+                    used: "0 GB",
+                    percent: 0
+                },
+                network: [],
+                networkSpeed: {
+                    rx: "0 B/s",
+                    tx: "0 B/s"
+                },
+                dns: "N/A",
+                ping: "N/A",
+                system: {
+                    os: "N/A",
+                    osVersion: "N/A",
+                    arch: "N/A",
+                    dockerVersion: "N/A"
+                }
+            },
             showAgentForm: false,
             showRemoveAgentDialog: {},
             showEditAgentNameDialog: {},
@@ -179,10 +291,15 @@ export default {
 
         window.addEventListener("resize", this.updatePerPage);
         this.updatePerPage();
+
+        this.$root.getSocket().on("serverStats", (stats) => {
+            this.serverStats = stats;
+        });
     },
 
     beforeUnmount() {
         window.removeEventListener("resize", this.updatePerPage);
+        this.$root.getSocket().off("serverStats");
     },
 
     methods: {
@@ -244,22 +361,7 @@ export default {
             return num;
         },
 
-        convertDockerRun() {
-            if (this.dockerRunCommand.trim() === "docker run") {
-                throw new Error("Please enter a docker run command");
-            }
 
-            // composerize is working in dev, but after "vite build", it is not working
-            // So pass to backend to do the conversion
-            this.$root.getSocket().emit("composerize", this.dockerRunCommand, (res) => {
-                if (res.ok) {
-                    this.$root.composeTemplate = res.composeTemplate;
-                    this.$router.push("/compose");
-                } else {
-                    this.$root.toastRes(res);
-                }
-            });
-        },
 
         /**
          * Updates the displayed records when a new important heartbeat arrives.
@@ -326,22 +428,52 @@ export default {
 <style lang="scss" scoped>
 @import "../styles/vars";
 
-.num {
-    font-size: 30px;
-    font-weight: bold;
-    display: block;
+.stat-card {
+    border-radius: 12px !important;
+    border: none !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 
-    &.active {
-        color: $primary;
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
     }
 
-    &.exited {
-        color: $danger;
+    .stat-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
     }
 }
 
-h3 {
-    font-size: 1.5rem;
+.active-card {
+    background-color: var(--m3-success-container) !important;
+    color: var(--m3-on-success-container) !important;
+    .num {
+        color: var(--m3-on-success-container) !important;
+    }
+}
+
+.exited-card {
+    background-color: var(--m3-danger-container) !important;
+    color: var(--m3-on-danger-container) !important;
+    .num {
+        color: var(--m3-on-danger-container) !important;
+    }
+}
+
+.inactive-card {
+    background-color: var(--m3-secondary-container) !important;
+    color: var(--m3-on-secondary-container) !important;
+    .num {
+        color: var(--m3-on-secondary-container) !important;
+    }
+}
+
+.num {
+    font-size: 20px !important;
+    font-weight: 700;
+    display: block;
 }
 
 @media (max-width: 550px) {
@@ -349,7 +481,7 @@ h3 {
         font-size: 1.1rem !important;
     }
     .num {
-        font-size: 24px !important;
+        font-size: 16px !important;
     }
 }
 

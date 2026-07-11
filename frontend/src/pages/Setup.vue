@@ -1,11 +1,11 @@
 <template>
     <div class="form-container" data-cy="setup-form">
-        <div class="form">
+        <div class="form shadow-box m3-setup-card">
             <form @submit.prevent="submit">
                 <div>
                     <object width="64" height="64" data="/icon.svg" />
                     <div style="font-size: 28px; font-weight: bold; margin-top: 5px;">
-                        Dockge
+                        Bockge
                     </div>
                 </div>
 
@@ -103,8 +103,27 @@ export default {
 .form-container {
     display: flex;
     align-items: center;
+    justify-content: center;
     padding-top: 40px;
     padding-bottom: 40px;
+    min-height: calc(100vh - 120px);
+
+    @media (max-width: 575.98px) {
+        padding-top: 20px;
+        padding-bottom: 20px;
+        min-height: calc(100vh - 80px);
+    }
+}
+
+.m3-setup-card {
+    background-color: var(--m3-surface-container) !important;
+    border: 1px solid rgba(120, 120, 120, 0.15) !important;
+    border-radius: var(--m3-card-radius) !important;
+    padding: 32px 24px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    width: 100%;
+    max-width: 380px;
+    margin: auto;
 }
 
 .form-floating {
@@ -128,11 +147,7 @@ export default {
 }
 
 .form {
-
     width: 100%;
-    max-width: 330px;
-    padding: 15px;
-    margin: auto;
     text-align: center;
 }
 </style>

@@ -37,6 +37,8 @@ import { AgentSocketHandler } from "./agent-socket-handler";
 import { AgentSocket } from "../common/agent-socket";
 import { ManageAgentSocketHandler } from "./socket-handlers/manage-agent-socket-handler";
 import { Terminal } from "./terminal";
+import os from "os";
+import { exec, execSync } from "child_process";
 
 export class DockgeServer {
     app : Express;
@@ -300,13 +302,7 @@ export class DockgeServer {
             // ***************************
 
             log.debug("auth", "check auto login");
-            if (await Settings.get("disableAuth")) {
-                log.info("auth", "Disabled Auth: auto login to admin");
-                this.afterLogin(dockgeSocket, await R.findOne("user") as User);
-                dockgeSocket.emit("autoLogin");
-            } else {
-                log.debug("auth", "need auth");
-            }
+            log.debug("auth", "need auth");
 
             // Socket disconnect
             dockgeSocket.on("disconnect", () => {
@@ -400,8 +396,77 @@ export class DockgeServer {
                 protect: true,  // Enabled over-run protection.
             }, () => {
                 //log.debug("server", "Cron job running");
-                this.sendStackList(true);
+                this.sendStackList(false);
             });
+
+            // Pre-calculate static system stats
+            let dockerVersion = "Unknown";
+            try {
+                dockerVersion = execSync("docker --version").toString().trim().replace("Docker version ", "");
+            } catch (e) {
+                // Ignore
+            }
+
+            const systemInfo = {
+                os: os.type(),
+                osVersion: os.release(),
+                arch: os.arch(),
+                dockerVersion
+            };
+
+            // Run system stats monitoring every 5 seconds
+            setInterval(async () => {
+                try {
+                    const cpu = await getCPUUsage();
+                    
+                    const totalMem = os.totalmem();
+                    const freeMem = os.freemem();
+                    const usedMem = totalMem - freeMem;
+                    const ramPercent = Math.round((usedMem / totalMem) * 100);
+                    const ram = {
+                        total: (totalMem / 1024 / 1024 / 1024).toFixed(1) + " GB",
+                        used: (usedMem / 1024 / 1024 / 1024).toFixed(1) + " GB",
+                        percent: ramPercent
+                    };
+
+                    const storage = await getStorageUsage();
+                    const network = getNetworkIPs();
+
+                    // Calculate network traffic speeds
+                    const nowTraffic = getNetworkTraffic();
+                    const timeDiff = (Date.now() - lastTraffic.time) / 1000;
+                    let rxSpeed = 0;
+                    let txSpeed = 0;
+                    if (timeDiff > 0 && lastTraffic.rx > 0) {
+                        rxSpeed = Math.max(0, (nowTraffic.rx - lastTraffic.rx) / timeDiff);
+                        txSpeed = Math.max(0, (nowTraffic.tx - lastTraffic.tx) / timeDiff);
+                    }
+                    lastTraffic = { rx: nowTraffic.rx, tx: nowTraffic.tx, time: Date.now() };
+
+                    // Fetch ping latency
+                    const pingLatency = await getPingTime();
+                    const ping = pingLatency >= 0 ? `${pingLatency} ms` : "N/A";
+
+                    // Fetch DNS servers
+                    const dns = getDNSServers().join(", ");
+
+                    this.io.emit("serverStats", {
+                        cpu,
+                        ram,
+                        storage,
+                        network,
+                        networkSpeed: {
+                            rx: formatSpeed(rxSpeed),
+                            tx: formatSpeed(txSpeed)
+                        },
+                        dns,
+                        ping,
+                        system: systemInfo
+                    });
+                } catch (err) {
+                    // Ignore
+                }
+            }, 5000);
 
             checkVersion.startInterval();
         });
@@ -424,23 +489,8 @@ export class DockgeServer {
      * @returns
      */
     async sendInfo(socket : Socket, hideVersion = false) {
-        let versionProperty;
-        let latestVersionProperty;
-        let isContainer;
-
-        if (!hideVersion) {
-            versionProperty = packageJSON.version;
-            latestVersionProperty = checkVersion.latestVersion;
-            isContainer = (process.env.DOCKGE_IS_CONTAINER === "1");
-        }
-
         socket.emit("info", {
-            version: versionProperty,
-            latestVersion: latestVersionProperty,
-            isContainer,
             primaryHostname: await Settings.get("primaryHostname"),
-            //serverTimezone: await this.getTimezone(),
-            //serverTimezoneOffset: this.getTimezoneOffset(),
         });
     }
 
@@ -722,4 +772,121 @@ export class DockgeServer {
         return `${protocol}://${host}:${this.config.port}`;
     }
 
+}
+
+function getCPUUsage() : Promise<number> {
+    const start = os.cpus();
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const end = os.cpus();
+            let idleDiff = 0;
+            let totalDiff = 0;
+            for (let i = 0; i < start.length; i++) {
+                const startCpu = start[i];
+                const endCpu = end[i];
+                const startTotal = Object.values(startCpu.times).reduce((a, b) => a + b, 0);
+                const endTotal = Object.values(endCpu.times).reduce((a, b) => a + b, 0);
+                idleDiff += endCpu.times.idle - startCpu.times.idle;
+                totalDiff += endTotal - startTotal;
+            }
+            if (totalDiff === 0) resolve(0);
+            else resolve(Math.round((1 - idleDiff / totalDiff) * 100));
+        }, 1000);
+    });
+}
+
+function getStorageUsage() : Promise<{ total: string, used: string, free: string, percent: number }> {
+    return new Promise((resolve) => {
+        exec("df -h / | tail -1", (err, stdout) => {
+            if (err || !stdout) {
+                resolve({ total: "N/A", used: "N/A", free: "N/A", percent: 0 });
+                return;
+            }
+            const parts = stdout.trim().split(/\s+/);
+            const total = parts[1] || "N/A";
+            const used = parts[2] || "N/A";
+            const free = parts[3] || "N/A";
+            const percentStr = parts[4] || "0%";
+            const percent = parseInt(percentStr.replace("%", ""), 10) || 0;
+            resolve({ total, used, free, percent });
+        });
+    });
+}
+
+function getNetworkIPs() : { name: string, address: string }[] {
+    const interfaces = os.networkInterfaces();
+    const ips: { name: string, address: string }[] = [];
+    for (const [name, infoList] of Object.entries(interfaces)) {
+        if (!infoList) continue;
+        for (const info of infoList) {
+            if (!info.internal && info.family === "IPv4") {
+                ips.push({
+                    name,
+                    address: info.address
+                });
+            }
+        }
+    }
+    return ips;
+}
+
+let lastTraffic = { rx: 0, tx: 0, time: Date.now() };
+
+function getNetworkTraffic() {
+    try {
+        const content = fs.readFileSync("/proc/net/dev", "utf8");
+        const lines = content.split("\n");
+        let totalRx = 0;
+        let totalTx = 0;
+        for (const line of lines) {
+            const parts = line.trim().split(/\s+/);
+            if (parts.length >= 10 && parts[0].includes(":")) {
+                const interfaceName = parts[0].split(":")[0];
+                if (interfaceName !== "lo") {
+                    totalRx += parseInt(parts[1], 10) || 0;
+                    totalTx += parseInt(parts[9], 10) || 0;
+                }
+            }
+        }
+        return { rx: totalRx, tx: totalTx };
+    } catch (e) {
+        return { rx: 0, tx: 0 };
+    }
+}
+
+function formatSpeed(bytesPerSec: number): string {
+    if (bytesPerSec < 1024) return `${bytesPerSec.toFixed(0)} B/s`;
+    const kb = bytesPerSec / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)} KB/s`;
+    const mb = kb / 1024;
+    return `${mb.toFixed(1)} MB/s`;
+}
+
+function getDNSServers(): string[] {
+    try {
+        const content = fs.readFileSync("/etc/resolv.conf", "utf8");
+        const dns: string[] = [];
+        for (const line of content.split("\n")) {
+            if (line.startsWith("nameserver")) {
+                dns.push(line.replace("nameserver", "").trim());
+            }
+        }
+        return dns.length > 0 ? dns : ["N/A"];
+    } catch (e) {
+        return ["N/A"];
+    }
+}
+
+function getPingTime(): Promise<number> {
+    return new Promise((resolve) => {
+        const cmd = os.platform() === "win32" ? "ping -n 1 1.1.1.1" : "ping -c 1 -W 2 1.1.1.1";
+        const startTime = Date.now();
+        exec(cmd, (error) => {
+            if (error) {
+                resolve(-1);
+            } else {
+                resolve(Date.now() - startTime);
+            }
+        });
+    });
 }

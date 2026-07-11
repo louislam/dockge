@@ -4,7 +4,8 @@ import { SocketHandler } from "../socket-handler.js";
 import { DockgeServer } from "../dockge-server";
 import { log } from "../log";
 import { R } from "redbean-node";
-import { loginRateLimiter, twoFaRateLimiter } from "../rate-limiter";
+import { randomBytes } from "crypto";
+import { loginRateLimiter } from "../rate-limiter";
 import { generatePasswordHash, needRehashPassword, shake256, SHAKE256_LENGTH, verifyPassword } from "../password-hash";
 import { User } from "../models/user";
 import {
@@ -18,8 +19,10 @@ import {
 import { passwordStrength } from "check-password-strength";
 import jwt from "jsonwebtoken";
 import { Settings } from "../settings";
+import { exec, spawn } from "child_process";
 import fs, { promises as fsAsync } from "fs";
 import path from "path";
+import os from "os";
 
 export class MainSocketHandler extends SocketHandler {
     create(socket : DockgeSocket, server : DockgeServer) {
@@ -144,55 +147,14 @@ export class MainSocketHandler extends SocketHandler {
             const user = await this.login(data.username, data.password);
 
             if (user) {
-                if (user.twofa_status === 0) {
-                    server.afterLogin(socket, user);
+                server.afterLogin(socket, user);
 
-                    log.info("auth", `Successfully logged in user ${data.username}. IP=${clientIP}`);
+                log.info("auth", `Successfully logged in user ${data.username}. IP=${clientIP}`);
 
-                    callback({
-                        ok: true,
-                        token: User.createJWT(user, server.jwtSecret),
-                    });
-                }
-
-                if (user.twofa_status === 1 && !data.token) {
-
-                    log.info("auth", `2FA token required for user ${data.username}. IP=${clientIP}`);
-
-                    callback({
-                        tokenRequired: true,
-                    });
-                }
-
-                if (data.token) {
-                    // @ts-ignore
-                    const verify = notp.totp.verify(data.token, user.twofa_secret, twoFAVerifyOptions);
-
-                    if (user.twofa_last_token !== data.token && verify) {
-                        server.afterLogin(socket, user);
-
-                        await R.exec("UPDATE `user` SET twofa_last_token = ? WHERE id = ? ", [
-                            data.token,
-                            socket.userID,
-                        ]);
-
-                        log.info("auth", `Successfully logged in user ${data.username}. IP=${clientIP}`);
-
-                        callback({
-                            ok: true,
-                            token: User.createJWT(user, server.jwtSecret),
-                        });
-                    } else {
-
-                        log.warn("auth", `Invalid token provided for user ${data.username}. IP=${clientIP}`);
-
-                        callback({
-                            ok: false,
-                            msg: "authInvalidToken",
-                            msgi18n: true,
-                        });
-                    }
-                }
+                callback({
+                    ok: true,
+                    token: User.createJWT(user, server.jwtSecret),
+                });
             } else {
 
                 log.warn("auth", `Incorrect username or password for user ${data.username}. IP=${clientIP}`);
@@ -269,15 +231,7 @@ export class MainSocketHandler extends SocketHandler {
             try {
                 checkLogin(socket);
 
-                // If currently is disabled auth, don't need to check
-                // Disabled Auth + Want to Disable Auth => No Check
-                // Disabled Auth + Want to Enable Auth => No Check
-                // Enabled Auth + Want to Disable Auth => Check!!
-                // Enabled Auth + Want to Enable Auth => No Check
-                const currentDisabledAuth = await Settings.get("disableAuth");
-                if (!currentDisabledAuth && data.disableAuth) {
-                    await doubleCheckPassword(socket, currentPassword);
-                }
+                data.disableAuth = false;
                 // Handle global.env
                 if (data.globalENV && data.globalENV != "# VARIABLE=value #comment") {
                     await fsAsync.writeFile(path.join(server.stacksDir, "global.env"), data.globalENV);
@@ -343,6 +297,282 @@ export class MainSocketHandler extends SocketHandler {
                 callbackError(e, callback);
             }
         });
+
+        // Change Username
+        socket.on("changeUsername", async (data, callback) => {
+            try {
+                checkLogin(socket);
+                if (!data.newUsername || typeof data.newUsername !== "string") {
+                    throw new Error("Invalid new username");
+                }
+                const user = await doubleCheckPassword(socket, data.currentPassword);
+
+                // Update username in DB
+                await R.exec("UPDATE `user` SET username = ? WHERE id = ?", [
+                    data.newUsername,
+                    user.id,
+                ]);
+
+                log.info("auth", `User ${user.username} changed username to ${data.newUsername}`);
+
+                callback({
+                    ok: true,
+                    msg: "Username changed successfully.",
+                });
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // Scan Image using Trivy or Grype
+        socket.on("scanImage", async (imageName: unknown, scanner: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof imageName !== "string" || !imageName) {
+                    throw new Error("Invalid image name");
+                }
+                if (typeof scanner !== "string") {
+                    throw new Error("Invalid scanner selection");
+                }
+                
+                let vulnerabilities: any[] = [];
+                let errorMsg = "";
+
+                const emitProgress = (step: string, message: string) => {
+                    log.info("scanImage", `Emitting scanProgress: ${imageName} - ${step} - ${message}`);
+                    socket.emit("scanProgress", { image: imageName, step, message });
+                };
+
+                const parseCleanJson = (stdout: string) => {
+                    const firstBrace = stdout.indexOf("{");
+                    const firstBracket = stdout.indexOf("[");
+                    let clean = stdout;
+                    if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+                        clean = stdout.substring(firstBrace);
+                    } else if (firstBracket !== -1) {
+                        clean = stdout.substring(firstBracket);
+                    }
+                    return JSON.parse(clean);
+                };
+
+                if (scanner === "trivy" || scanner === "both") {
+                    try {
+                        emitProgress("trivy_pull", "Pulling Trivy scanner image...");
+                        await new Promise((resolve) => exec("docker pull aquasec/trivy:latest", () => resolve(true)));
+                        
+                        emitProgress("trivy_scan", "Scanning image vulnerabilities with Trivy...");
+                        const stdout = await runScanCommand(`docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/dockge-cache/trivy:/root/.cache aquasec/trivy:latest image -q ${imageName} --format json`);
+                        const data = parseCleanJson(stdout);
+                        if (data && Array.isArray(data.Results)) {
+                            for (const result of data.Results) {
+                                if (result && Array.isArray(result.Vulnerabilities)) {
+                                    for (const vuln of result.Vulnerabilities) {
+                                        vulnerabilities.push({
+                                            scanner: "Trivy",
+                                            id: vuln.VulnerabilityID,
+                                            pkgName: vuln.PkgName,
+                                            installedVersion: vuln.InstalledVersion,
+                                            fixedVersion: vuln.FixedVersion,
+                                            severity: vuln.Severity,
+                                            url: vuln.PrimaryURL || `https://nvd.nist.gov/vuln/detail/${vuln.VulnerabilityID}`
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e: any) {
+                        errorMsg += `Trivy scan failed: ${e.message}. `;
+                    }
+                }
+
+                if (scanner === "grype" || scanner === "both") {
+                    try {
+                        emitProgress("grype_pull", "Pulling Grype scanner image...");
+                        await new Promise((resolve) => exec("docker pull anchore/grype:latest", () => resolve(true)));
+                        
+                        emitProgress("grype_scan", "Scanning image vulnerabilities with Grype...");
+                        const stdout = await runScanCommand(`docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/dockge-cache/grype:/root/.cache anchore/grype:latest -q ${imageName} --output json`);
+                        const data = parseCleanJson(stdout);
+                        if (data && Array.isArray(data.matches)) {
+                            for (const match of data.matches) {
+                                if (match && match.vulnerability && match.artifact) {
+                                    const vuln = match.vulnerability;
+                                    const art = match.artifact;
+                                    vulnerabilities.push({
+                                        scanner: "Grype",
+                                        id: vuln.id,
+                                        pkgName: art.name,
+                                        installedVersion: art.version,
+                                        fixedVersion: vuln.fix?.versions?.join(", ") || "N/A",
+                                        severity: vuln.severity.toUpperCase(),
+                                        url: vuln.links?.[0] || `https://nvd.nist.gov/vuln/detail/${vuln.id}`
+                                    });
+                                }
+                            }
+                        }
+                    } catch (e: any) {
+                        errorMsg += `Grype scan failed: ${e.message}. `;
+                    }
+                }
+
+                emitProgress("done", "Scan complete!");
+
+                callback({
+                    ok: vulnerabilities.length > 0 || !errorMsg,
+                    vulnerabilities,
+                    error: errorMsg
+                });
+            } catch (e: any) {
+                callbackError(e, callback);
+            }
+        });
+
+        // Get all Docker images
+        socket.on("dockerGetImages", async (callback) => {
+            try {
+                checkLogin(socket);
+                exec("docker image ls --format '{{json .}}'", { maxBuffer: 15 * 1024 * 1024 }, (err, stdout) => {
+                    if (err) {
+                        return callback({ ok: false, error: err.message });
+                    }
+                    try {
+                        const lines = stdout.trim().split("\n").filter(l => l.trim() !== "");
+                        const images = lines.map(l => JSON.parse(l));
+                        callback({ ok: true, images });
+                    } catch (pe) {
+                        callback({ ok: false, error: "Failed to parse images list" });
+                    }
+                });
+            } catch (e: any) {
+                callback({ ok: false, error: e.message });
+            }
+        });
+
+        // Pull an image from Docker registry
+        socket.on("dockerPullImage", async (data: any, callback) => {
+            try {
+                checkLogin(socket);
+                if (!data || typeof data.image !== "string" || !data.image) {
+                    throw new Error("Invalid image name");
+                }
+                const imageName = data.image;
+                
+                const child = spawn("docker", ["pull", imageName]);
+                
+                child.stdout.on("data", (chunk) => {
+                    socket.emit("dockerPullProgress", { image: imageName, output: chunk.toString() });
+                });
+                
+                child.stderr.on("data", (chunk) => {
+                    socket.emit("dockerPullProgress", { image: imageName, output: chunk.toString() });
+                });
+                
+                child.on("close", (code) => {
+                    if (code === 0) {
+                        callback({ ok: true });
+                    } else {
+                        callback({ ok: false, error: `Pull exited with code ${code}` });
+                    }
+                });
+            } catch (e: any) {
+                callback({ ok: false, error: e.message });
+            }
+        });
+
+        // Build an image from Dockerfile content
+        socket.on("dockerBuildImage", async (data: any, callback) => {
+            try {
+                checkLogin(socket);
+                if (!data || typeof data.tag !== "string" || typeof data.dockerfile !== "string") {
+                    throw new Error("Invalid tag or Dockerfile content");
+                }
+                const tag = data.tag;
+                const dockerfile = data.dockerfile;
+                
+                const tmpDir = path.join(os.tmpdir(), `dockge-build-${Date.now()}`);
+                fs.mkdirSync(tmpDir, { recursive: true });
+                fs.writeFileSync(path.join(tmpDir, "Dockerfile"), dockerfile);
+                
+                const child = spawn("docker", ["build", "-t", tag, "-f", path.join(tmpDir, "Dockerfile"), tmpDir]);
+                
+                child.stdout.on("data", (chunk) => {
+                    socket.emit("dockerBuildProgress", { tag, output: chunk.toString() });
+                });
+                
+                child.stderr.on("data", (chunk) => {
+                    socket.emit("dockerBuildProgress", { tag, output: chunk.toString() });
+                });
+                
+                child.on("close", (code) => {
+                    try {
+                        fs.rmSync(tmpDir, { recursive: true, force: true });
+                    } catch (e) {
+                        // ignore
+                    }
+                    if (code === 0) {
+                        callback({ ok: true });
+                    } else {
+                        callback({ ok: false, error: `Build exited with code ${code}` });
+                    }
+                });
+            } catch (e: any) {
+                callback({ ok: false, error: e.message });
+            }
+        });
+
+        // Delete individual image
+        socket.on("dockerDeleteImage", async (id: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof id !== "string" || !id) {
+                    throw new Error("Invalid image ID");
+                }
+                exec(`docker rmi ${id}`, (err, stdout, stderr) => {
+                    if (err) {
+                        return callback({ ok: false, error: stderr || err.message });
+                    }
+                    callback({ ok: true });
+                });
+            } catch (e: any) {
+                callback({ ok: false, error: e.message });
+            }
+        });
+
+        // Prune unused images
+        socket.on("dockerPruneImages", async (callback) => {
+            try {
+                checkLogin(socket);
+                exec("docker image prune -a -f", (err, stdout, stderr) => {
+                    if (err) {
+                        return callback({ ok: false, error: stderr || err.message });
+                    }
+                    callback({ ok: true, output: stdout });
+                });
+            } catch (e: any) {
+                callback({ ok: false, error: e.message });
+            }
+        });
+
+        // Get Docker disk usage statistics
+        socket.on("dockerGetDiskUsage", async (callback) => {
+            try {
+                checkLogin(socket);
+                exec("docker system df --format '{{json .}}'", { maxBuffer: 10 * 1024 * 1024 }, (err, stdout) => {
+                    if (err) {
+                        return callback({ ok: false, error: err.message });
+                    }
+                    try {
+                        const lines = stdout.trim().split("\n").filter(l => l.trim() !== "");
+                        const usage = lines.map(l => JSON.parse(l));
+                        callback({ ok: true, usage });
+                    } catch (pe) {
+                        callback({ ok: false, error: "Failed to parse disk usage" });
+                    }
+                });
+            } catch (e: any) {
+                callback({ ok: false, error: e.message });
+            }
+        });
     }
 
     async login(username : string, password : string) : Promise<User | null> {
@@ -367,4 +597,20 @@ export class MainSocketHandler extends SocketHandler {
 
         return null;
     }
+}
+
+function runScanCommand(cmd: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        exec(cmd, { timeout: 300000, maxBuffer: 15 * 1024 * 1024 }, (error, stdout, stderr) => {
+            if (error) {
+                if (stdout && (stdout.trim().startsWith("{") || stdout.trim().startsWith("["))) {
+                    resolve(stdout);
+                } else {
+                    reject(new Error(stderr || error.message));
+                }
+            } else {
+                resolve(stdout);
+            }
+        });
+    });
 }

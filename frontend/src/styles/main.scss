@@ -2,8 +2,59 @@
 @import "bootstrap/scss/bootstrap";
 @import "bootstrap-vue-next/dist/bootstrap-vue-next.css";
 
-#app {
-    font-family: BlinkMacSystemFont, segoe ui, Roboto, helvetica neue, Arial, noto sans, sans-serif, apple color emoji, segoe ui emoji, segoe ui symbol, noto color emoji;
+:root {
+  --m3-primary: #005FAF;
+  --m3-on-primary: #FFFFFF;
+  --m3-primary-container: #D4E3FF;
+  --m3-on-primary-container: #001C38;
+  --m3-secondary-container: #D7E3F8;
+  --m3-on-secondary-container: #121A26;
+  --m3-surface: #F8F9FF;
+  --m3-surface-container: #EEEEF6;
+  --m3-surface-variant: #E0E2EC;
+  --m3-on-surface: #191C20;
+  --m3-on-surface-variant: #43474E;
+  --m3-outline: #74777F;
+  --m3-success-container: #C8E6C9;
+  --m3-on-success-container: #1B5E20;
+  --m3-danger-container: #FFCDD2;
+  --m3-on-danger-container: #B71C1C;
+  --m3-warning-container: #FFE082;
+  --m3-on-warning-container: #5D4037;
+  --m3-card-radius: 24px;
+  --m3-button-radius: 50rem;
+  --m3-input-radius: 12px;
+}
+
+.dark {
+  --m3-primary: #A5C8FF;
+  --m3-on-primary: #00315F;
+  --m3-primary-container: #004786;
+  --m3-on-primary-container: #D4E3FF;
+  --m3-secondary-container: #3E4758;
+  --m3-on-secondary-container: #D7E3F8;
+  --m3-surface: #111318;
+  --m3-surface-container: #1E2025;
+  --m3-surface-variant: #2D3036;
+  --m3-on-surface: #E2E2E9;
+  --m3-on-surface-variant: #C3C6CF;
+  --m3-outline: #8D9199;
+  --m3-success-container: #1B5E20;
+  --m3-on-success-container: #C8E6C9;
+  --m3-danger-container: #B71C1C;
+  --m3-on-danger-container: #FFCDD2;
+  --m3-warning-container: #5D4037;
+  --m3-on-warning-container: #FFE082;
+  --m3-card-radius: 24px;
+  --m3-button-radius: 50rem;
+  --m3-input-radius: 12px;
+}
+
+body, html, #app {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    background-color: var(--m3-surface) !important;
+    color: var(--m3-on-surface) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1 {
@@ -14,8 +65,31 @@ h2 {
     font-size: 26px;
 }
 
+.form-control, .form-select {
+    border-radius: var(--m3-input-radius) !important;
+    border: 1px solid var(--m3-outline) !important;
+    background-color: var(--m3-surface) !important;
+    color: var(--m3-on-surface) !important;
+    padding: 10px 16px !important;
+    font-size: 15px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+
+    &:focus {
+        border-color: var(--m3-primary) !important;
+        border-width: 2px !important;
+        box-shadow: none !important;
+        background-color: var(--m3-surface-container) !important;
+    }
+
+    &:disabled, &[readonly] {
+        background-color: var(--m3-surface-variant) !important;
+        color: var(--m3-on-surface-variant) !important;
+        opacity: 0.7 !important;
+    }
+}
+
 textarea.form-control {
-    border-radius: 19px;
+    border-radius: var(--m3-input-radius) !important;
 }
 
 ::-webkit-scrollbar {
@@ -36,7 +110,7 @@ textarea.form-control {
 }
 
 ::placeholder {
-    color: $dark-font-color3;
+    color: rgba(255, 255, 255, 0.45) !important;
 }
 
 .incident a,
@@ -100,90 +174,173 @@ optgroup {
 }
 
 .shadow-box {
-    box-shadow: 0 15px 70px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    border-radius: 10px;
+    background-color: var(--m3-surface-container);
+    border: 1px solid rgba(120, 120, 120, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+    border-radius: var(--m3-card-radius);
+    transition: box-shadow 0.2s ease, transform 0.2s ease, background-color 0.3s ease;
+
+    &:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
 
     &.big-padding {
-        padding: 20px;
+        padding: 24px;
+    }
+
+    @media (max-width: 575.98px) {
+        padding: 12px !important;
+        
+        &.big-padding {
+            padding: 16px !important;
+        }
     }
 }
 
 .btn {
-    padding-left: 20px;
-    padding-right: 20px;
+    border-radius: var(--m3-button-radius) !important;
+    padding: 8px 24px !important;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.1px;
+    text-transform: none;
+    border: none;
+    transition: all 0.2s ease;
+    box-shadow: none;
+
+    &:hover {
+        transform: translateY(-1px);
+        filter: brightness(0.95);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
 }
 
 .btn-sm {
-    border-radius: 25px;
+    padding: 6px 16px !important;
+    font-size: 12px;
 }
 
 .btn-primary {
-    color: white;
-    background: $primary-gradient;
+    background-color: var(--m3-primary) !important;
+    color: var(--m3-on-primary) !important;
+    border: none !important;
 
-    &:hover, &:active, &:focus, &.active {
-        color: white;
-        background: $primary-gradient-active;
-        border-color: $highlight;
-    }
-
-    .dark & {
-        color: $dark-font-color2;
+    &:hover, &:focus {
+        background-color: var(--m3-primary) !important;
+        filter: brightness(1.1) !important;
+        color: var(--m3-on-primary) !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
     }
 }
 
-.btn-normal {
-    $bg-color: #F5F5F5;
+.btn-secondary, .btn-normal {
+    background-color: var(--m3-primary-container) !important;
+    color: var(--m3-on-primary-container) !important;
+    border: none !important;
 
-    background-color: $bg-color;
-    border-color: $bg-color;
+    &:hover, &:focus {
+        background-color: var(--m3-primary-container) !important;
+        filter: brightness(1.05) !important;
+        color: var(--m3-on-primary-container) !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+}
 
-    &:hover {
-        $hover-color: darken($bg-color, 3%);
-        background-color: $hover-color;
-        border-color: $hover-color;
+.btn-success {
+    background-color: var(--m3-success-container) !important;
+    color: var(--m3-on-success-container) !important;
+    border: none !important;
+
+    &:hover, &:focus {
+        background-color: var(--m3-success-container) !important;
+        filter: brightness(1.05) !important;
+        color: var(--m3-on-success-container) !important;
+    }
+}
+
+.btn-danger {
+    background-color: var(--m3-danger-container) !important;
+    color: var(--m3-on-danger-container) !important;
+    border: none !important;
+
+    &:hover, &:focus {
+        background-color: var(--m3-danger-container) !important;
+        filter: brightness(1.05) !important;
+        color: var(--m3-on-danger-container) !important;
     }
 }
 
 .btn-warning {
-    color: white;
+    background-color: var(--m3-warning-container) !important;
+    color: var(--m3-on-warning-container) !important;
+    border: none !important;
 
-    &:hover, &:active, &:focus, &.active {
-        color: white;
+    &:hover, &:focus {
+        background-color: var(--m3-warning-container) !important;
+        filter: brightness(1.05) !important;
+        color: var(--m3-on-warning-container) !important;
     }
 }
 
 .btn-info {
-    color: white;
+    background-color: var(--m3-primary-container) !important;
+    color: var(--m3-on-primary-container) !important;
+    border: none !important;
 
-    &:hover, &:active, &:focus, &.active {
-        color: white;
+    &:hover, &:focus {
+        background-color: var(--m3-primary-container) !important;
+        filter: brightness(1.05) !important;
+        color: var(--m3-on-primary-container) !important;
     }
 }
 
 .btn-dark {
-    background-color: #161B22;
+    background-color: var(--m3-surface-variant) !important;
+    color: var(--m3-on-surface) !important;
+    border: 1px solid var(--m3-outline) !important;
+
+    &:hover, &:focus {
+        background-color: var(--m3-surface-variant) !important;
+        filter: brightness(1.05) !important;
+    }
 }
 
 .btn-outline-normal {
-    padding: 4px 10px;
-    border: 1px solid #ced4da;
-    border-radius: 25px;
+    padding: 6px 16px;
+    border: 1px solid var(--m3-outline);
+    border-radius: var(--m3-button-radius);
     background-color: transparent;
+    color: var(--m3-on-surface);
 
-    .dark & {
-        color: $dark-font-color;
-        border: 1px solid $dark-font-color2;
+    &:hover {
+        background-color: rgba(120, 120, 120, 0.08);
     }
 
     &.active {
-        background-color: $highlight-white;
-
-        .dark & {
-            background-color: $dark-font-color2;
-        }
+        background-color: var(--m3-primary-container);
+        color: var(--m3-on-primary-container);
+        border-color: var(--m3-primary-container);
     }
+}
+
+.btn-outline-primary {
+    background-color: transparent !important;
+    color: var(--m3-primary) !important;
+    border: 1px solid var(--m3-outline) !important;
+
+    &:hover, &:focus {
+        background-color: rgba(120, 120, 120, 0.08) !important;
+        color: var(--m3-primary) !important;
+        border-color: var(--m3-outline) !important;
+    }
+}
+
+.btn-check:checked + .btn-outline-primary {
+    background-color: var(--m3-primary-container) !important;
+    color: var(--m3-on-primary-container) !important;
+    border-color: var(--m3-primary-container) !important;
+    font-weight: 600;
 }
 
 @media (max-width: 550px) {
@@ -235,20 +392,20 @@ optgroup {
 
 // Dark Theme override here
 .dark {
-    background-color: #090c10;
-    color: $dark-font-color;
+    background-color: var(--m3-surface) !important;
+    color: var(--m3-on-surface);
 
     mark, .mark {
         background-color: #b6ad86;
     }
 
     &::-webkit-scrollbar-thumb, ::-webkit-scrollbar-thumb {
-        background: $dark-border-color;
+        background: var(--m3-outline);
     }
 
     .shadow-box {
         &:not(.alert) {
-            background-color: $dark-bg;
+            background-color: var(--m3-surface-container);
         }
     }
 
@@ -286,45 +443,19 @@ optgroup {
         color: inherit;
     }
 
-    .form-control,
-    .form-control:focus,
-    .form-select,
-    .form-select:focus {
-        color: $dark-font-color;
-        background-color: $dark-bg2;
-    }
-
-    .form-select:disabled {
-        color: rgba($dark-font-color, 0.7);
-        background-color: $dark-bg;
-    }
-
-    .form-control, .form-select {
-        border-color: $dark-border-color;
-    }
-
-    .form-control:disabled, .form-control[readonly] {
-        background-color: #232f3b;
-        opacity: 1;
-    }
-
     .table-hover > tbody > tr:hover > * {
-        --bs-table-accent-bg: #070a10;
-        color: $dark-font-color;
+        --bs-table-accent-bg: var(--m3-surface-container);
+        color: var(--m3-on-surface);
     }
 
     .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-        color: $dark-font-color2;
-        background: $primary-gradient;
-
-        &:hover {
-            background: $primary-gradient-active;
-        }
+        color: var(--m3-on-primary-container) !important;
+        background: var(--m3-primary-container) !important;
     }
 
     .bg-primary {
-        color: $dark-font-color2;
-        background: $primary-gradient;
+        color: var(--m3-on-primary) !important;
+        background-color: var(--m3-primary) !important;
     }
 
     .btn-secondary {
@@ -691,6 +822,136 @@ code {
 }
 .cm-focused {
     outline: none !important;
+}
+
+// Material Design 3 Custom Overrides
+.badge {
+    border-radius: var(--m3-button-radius) !important;
+    padding: 6px 12px !important;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.bg-primary {
+    background-color: var(--m3-primary) !important;
+    color: var(--m3-on-primary) !important;
+}
+
+.bg-success {
+    background-color: var(--m3-success-container) !important;
+    color: var(--m3-on-success-container) !important;
+}
+
+.bg-danger {
+    background-color: var(--m3-danger-container) !important;
+    color: var(--m3-on-danger-container) !important;
+}
+
+.bg-warning {
+    background-color: var(--m3-warning-container) !important;
+    color: var(--m3-on-warning-container) !important;
+}
+
+.bg-secondary {
+    background-color: var(--m3-secondary-container) !important;
+    color: var(--m3-on-secondary-container) !important;
+}
+
+// Sidebar Stack List Styling
+.stack-list {
+    .item {
+        border-radius: 16px !important;
+        margin-bottom: 4px;
+        padding: 12px 16px !important;
+        color: var(--m3-on-surface-variant) !important;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: rgba(120, 120, 120, 0.08) !important;
+            color: var(--m3-on-surface) !important;
+        }
+
+        &.active {
+            background-color: var(--m3-primary-container) !important;
+            color: var(--m3-on-primary-container) !important;
+            font-weight: 500;
+        }
+    }
+}
+
+// Table / List Group Styling
+.list-group-item {
+    background-color: var(--m3-surface-container) !important;
+    color: var(--m3-on-surface) !important;
+    border-color: rgba(120, 120, 120, 0.15) !important;
+    border-radius: 12px;
+    margin-bottom: 4px;
+}
+
+// Modal Content styling
+.modal-content {
+    background-color: var(--m3-surface) !important;
+    color: var(--m3-on-surface) !important;
+    border-radius: 28px !important; // M3 Modal radius is 28px
+    border: 1px solid rgba(120, 120, 120, 0.2) !important;
+}
+
+.modal-header, .modal-footer {
+    border-bottom: 1px solid rgba(120, 120, 120, 0.1) !important;
+    border-top: 1px solid rgba(120, 120, 120, 0.1) !important;
+}
+
+// Dropdown Menus
+.dropdown-menu {
+    background-color: var(--m3-surface-container) !important;
+    color: var(--m3-on-surface) !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(120, 120, 120, 0.15) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+
+    .dropdown-item {
+        color: var(--m3-on-surface) !important;
+        border-radius: 8px;
+        margin: 2px 4px;
+        width: calc(100% - 8px);
+        padding: 8px 12px;
+
+        &:hover {
+            background-color: rgba(120, 120, 120, 0.08) !important;
+        }
+
+        &.active, &:active {
+            background-color: var(--m3-primary-container) !important;
+            color: var(--m3-on-primary-container) !important;
+        }
+    }
+}
+
+// Code editors / terminals
+.code-editor, .css-editor, .cm-editor {
+    border-radius: 16px !important;
+    border-color: rgba(120, 120, 120, 0.15) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+// Scrollbars M3 design
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--m3-outline);
+    border-radius: 99px;
+    opacity: 0.5;
+
+    &:hover {
+        background: var(--m3-primary);
+    }
 }
 
 // Localization

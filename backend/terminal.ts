@@ -262,32 +262,3 @@ export class InteractiveTerminal extends Terminal {
         this.ptyProcess?.write(`cd "${cwd}"\r`);
     }
 }
-
-/**
- * User interactive terminal that use bash or powershell with limited commands such as docker, ls, cd, dir
- */
-export class MainTerminal extends InteractiveTerminal {
-    constructor(server : DockgeServer, name : string) {
-        let shell;
-
-        // Throw an error if console is not enabled
-        if (!server.config.enableConsole) {
-            throw new Error("Console is not enabled.");
-        }
-
-        if (os.platform() === "win32") {
-            if (commandExistsSync("pwsh.exe")) {
-                shell = "pwsh.exe";
-            } else {
-                shell = "powershell.exe";
-            }
-        } else {
-            shell = "bash";
-        }
-        super(server, name, shell, [], server.stacksDir);
-    }
-
-    public write(input : string) {
-        super.write(input);
-    }
-}

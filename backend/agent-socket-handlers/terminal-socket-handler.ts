@@ -1,10 +1,11 @@
 import { DockgeServer } from "../dockge-server";
 import { callbackError, callbackResult, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { log } from "../log";
-import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
+import { InteractiveTerminal, Terminal } from "../terminal";
 import { Stack } from "../stack";
 import { AgentSocketHandler } from "../agent-socket-handler";
 import { AgentSocket } from "../../common/agent-socket";
+import { Settings } from "../settings";
 
 export class TerminalSocketHandler extends AgentSocketHandler {
     create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
@@ -18,66 +19,22 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 }
 
                 if (typeof(cmd) !== "string") {
-                    throw new Error("Command must be a string.");
+                    throw new Error("Cmd must be a string.");
                 }
 
-                let terminal = Terminal.getTerminal(terminalName);
+                log.debug("terminalInput", "Terminal name: " + terminalName);
+                log.debug("terminalInput", "Cmd: " + cmd);
+
+                const terminal = Terminal.getTerminal(terminalName);
+
                 if (terminal instanceof InteractiveTerminal) {
-                    //log.debug("terminalInput", "Terminal found, writing to terminal.");
                     terminal.write(cmd);
+                    callbackResult({
+                        ok: true,
+                    }, callback);
                 } else {
                     throw new Error("Terminal not found or it is not a Interactive Terminal.");
                 }
-            } catch (e) {
-                callbackError(e, callback);
-            }
-        });
-
-        // Main Terminal
-        agentSocket.on("mainTerminal", async (terminalName : unknown, callback) => {
-            try {
-                checkLogin(socket);
-
-                // Throw an error if console is not enabled
-                if (!server.config.enableConsole) {
-                    throw new ValidationError("Console is not enabled.");
-                }
-
-                // TODO: Reset the name here, force one main terminal for now
-                terminalName = "console";
-
-                if (typeof(terminalName) !== "string") {
-                    throw new ValidationError("Terminal name must be a string.");
-                }
-
-                log.debug("mainTerminal", "Terminal name: " + terminalName);
-
-                let terminal = Terminal.getTerminal(terminalName);
-
-                if (!terminal) {
-                    terminal = new MainTerminal(server, terminalName);
-                    terminal.rows = 50;
-                    log.debug("mainTerminal", "Terminal created");
-                }
-
-                terminal.join(socket);
-                terminal.start();
-
-                callbackResult({
-                    ok: true,
-                }, callback);
-            } catch (e) {
-                callbackError(e, callback);
-            }
-        });
-
-        // Check if MainTerminal is enabled
-        agentSocket.on("checkMainTerminal", async (callback) => {
-            try {
-                checkLogin(socket);
-                callbackResult({
-                    ok: server.config.enableConsole,
-                }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }

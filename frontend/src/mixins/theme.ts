@@ -3,9 +3,9 @@ import { defineComponent } from "vue";
 export default defineComponent({
     data() {
         return {
-            system: (window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light",
-            userTheme: localStorage.theme,
-            statusPageTheme: "light",
+            system: "dark",
+            userTheme: "dark",
+            statusPageTheme: "dark",
             forceStatusPageTheme: false,
             path: "",
         };
@@ -13,14 +13,11 @@ export default defineComponent({
 
     computed: {
         theme() {
-            if (this.userTheme === "auto") {
-                return this.system;
-            }
-            return this.userTheme;
+            return "dark";
         },
 
         isDark() {
-            return this.theme === "dark";
+            return true;
         }
     },
 
@@ -30,7 +27,7 @@ export default defineComponent({
         },
 
         userTheme(to, from) {
-            localStorage.theme = to;
+            localStorage.theme = "dark";
         },
 
         styleElapsedTime(to, from) {
@@ -39,7 +36,7 @@ export default defineComponent({
 
         theme(to, from) {
             document.body.classList.remove(from);
-            document.body.classList.add(this.theme);
+            document.body.classList.add("dark");
             this.updateThemeColorMeta();
         },
 
@@ -49,17 +46,14 @@ export default defineComponent({
 
         heartbeatBarTheme(to, from) {
             document.body.classList.remove(from);
-            document.body.classList.add(this.heartbeatBarTheme);
+            document.body.classList.add("dark");
         }
     },
 
     mounted() {
-        // Default Dark
-        if (! this.userTheme) {
-            this.userTheme = "dark";
-        }
-
-        document.body.classList.add(this.theme);
+        this.userTheme = "dark";
+        localStorage.theme = "dark";
+        document.body.classList.add("dark");
         this.updateThemeColorMeta();
     },
 
@@ -69,10 +63,9 @@ export default defineComponent({
          * @returns {void}
          */
         updateThemeColorMeta() {
-            if (this.theme === "dark") {
-                document.querySelector("#theme-color").setAttribute("content", "#161B22");
-            } else {
-                document.querySelector("#theme-color").setAttribute("content", "#5cdd8b");
+            const meta = document.querySelector("#theme-color");
+            if (meta) {
+                meta.setAttribute("content", "#161B22");
             }
         }
     }

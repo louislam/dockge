@@ -57,6 +57,38 @@
                 <div class="form-text"></div>
             </div>
 
+
+
+            <!-- Optional Pre-Deployment Vulnerability Scanning -->
+            <div class="mb-4">
+                <label class="form-label d-block fw-bold">Pre-deployment Image Scanning</label>
+                <div class="form-check mb-2">
+                    <input
+                        id="enableTrivyScan"
+                        v-model="settings.enableTrivyScan"
+                        type="checkbox"
+                        class="form-check-input"
+                    />
+                    <label class="form-check-label" for="enableTrivyScan">
+                        Enable Trivy Vulnerability Scan before deploying
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input
+                        id="enableGrypeScan"
+                        v-model="settings.enableGrypeScan"
+                        type="checkbox"
+                        class="form-check-input"
+                    />
+                    <label class="form-check-label" for="enableGrypeScan">
+                        Enable Grype Vulnerability Scan before deploying
+                    </label>
+                </div>
+                <div class="form-text">
+                    When enabled, Dockge will scan service images for vulnerabilities using Docker-based scanners before starting/deploying.
+                </div>
+            </div>
+
             <!-- Save Button -->
             <div>
                 <button class="btn btn-primary" type="submit">

@@ -6,7 +6,7 @@
 
         <div class="shadow-box shadow-box-settings">
             <div class="row">
-                <div v-if="showSubMenu" class="settings-menu col-lg-3 col-md-5">
+                <div v-if="showSubMenu" class="settings-menu col-lg-3 col-md-5 col-12">
                     <router-link
                         v-for="(item, key) in subMenus"
                         :key="key"
@@ -17,17 +17,17 @@
                         </div>
                     </router-link>
 
-                    <!-- Logout Button -->
-                    <a v-if="$root.isMobile && $root.loggedIn && $root.socket.token !== 'autoLogin'" class="logout" @click.prevent="$root.logout">
+                    <!-- Logout Action -->
+                    <a v-if="$root.loggedIn" href="#" class="text-decoration-none logout" @click.prevent="$root.logout">
                         <div class="menu-item">
-                            <font-awesome-icon icon="sign-out-alt" />
+                            <font-awesome-icon icon="sign-out-alt" class="me-2" />
                             {{ $t("Logout") }}
                         </div>
                     </a>
                 </div>
-                <div class="settings-content col-lg-9 col-md-7">
+                <div v-if="!isMobile || currentPage" class="settings-content col-lg-9 col-md-7 col-12">
                     <div v-if="currentPage" class="settings-content-header">
-                        <router-link v-if="$root.isMobile" to="/settings" class="btn btn-outline-normal btn-sm me-2">
+                        <router-link v-if="isMobile" to="/settings" class="btn btn-outline-normal btn-sm me-2">
                             <font-awesome-icon icon="chevron-left" />
                         </router-link>
                         {{ subMenus[currentPage].title }}
@@ -46,20 +46,19 @@
 </template>
 
 <script>
-import { useRoute } from "vue-router";
-
 export default {
     data() {
         return {
             show: true,
             settings: {},
             settingsLoaded: false,
+            windowWidth: window.innerWidth,
         };
     },
 
     computed: {
         currentPage() {
-            let pathSplit = useRoute().path.split("/");
+            let pathSplit = this.$route.path.split("/");
             let pathEnd = pathSplit[pathSplit.length - 1];
             if (!pathEnd || pathEnd === "settings") {
                 return null;
@@ -67,8 +66,12 @@ export default {
             return pathEnd;
         },
 
+        isMobile() {
+            return this.windowWidth < 768;
+        },
+
         showSubMenu() {
-            if (this.$root.isMobile) {
+            if (this.isMobile) {
                 return !this.currentPage;
             } else {
                 return true;
@@ -80,14 +83,11 @@ export default {
                 general: {
                     title: this.$t("general"),
                 },
-                appearance: {
-                    title: this.$t("Appearance"),
-                },
                 security: {
                     title: this.$t("Security"),
                 },
-                globalEnv: {
-                    title: this.$t("GlobalEnv"),
+                scanner: {
+                    title: this.$t("Vulnerability Scanner"),
                 },
                 about: {
                     title: this.$t("About"),
@@ -97,25 +97,33 @@ export default {
     },
 
     watch: {
-        "$root.isMobile"() {
+        isMobile() {
             this.loadGeneralPage();
         }
     },
 
     mounted() {
+        window.addEventListener("resize", this.onResize);
         this.loadSettings();
         this.loadGeneralPage();
     },
 
+    beforeUnmount() {
+        window.removeEventListener("resize", this.onResize);
+    },
+
     methods: {
+        onResize() {
+            this.windowWidth = window.innerWidth;
+        },
 
         /**
          * Load the general settings page
          * For desktop only, on mobile do nothing
          */
         loadGeneralPage() {
-            if (!this.currentPage && !this.$root.isMobile) {
-                this.$router.push("/settings/appearance");
+            if (!this.currentPage && !this.isMobile) {
+                this.$router.push("/settings/general");
             }
         },
 
@@ -131,14 +139,8 @@ export default {
         },
 
         /**
-         * Callback for saving settings
-         * @callback saveSettingsCB
-         * @param {Object} res Result of operation
-         */
-
-        /**
          * Save Settings
-         * @param {saveSettingsCB} [callback]
+         * @param {Function} [callback]
          * @param {string} [currentPassword] Only need for disableAuth to true
          */
         saveSettings(callback, currentPassword) {
@@ -181,8 +183,20 @@ export default {
 @import "../styles/vars.scss";
 
 .shadow-box-settings {
-    padding: 20px;
-    min-height: calc(100vh - 155px);
+    padding: 24px;
+    background-color: var(--m3-surface-container) !important;
+    border: 1px solid rgba(120, 120, 120, 0.15) !important;
+    border-radius: var(--m3-card-radius) !important;
+    min-height: calc(100vh - 120px);
+
+    @media (max-width: 767.98px) {
+        padding: 16px !important;
+        margin: -15px -15px 0 -15px !important;
+        border-radius: 0 !important;
+        border: none !important;
+        background-color: transparent !important;
+        min-height: calc(100vh - 100px);
+    }
 }
 
 footer {
@@ -199,60 +213,50 @@ footer {
     }
 
     .menu-item {
-        border-radius: 10px;
-        margin: 0.5em;
-        padding: 0.7em 1em;
+        border-radius: var(--m3-button-radius) !important;
+        margin: 4px 8px !important;
+        padding: 10px 16px !important;
         cursor: pointer;
-        border-left-width: 0;
-        transition: all ease-in-out 0.1s;
+        transition: all 0.2s ease;
+        color: var(--m3-on-surface-variant);
+        font-weight: 500;
+        font-size: 14px;
     }
 
     .menu-item:hover {
-        background: $highlight-white;
-
-        .dark & {
-            background: $dark-header-bg;
-        }
+        background-color: rgba(120, 120, 120, 0.08) !important;
+        color: var(--m3-on-surface);
     }
 
     .active .menu-item {
-        background: $highlight-white;
-        border-left: 4px solid $primary;
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-
-        .dark & {
-            background: $dark-header-bg;
-        }
+        background-color: var(--m3-primary-container) !important;
+        color: var(--m3-on-primary-container) !important;
+        border-left: none !important;
+        font-weight: 600;
     }
 }
 
 .settings-content {
     .settings-content-header {
-        width: calc(100% + 20px);
-        border-bottom: 1px solid #dee2e6;
-        border-radius: 0 10px 0 0;
-        margin-top: -20px;
-        margin-right: -20px;
-        padding: 12.5px 1em;
-        font-size: 26px;
+        width: 100%;
+        border-bottom: 1px solid rgba(120, 120, 120, 0.15) !important;
+        margin-top: 0;
+        margin-right: 0;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--m3-on-surface);
+        background: transparent !important;
 
-        .dark & {
-            background: $dark-header-bg;
-            border-bottom: 0;
-        }
-
-        .mobile & {
+        @media (max-width: 767.98px) {
             padding: 15px 0 0 0;
-
-            .dark & {
-                background-color: transparent;
-            }
+            background-color: transparent;
         }
     }
 }
 
 .logout {
-    color: $danger !important;
+    color: #ef4444 !important;
 }
 </style>

@@ -4,17 +4,15 @@ import Layout from "./layouts/Layout.vue";
 import Setup from "./pages/Setup.vue";
 import Dashboard from "./pages/Dashboard.vue";
 import DashboardHome from "./pages/DashboardHome.vue";
-import Console from "./pages/Console.vue";
 import Compose from "./pages/Compose.vue";
 import ContainerTerminal from "./pages/ContainerTerminal.vue";
 
 const Settings = () => import("./pages/Settings.vue");
 
 // Settings - Sub Pages
-import Appearance from "./components/settings/Appearance.vue";
 import General from "./components/settings/General.vue";
 const Security = () => import("./components/settings/Security.vue");
-const GlobalEnv = () => import("./components/settings/GlobalEnv.vue");
+const Scanner = () => import("./components/settings/Scanner.vue");
 import About from "./components/settings/About.vue";
 
 const routes = [
@@ -34,6 +32,11 @@ const routes = [
                             {
                                 path: "/compose",
                                 component: Compose,
+                            },
+                            {
+                                path: "/images",
+                                component: () => import("./pages/Images.vue"),
+                                name: "DockerImages",
                             },
                             {
                                 path: "/compose/:stackName/:endpoint",
@@ -56,14 +59,6 @@ const routes = [
                         ]
                     },
                     {
-                        path: "/console",
-                        component: Console,
-                    },
-                    {
-                        path: "/console/:endpoint",
-                        component: Console,
-                    },
-                    {
                         path: "/settings",
                         component: Settings,
                         children: [
@@ -72,16 +67,12 @@ const routes = [
                                 component: General,
                             },
                             {
-                                path: "appearance",
-                                component: Appearance,
-                            },
-                            {
                                 path: "security",
                                 component: Security,
                             },
                             {
-                                path: "globalEnv",
-                                component: GlobalEnv,
+                                path: "scanner",
+                                component: Scanner,
                             },
                             {
                                 path: "about",
@@ -100,7 +91,7 @@ const routes = [
 ];
 
 export const router = createRouter({
-    linkActiveClass: "active",
+    linkExactActiveClass: "active",
     history: createWebHistory(),
     routes,
 });

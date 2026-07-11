@@ -1,5 +1,6 @@
 <template>
-    <span :class="className">{{ statusName }}</span>
+    <span v-if="fixedWidth" class="status-dot" :class="'bg-' + color" :title="statusName"></span>
+    <span v-else :class="className">{{ statusName }}</span>
 </template>
 
 <script>
@@ -12,6 +13,10 @@ export default {
             default: null,
         },
         fixedWidth: {
+            type: Boolean,
+            default: false,
+        },
+        pill: {
             type: Boolean,
             default: false,
         },
@@ -45,12 +50,19 @@ export default {
 <style scoped>
 .badge {
     min-width: 62px;
-
 }
 
 .fixed-width {
     width: 62px;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 </style>

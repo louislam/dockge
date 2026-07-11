@@ -1,36 +1,36 @@
 <template>
     <div class="form-container">
-        <div class="form">
+        <div class="form shadow-box m3-login-card">
             <form @submit.prevent="submit">
-                <h1 class="h3 mb-3 fw-normal" />
+                <div class="d-flex justify-content-center mb-3">
+                    <object class="bi" width="48" height="48" data="/icon.svg" />
+                </div>
+                <h2 class="h4 mb-4 fw-semibold text-center">{{ $t("Login") }}</h2>
 
-                <div v-if="!tokenRequired" class="form-floating">
+                <div v-if="!tokenRequired" class="form-floating mb-3">
                     <input id="floatingInput" v-model="username" type="text" class="form-control" placeholder="Username" autocomplete="username" required>
                     <label for="floatingInput">{{ $t("Username") }}</label>
                 </div>
 
-                <div v-if="!tokenRequired" class="form-floating mt-3">
+                <div v-if="!tokenRequired" class="form-floating mb-3">
                     <input id="floatingPassword" v-model="password" type="password" class="form-control" placeholder="Password" autocomplete="current-password" required>
                     <label for="floatingPassword">{{ $t("Password") }}</label>
                 </div>
 
                 <div v-if="tokenRequired">
-                    <div class="form-floating mt-3">
+                    <div class="form-floating mb-3">
                         <input id="otp" v-model="token" type="text" maxlength="6" class="form-control" placeholder="123456" autocomplete="one-time-code" required>
                         <label for="otp">{{ $t("Token") }}</label>
                     </div>
                 </div>
 
-                <div class="form-check mb-3 mt-3 d-flex justify-content-center pe-4">
-                    <div class="form-check">
-                        <input id="remember" v-model="$root.remember" type="checkbox" value="remember-me" class="form-check-input">
-
-                        <label class="form-check-label" for="remember">
-                            {{ $t("Remember me") }}
-                        </label>
-                    </div>
+                <div class="form-check mb-4 d-flex justify-content-center align-items-center">
+                    <input id="remember" v-model="$root.remember" type="checkbox" value="remember-me" class="form-check-input me-2">
+                    <label class="form-check-label" for="remember">
+                        {{ $t("Remember me") }}
+                    </label>
                 </div>
-                <button class="w-100 btn btn-primary" type="submit" :disabled="processing">
+                <button class="w-100 btn btn-primary py-2" type="submit" :disabled="processing">
                     {{ $t("Login") }}
                 </button>
 
@@ -90,25 +90,36 @@ export default {
 .form-container {
     display: flex;
     align-items: center;
+    justify-content: center;
     padding-top: 40px;
     padding-bottom: 40px;
+    min-height: calc(100vh - 120px);
+
+    @media (max-width: 575.98px) {
+        padding-top: 20px;
+        padding-bottom: 20px;
+        min-height: calc(100vh - 80px);
+    }
+}
+
+.m3-login-card {
+    background-color: var(--m3-surface-container) !important;
+    border: 1px solid rgba(120, 120, 120, 0.15) !important;
+    border-radius: var(--m3-card-radius) !important;
+    padding: 32px 24px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    width: 100%;
+    max-width: 380px;
+    margin: auto;
 }
 
 .form-floating {
     > label {
-        padding-left: 1.3rem;
+        padding-left: 1rem;
     }
 
     > .form-control {
-        padding-left: 1.3rem;
+        padding-left: 1rem;
     }
-}
-
-.form {
-    width: 100%;
-    max-width: 330px;
-    padding: 15px;
-    margin: auto;
-    text-align: center;
 }
 </style>

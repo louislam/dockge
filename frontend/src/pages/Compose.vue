@@ -104,6 +104,17 @@
                         </div>
                     </div>
 
+                    <!-- Docker Run -->
+                    <div v-if="isAdd" class="mb-4">
+                        <h4 class="mb-3">{{ $t("Docker Run") }}</h4>
+                        <div class="shadow-box big-padding mb-3">
+                            <div class="mb-3">
+                                <textarea id="docker-run-input" v-model="dockerRunCommand" class="form-control docker-run shadow-box" style="font-family: 'JetBrains Mono', monospace; font-size: 14px;" placeholder="docker run ..."></textarea>
+                            </div>
+                            <button class="btn btn-normal" type="button" @click="convertDockerRun">{{ $t("Convert to Compose") }}</button>
+                        </div>
+                    </div>
+
                     <!-- Containers -->
                     <h4 class="mb-3">{{ $tc("container", 2) }}</h4>
 
@@ -165,7 +176,22 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <h4 class="mb-3">{{ stack.composeFileName }}</h4>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h4 class="m-0">{{ stack.composeFileName }}</h4>
+                        <div class="d-flex gap-2">
+                            <!-- Import Compose -->
+                            <label v-if="isEditMode" class="btn btn-sm btn-outline-primary m-0 d-flex align-items-center gap-2 cursor-pointer py-1 px-3">
+                                <font-awesome-icon icon="upload" />
+                                <span>{{ $t("Import") }}</span>
+                                <input type="file" accept=".yml,.yaml" style="display: none;" @change="importComposeFile">
+                            </label>
+                            <!-- Export Compose -->
+                            <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 py-1 px-3" type="button" @click="exportComposeFile">
+                                <font-awesome-icon icon="download" />
+                                <span>{{ $t("Export") }}</span>
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- YAML editor -->
                     <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
@@ -239,6 +265,173 @@
             <BModal v-model="showDeleteDialog" :cancelTitle="$t('cancel')" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
                 {{ $t("deleteStackMsg") }}
             </BModal>
+
+            <!-- Pre-deployment Scan Warning Dialog -->
+            <div v-if="scanningImages || showScanWarningDialog" class="modal fade show d-block" style="background: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content text-white shadow-lg" style="background-color: var(--m3-surface-container); border: 1px solid rgba(120, 120, 120, 0.25); border-radius: var(--m3-card-radius);">
+                        <div class="modal-header border-bottom border-secondary border-opacity-20 py-3 px-4">
+                            <h5 class="modal-title text-warning fw-bold d-flex align-items-center gap-2">
+                                <font-awesome-icon icon="exclamation-triangle" />
+                                <span>Image Security Scan Results</span>
+                            </h5>
+                        </div>
+                        <div class="modal-body p-4" style="max-height: 65vh; overflow-y: auto;">
+                            <!-- Loading State -->
+                            <div v-if="scanningImages" class="text-center py-4">
+                                <div class="spinner-border text-warning mb-3" role="status"></div>
+                                <p class="fs-5 fw-semibold">{{ scanProgressText }}</p>
+                                
+                                <div class="progress mb-3 mx-auto" style="height: 12px; max-width: 600px; border-radius: 6px; background-color: rgba(255,255,255,0.1); overflow: hidden;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" :style="{ width: progressPercent + '%' }"></div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between text-secondary small mx-auto" style="max-width: 600px;">
+                                    <span>Progress: {{ progressPercent }}%</span>
+                                    <span>Time Elapsed: {{ scanElapsedTime }}s</span>
+                                </div>
+                            </div>
+
+                            <!-- Findings State -->
+                            <div v-else>
+                                <div v-if="scanError" class="alert alert-warning mb-3">
+                                    <strong>Scan Error occurred:</strong> {{ scanError }}
+                                </div>
+
+                                <p class="mb-4 fs-6">The security scan found <strong class="text-warning">{{ scanResults.length }}</strong> vulnerability matches in stack service images. Review findings before deploying:</p>
+
+                                <div class="row g-4">
+                                    <!-- Trivy Column -->
+                                    <div class="col-lg-6 col-12 border-end border-secondary border-opacity-20">
+                                        <div class="p-2 mb-3 d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-20">
+                                            <h6 class="text-info fw-bold mb-0">Trivy Vulnerabilities</h6>
+                                            <span class="badge bg-info">{{ trivyScanResults.length }}</span>
+                                        </div>
+                                        <div v-if="trivyScanResults.length > 0" class="table-responsive" style="border-radius: 8px; border: 1px solid rgba(120, 120, 120, 0.15);">
+                                            <table class="table table-hover table-dark mb-0 align-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Image</th>
+                                                        <th>Severity</th>
+                                                        <th>CVE ID</th>
+                                                        <th>Current Version</th>
+                                                        <th>Fixed Version</th>
+                                                        <th>Info</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="(vuln, idx) in trivyScanResults" :key="idx">
+                                                        <td class="font-monospace small text-truncate" style="max-width: 100px;">{{ vuln.imageName }}</td>
+                                                        <td>
+                                                            <span class="badge" :class="severityClass(vuln.severity)">
+                                                                {{ vuln.severity }}
+                                                            </span>
+                                                        </td>
+                                                        <td class="fw-semibold small">{{ vuln.id }}</td>
+                                                        <td class="font-monospace text-secondary small">{{ vuln.installedVersion }}</td>
+                                                        <td class="font-monospace text-success small">{{ vuln.fixedVersion }}</td>
+                                                        <td>
+                                                            <a :href="vuln.url" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;">
+                                                                Link
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div v-else class="alert alert-success py-3 text-center small">
+                                            No Trivy vulnerabilities found
+                                        </div>
+                                    </div>
+
+                                    <!-- Grype Column -->
+                                    <div class="col-lg-6 col-12">
+                                        <div class="p-2 mb-3 d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-20">
+                                            <h6 class="text-primary fw-bold mb-0">Grype Vulnerabilities</h6>
+                                            <span class="badge bg-primary">{{ grypeScanResults.length }}</span>
+                                        </div>
+                                        <div v-if="grypeScanResults.length > 0" class="table-responsive" style="border-radius: 8px; border: 1px solid rgba(120, 120, 120, 0.15);">
+                                            <table class="table table-hover table-dark mb-0 align-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Image</th>
+                                                        <th>Severity</th>
+                                                        <th>CVE ID</th>
+                                                        <th>Current Version</th>
+                                                        <th>Fixed Version</th>
+                                                        <th>Info</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="(vuln, idx) in grypeScanResults" :key="idx">
+                                                        <td class="font-monospace small text-truncate" style="max-width: 100px;">{{ vuln.imageName }}</td>
+                                                        <td>
+                                                            <span class="badge" :class="severityClass(vuln.severity)">
+                                                                {{ vuln.severity }}
+                                                            </span>
+                                                        </td>
+                                                        <td class="fw-semibold small">{{ vuln.id }}</td>
+                                                        <td class="font-monospace text-secondary small">{{ vuln.installedVersion }}</td>
+                                                        <td class="font-monospace text-success small">{{ vuln.fixedVersion }}</td>
+                                                        <td>
+                                                            <a :href="vuln.url" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;">
+                                                                Link
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div v-else class="alert alert-success py-3 text-center small">
+                                            No Grype vulnerabilities found
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top border-secondary border-opacity-20 py-3 px-4">
+                            <template v-if="!scanningImages">
+                                <button type="button" class="btn btn-secondary px-3" @click="showScanWarningDialog = false">
+                                    Cancel Deployment
+                                </button>
+                                <button type="button" class="btn btn-danger px-3" @click="showScanWarningDialog = false; deployStack(true)">
+                                    Deploy Anyway
+                                </button>
+                            </template>
+                            <template v-else>
+                                <button type="button" class="btn btn-secondary" disabled>
+                                    Scanning in progress...
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deploy Option Choice Dialog -->
+            <div v-if="showDeployChoiceDialog" class="modal fade show d-block" style="background: rgba(0,0,0,0.5); z-index: 1050;" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content text-white shadow-lg" style="background-color: var(--m3-surface-container); border: 1px solid rgba(120, 120, 120, 0.25); border-radius: var(--m3-card-radius);">
+                        <div class="modal-header border-bottom border-secondary border-opacity-20 py-3 px-4">
+                            <h5 class="modal-title fw-bold">Security Scan Recommendation</h5>
+                        </div>
+                        <div class="modal-body p-4">
+                            <p class="fs-6">Optional vulnerability scanning is enabled. Would you like to run a security scan on service images before deploying?</p>
+                        </div>
+                        <div class="modal-footer border-top border-secondary border-opacity-20 py-3 px-4">
+                            <button type="button" class="btn btn-secondary px-3" @click="showDeployChoiceDialog = false">
+                                Cancel
+                            </button>
+                            <button type="button" class="btn btn-outline-primary px-3" @click="showDeployChoiceDialog = false; deployStack(true)">
+                                Deploy Directly
+                            </button>
+                            <button type="button" class="btn btn-primary px-3" @click="runPreDeployScan">
+                                Scan & Deploy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </transition>
 </template>
@@ -294,6 +487,11 @@ export default {
     beforeRouteLeave(to, from, next) {
         this.exitConfirm(next);
     },
+    beforeUnmount() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+        }
+    },
     setup() {
         const editorFocus = ref(false);
 
@@ -323,6 +521,16 @@ export default {
     yamlDoc: null,  // For keeping the yaml comments
     data() {
         return {
+            dockerRunCommand: "",
+            scanningImages: false,
+            showScanWarningDialog: false,
+            showDeployChoiceDialog: false,
+            scanResults: [],
+            scanError: "",
+            scanProgressText: "",
+            progressPercent: 0,
+            scanElapsedTime: 0,
+            timerInterval: null,
             jsonConfig: {},
             envsubstJSONConfig: {},
             yamlError: "",
@@ -374,6 +582,14 @@ export default {
                 });
             }
             return urls;
+        },
+
+        trivyScanResults() {
+            return this.scanResults.filter(v => v.scanner === "Trivy");
+        },
+
+        grypeScanResults() {
+            return this.scanResults.filter(v => v.scanner === "Grype");
         },
 
         isAdd() {
@@ -514,6 +730,22 @@ export default {
 
     },
     methods: {
+        convertDockerRun() {
+            if (!this.dockerRunCommand || this.dockerRunCommand.trim() === "docker run") {
+                this.$root.toastError("Please enter a docker run command");
+                return;
+            }
+
+            this.$root.getSocket().emit("composerize", this.dockerRunCommand, (res) => {
+                if (res.ok) {
+                    this.stack.composeYAML = res.composeTemplate;
+                    this.dockerRunCommand = "";
+                } else {
+                    this.$root.toastRes(res);
+                }
+            });
+        },
+
         startServiceStatusTimeout() {
             clearTimeout(serviceStatusTimeout);
             serviceStatusTimeout = setTimeout(async () => {
@@ -599,7 +831,7 @@ export default {
             });
         },
 
-        deployStack() {
+        async deployStack(bypassScan = false) {
             this.processing = true;
 
             if (!this.jsonConfig.services) {
@@ -629,6 +861,28 @@ export default {
                 }
             }
 
+            // Extract images
+            const images = [];
+            if (this.jsonConfig.services) {
+                for (const service of Object.values(this.jsonConfig.services)) {
+                    if (service && typeof service === "object" && typeof service.image === "string") {
+                        images.push(service.image);
+                    }
+                }
+            }
+
+            // Retrieve settings
+            const settings = this.$root.settings || {};
+            const scanner = (settings.enableTrivyScan && settings.enableGrypeScan) ? "both" : 
+                            settings.enableTrivyScan ? "trivy" : 
+                            settings.enableGrypeScan ? "grype" : null;
+
+            if (scanner && images.length > 0 && !bypassScan) {
+                this.showDeployChoiceDialog = true;
+                this.processing = false;
+                return;
+            }
+
             this.bindTerminal();
 
             this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
@@ -640,6 +894,88 @@ export default {
                     this.$router.push(this.url);
                 }
             });
+        },
+
+        async runPreDeployScan() {
+            this.showDeployChoiceDialog = false;
+            this.scanningImages = true;
+            this.scanResults = [];
+            this.scanError = "";
+            this.scanProgressText = "Preparing image scanner...";
+            this.progressPercent = 5;
+
+            // Extract images
+            const images = [];
+            if (this.jsonConfig.services) {
+                for (const service of Object.values(this.jsonConfig.services)) {
+                    if (service && typeof service === "object" && typeof service.image === "string") {
+                        images.push(service.image);
+                    }
+                }
+            }
+
+            const totalImages = images.length;
+            this.scanStartTime = Date.now();
+            this.scanElapsedTime = 0;
+            this.timerInterval = setInterval(() => {
+                this.scanElapsedTime = Math.floor((Date.now() - this.scanStartTime) / 1000);
+            }, 1000);
+
+            let currentImgIndex = 0;
+            let subStepPercent = 0;
+
+            const progressListener = (data) => {
+                this.scanProgressText = `[${data.image}] (${currentImgIndex + 1}/${totalImages}): ${data.message}`;
+                if (data.step === "trivy_pull") subStepPercent = 25;
+                else if (data.step === "trivy_scan") subStepPercent = 50;
+                else if (data.step === "grype_pull") subStepPercent = 75;
+                else if (data.step === "grype_scan") subStepPercent = 90;
+                else if (data.step === "done") subStepPercent = 100;
+                
+                this.progressPercent = Math.min(100, Math.floor(((currentImgIndex + (subStepPercent / 100)) / totalImages) * 100));
+            };
+            this.$root.getSocket().on("scanProgress", progressListener);
+
+            const settings = this.$root.settings || {};
+            const scanner = (settings.enableTrivyScan && settings.enableGrypeScan) ? "both" : 
+                            settings.enableTrivyScan ? "trivy" : 
+                            settings.enableGrypeScan ? "grype" : null;
+
+            // Scan each image sequentially
+            for (let i = 0; i < images.length; i++) {
+                const img = images[i];
+                currentImgIndex = i;
+                subStepPercent = 0;
+                this.scanProgressText = `Scanning image [${img}] (${i + 1}/${totalImages})...`;
+                await new Promise((resolve) => {
+                    this.$root.getSocket().emit("scanImage", img, scanner, (res) => {
+                        if (res.ok && res.vulnerabilities) {
+                            this.scanResults.push(...res.vulnerabilities.map(v => ({ ...v, imageName: img })));
+                        }
+                        if (res.error) {
+                            this.scanError += `[${img}]: ${res.error}. `;
+                        }
+                        resolve();
+                    });
+                });
+            }
+
+            clearInterval(this.timerInterval);
+            this.$root.getSocket().off("scanProgress", progressListener);
+            this.scanningImages = false;
+
+            if (this.scanResults.length > 0 || this.scanError) {
+                this.showScanWarningDialog = true;
+            } else {
+                this.deployStack(true);
+            }
+        },
+
+        severityClass(severity) {
+            const sev = severity ? severity.toUpperCase() : "";
+            if (sev === "CRITICAL" || sev === "HIGH") return "bg-danger text-white";
+            if (sev === "MEDIUM") return "bg-warning text-dark";
+            return "bg-info text-dark";
         },
 
         saveStack() {
@@ -839,6 +1175,36 @@ export default {
                     this.requestServiceStatus(); // Refresh service status
                 }
             });
+        },
+
+        importComposeFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                this.stack.composeYAML = content;
+                this.$root.toastSuccess("Compose file imported successfully");
+            };
+            reader.readAsText(file);
+            event.target.value = "";
+        },
+
+        exportComposeFile() {
+            if (!this.stack.composeYAML) {
+                this.$root.toastError("No compose content to export");
+                return;
+            }
+            const blob = new Blob([this.stack.composeYAML], { type: "text/yaml;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = this.stack.composeFileName || "docker-compose.yml";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            this.$root.toastSuccess("Compose file exported successfully");
         },
     }
 };

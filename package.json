@@ -1,5 +1,5 @@
 {
-    "name": "dockge",
+    "name": "bockge",
     "version": "1.5.0",
     "type": "module",
     "engines": {
@@ -46,11 +46,13 @@
         "knex": "~2.5.1",
         "limiter-es6-compat": "~2.1.2",
         "mysql2": "~3.12.0",
+        "notp": "^2.0.3",
         "promisify-child-process": "~4.1.2",
         "redbean-node": "~0.3.3",
         "semver": "^7.7.1",
         "socket.io": "~4.8.1",
         "socket.io-client": "~4.8.1",
+        "thirty-two": "^1.0.2",
         "timezones-list": "~3.0.3",
         "ts-command-line-args": "~2.5.1",
         "tsx": "~4.19.3",

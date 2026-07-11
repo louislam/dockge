@@ -147,7 +147,7 @@ export default {
         background-color: #cdf8f4;
     }
     .title {
-        margin-top: -4px;
+        margin-top: 0;
     }
     .endpoint {
         font-size: 12px;

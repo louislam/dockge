@@ -1,12 +1,12 @@
 <template>
     <div class="shadow-box big-padding mb-3 container">
-        <div class="row">
-            <div class="col-5">
+        <div class="row gy-3">
+            <div class="col-12 col-md-5">
                 <h4>{{ name }}</h4>
-                <div class="image mb-2">
+                <div class="image mb-2 text-break">
                     <span class="me-1">{{ imageName }}:</span><span class="tag">{{ imageTag }}</span>
                 </div>
-                <div v-if="!isEditMode">
+                <div v-if="!isEditMode" class="d-flex flex-wrap gap-1">
                     <span class="badge me-1" :class="bgStyle">{{ status }}</span>
 
                     <a v-for="port in (ports ?? envsubstService.ports)" :key="port" :href="parsePort(port).url" target="_blank">
@@ -14,9 +14,9 @@
                     </a>
                 </div>
             </div>
-            <div class="col-7">
-                <div class="function">
-                    <div class="btn-group me-2" role="group">
+            <div class="col-12 col-md-7 d-flex align-items-center justify-content-md-end">
+                <div class="function w-100 text-md-end">
+                    <div class="btn-group w-100 w-md-auto" role="group">
                         <router-link v-if="!isEditMode && (status === 'running' || status === 'healthy')" class="btn btn-normal" :to="terminalRouteLink" disabled="">
                             <font-awesome-icon icon="terminal" />
                             Bash
