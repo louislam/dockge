@@ -1,8 +1,8 @@
-# Design System: Dockge Material You
-**Project ID:** dockge-material-you-v3
+# Design System: Bockge Material You
+**Project ID:** bockge-material-you-v3
 
 ## 1. Visual Theme & Atmosphere
-The Dockge user interface embodies the **Material You (Material Design 3)** design language, presenting a highly personalized, fluid, and container-based dashboard. It prioritizes comfortable spacing, tactile interactivity, and expressive shapes. The interface shifts away from rigid corners and harsh borders toward an organic, cohesive visual language.
+The Bockge user interface embodies the **Material You (Material Design 3)** design language, presenting a highly personalized, fluid, and container-based dashboard. It prioritizes comfortable spacing, tactile interactivity, and expressive shapes. The interface shifts away from rigid corners and harsh borders toward an organic, cohesive visual language.
 
 Key characteristics:
 - Generous, rounded corners (up to 24px/1.5rem for cards, fully pill-shaped 50rem for buttons and active states).

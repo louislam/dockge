@@ -2,8 +2,8 @@
 
 ## Reporting a Vulnerability
 
-1. Please report security issues to https://github.com/louislam/dockge/security/advisories/new.
-1. Please also create an empty security issue to alert me, as GitHub Advisories do not send a notification, I probably will miss it without this. https://github.com/louislam/dockge/issues/new?assignees=&labels=help&template=security.md
+1. Please report security issues to https://github.com/louislam/bockge/security/advisories/new.
+1. Please also create an empty security issue to alert me, as GitHub Advisories do not send a notification, I probably will miss it without this. https://github.com/louislam/bockge/issues/new?assignees=&labels=help&template=security.md
 
 Do not use the public issue tracker or discuss it in public as it will cause more damage.
 

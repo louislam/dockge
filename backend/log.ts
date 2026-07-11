@@ -60,7 +60,7 @@ const consoleLevelColors : Record<string, string> = {
 class Logger {
 
     /**
-     * DOCKGE_HIDE_LOG=debug_monitor,info_monitor
+     * BOCKGE_HIDE_LOG=debug_monitor,info_monitor
      *
      * Example:
      *  [
@@ -79,8 +79,8 @@ class Logger {
      *
      */
     constructor() {
-        if (typeof process !== "undefined" && process.env.DOCKGE_HIDE_LOG) {
-            const list = process.env.DOCKGE_HIDE_LOG.split(",").map(v => v.toLowerCase());
+        if (typeof process !== "undefined" && process.env.BOCKGE_HIDE_LOG) {
+            const list = process.env.BOCKGE_HIDE_LOG.split(",").map(v => v.toLowerCase());
 
             for (const pair of list) {
                 // split first "_" only
@@ -91,7 +91,7 @@ class Logger {
                 }
             }
 
-            this.debug("server", "DOCKGE_HIDE_LOG is set");
+            this.debug("server", "BOCKGE_HIDE_LOG is set");
             this.debug("server", this.hideLog);
         }
     }

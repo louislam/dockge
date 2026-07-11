@@ -2,19 +2,19 @@ import { Database } from "../backend/database";
 import { R } from "redbean-node";
 import readline from "readline";
 import { User } from "../backend/models/user";
-import { DockgeServer } from "../backend/dockge-server";
+import { BockgeServer } from "../backend/bockge-server";
 import { log } from "../backend/log";
 import { io } from "socket.io-client";
 import { BaseRes } from "../common/util-common";
 
-console.log("== Dockge Reset Password Tool ==");
+console.log("== Bockge Reset Password Tool ==");
 
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
-const server = new DockgeServer();
+const server = new BockgeServer();
 
 export const main = async () => {
     // Check if

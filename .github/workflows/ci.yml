@@ -1,4 +1,4 @@
-name: Node.js CI - Dockge
+name: Node.js CI - Bockge
 
 on:
   push:

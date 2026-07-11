@@ -4,7 +4,7 @@
             <object class="my-4" width="200" height="200" data="/icon.svg" />
             <div class="fs-4 fw-bold mb-3">Bockge</div>
             <div class="mb-2">
-                <a href="https://github.com/dsbok/dockge" target="_blank" rel="noopener" class="text-decoration-none text-primary">GitHub Repository</a>
+                <a href="https://github.com/dsbok/bockge" target="_blank" rel="noopener" class="text-decoration-none text-primary">GitHub Repository</a>
             </div>
             <div class="text-secondary mt-1">Author: <a href="https://github.com/dsbok" target="_blank" rel="noopener" class="text-decoration-none text-primary">Danii Saahir</a></div>
         </div>

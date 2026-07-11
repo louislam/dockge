@@ -1,8 +1,8 @@
-import { DockgeServer } from "./dockge-server";
+import { BockgeServer } from "./bockge-server";
 import * as os from "node:os";
 import * as pty from "@homebridge/node-pty-prebuilt-multiarch";
 import { LimitQueue } from "./utils/limit-queue";
-import { DockgeSocket } from "./util-server";
+import { BockgeSocket } from "./util-server";
 import {
     PROGRESS_TERMINAL_ROWS,
     TERMINAL_COLS,
@@ -18,7 +18,7 @@ export class Terminal {
     protected static terminalMap : Map<string, Terminal> = new Map();
 
     protected _ptyProcess? : pty.IPty;
-    protected server : DockgeServer;
+    protected server : BockgeServer;
     protected buffer : LimitQueue<string> = new LimitQueue(100);
     protected _name : string;
 
@@ -34,9 +34,9 @@ export class Terminal {
     protected keepAliveInterval? : NodeJS.Timeout;
     protected kickDisconnectedClientsInterval? : NodeJS.Timeout;
 
-    protected socketList : Record<string, DockgeSocket> = {};
+    protected socketList : Record<string, BockgeSocket> = {};
 
-    constructor(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) {
+    constructor(server : BockgeServer, name : string, file : string, args : string | string[], cwd : string) {
         this.server = server;
         this._name = name;
         //this._name = "terminal-" + Date.now() + "-" + getCryptoRandomInt(0, 1000000);
@@ -172,11 +172,11 @@ export class Terminal {
         this.callback = callback;
     }
 
-    public join(socket : DockgeSocket) {
+    public join(socket : BockgeSocket) {
         this.socketList[socket.id] = socket;
     }
 
-    public leave(socket : DockgeSocket) {
+    public leave(socket : BockgeSocket) {
         delete this.socketList[socket.id];
     }
 
@@ -212,7 +212,7 @@ export class Terminal {
         return Terminal.terminalMap.get(name);
     }
 
-    public static getOrCreateTerminal(server : DockgeServer, name : string, file : string, args : string | string[], cwd : string) : Terminal {
+    public static getOrCreateTerminal(server : BockgeServer, name : string, file : string, args : string | string[], cwd : string) : Terminal {
         // Since exited terminal will be removed from the map, it is safe to get the terminal from the map
         let terminal = Terminal.getTerminal(name);
         if (!terminal) {
@@ -221,7 +221,7 @@ export class Terminal {
         return terminal;
     }
 
-    public static exec(server : DockgeServer, socket : DockgeSocket | undefined, terminalName : string, file : string, args : string | string[], cwd : string) : Promise<number> {
+    public static exec(server : BockgeServer, socket : BockgeSocket | undefined, terminalName : string, file : string, args : string | string[], cwd : string) : Promise<number> {
         return new Promise((resolve, reject) => {
             // check if terminal exists
             if (Terminal.terminalMap.has(terminalName)) {

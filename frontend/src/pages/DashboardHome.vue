@@ -125,7 +125,7 @@
                 <div class="col-md-5">
                     <!-- Agent List -->
                     <div class="shadow-box big-padding">
-                        <h4 class="mb-3">{{ $tc("dockgeAgent", 2) }} <span class="badge bg-warning" style="font-size: 12px;">beta</span></h4>
+                        <h4 class="mb-3">{{ $tc("bockgeAgent", 2) }} <span class="badge bg-warning" style="font-size: 12px;">beta</span></h4>
 
                         <div v-for="(agentItem, endpoint) in $root.agentList" :key="endpoint" class="mb-3 agent">
                             <!-- Agent Status -->
@@ -166,7 +166,7 @@
                         <!-- Add Agent Form -->
                         <form v-if="showAgentForm" @submit.prevent="addAgent">
                             <div class="mb-3">
-                                <label for="url" class="form-label">{{ $t("dockgeURL") }}</label>
+                                <label for="url" class="form-label">{{ $t("bockgeURL") }}</label>
                                 <input id="url" v-model="agent.url" type="url" class="form-control" required placeholder="http://">
                             </div>
 

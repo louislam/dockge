@@ -11,4 +11,4 @@ services:
       - ./data:/app/data
       - ./data/stacks:/opt/stacks
     environment:
-      - DOCKGE_STACKS_DIR=/opt/stacks
+      - BOCKGE_STACKS_DIR=/opt/stacks

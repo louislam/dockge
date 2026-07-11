@@ -85,7 +85,7 @@
                     </label>
                 </div>
                 <div class="form-text">
-                    When enabled, Dockge will scan service images for vulnerabilities using Docker-based scanners before starting/deploying.
+                    When enabled, Bockge will scan service images for vulnerabilities using Docker-based scanners before starting/deploying.
                 </div>
             </div>
 

@@ -10,7 +10,7 @@ import github from "@actions/github";
 
         const issue = {
             owner: "louislam",
-            repo: "dockge",
+            repo: "bockge",
             number: issueNumber,
         };
 

@@ -1,7 +1,7 @@
 // @ts-ignore
 import composerize from "composerize";
 import { SocketHandler } from "../socket-handler.js";
-import { DockgeServer } from "../dockge-server";
+import { BockgeServer } from "../bockge-server";
 import { log } from "../log";
 import { R } from "redbean-node";
 import { randomBytes } from "crypto";
@@ -11,7 +11,7 @@ import { User } from "../models/user";
 import {
     callbackError,
     checkLogin,
-    DockgeSocket,
+    BockgeSocket,
     doubleCheckPassword,
     JWTDecoded,
     ValidationError
@@ -25,7 +25,7 @@ import path from "path";
 import os from "os";
 
 export class MainSocketHandler extends SocketHandler {
-    create(socket : DockgeSocket, server : DockgeServer) {
+    create(socket : BockgeSocket, server : BockgeServer) {
 
         // ***************************
         // Public Socket API
@@ -39,7 +39,7 @@ export class MainSocketHandler extends SocketHandler {
                 }
 
                 if ((await R.knex("user").count("id as count").first()).count !== 0) {
-                    throw new Error("Dockge has been initialized. If you want to run setup again, please delete the database.");
+                    throw new Error("Bockge has been initialized. If you want to run setup again, please delete the database.");
                 }
 
                 const user = R.dispense("user");
@@ -361,7 +361,7 @@ export class MainSocketHandler extends SocketHandler {
                         await new Promise((resolve) => exec("docker pull aquasec/trivy:latest", () => resolve(true)));
                         
                         emitProgress("trivy_scan", "Scanning image vulnerabilities with Trivy...");
-                        const stdout = await runScanCommand(`docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/dockge-cache/trivy:/root/.cache aquasec/trivy:latest image -q ${imageName} --format json`);
+                        const stdout = await runScanCommand(`docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/bockge-cache/trivy:/root/.cache aquasec/trivy:latest image -q ${imageName} --format json`);
                         const data = parseCleanJson(stdout);
                         if (data && Array.isArray(data.Results)) {
                             for (const result of data.Results) {
@@ -391,7 +391,7 @@ export class MainSocketHandler extends SocketHandler {
                         await new Promise((resolve) => exec("docker pull anchore/grype:latest", () => resolve(true)));
                         
                         emitProgress("grype_scan", "Scanning image vulnerabilities with Grype...");
-                        const stdout = await runScanCommand(`docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/dockge-cache/grype:/root/.cache anchore/grype:latest -q ${imageName} --output json`);
+                        const stdout = await runScanCommand(`docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/bockge-cache/grype:/root/.cache anchore/grype:latest -q ${imageName} --output json`);
                         const data = parseCleanJson(stdout);
                         if (data && Array.isArray(data.matches)) {
                             for (const match of data.matches) {
@@ -489,7 +489,7 @@ export class MainSocketHandler extends SocketHandler {
                 const tag = data.tag;
                 const dockerfile = data.dockerfile;
                 
-                const tmpDir = path.join(os.tmpdir(), `dockge-build-${Date.now()}`);
+                const tmpDir = path.join(os.tmpdir(), `bockge-build-${Date.now()}`);
                 fs.mkdirSync(tmpDir, { recursive: true });
                 fs.writeFileSync(path.join(tmpDir, "Dockerfile"), dockerfile);
                 

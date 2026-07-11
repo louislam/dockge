@@ -1,4 +1,4 @@
-## Can I create a pull request for Dockge?
+## Can I create a pull request for Bockge?
 
 Yes or no, it depends on what you will try to do. Since I don't want to waste your time, be sure to **create open a discussion, so we can have a discussion first**. Especially for a large pull request or you don't know if it will be merged or not.
 
@@ -7,7 +7,7 @@ Here are some references:
 ### ✅ Usually accepted:
 - Bug fix
 - Security fix
-- Adding new language files (see [these instructions](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md))
+- Adding new language files (see [these instructions](https://github.com/louislam/bockge/blob/master/frontend/src/lang/README.md))
 - Adding new language keys: `$t("...")`
 
 ### ⚠️ Discussion required:
@@ -15,12 +15,12 @@ Here are some references:
 - New features
 
 ### ❌ Won't be merged:
-- A dedicated PR for translating existing languages (see [these instructions](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md))
+- A dedicated PR for translating existing languages (see [these instructions](https://github.com/louislam/bockge/blob/master/frontend/src/lang/README.md))
 - Do not pass the auto-test
 - Any breaking changes
 - Duplicated pull requests
 - Buggy
-- UI/UX is not close to Dockge
+- UI/UX is not close to Bockge
 - Modifications or deletions of existing logic without a valid reason.
 - Adding functions that is completely out of scope
 - Converting existing code into other programming languages
@@ -30,7 +30,7 @@ The above cases may not cover all possible situations.
 
 I (@louislam) have the final say. If your pull request does not meet my expectations, I will reject it, no matter how much time you spend on it. Therefore, it is essential to have a discussion beforehand.
 
-I will assign your pull request to a [milestone](https://github.com/louislam/dockge/milestones), if I plan to review and merge it.
+I will assign your pull request to a [milestone](https://github.com/louislam/bockge/milestones), if I plan to review and merge it.
 
 Also, please don't rush or ask for an ETA, because I have to understand the pull request, make sure it is no breaking changes and stick to my vision of this project, especially for large pull requests.
 
@@ -38,7 +38,7 @@ Also, please don't rush or ask for an ETA, because I have to understand the pull
 
 I personally do not like something that requires so many configurations before you can finally start the app.
 
-- Settings should be configurable in the frontend. Environment variables are discouraged, unless it is related to startup such as `DOCKGE_STACKS_DIR`
+- Settings should be configurable in the frontend. Environment variables are discouraged, unless it is related to startup such as `BOCKGE_STACKS_DIR`
 - Easy to use
 - The web UI styling should be consistent and nice
 - No native build dependency

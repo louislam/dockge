@@ -9,7 +9,7 @@
                 </span>
             </h1>
 
-            <div v-if="stack.isManagedByDockge" class="d-flex flex-wrap gap-2 mb-3">
+            <div v-if="stack.isManagedByBockge" class="d-flex flex-wrap gap-2 mb-3">
                 <button v-if="isEditMode" class="btn btn-primary" :disabled="processing" @click="deployStack">
                     <font-awesome-icon icon="rocket" class="me-1" />
                     {{ $t("deployStack") }}
@@ -79,7 +79,7 @@
                 ></Terminal>
             </transition>
 
-            <div v-if="stack.isManagedByDockge" class="row">
+            <div v-if="stack.isManagedByBockge" class="row">
                 <div class="col-lg-6">
                     <!-- General -->
                     <div v-if="isAdd">
@@ -94,7 +94,7 @@
 
                             <!-- Endpoint -->
                             <div class="mt-3">
-                                <label for="name" class="form-label">{{ $t("dockgeAgent") }}</label>
+                                <label for="name" class="form-label">{{ $t("bockgeAgent") }}</label>
                                 <select v-model="stack.endpoint" class="form-select">
                                     <option v-for="(agent, agentEndpoint) in $root.agentList" :key="agentEndpoint" :value="agentEndpoint" :disabled="$root.agentStatusList[agentEndpoint] != 'online'">
                                         ({{ $root.agentStatusList[agentEndpoint] }}) {{ (agent.name !== '') ? agent.name : agent.url || $t("Current") }}
@@ -156,7 +156,7 @@
                                 <label class="form-label">
                                     {{ $tc("url", 2) }}
                                 </label>
-                                <ArrayInput name="urls" :display-name="$t('url')" placeholder="https://" object-type="x-dockge" />
+                                <ArrayInput name="urls" :display-name="$t('url')" placeholder="https://" object-type="x-bockge" />
                             </div>
                         </div>
                     </div>
@@ -257,8 +257,8 @@
                 </div>
             </div>
 
-            <div v-if="!stack.isManagedByDockge && !processing">
-                {{ $t("stackNotManagedByDockgeMsg") }}
+            <div v-if="!stack.isManagedByBockge && !processing">
+                {{ $t("stackNotManagedByBockgeMsg") }}
             </div>
 
             <!-- Delete Dialog -->
@@ -558,12 +558,12 @@ export default {
         },
 
         urls() {
-            if (!this.envsubstJSONConfig["x-dockge"] || !this.envsubstJSONConfig["x-dockge"].urls || !Array.isArray(this.envsubstJSONConfig["x-dockge"].urls)) {
+            if (!this.envsubstJSONConfig["x-bockge"] || !this.envsubstJSONConfig["x-bockge"].urls || !Array.isArray(this.envsubstJSONConfig["x-bockge"].urls)) {
                 return [];
             }
 
             let urls = [];
-            for (const url of this.envsubstJSONConfig["x-dockge"].urls) {
+            for (const url of this.envsubstJSONConfig["x-bockge"].urls) {
                 let display;
                 try {
                     let obj = new URL(url);
@@ -712,7 +712,7 @@ export default {
                 name: "",
                 composeYAML,
                 composeENV,
-                isManagedByDockge: true,
+                isManagedByBockge: true,
                 endpoint: "",
             };
 

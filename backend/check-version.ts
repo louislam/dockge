@@ -5,7 +5,7 @@ import { Settings } from "./settings";
 
 // How much time in ms to wait between update checks
 const UPDATE_CHECKER_INTERVAL_MS = 1000 * 60 * 60 * 48;
-const CHECK_URL = "https://dockge.kuma.pet/version";
+const CHECK_URL = "https://bockge.kuma.pet/version";
 
 class CheckVersion {
     version = packageJSON.version;
