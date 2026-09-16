@@ -69,6 +69,12 @@ docker compose up -d
 
 Dockge is now running on http://localhost:5001
 
+### Easypanel
+
+[Easypanel](https://easypanel.io) is a self-hosted Docker deployment platform. It has a one-click Easypanel template for Dockge, which binds the host's Docker socket automatically so Dockge can manage stacks on the same host.
+
+[![Deploy on Easypanel](https://easypanel.io/img/deploy-on-easypanel-40.svg)](https://easypanel.io/templates/dockge)
+
 ### Advanced
 
 If you want to store your stacks in another directory, you can generate your compose.yaml file by using the following URL with custom query strings.
