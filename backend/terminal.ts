@@ -113,9 +113,9 @@ export class Terminal {
 
         try {
             this._ptyProcess = pty.spawn(this.file, this.args, {
-                name: this.name,
+                name: "xterm-256color",
                 cwd: this.cwd,
-                cols: TERMINAL_COLS,
+                cols: this.cols,
                 rows: this.rows,
             });
 
@@ -180,6 +180,10 @@ export class Terminal {
         delete this.socketList[socket.id];
     }
 
+    public get hasClients() {
+        return Object.keys(this.socketList).length > 0;
+    }
+
     public get ptyProcess() {
         return this._ptyProcess;
     }
@@ -200,8 +204,7 @@ export class Terminal {
 
     close() {
         clearInterval(this.keepAliveInterval);
-        // Send Ctrl+C to the terminal
-        this.ptyProcess?.write("\x03");
+        this.ptyProcess?.kill();
     }
 
     /**

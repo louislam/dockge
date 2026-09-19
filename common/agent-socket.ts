@@ -2,8 +2,8 @@ export class AgentSocket {
 
     eventList : Map<string, (...args : unknown[]) => void> = new Map();
 
-    on(event : string, callback : (...args : unknown[]) => void) {
-        this.eventList.set(event, callback);
+    on<TArgs extends unknown[]>(event : string, callback : (...args : TArgs) => void) {
+        this.eventList.set(event, callback as (...args : unknown[]) => void);
     }
 
     call(eventName : string, ...args : unknown[]) {

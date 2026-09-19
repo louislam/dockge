@@ -1,19 +1,18 @@
 ---
 
 name: "Security Issue"
-about: "Just for alerting @louislam, do not provide any details here"
+about: "Do not disclose vulnerability details in a public issue"
 title: "Security Issue"
-ref: "main"
+ref: "master"
 labels:
 
 - security
 
 ---
 
-DO NOT PROVIDE ANY DETAILS HERE. Please privately report to https://github.com/louislam/dockge/security/advisories/new.
+DO NOT PROVIDE ANY DETAILS HERE. Please report the vulnerability privately at
+https://github.com/Lorwell/dockge/security/advisories/new.
 
 
-Why need this issue? It is because GitHub Advisory do not send a notification to @louislam, it is a workaround to do so.
-
-Your GitHub Advisory URL:
+There is no need to create a public issue after submitting the advisory.
 

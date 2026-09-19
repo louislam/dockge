@@ -209,8 +209,16 @@ export function getContainerTerminalName(endpoint : string, container : string) 
     return "container-" + endpoint + "-" + container;
 }
 
-export function getContainerExecTerminalName(endpoint : string, stackName : string, container : string, index : number) {
-    return "container-exec-" + endpoint + "-" + stackName + "-" + container + "-" + index;
+export function getContainerExecTerminalName(endpoint : string, stackName : string, container : string, index : number, shell : string = "") {
+    return "container-exec-" + endpoint + "-" + stackName + "-" + container + "-" + index + (shell ? "-" + shell : "");
+}
+
+export function getContainerLogTerminalName(endpoint : string, stackName : string, container : string) {
+    return "container-log-" + endpoint + "-" + stackName + "-" + container;
+}
+
+export function getContainerInstanceExecTerminalName(endpoint : string, stackName : string, container : string, shell : string) {
+    return "container-instance-exec-" + endpoint + "-" + stackName + "-" + container + "-" + shell;
 }
 
 export function copyYAMLComments(doc : Document, src : Document) {
@@ -427,4 +435,3 @@ function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
         pair.value.value = envsubst(pair.value.value, env);
     }
 }
-

@@ -6,7 +6,8 @@ data
 stacks
 tmp
 /private
+/stacks-data/
+/.npmrc
 
 # Git only
 frontend-dist
-

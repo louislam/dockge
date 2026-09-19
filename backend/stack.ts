@@ -11,9 +11,9 @@ import {
     CREATED_FILE,
     CREATED_STACK,
     EXITED, getCombinedTerminalName,
-    getComposeTerminalName, getContainerExecTerminalName,
-    PROGRESS_TERMINAL_ROWS,
-    RUNNING, TERMINAL_ROWS,
+    getComposeTerminalName, getContainerExecTerminalName, getContainerInstanceExecTerminalName,
+    getContainerLogTerminalName,
+    RUNNING, TERMINAL_COLS, TERMINAL_ROWS,
     UNKNOWN
 } from "../common/util-common";
 import { InteractiveTerminal, Terminal } from "./terminal";
@@ -494,11 +494,11 @@ export class Stack {
     }
 
     async joinContainerTerminal(socket: DockgeSocket, serviceName: string, shell : string = "sh", index: number = 0) {
-        const terminalName = getContainerExecTerminalName(socket.endpoint, this.name, serviceName, index);
+        const terminalName = getContainerExecTerminalName(socket.endpoint, this.name, serviceName, index, shell);
         let terminal = Terminal.getTerminal(terminalName);
 
         if (!terminal) {
-            terminal = new InteractiveTerminal(this.server, terminalName, "docker", this.getComposeOptions("exec", serviceName, shell), this.path);
+            terminal = new InteractiveTerminal(this.server, terminalName, "docker", this.getComposeOptions("exec", "-e", "TERM=xterm-256color", serviceName, shell), this.path);
             terminal.rows = TERMINAL_ROWS;
             log.debug("joinContainerTerminal", "Terminal created");
         }
@@ -507,11 +507,30 @@ export class Stack {
         terminal.start();
     }
 
+    /**
+     * Leave a Compose service terminal and close its PTY when unused.
+     *
+     * @param socket Socket leaving the terminal
+     * @param serviceName Compose service name
+     * @param shell Shell executable
+     * @param index Compose replica index
+     */
+    leaveContainerTerminal(socket: DockgeSocket, serviceName: string, shell: string, index: number = 0) {
+        const terminalName = getContainerExecTerminalName(socket.endpoint, this.name, serviceName, index, shell);
+        const terminal = Terminal.getTerminal(terminalName);
+        if (terminal) {
+            terminal.leave(socket);
+            if (!terminal.hasClients) {
+                terminal.close();
+            }
+        }
+    }
+
     async getServiceStatusList() {
         let statusList = new Map<string, Array<object>>();
 
         try {
-            let res = await childProcessAsync.spawn("docker", this.getComposeOptions("ps", "--format", "json"), {
+            let res = await childProcessAsync.spawn("docker", this.getComposeOptions("ps", "--all", "--format", "json"), {
                 cwd: this.path,
                 encoding: "utf-8",
             });
@@ -522,13 +541,35 @@ export class Stack {
 
             let lines = res.stdout?.toString().split("\n");
 
-            const addLine = (obj: { Service: string, State: string, Name: string, Health: string }) => {
+            const addLine = (obj: {
+                ID: string,
+                Service: string,
+                State: string,
+                Name: string,
+                Health: string,
+                Image: string,
+                Command: string,
+                CreatedAt: string,
+                RunningFor: string,
+                Ports: string,
+                Publishers?: Array<object>
+            }) => {
                 if (!statusList.has(obj.Service)) {
                     statusList.set(obj.Service, []);
                 }
                 statusList.get(obj.Service)?.push({
+                    id: obj.ID,
+                    service: obj.Service,
                     status: obj.Health || obj.State,
-                    name: obj.Name
+                    state: obj.State,
+                    health: obj.Health,
+                    name: obj.Name,
+                    image: obj.Image,
+                    command: obj.Command,
+                    createdAt: obj.CreatedAt,
+                    runningFor: obj.RunningFor,
+                    ports: obj.Ports,
+                    publishers: obj.Publishers || [],
                 });
             };
 
@@ -548,6 +589,120 @@ export class Stack {
         } catch (e) {
             log.error("getServiceStatusList", e);
             return statusList;
+        }
+    }
+
+    /**
+     * Resolve a container by name and verify that it belongs to this stack.
+     *
+     * @param containerName Docker container name
+     * @returns Container status returned by Docker Compose
+     */
+    async getContainer(containerName: string) : Promise<Record<string, unknown>> {
+        const serviceStatusList = await this.getServiceStatusList();
+        for (const containers of serviceStatusList.values()) {
+            const container = containers.find((item) => (item as { name?: string }).name === containerName);
+            if (container) {
+                return container as Record<string, unknown>;
+            }
+        }
+        throw new ValidationError(`Container ${containerName} does not belong to stack ${this.name}.`);
+    }
+
+    /**
+     * Join a read-only log stream for one container instance.
+     *
+     * @param socket Socket joining the terminal
+     * @param containerName Docker container name
+     * @returns Terminal name used by the frontend
+     */
+    async joinContainerLogs(socket: DockgeSocket, containerName: string) : Promise<string> {
+        const container = await this.getContainer(containerName);
+        const terminalName = getContainerLogTerminalName(socket.endpoint, this.name, containerName);
+        const terminal = Terminal.getOrCreateTerminal(
+            this.server,
+            terminalName,
+            "docker",
+            [ "logs", "--follow", "--tail", "200", String(container.id) ],
+            this.path
+        );
+        terminal.enableKeepAlive = true;
+        terminal.rows = COMBINED_TERMINAL_ROWS;
+        terminal.cols = TERMINAL_COLS;
+        terminal.join(socket);
+        terminal.start();
+        return terminalName;
+    }
+
+    /**
+     * Leave a container log stream.
+     *
+     * @param socket Socket leaving the terminal
+     * @param containerName Docker container name
+     */
+    async leaveContainerLogs(socket: DockgeSocket, containerName: string) {
+        const terminalName = getContainerLogTerminalName(socket.endpoint, this.name, containerName);
+        const terminal = Terminal.getTerminal(terminalName);
+        terminal?.leave(socket);
+    }
+
+    /**
+     * Open an interactive shell for one concrete container instance.
+     *
+     * @param socket Socket joining the terminal
+     * @param containerName Docker container name
+     * @param shell Shell executable
+     */
+    async joinContainerInstanceTerminal(socket: DockgeSocket, containerName: string, shell: string) {
+        const container = await this.getContainer(containerName);
+        const terminalName = getContainerInstanceExecTerminalName(socket.endpoint, this.name, containerName, shell);
+        let terminal = Terminal.getTerminal(terminalName);
+        if (!terminal) {
+            terminal = new InteractiveTerminal(
+                this.server,
+                terminalName,
+                "docker",
+                [ "exec", "-it", "-e", "TERM=xterm-256color", String(container.id), shell ],
+                this.path
+            );
+            terminal.rows = TERMINAL_ROWS;
+        }
+        terminal.join(socket);
+        terminal.start();
+    }
+
+    /**
+     * Leave an interactive container terminal and close it when unused.
+     *
+     * @param socket Socket leaving the terminal
+     * @param containerName Docker container name
+     * @param shell Shell executable
+     */
+    leaveContainerInstanceTerminal(socket: DockgeSocket, containerName: string, shell: string) {
+        const terminalName = getContainerInstanceExecTerminalName(socket.endpoint, this.name, containerName, shell);
+        const terminal = Terminal.getTerminal(terminalName);
+        if (terminal) {
+            terminal.leave(socket);
+            if (!terminal.hasClients) {
+                terminal.close();
+            }
+        }
+    }
+
+    /**
+     * Run a lifecycle action against one verified container instance.
+     *
+     * @param containerName Docker container name
+     * @param action Docker lifecycle action
+     */
+    async runContainerAction(containerName: string, action: "start" | "stop" | "restart") {
+        const container = await this.getContainer(containerName);
+        const result = await childProcessAsync.spawn("docker", [ action, String(container.id) ], {
+            cwd: this.path,
+            encoding: "utf-8",
+        });
+        if (result.code !== 0) {
+            throw new Error(`Failed to ${action} container ${containerName}.`);
         }
     }
 

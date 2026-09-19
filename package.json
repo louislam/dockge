@@ -1,6 +1,6 @@
 {
     "name": "dockge",
-    "version": "1.5.0",
+    "version": "1.8.2",
     "type": "module",
     "engines": {
         "node": ">= 22.14.0"
@@ -9,6 +9,7 @@
         "fmt": "eslint \"**/*.{ts,vue}\" --fix",
         "lint": "eslint \"**/*.{ts,vue}\"",
         "check-ts": "tsc --noEmit",
+        "test:file-manager": "tsx --test backend/file-manager.test.ts",
         "start": "tsx ./backend/index.ts",
         "dev": "concurrently -k -r \"wait-on tcp:5000 && npm run dev:backend \" \"npm run dev:frontend\"",
         "dev:backend": "cross-env NODE_ENV=development tsx watch --inspect ./backend/index.ts",
@@ -17,16 +18,17 @@
         "release-beta": "tsx ./extra/test-docker.ts && tsx extra/update-version.ts && npm run build:frontend && npm run build:docker-beta",
         "build:frontend": "vite build --config ./frontend/vite.config.ts",
         "build:docker-base": "docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:base -f ./docker/Base.Dockerfile . --push",
-        "build:docker": "node ./extra/env2arg.js docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:latest -t louislam/dockge:1 -t louislam/dockge:$VERSION -t louislam/dockge:beta -t louislam/dockge:nightly --target release -f ./docker/Dockerfile . --push",
-        "build:docker-beta": "node ./extra/env2arg.js docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:beta -t louislam/dockge:$VERSION --target release -f ./docker/Dockerfile . --push",
+        "build:docker": "node ./extra/env2arg.js docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t moailaozi/dockge:latest -t moailaozi/dockge:1 -t moailaozi/dockge:$VERSION --target release -f ./docker/Dockerfile . --push",
+        "build:docker-beta": "node ./extra/env2arg.js docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t moailaozi/dockge:beta -t moailaozi/dockge:$VERSION --target release -f ./docker/Dockerfile . --push",
         "build:healthcheck": "docker buildx build -f docker/BuildHealthCheck.Dockerfile --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:build-healthcheck . --push",
-        "release-nightly": "npm run build:frontend && docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t louislam/dockge:nightly -t ghcr.io/louislam/dockge:nightly --target nightly -f ./docker/Dockerfile . --push",
-        "start-docker": "docker run --rm -p 5001:5001 --name dockge louislam/dockge:latest",
+        "release-nightly": "npm run build:frontend && docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t moailaozi/dockge:nightly -t ghcr.io/lorwell/dockge:nightly --target nightly -f ./docker/Dockerfile . --push",
+        "start-docker": "docker run --rm -p 5001:5001 --name dockge moailaozi/dockge:latest",
         "mark-as-nightly": "tsx ./extra/mark-as-nightly.ts",
         "reformat-changelog": "tsx ./extra/reformat-changelog.ts",
         "reset-password": "tsx ./extra/reset-password.ts"
     },
     "dependencies": {
+        "@codemirror/language-data": "^6.5.2",
         "@homebridge/node-pty-prebuilt-multiarch": "0.11.14",
         "@inventage/envsubst": "^0.16.0",
         "@louislam/sqlite3": "~15.1.6",

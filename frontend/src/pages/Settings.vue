@@ -18,7 +18,7 @@
                     </router-link>
 
                     <!-- Logout Button -->
-                    <a v-if="$root.isMobile && $root.loggedIn && $root.socket.token !== 'autoLogin'" class="logout" @click.prevent="$root.logout">
+                    <a v-if="$root.isMobile && $root.loggedIn && $root.socketIO.token !== 'autoLogin'" class="logout" @click.prevent="$root.logout">
                         <div class="menu-item">
                             <font-awesome-icon icon="sign-out-alt" />
                             {{ $t("Logout") }}
@@ -27,6 +27,7 @@
                 </div>
                 <div class="settings-content col-lg-9 col-md-7">
                     <div v-if="currentPage" class="settings-content-header">
+                        <router-link v-if="$root.isMobile" to="/settings" class="btn btn-sm btn-normal me-2" :aria-label="$t('backToSettings')"><font-awesome-icon icon="arrow-left" /></router-link>
                         {{ subMenus[currentPage].title }}
                     </div>
                     <div class="mx-3">
@@ -251,5 +252,24 @@ footer {
 
 .logout {
     color: $danger !important;
+}
+
+@media (max-width: 767.98px) {
+    .shadow-box-settings {
+        min-height: calc(100dvh - 170px);
+        padding: 12px;
+    }
+
+    .settings-content-header {
+        display: flex;
+        align-items: center;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 0 12px !important;
+    }
+
+    .settings-content > .mx-3 {
+        margin-inline: 0 !important;
+    }
 }
 </style>

@@ -1,140 +1,76 @@
-## Can I create a pull request for Dockge?
+# Contributing
 
-Yes or no, it depends on what you will try to do. Since I don't want to waste your time, be sure to **create open a discussion, so we can have a discussion first**. Especially for a large pull request or you don't know if it will be merged or not.
+This repository is an independently maintained fork of Dockge. Open issues and pull requests against
+`Lorwell/dockge`; do not send fork-specific changes to the upstream project.
 
-Here are some references:
+## Before opening a pull request
 
-### ✅ Usually accepted:
-- Bug fix
-- Security fix
-- Adding new language files (see [these instructions](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md))
-- Adding new language keys: `$t("...")`
+- Keep each change focused and avoid unrelated refactors.
+- Discuss large features or breaking changes in a repository issue first.
+- Add user-facing English text to `frontend/src/lang/en.json`. Do not update unrelated translations in the same
+  change.
+- Include screenshots stored on GitHub for visible UI changes.
+- Describe manual coverage for affected UI, Socket.IO, database, and Docker Compose behavior.
 
-### ⚠️ Discussion required:
-- Large pull requests
-- New features
+## Local development
 
-### ❌ Won't be merged:
-- A dedicated PR for translating existing languages (see [these instructions](https://github.com/louislam/dockge/blob/master/frontend/src/lang/README.md))
-- Do not pass the auto-test
-- Any breaking changes
-- Duplicated pull requests
-- Buggy
-- UI/UX is not close to Dockge
-- Modifications or deletions of existing logic without a valid reason.
-- Adding functions that is completely out of scope
-- Converting existing code into other programming languages
-- Unnecessarily large code changes that are hard to review and cause conflicts with other PRs.
+Requirements:
 
-The above cases may not cover all possible situations.
+- Node.js 22.14 or newer
+- npm
+- Git
+- Docker Engine with Docker Compose V2 for integration testing
 
-I (@louislam) have the final say. If your pull request does not meet my expectations, I will reject it, no matter how much time you spend on it. Therefore, it is essential to have a discussion beforehand.
-
-I will assign your pull request to a [milestone](https://github.com/louislam/dockge/milestones), if I plan to review and merge it.
-
-Also, please don't rush or ask for an ETA, because I have to understand the pull request, make sure it is no breaking changes and stick to my vision of this project, especially for large pull requests.
-
-## Project Styles
-
-I personally do not like something that requires so many configurations before you can finally start the app.
-
-- Settings should be configurable in the frontend. Environment variables are discouraged, unless it is related to startup such as `DOCKGE_STACKS_DIR`
-- Easy to use
-- The web UI styling should be consistent and nice
-- No native build dependency
-
-## Coding Styles
-
-- 4 spaces indentation
-- Follow `.editorconfig`
-- Follow ESLint
-- Methods and functions should be documented with JSDoc
-
-## Name Conventions
-
-- Javascript/Typescript: camelCaseType
-- SQLite: snake_case (Underscore)
-- CSS/SCSS: kebab-case (Dash)
-
-## Tools
-
-- [`Node.js`](https://nodejs.org/) >= 22.14.0
-- [`git`](https://git-scm.com/)
-- IDE that supports [`ESLint`](https://eslint.org/) and EditorConfig (I am using [`IntelliJ IDEA`](https://www.jetbrains.com/idea/))
-- A SQLite GUI tool (f.ex. [`SQLite Expert Personal`](https://www.sqliteexpert.com/download.html) or [`DBeaver Community`](https://dbeaver.io/download/))
-
-## Install Dependencies for Development
+Install dependencies and start the frontend and backend development servers:
 
 ```bash
 npm install
+npm run dev
 ```
 
-## Dev Server
+The frontend runs on <http://localhost:5000> and waits for the backend on port `5001`. The processes can also be
+started independently:
 
-```
+```bash
 npm run dev:frontend
 npm run dev:backend
 ```
 
-## Backend Dev Server
+Both applications share the root `package.json`. Frontend-only packages belong in `devDependencies`; runtime
+backend packages belong in `dependencies`.
 
-It binds to `0.0.0.0:5001` by default.
+## Project layout
 
-It is mainly a socket.io app + express.js.
+- `backend/`: Node.js server, models, migrations, and Socket.IO handlers
+- `common/`: utilities shared by the frontend and backend
+- `frontend/src/`: Vue 3 components, pages, layouts, styles, and translations
+- `frontend/public/`: static frontend assets
+- `docker/`: production image definitions
+- `extra/`: maintenance and release scripts
 
-## Frontend Dev Server
+## Code style
 
-It binds to `0.0.0.0:5000` by default. The frontend dev server is used for development only.
+- Use four-space indentation for TypeScript and Vue, and two spaces for YAML.
+- Use double quotes and semicolons in TypeScript.
+- Use `camelCase` for TypeScript identifiers, `snake_case` for SQLite fields, and `kebab-case` for CSS classes.
+- Add JSDoc to methods and functions.
+- Preserve existing behavior unless the change explicitly requires otherwise.
 
-For production, it is not used. It will be compiled to `frontend-dist` directory instead.
+## Required checks
 
-You can use Vue.js devtools Chrome extension for debugging.
-
-### Build the frontend
+Run the same validation used by CI before submitting:
 
 ```bash
-npm run build
+npm run lint
+npm run check-ts
+npm run build:frontend
 ```
 
-## Database Migration
+There is no dedicated unit-test suite yet. Add focused automated tests when introducing independently testable
+logic, and document the manual tests performed for the rest.
 
-TODO
+## Docker releases
 
-## Dependencies
-
-Both frontend and backend share the same package.json. However, the frontend dependencies are eventually not used in the production environment, because it is usually also baked into dist files. So:
-
-- Frontend dependencies = "devDependencies"
-    - Examples: vue, chart.js
-- Backend dependencies = "dependencies"
-    - Examples: socket.io, sqlite3
-- Development dependencies = "devDependencies"
-    - Examples: eslint, sass
-
-### Update Dependencies
-
-Should only be done by the maintainer.
-
-```bash
-npm update
-````
-
-It should update the patch release version only.
-
-Patch release = the third digit ([Semantic Versioning](https://semver.org/))
-
-If for security / bug / other reasons, a library must be updated, breaking changes need to be checked by the person proposing the change.
-
-## Translations
-
-Please add **all** the strings which are translatable to `src/lang/en.json` (If translation keys are omitted, they can not be translated).
-
-**Don't include any other languages in your initial Pull-Request** (even if this is your mother tongue), to avoid merge-conflicts between weblate and `master`.  
-The translations can then (after merging a PR into `master`) be translated by awesome people donating their language skills.
-
-If you want to help by translating Uptime Kuma into your language, please visit the [instructions on how to translate using weblate](https://github.com/louislam/uptime-kuma/blob/master/src/lang/README.md).
-
-## Spelling & Grammar
-
-Feel free to correct the grammar in the documentation or code.
-My mother language is not English and my grammar is not that great.
+Stable Docker images are published from `master` with the `Build and push Docker image` workflow. The release
+version is read from `package.json`; version changes must keep `package.json` and `package-lock.json` synchronized.
+Publishing requires the repository's Docker Hub secrets and is a maintainer operation.

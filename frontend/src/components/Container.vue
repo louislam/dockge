@@ -4,12 +4,12 @@
             <div class="col-5">
                 <h4>{{ name }}</h4>
                 <div class="image mb-2">
-                    <span class="me-1">{{ imageName }}:</span><span class="tag">{{ imageTag }}</span>
+                    <span class="tag">{{ imageDisplay }}</span>
                 </div>
                 <div v-if="!isEditMode">
                     <span class="badge me-1" :class="bgStyle">{{ status }}</span>
 
-                    <a v-for="port in (ports ?? envsubstService.ports)" :key="port" :href="parsePort(port).url" target="_blank">
+                    <a v-for="port in (envsubstService.ports || [])" :key="port" :href="parsePort(port).url" target="_blank">
                         <span class="badge me-1 bg-secondary">{{ parsePort(port).display }}</span>
                     </a>
                 </div>
@@ -64,31 +64,29 @@
                 {{ $t("deleteContainer") }}
             </button>
         </div>
-        <div v-else-if="statsInstances.length > 0" class="mt-2">
-            <div class="d-flex align-items-center gap-3">
-                <template v-if="!expandedStats">
-                    <div class="stats">
-                        {{ $t('CPU') }}: {{ statsInstances[0].CPUPerc }}
+        <div v-else-if="serviceStatus.length > 0" class="container-instances mt-3">
+            <div v-for="instance in serviceStatus" :key="instance.name" class="instance-row">
+                <div class="instance-summary">
+                    <div class="instance-name">{{ instance.name }}</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                        <span class="badge" :class="instanceStatusClass(instance)">{{ instance.status }}</span>
+                        <span v-if="dockerStats[instance.name]" class="stats">
+                            {{ $t("CPU") }}: {{ dockerStats[instance.name].CPUPerc }}
+                        </span>
+                        <span v-if="dockerStats[instance.name]" class="stats">
+                            {{ $t("memoryAbbreviated") }}: {{ dockerStats[instance.name].MemUsage }}
+                        </span>
                     </div>
-                    <div class="stats">
-                        {{ $t('memoryAbbreviated') }}: {{ statsInstances[0].MemUsage }}
-                    </div>
-                </template>
-                <div class="d-flex flex-grow-1 justify-content-end">
-                    <button class="btn btn-sm btn-normal" @click="expandedStats = !expandedStats">
-                        <font-awesome-icon :icon="expandedStats ? 'chevron-up' : 'chevron-down'" />
-                    </button>
+                </div>
+                <div class="instance-actions btn-group" role="group">
+                    <router-link class="btn btn-sm btn-normal" :to="containerDetailsRoute(instance)">
+                        <font-awesome-icon icon="info-circle" class="me-1" /> {{ $t("details") }}
+                    </router-link>
+                    <router-link class="btn btn-sm btn-normal" :to="containerDetailsRoute(instance, 'logs')">
+                        <font-awesome-icon icon="list" class="me-1" /> {{ $t("logs") }}
+                    </router-link>
                 </div>
             </div>
-            <transition name="slide-fade" appear>
-                <div v-if="expandedStats" class="d-flex flex-column gap-3 mt-2">
-                    <DockerStat
-                        v-for="stat in statsInstances"
-                        :key="stat.Name"
-                        :stat="stat"
-                    />
-                </div>
-            </transition>
         </div>
 
         <transition name="slide-fade" appear>
@@ -193,12 +191,10 @@
 import { defineComponent } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { parseDockerPort } from "../../../common/util-common";
-import DockerStat from "./DockerStat.vue";
 
 export default defineComponent({
     components: {
-        FontAwesomeIcon,
-        DockerStat
+        FontAwesomeIcon
     },
     props: {
         name: {
@@ -214,12 +210,16 @@ export default defineComponent({
             default: false,
         },
         serviceStatus: {
-            type: Object,
-            default: null,
+            type: Array,
+            default: () => [],
         },
         dockerStats: {
             type: Object,
-            default: null
+            default: () => ({}),
+        },
+        serviceCount: {
+            type: Number,
+            default: 1,
         }
     },
     emits: [
@@ -230,14 +230,13 @@ export default defineComponent({
     data() {
         return {
             showConfig: false,
-            expandedStats: false,
         };
     },
     computed: {
 
         networkList() {
             let list = [];
-            for (const networkName in this.jsonObject.networks) {
+            for (const networkName in (this.jsonObject.networks || {})) {
                 list.push(networkName);
             }
             return list;
@@ -289,14 +288,10 @@ export default defineComponent({
         },
 
         service() {
-            if (!this.jsonObject.services[this.name]) {
+            if (!this.jsonObject.services || !this.jsonObject.services[this.name]) {
                 return {};
             }
             return this.jsonObject.services[this.name];
-        },
-
-        serviceCount() {
-            return Object.keys(this.jsonObject.services).length;
         },
 
         jsonObject() {
@@ -308,45 +303,17 @@ export default defineComponent({
         },
 
         envsubstService() {
-            if (!this.envsubstJSONConfig.services[this.name]) {
+            if (!this.envsubstJSONConfig.services || !this.envsubstJSONConfig.services[this.name]) {
                 return {};
             }
             return this.envsubstJSONConfig.services[this.name];
         },
 
-        imageName() {
-            if (this.envsubstService.image) {
-                return this.envsubstService.image.split(":")[0];
-            } else {
-                return "";
-            }
-        },
-
-        imageTag() {
-            if (this.envsubstService.image) {
-                let tag = this.envsubstService.image.split(":")[1];
-
-                if (tag) {
-                    return tag;
-                } else {
-                    return "latest";
-                }
-            } else {
-                return "";
-            }
-        },
-        statsInstances() {
-            if (!this.serviceStatus) {
-                return [];
-            }
-
-            return this.serviceStatus
-                .map(s => this.dockerStats[s.name])
-                .filter(s => !!s)
-                .sort((a, b) => a.Name.localeCompare(b.Name));
+        imageDisplay() {
+            return this.envsubstService.image || this.serviceStatus[0]?.image || "";
         },
         status() {
-            if (!this.serviceStatus) {
+            if (this.serviceStatus.length === 0) {
                 return "N/A";
             }
             return this.serviceStatus[0].status;
@@ -377,6 +344,28 @@ export default defineComponent({
         },
         restartService() {
             this.$emit("restart-service", this.name);
+        },
+        containerDetailsRoute(instance, tab) {
+            const route = {
+                name: this.endpoint ? "containerDetailsEndpoint" : "containerDetails",
+                params: {
+                    stackName: this.stackName,
+                    containerName: instance.name,
+                },
+            };
+            if (this.endpoint) {
+                route.params.endpoint = this.endpoint;
+            }
+            if (tab) {
+                route.query = { tab };
+            }
+            return route;
+        },
+        instanceStatusClass(instance) {
+            if (instance.health === "unhealthy") {
+                return "bg-danger";
+            }
+            return instance.state === "running" ? "bg-primary" : "bg-secondary";
         }
 
     }
@@ -391,7 +380,7 @@ export default defineComponent({
         font-size: 0.8rem;
         color: #6c757d;
         .tag {
-            color: #33383b;
+            color: var(--bs-heading-color);
         }
     }
 
@@ -407,6 +396,58 @@ export default defineComponent({
     .stats {
         font-size: 0.8rem;
         color: #6c757d;
+    }
+
+    .container-instances {
+        border-top: 1px solid $dark-border-color;
+    }
+
+    .instance-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding-top: 0.85rem;
+    }
+
+    .instance-name {
+        overflow-wrap: anywhere;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 575.98px) {
+        > .row > [class*="col-"] {
+            width: 100%;
+        }
+
+        .function {
+            justify-content: flex-start;
+            margin-top: 0.75rem;
+        }
+
+        .function .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .function .btn {
+            flex: 1 1 auto;
+        }
+
+        .instance-row {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .instance-actions {
+            display: flex;
+        }
+
+        .instance-actions .btn {
+            flex: 1;
+        }
     }
 }
 </style>

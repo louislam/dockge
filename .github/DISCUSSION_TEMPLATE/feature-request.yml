@@ -4,7 +4,7 @@ body:
     id: no-duplicate-issues
     attributes:
       label: "⚠️ Please verify that this feature request has NOT been suggested before."
-      description: "Search in the issues sections by clicking [HERE](https://github.com/louislam/dockge/discussions/categories/feature-request)"
+      description: "Search existing discussions by clicking [HERE](https://github.com/Lorwell/dockge/discussions/categories/feature-request)"
       options:
         - label: "I checked and didn't find similar feature request"
           required: true

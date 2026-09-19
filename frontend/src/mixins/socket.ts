@@ -400,12 +400,13 @@ export default defineComponent({
 
         },
 
-        bindTerminal(endpoint : string, terminalName : string, terminal : Terminal) {
+        bindTerminal(endpoint : string, terminalName : string, terminal : Terminal, callback? : () => void) {
             // Load terminal, get terminal screen
             this.emitAgent(endpoint, "terminalJoin", terminalName, (res) => {
                 if (res.ok) {
                     terminal.write(res.buffer);
                     terminalMap.set(terminalName, terminal);
+                    callback?.();
                 } else {
                     this.toastRes(res);
                 }

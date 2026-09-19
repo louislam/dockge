@@ -10,7 +10,7 @@
         </div>
 
         <!-- Desktop header -->
-        <header v-if="! $root.isMobile" class="d-flex flex-wrap justify-content-center py-3 mb-3 border-bottom">
+        <header v-if="!$root.isCompact" class="desktop-header d-flex flex-wrap justify-content-center py-3 mb-3 border-bottom">
             <router-link to="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <object class="bi me-2 ms-4" width="40" height="40" data="/icon.svg" />
                 <span class="fs-4 title">Dockge</span>
@@ -30,6 +30,12 @@
                 <li v-if="$root.loggedIn" class="nav-item me-2">
                     <router-link to="/console" class="nav-link">
                         <font-awesome-icon icon="terminal" /> {{ $t("console") }}
+                    </router-link>
+                </li>
+
+                <li v-if="$root.loggedIn" class="nav-item me-2">
+                    <router-link to="/files" class="nav-link">
+                        <font-awesome-icon icon="folder-open" /> {{ $t("files") }}
                     </router-link>
                 </li>
 
@@ -84,6 +90,23 @@
             </ul>
         </header>
 
+        <header v-if="$root.isCompact" class="compact-header border-bottom">
+            <router-link to="/" class="brand text-decoration-none">
+                <object class="bi" width="32" height="32" data="/icon.svg" />
+                <span>Dockge</span>
+            </router-link>
+            <div v-if="$root.loggedIn" class="dropdown dropdown-profile-pic">
+                <button class="nav-link border-0" data-bs-toggle="dropdown" :aria-label="$t('Account')">
+                    <div class="profile-pic">{{ $root.usernameFirstChar }}</div>
+                    <font-awesome-icon icon="angle-down" />
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><router-link to="/settings/general" class="dropdown-item"><font-awesome-icon icon="cog" /> {{ $t("Settings") }}</router-link></li>
+                    <li><button class="dropdown-item" @click="$root.logout"><font-awesome-icon icon="sign-out-alt" /> {{ $t("Logout") }}</button></li>
+                </ul>
+            </div>
+        </header>
+
         <main>
             <div v-if="$root.socketIO.connecting" class="container mt-5">
                 <h4>{{ $t("connecting...") }}</h4>
@@ -92,6 +115,14 @@
             <router-view v-if="$root.loggedIn" />
             <Login v-if="! $root.loggedIn && $root.allowLoginDialog" />
         </main>
+
+        <nav v-if="$root.isCompact && $root.loggedIn" class="bottom-nav" :aria-label="$t('mainNavigation')">
+            <router-link to="/" exact-active-class="active"><font-awesome-icon icon="home" /><span>{{ $t("home") }}</span></router-link>
+            <router-link to="/stacks"><font-awesome-icon icon="stream" /><span>{{ $t("stacks") }}</span></router-link>
+            <router-link to="/console"><font-awesome-icon icon="terminal" /><span>{{ $t("console") }}</span></router-link>
+            <router-link to="/files"><font-awesome-icon icon="folder-open" /><span>{{ $t("files") }}</span></router-link>
+            <router-link to="/settings"><font-awesome-icon icon="cog" /><span>{{ $t("Settings") }}</span></router-link>
+        </nav>
     </div>
 </template>
 
@@ -177,10 +208,14 @@ export default {
     white-space: nowrap;
     padding: 0 10px env(safe-area-inset-bottom);
 
+    display: flex;
+
     a {
         text-align: center;
-        width: 25%;
-        display: inline-block;
+        width: 20%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         height: 100%;
         padding: 8px 10px 0;
         font-size: 13px;
@@ -193,14 +228,54 @@ export default {
             font-weight: bold;
         }
 
-        div {
+        svg {
             font-size: 20px;
+        }
+
+        span {
+            margin-top: 2px;
+            overflow: hidden;
+            max-width: 100%;
+            text-overflow: ellipsis;
         }
     }
 }
 
 main {
     min-height: calc(100vh - 160px);
+}
+
+.compact-header {
+    position: sticky;
+    z-index: 1020;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 58px;
+    padding: max(8px, env(safe-area-inset-top)) 14px 8px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: inherit;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+}
+
+.mobile main, .mobile .compact-header + main {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 991.98px) {
+    main {
+        min-height: calc(100dvh - 120px);
+        padding: 12px 12px calc(76px + env(safe-area-inset-bottom));
+    }
 }
 
 .title {
@@ -307,6 +382,11 @@ main {
 
     .bottom-nav {
         background-color: $dark-bg;
+    }
+
+    .compact-header {
+        background: rgba($dark-header-bg, 0.96);
+        border-bottom-color: $dark-border-color !important;
     }
 }
 </style>

@@ -7,7 +7,7 @@ body:
     id: no-duplicate-issues
     attributes:
       label: "⚠️ Please verify that this bug has NOT been reported before."
-      description: "Search in the issues sections by clicking [HERE](https://github.com/louislam/dockge/issues?q=)"
+      description: "Search existing issues by clicking [HERE](https://github.com/Lorwell/dockge/issues?q=)"
       options:
         - label: "I checked and didn't find similar issue"
           required: true
@@ -16,7 +16,7 @@ body:
       label: "🛡️ Security Policy"
       description: Please review the security policy before reporting security related issues/bugs.
       options:
-        - label: I agree to have read this project [Security Policy](https://github.com/louislam/dockge/security/policy)
+        - label: I agree to have read this project [Security Policy](https://github.com/Lorwell/dockge/security/policy)
           required: true
   - type: textarea
     id: description

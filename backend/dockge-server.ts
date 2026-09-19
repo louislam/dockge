@@ -37,6 +37,8 @@ import { AgentSocketHandler } from "./agent-socket-handler";
 import { AgentSocket } from "../common/agent-socket";
 import { ManageAgentSocketHandler } from "./socket-handlers/manage-agent-socket-handler";
 import { Terminal } from "./terminal";
+import { FileManager } from "./file-manager";
+import { FileManagerSocketHandler } from "./agent-socket-handlers/file-manager-socket-handler";
 
 export class DockgeServer {
     app : Express;
@@ -69,6 +71,7 @@ export class DockgeServer {
     agentSocketHandlerList : AgentSocketHandler[] = [
         new DockerSocketHandler(),
         new TerminalSocketHandler(),
+        new FileManagerSocketHandler(),
     ];
 
     /**
@@ -79,6 +82,8 @@ export class DockgeServer {
     jwtSecret : string = "";
 
     stacksDir : string = "";
+
+    fileManager? : FileManager;
 
     /**
      *
@@ -141,7 +146,15 @@ export class DockgeServer {
                 type: Boolean,
                 optional: true,
                 defaultValue: false,
-            }
+            },
+            fileManagerRoot: {
+                type: String,
+                optional: true,
+            },
+            fileManagerMaxFileSize: {
+                type: Number,
+                optional: true,
+            },
         });
 
         this.config = args as Config;
@@ -155,6 +168,14 @@ export class DockgeServer {
         this.config.dataDir = args.dataDir || process.env.DOCKGE_DATA_DIR || "./data/";
         this.config.stacksDir = args.stacksDir || process.env.DOCKGE_STACKS_DIR || defaultStacksDir;
         this.config.enableConsole = args.enableConsole || process.env.DOCKGE_ENABLE_CONSOLE === "true" || false;
+        this.config.fileManagerRoot = args.fileManagerRoot || process.env.DOCKGE_FILE_MANAGER_ROOT || undefined;
+        this.config.fileManagerMaxFileSize = args.fileManagerMaxFileSize
+            ?? (process.env.DOCKGE_FILE_MANAGER_MAX_FILE_SIZE !== undefined
+                ? Number(process.env.DOCKGE_FILE_MANAGER_MAX_FILE_SIZE)
+                : 100 * 1024 * 1024);
+        if (!Number.isFinite(this.config.fileManagerMaxFileSize) || this.config.fileManagerMaxFileSize <= 0) {
+            throw new Error("DOCKGE_FILE_MANAGER_MAX_FILE_SIZE must be a positive number of bytes.");
+        }
         this.stacksDir = this.config.stacksDir;
 
         log.debug("server", this.config);
@@ -557,6 +578,16 @@ export class DockgeServer {
         // Create data/stacks directory
         if (!fs.existsSync(this.stacksDir)) {
             fs.mkdirSync(this.stacksDir, { recursive: true });
+        }
+
+        if (this.config.fileManagerRoot) {
+            if (!fs.existsSync(this.config.fileManagerRoot)) {
+                throw new Error(`File manager root does not exist: ${this.config.fileManagerRoot}`);
+            }
+            this.fileManager = new FileManager(this.config.fileManagerRoot, this.config.fileManagerMaxFileSize);
+            log.info("server", `File Manager Root: ${this.fileManager.root}`);
+        } else {
+            log.info("server", "File Manager: disabled");
         }
 
         log.info("server", `Data Dir: ${this.config.dataDir}`);

@@ -8,6 +8,7 @@ export default defineComponent({
             statusPageTheme: "light",
             forceStatusPageTheme: false,
             path: "",
+            viewportWidth: window.innerWidth,
         };
     },
 
@@ -21,7 +22,19 @@ export default defineComponent({
 
         isDark() {
             return this.theme === "dark";
-        }
+        },
+
+        isMobile() {
+            return this.viewportWidth < 768;
+        },
+
+        isTablet() {
+            return this.viewportWidth >= 768 && this.viewportWidth < 992;
+        },
+
+        isCompact() {
+            return this.viewportWidth < 992;
+        },
     },
 
     watch: {
@@ -61,6 +74,11 @@ export default defineComponent({
 
         document.body.classList.add(this.theme);
         this.updateThemeColorMeta();
+        window.addEventListener("resize", this.updateViewportWidth, { passive: true });
+    },
+
+    beforeUnmount() {
+        window.removeEventListener("resize", this.updateViewportWidth);
     },
 
     methods: {
@@ -74,7 +92,11 @@ export default defineComponent({
             } else {
                 document.querySelector("#theme-color").setAttribute("content", "#5cdd8b");
             }
-        }
+        },
+
+        updateViewportWidth() {
+            this.viewportWidth = window.innerWidth;
+        },
     }
 });
 

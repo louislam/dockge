@@ -6,6 +6,15 @@
     font-family: BlinkMacSystemFont, segoe ui, Roboto, helvetica neue, Arial, noto sans, sans-serif, apple color emoji, segoe ui emoji, segoe ui symbol, noto color emoji;
 }
 
+html, body, #app {
+    min-width: 320px;
+    min-height: 100%;
+}
+
+body {
+    overflow-x: hidden;
+}
+
 h1 {
     font-size: 32px;
 }
@@ -187,6 +196,30 @@ optgroup {
 }
 
 @media (max-width: 550px) {
+    h1 { font-size: 1.7rem; }
+    h2 { font-size: 1.4rem; }
+
+    .btn, .form-control, .form-select {
+        min-height: 44px;
+    }
+
+    .form-control, .form-select {
+        font-size: 16px;
+    }
+
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    .modal-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .modal-footer .btn {
+        margin: 0;
+    }
+
     .table-shadow-box {
         padding: 10px !important;
 

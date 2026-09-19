@@ -59,4 +59,11 @@ export default {
 .terminal {
     height: 410px;
 }
+
+@media (max-width: 991.98px) {
+    .terminal {
+        height: calc(100dvh - 190px);
+        min-height: 360px;
+    }
+}
 </style>

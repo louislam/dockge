@@ -7,6 +7,9 @@ import DashboardHome from "./pages/DashboardHome.vue";
 import Console from "./pages/Console.vue";
 import Compose from "./pages/Compose.vue";
 import ContainerTerminal from "./pages/ContainerTerminal.vue";
+import ContainerDetails from "./pages/ContainerDetails.vue";
+import Files from "./pages/Files.vue";
+import StackBrowser from "./pages/StackBrowser.vue";
 
 const Settings = () => import("./pages/Settings.vue");
 
@@ -44,6 +47,16 @@ const routes = [
                                 component: Compose,
                             },
                             {
+                                path: "/compose/:stackName/container/:containerName",
+                                component: ContainerDetails,
+                                name: "containerDetails",
+                            },
+                            {
+                                path: "/compose/:stackName/container/:containerName/:endpoint",
+                                component: ContainerDetails,
+                                name: "containerDetailsEndpoint",
+                            },
+                            {
                                 path: "/terminal/:stackName/:serviceName/:type",
                                 component: ContainerTerminal,
                                 name: "containerTerminal",
@@ -62,6 +75,21 @@ const routes = [
                     {
                         path: "/console/:endpoint",
                         component: Console,
+                    },
+                    {
+                        path: "/files",
+                        component: Files,
+                        name: "files",
+                    },
+                    {
+                        path: "/files/:endpoint",
+                        component: Files,
+                        name: "filesEndpoint",
+                    },
+                    {
+                        path: "/stacks",
+                        component: StackBrowser,
+                        name: "stacks",
                     },
                     {
                         path: "/settings",

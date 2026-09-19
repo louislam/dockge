@@ -31,12 +31,15 @@ export interface Arguments {
     dataDir? : string;
     stacksDir? : string;
     enableConsole? : boolean;
+    fileManagerRoot? : string;
+    fileManagerMaxFileSize? : number;
 }
 
 // Some config values are required
 export interface Config extends Arguments {
     dataDir : string;
     stacksDir : string;
+    fileManagerMaxFileSize : number;
 }
 
 export function checkLogin(socket : DockgeSocket) {

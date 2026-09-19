@@ -1,6 +1,10 @@
 <template>
     <transition name="slide-fade" appear>
-        <div>
+        <div
+            class="compose-page"
+            :class="{ 'stack-view-mode': !isAdd && !isEditMode && stack.isManagedByDockge }"
+            :style="composePageStyle"
+        >
             <h1 v-if="isAdd" class="mb-3">{{ $t("compose") }}</h1>
             <h1 v-else class="mb-3">
                 <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
@@ -9,7 +13,7 @@
                 </span>
             </h1>
 
-            <div v-if="stack.isManagedByDockge" class="mb-3">
+            <div v-if="stack.isManagedByDockge" class="stack-actions mb-3">
                 <div class="btn-group me-2" role="group">
                     <button v-if="isEditMode" class="btn btn-primary" :disabled="processing" @click="deployStack">
                         <font-awesome-icon icon="rocket" class="me-1" />
@@ -36,7 +40,7 @@
                         {{ $t("restartStack") }}
                     </button>
 
-                    <button v-if="!isEditMode" class="btn btn-normal" :disabled="processing" @click="updateStack">
+                    <button v-if="!isEditMode && !$root.isCompact" class="btn btn-normal" :disabled="processing" @click="updateStack">
                         <font-awesome-icon icon="cloud-arrow-down" class="me-1" />
                         {{ $t("updateStack") }}
                     </button>
@@ -47,15 +51,23 @@
                     </button>
 
                     <BDropdown right text="" variant="normal">
+                        <BDropdownItem v-if="$root.isCompact && !isEditMode" @click="updateStack">
+                            <font-awesome-icon icon="cloud-arrow-down" class="me-1" />
+                            {{ $t("updateStack") }}
+                        </BDropdownItem>
                         <BDropdownItem @click="downStack">
                             <font-awesome-icon icon="stop" class="me-1" />
                             {{ $t("downStack") }}
+                        </BDropdownItem>
+                        <BDropdownItem v-if="$root.isCompact && !isEditMode" class="text-danger" @click="showDeleteDialog = true">
+                            <font-awesome-icon icon="trash" class="me-1" />
+                            {{ $t("deleteStack") }}
                         </BDropdownItem>
                     </BDropdown>
                 </div>
 
                 <button v-if="isEditMode && !isAdd" class="btn btn-normal" :disabled="processing" @click="discardStack">{{ $t("discardStack") }}</button>
-                <button v-if="!isEditMode" class="btn btn-danger" :disabled="processing" @click="showDeleteDialog = !showDeleteDialog">
+                <button v-if="!isEditMode && !$root.isCompact" class="btn btn-danger" :disabled="processing" @click="showDeleteDialog = !showDeleteDialog">
                     <font-awesome-icon icon="trash" class="me-1" />
                     {{ $t("deleteStack") }}
                 </button>
@@ -81,8 +93,14 @@
                 ></Terminal>
             </transition>
 
-            <div v-if="stack.isManagedByDockge" class="row">
-                <div class="col-lg-6">
+            <div v-if="$root.isCompact && stack.isManagedByDockge" class="compact-compose-tabs mb-3">
+                <button class="btn" :class="compactTab === 'containers' ? 'btn-primary' : 'btn-normal'" @click="compactTab = 'containers'">{{ $tc("container", 2) }}</button>
+                <button class="btn" :class="compactTab === 'compose' ? 'btn-primary' : 'btn-normal'" @click="compactTab = 'compose'">Compose</button>
+                <button v-if="isEditMode" class="btn" :class="compactTab === 'environment' ? 'btn-primary' : 'btn-normal'" @click="compactTab = 'environment'">{{ $t("environmentAndNetworks") }}</button>
+            </div>
+
+            <div v-if="stack.isManagedByDockge" class="row stack-content">
+                <div v-show="!$root.isCompact || compactTab === 'containers'" class="col-lg-6 containers-column">
                     <!-- General -->
                     <div v-if="isAdd">
                         <h4 class="mb-3">{{ $t("general") }}</h4>
@@ -121,15 +139,16 @@
                         </button>
                     </div>
 
-                    <div ref="containerList">
+                    <div ref="containerList" class="container-list">
                         <Container
-                            v-for="(service, name) in jsonConfig.services"
+                            v-for="name in displayServiceNames"
                             :key="name"
                             :name="name"
                             :is-edit-mode="isEditMode"
-                            :first="name === Object.keys(jsonConfig.services)[0]"
+                            :first="name === displayServiceNames[0]"
                             :serviceStatus="serviceStatusList[name]"
                             :dockerStats="dockerStats"
+                            :service-count="displayServiceNames.length"
                             @start-service="startService"
                             @stop-service="stopService"
                             @restart-service="restartService"
@@ -151,26 +170,12 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Combined Terminal Output -->
-                    <div v-show="!isEditMode">
-                        <h4 class="mb-3">{{ $t("terminal") }}</h4>
-                        <Terminal
-                            ref="combinedTerminal"
-                            class="mb-3 terminal"
-                            :name="combinedTerminalName"
-                            :endpoint="endpoint"
-                            :rows="combinedTerminalRows"
-                            :cols="combinedTerminalCols"
-                            style="height: 315px;"
-                        ></Terminal>
-                    </div>
                 </div>
-                <div class="col-lg-6">
-                    <h4 class="mb-3">{{ stack.composeFileName }}</h4>
+                <div v-show="!$root.isCompact || compactTab !== 'containers'" class="col-lg-6 compose-column">
+                    <h4 v-show="!$root.isCompact || compactTab === 'compose'" class="mb-3">{{ stack.composeFileName }}</h4>
 
                     <!-- YAML editor -->
-                    <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
+                    <div v-show="!$root.isCompact || compactTab === 'compose'" class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
                         <code-mirror
                             ref="editor"
                             v-model="stack.composeYAML"
@@ -184,12 +189,12 @@
                             @change="yamlCodeChange"
                         />
                     </div>
-                    <div v-if="isEditMode" class="mb-3">
+                    <div v-if="isEditMode" v-show="!$root.isCompact || compactTab === 'compose'" class="mb-3">
                         {{ yamlError }}
                     </div>
 
                     <!-- ENV editor -->
-                    <div v-if="isEditMode">
+                    <div v-if="isEditMode" v-show="!$root.isCompact || compactTab === 'environment'">
                         <h4 class="mb-3">.env</h4>
                         <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
                             <code-mirror
@@ -207,7 +212,7 @@
                         </div>
                     </div>
 
-                    <div v-if="isEditMode">
+                    <div v-if="isEditMode" v-show="!$root.isCompact || compactTab === 'environment'">
                         <!-- Volumes -->
                         <div v-if="false">
                             <h4 class="mb-3">{{ $tc("volume", 2) }}</h4>
@@ -255,10 +260,7 @@ import { parseDocument, Document } from "yaml";
 
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
-    COMBINED_TERMINAL_COLS,
-    COMBINED_TERMINAL_ROWS,
     copyYAMLComments, envsubstYAML,
-    getCombinedTerminalName,
     getComposeTerminalName,
     PROGRESS_TERMINAL_ROWS,
     RUNNING
@@ -331,8 +333,6 @@ export default {
             processing: true,
             showProgressTerminal: false,
             progressTerminalRows: PROGRESS_TERMINAL_ROWS,
-            combinedTerminalRows: COMBINED_TERMINAL_ROWS,
-            combinedTerminalCols: COMBINED_TERMINAL_COLS,
             stack: {
 
             },
@@ -342,8 +342,10 @@ export default {
             submitted: false,
             showDeleteDialog: false,
             newContainerName: "",
+            compactTab: "containers",
             stopServiceStatusTimeout: false,
             stopDockerStatsTimeout: false,
+            availablePageHeight: 0,
         };
     },
     computed: {
@@ -398,18 +400,22 @@ export default {
             return this.status === RUNNING;
         },
 
+        displayServiceNames() {
+            const configuredServices = Object.keys(this.jsonConfig.services || {});
+            if (this.isEditMode) {
+                return configuredServices;
+            }
+            return Array.from(new Set([
+                ...configuredServices,
+                ...Object.keys(this.serviceStatusList || {})
+            ])).sort((a, b) => a.localeCompare(b));
+        },
+
         terminalName() {
             if (!this.stack.name) {
                 return "";
             }
             return getComposeTerminalName(this.endpoint, this.stack.name);
-        },
-
-        combinedTerminalName() {
-            if (!this.stack.name) {
-                return "";
-            }
-            return getCombinedTerminalName(this.endpoint, this.stack.name);
         },
 
         networks() {
@@ -426,6 +432,15 @@ export default {
             } else {
                 return `/compose/${this.stack.name}`;
             }
+        },
+
+        composePageStyle() {
+            if (!this.availablePageHeight) {
+                return {};
+            }
+            return {
+                "--compose-page-height": `${this.availablePageHeight}px`,
+            };
         },
     },
     watch: {
@@ -473,6 +488,8 @@ export default {
         }
     },
     mounted() {
+        this.updateAvailableHeight();
+        window.addEventListener("resize", this.updateAvailableHeight);
         if (this.isAdd) {
             this.processing = false;
             this.isEditMode = true;
@@ -513,9 +530,23 @@ export default {
         this.requestDockerStats();
     },
     unmounted() {
-
+        window.removeEventListener("resize", this.updateAvailableHeight);
     },
     methods: {
+        /**
+         * Calculate the desktop viewport space available below the page's layout position.
+         */
+        updateAvailableHeight() {
+            let pageTop = 0;
+            let element = this.$el;
+            while (element) {
+                pageTop += element.offsetTop;
+                element = element.offsetParent;
+            }
+            pageTop -= window.scrollY;
+            this.availablePageHeight = Math.max(0, window.innerHeight - pageTop - 16);
+        },
+
         startServiceStatusTimeout() {
             clearTimeout(serviceStatusTimeout);
             serviceStatusTimeout = setTimeout(async () => {
@@ -578,9 +609,6 @@ export default {
             clearTimeout(serviceStatusTimeout);
             clearTimeout(dockerStatsTimeout);
 
-            // Leave Combined Terminal
-            console.debug("leaveCombinedTerminal", this.endpoint, this.stack.name);
-            this.$root.emitAgent(this.endpoint, "leaveCombinedTerminal", this.stack.name, () => {});
         },
 
         bindTerminal() {
@@ -861,5 +889,113 @@ export default {
 .agent-name {
     font-size: 13px;
     color: $dark-font-color3;
+}
+
+.compact-compose-tabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 0.25rem;
+}
+
+.compact-compose-tabs .btn {
+    flex: 1 0 auto;
+}
+
+@media (max-width: 991.98px) {
+    .stack-actions {
+        position: sticky;
+        z-index: 100;
+        bottom: calc(60px + env(safe-area-inset-bottom));
+        display: flex;
+        overflow-x: auto;
+        gap: 0.5rem;
+        margin-inline: -12px;
+        padding: 0.65rem 12px;
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(10px);
+
+        .dark & {
+            background: rgba($dark-bg, 0.94);
+        }
+    }
+
+    .stack-actions > .btn-group {
+        display: flex;
+        flex: 0 0 auto;
+    }
+
+    .stack-actions .btn {
+        min-height: 44px;
+        white-space: nowrap;
+    }
+
+    .editor-box :deep(.cm-editor) {
+        min-height: 52dvh;
+    }
+}
+
+@media (min-width: 992px) {
+    .compose-page.stack-view-mode {
+        display: flex;
+        overflow: hidden;
+        flex-direction: column;
+        height: var(--compose-page-height, calc(100dvh - 7rem));
+        min-height: 0;
+    }
+
+    .stack-view-mode > .stack-content {
+        overflow: hidden;
+        flex: 1 1 0;
+        min-height: 0;
+    }
+
+    .stack-view-mode .containers-column,
+    .stack-view-mode .compose-column {
+        height: 100%;
+        min-height: 0;
+    }
+
+    .stack-view-mode .containers-column {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stack-view-mode .container-list {
+        overflow-y: auto;
+        flex: 1 1 auto;
+        min-height: 0;
+        padding-right: 0.35rem;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+    }
+
+    .stack-view-mode .compose-column {
+        display: flex;
+        overflow: hidden;
+        flex-direction: column;
+        overscroll-behavior: contain;
+    }
+
+    .stack-view-mode .compose-column > h4 {
+        flex: 0 0 auto;
+    }
+
+    .stack-view-mode .compose-column > .editor-box {
+        overflow: hidden;
+        flex: 1 1 auto;
+        min-height: 0;
+        margin-bottom: 0 !important;
+    }
+
+    .stack-view-mode .compose-column > .editor-box :deep(.vue-codemirror),
+    .stack-view-mode .compose-column > .editor-box :deep(.cm-editor) {
+        height: 100%;
+        min-height: 0;
+    }
+
+    .stack-view-mode .compose-column > .editor-box :deep(.cm-scroller) {
+        overflow: auto;
+    }
 }
 </style>

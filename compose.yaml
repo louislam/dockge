@@ -1,6 +1,6 @@
 services:
   dockge:
-    image: louislam/dockge:1
+    image: docker.io/moailaozi/dockge:1.8.2
     restart: unless-stopped
     ports:
       # Host Port : Container Port
@@ -17,6 +17,12 @@ services:
       # ⚠️ 1. FULL path only. No relative path (MUST)
       # ⚠️ 2. Left Stacks Path === Right Stacks Path (MUST)
       - /opt/stacks:/opt/stacks
+      # Optional restricted file-manager directory. The host directory can be different,
+      # but it must be explicitly mounted into the container.
+      # - ./managed-files:/managed-files
     environment:
       # Tell Dockge where is your stacks directory
       - DOCKGE_STACKS_DIR=/opt/stacks
+      # Enable the file manager for this directory only:
+      # - DOCKGE_FILE_MANAGER_ROOT=/managed-files
+      # - DOCKGE_FILE_MANAGER_MAX_FILE_SIZE=104857600

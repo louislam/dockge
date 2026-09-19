@@ -4,7 +4,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️ ⚠️  Please go to https://github.com/louislam/dockge/discussions/new?category=ask-for-help
+        Please use https://github.com/Lorwell/dockge/discussions/new?category=ask-for-help for support requests.
   - type: checkboxes
     id: no-duplicate-issues
     attributes:

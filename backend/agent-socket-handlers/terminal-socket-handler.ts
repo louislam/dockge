@@ -25,6 +25,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 if (terminal instanceof InteractiveTerminal) {
                     //log.debug("terminalInput", "Terminal found, writing to terminal.");
                     terminal.write(cmd);
+                    callbackResult({ ok: true }, callback);
                 } else {
                     throw new Error("Terminal not found or it is not a Interactive Terminal.");
                 }
@@ -99,6 +100,9 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 if (typeof(shell) !== "string") {
                     throw new ValidationError("Shell must be a string.");
                 }
+                if (shell !== "bash" && shell !== "sh") {
+                    throw new ValidationError("Shell must be bash or sh.");
+                }
 
                 log.debug("interactiveTerminal", "Stack name: " + stackName);
                 log.debug("interactiveTerminal", "Service name: " + serviceName);
@@ -110,6 +114,85 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 callbackResult({
                     ok: true,
                 }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("leaveInteractiveTerminal", async (stackName : unknown, serviceName : unknown, shell : unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof(stackName) !== "string" || typeof(serviceName) !== "string" || typeof(shell) !== "string") {
+                    throw new ValidationError("Stack name, service name and shell must be strings.");
+                }
+                if (shell !== "bash" && shell !== "sh") {
+                    throw new ValidationError("Shell must be bash or sh.");
+                }
+                const stack = await Stack.getStack(server, stackName, true);
+                stack.leaveContainerTerminal(socket, serviceName, shell);
+                callbackResult({ ok: true }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("joinContainerLogs", async (stackName : unknown, containerName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof(stackName) !== "string" || typeof(containerName) !== "string") {
+                    throw new ValidationError("Stack name and container name must be strings.");
+                }
+                const stack = await Stack.getStack(server, stackName, true);
+                const terminalName = await stack.joinContainerLogs(socket, containerName);
+                callbackResult({
+                    ok: true,
+                    terminalName,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("leaveContainerLogs", async (stackName : unknown, containerName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof(stackName) !== "string" || typeof(containerName) !== "string") {
+                    throw new ValidationError("Stack name and container name must be strings.");
+                }
+                const stack = await Stack.getStack(server, stackName, true);
+                await stack.leaveContainerLogs(socket, containerName);
+                callbackResult({ ok: true }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("interactiveContainerTerminal", async (stackName : unknown, containerName : unknown, shell : unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof(stackName) !== "string" || typeof(containerName) !== "string" || typeof(shell) !== "string") {
+                    throw new ValidationError("Stack name, container name and shell must be strings.");
+                }
+                if (shell !== "bash" && shell !== "sh") {
+                    throw new ValidationError("Shell must be bash or sh.");
+                }
+                const stack = await Stack.getStack(server, stackName, true);
+                await stack.joinContainerInstanceTerminal(socket, containerName, shell);
+                callbackResult({ ok: true }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("leaveInteractiveContainerTerminal", async (stackName : unknown, containerName : unknown, shell : unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof(stackName) !== "string" || typeof(containerName) !== "string" || typeof(shell) !== "string") {
+                    throw new ValidationError("Stack name, container name and shell must be strings.");
+                }
+                const stack = await Stack.getStack(server, stackName, true);
+                stack.leaveContainerInstanceTerminal(socket, containerName, shell);
+                callbackResult({ ok: true }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }

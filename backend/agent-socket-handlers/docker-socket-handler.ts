@@ -19,7 +19,6 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msg: "Deployed",
                     msgi18n: true,
                 }, callback);
-                stack.joinCombinedTerminal(socket);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -77,10 +76,6 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
 
-                if (stack.isManagedByDockge) {
-                    stack.joinCombinedTerminal(socket);
-                }
-
                 callbackResult({
                     ok: true,
                     stack: await stack.toJSON(socket.endpoint),
@@ -123,8 +118,6 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 }, callback);
                 server.sendStackList();
 
-                stack.joinCombinedTerminal(socket);
-
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -147,8 +140,6 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msgi18n: true,
                 }, callback);
                 server.sendStackList();
-
-                stack.leaveCombinedTerminal(socket);
             } catch (e) {
                 callbackError(e, callback);
             }
@@ -267,7 +258,6 @@ export class DockerSocketHandler extends AgentSocketHandler {
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.startService(socket, serviceName);
-                stack.joinCombinedTerminal(socket); // Ensure the combined terminal is joined
                 callbackResult({
                     ok: true,
                     msg: "Service " + serviceName + " started"
@@ -318,6 +308,57 @@ export class DockerSocketHandler extends AgentSocketHandler {
             }
         });
 
+        agentSocket.on("startContainer", async (stackName: unknown, containerName: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof stackName !== "string" || typeof containerName !== "string") {
+                    throw new ValidationError("Stack name and container name must be strings");
+                }
+                const stack = await Stack.getStack(server, stackName, true);
+                await stack.runContainerAction(containerName, "start");
+                callbackResult({ ok: true,
+                    msg: "Started",
+                    msgi18n: true }, callback);
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("stopContainer", async (stackName: unknown, containerName: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof stackName !== "string" || typeof containerName !== "string") {
+                    throw new ValidationError("Stack name and container name must be strings");
+                }
+                const stack = await Stack.getStack(server, stackName, true);
+                await stack.runContainerAction(containerName, "stop");
+                callbackResult({ ok: true,
+                    msg: "Stopped",
+                    msgi18n: true }, callback);
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("restartContainer", async (stackName: unknown, containerName: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof stackName !== "string" || typeof containerName !== "string") {
+                    throw new ValidationError("Stack name and container name must be strings");
+                }
+                const stack = await Stack.getStack(server, stackName, true);
+                await stack.runContainerAction(containerName, "restart");
+                callbackResult({ ok: true,
+                    msg: "Restarted",
+                    msgi18n: true }, callback);
+                server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
         // getExternalNetworkList
         agentSocket.on("getDockerNetworkList", async (callback) => {
             try {
@@ -354,4 +395,3 @@ export class DockerSocketHandler extends AgentSocketHandler {
     }
 
 }
-
