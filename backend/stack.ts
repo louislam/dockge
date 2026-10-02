@@ -26,6 +26,7 @@ export class Stack {
     protected _status: number = UNKNOWN;
     protected _composeYAML?: string;
     protected _composeENV?: string;
+    protected _readme?: string;
     protected _configFilePath?: string;
     protected _composeFileName: string = "compose.yaml";
     protected server: DockgeServer;
@@ -74,6 +75,7 @@ export class Stack {
             ...obj,
             composeYAML: this.composeYAML,
             composeENV: this.composeENV,
+            readme: this.readme,
             primaryHostname,
         };
     }
@@ -152,6 +154,21 @@ export class Stack {
         return this._composeENV;
     }
 
+    get readme() : string {
+        if (this._readme === undefined) {
+            try {
+                this._readme = fs.readFileSync(path.join(this.path, "README.md"), "utf-8");
+            } catch (e) {
+                this._readme = "";
+            }
+        }
+        return this._readme;
+    }
+
+    setReadme(readme : string) {
+        this._readme = readme;
+    }
+
     get path() : string {
         return path.join(this.server.stacksDir, this.name);
     }
@@ -196,6 +213,9 @@ export class Stack {
 
         // Write or overwrite the compose.yaml
         fs.writeFileSync(path.join(dir, this._composeFileName), this.composeYAML);
+        if (this._readme !== undefined) {
+            fs.writeFileSync(path.join(dir, "README.md"), this._readme);
+        }
         if (process.env.PUID && process.env.PGID) {
             const uid = Number(process.env.PUID);
             const gid = Number(process.env.PGID);

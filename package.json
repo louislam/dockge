@@ -85,6 +85,7 @@
         "eslint": "~8.50.0",
         "eslint-plugin-jsdoc": "~46.8.2",
         "eslint-plugin-vue": "~9.32.0",
+        "markdown-it": "^15.0.2",
         "sass": "~1.68.0",
         "thememirror": "^2.0.1",
         "typescript": "~5.2.2",
