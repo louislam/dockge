@@ -233,6 +233,17 @@
                 </div>
             </div>
 
+            <section v-if="stack.isManagedByDockge" class="mt-3">
+                <h4 class="mb-3">README.md</h4>
+                <div v-if="isEditMode" class="shadow-box big-padding mb-3">
+                    <textarea v-model="stack.readme" class="form-control readme-editor" aria-label="README.md"></textarea>
+                </div>
+                <!-- MarkdownIt disables raw HTML and rejects unsafe link protocols. -->
+                <!-- eslint-disable-next-line vue/no-v-html -->
+                <div v-else-if="stack.readme" class="shadow-box big-padding mb-3 markdown-body" v-html="renderedReadme"></div>
+                <div v-else class="text-muted mb-3">No README.md</div>
+            </section>
+
             <div v-if="!stack.isManagedByDockge && !processing">
                 {{ $t("stackNotManagedByDockgeMsg") }}
             </div>
@@ -267,6 +278,13 @@ import { BModal } from "bootstrap-vue-next";
 import NetworkInput from "../components/NetworkInput.vue";
 import dotenv from "dotenv";
 import { ref } from "vue";
+import MarkdownIt from "markdown-it";
+
+const markdown = new MarkdownIt({
+    html: false,
+    linkify: true,
+    breaks: false,
+});
 
 const template = `
 services:
@@ -349,6 +367,10 @@ export default {
     computed: {
         endpointDisplay() {
             return this.$root.endpointDisplayFunction(this.endpoint);
+        },
+
+        renderedReadme() {
+            return markdown.render(this.stack.readme || "");
         },
 
         urls() {
@@ -498,6 +520,7 @@ export default {
                 name: "",
                 composeYAML,
                 composeENV,
+                readme: "",
                 isManagedByDockge: true,
                 endpoint: "",
             };
@@ -633,7 +656,7 @@ export default {
 
             this.bindTerminal();
 
-            this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+            this.$root.emitAgent(this.stack.endpoint, "deployStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.stack.readme || "", this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
@@ -647,7 +670,7 @@ export default {
         saveStack() {
             this.processing = true;
 
-            this.$root.emitAgent(this.stack.endpoint, "saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.isAdd, (res) => {
+            this.$root.emitAgent(this.stack.endpoint, "saveStack", this.stack.name, this.stack.composeYAML, this.stack.composeENV, this.stack.readme || "", this.isAdd, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
 
@@ -861,5 +884,21 @@ export default {
 .agent-name {
     font-size: 13px;
     color: $dark-font-color3;
+}
+
+.readme-editor {
+    min-height: 320px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.markdown-body :deep(pre) {
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    background: var(--bs-tertiary-bg);
+    overflow-x: auto;
+}
+
+.markdown-body :deep(img) {
+    max-width: 100%;
 }
 </style>
