@@ -238,6 +238,8 @@
                 <div v-if="isEditMode" class="shadow-box big-padding mb-3">
                     <textarea v-model="stack.readme" class="form-control readme-editor" aria-label="README.md"></textarea>
                 </div>
+                <!-- MarkdownIt disables raw HTML and rejects unsafe link protocols. -->
+                <!-- eslint-disable-next-line vue/no-v-html -->
                 <div v-else-if="stack.readme" class="shadow-box big-padding mb-3 markdown-body" v-html="renderedReadme"></div>
                 <div v-else class="text-muted mb-3">No README.md</div>
             </section>

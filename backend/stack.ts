@@ -165,6 +165,10 @@ export class Stack {
         return this._readme;
     }
 
+    /**
+     * Set the README content to be written when the stack is saved.
+     * @param readme Markdown content for README.md
+     */
     setReadme(readme : string) {
         this._readme = readme;
     }
