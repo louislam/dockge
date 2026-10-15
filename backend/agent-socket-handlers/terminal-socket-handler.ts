@@ -5,6 +5,7 @@ import { InteractiveTerminal, MainTerminal, Terminal } from "../terminal";
 import { Stack } from "../stack";
 import { AgentSocketHandler } from "../agent-socket-handler";
 import { AgentSocket } from "../../common/agent-socket";
+import { requireAdmin, requireStackAccess, requireTerminalAccess } from "../access-control";
 
 export class TerminalSocketHandler extends AgentSocketHandler {
     create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
@@ -12,16 +13,16 @@ export class TerminalSocketHandler extends AgentSocketHandler {
         agentSocket.on("terminalInput", async (terminalName : unknown, cmd : unknown, callback) => {
             try {
                 checkLogin(socket);
-
-                if (typeof(terminalName) !== "string") {
+                if (typeof terminalName !== "string") {
                     throw new Error("Terminal name must be a string.");
                 }
+                const terminal = Terminal.getTerminal(terminalName);
+                await requireTerminalAccess(socket, terminal?.stackName);
 
                 if (typeof(cmd) !== "string") {
                     throw new Error("Command must be a string.");
                 }
 
-                let terminal = Terminal.getTerminal(terminalName);
                 if (terminal instanceof InteractiveTerminal) {
                     //log.debug("terminalInput", "Terminal found, writing to terminal.");
                     terminal.write(cmd);
@@ -37,6 +38,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
         agentSocket.on("mainTerminal", async (terminalName : unknown, callback) => {
             try {
                 checkLogin(socket);
+                await requireAdmin(socket);
 
                 // Throw an error if console is not enabled
                 if (!server.config.enableConsole) {
@@ -75,6 +77,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
         agentSocket.on("checkMainTerminal", async (callback) => {
             try {
                 checkLogin(socket);
+                await requireAdmin(socket);
                 callbackResult({
                     ok: server.config.enableConsole,
                 }, callback);
@@ -91,6 +94,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 if (typeof(stackName) !== "string") {
                     throw new ValidationError("Stack name must be a string.");
                 }
+                await requireStackAccess(socket, stackName);
 
                 if (typeof(serviceName) !== "string") {
                     throw new ValidationError("Service name must be a string.");
@@ -127,8 +131,9 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 if (typeof(terminalName) !== "string") {
                     throw new ValidationError("Terminal name must be a string.");
                 }
-
-                let buffer : string = Terminal.getTerminal(terminalName)?.getBuffer() ?? "";
+                const terminal = Terminal.getTerminal(terminalName);
+                await requireTerminalAccess(socket, terminal?.stackName);
+                let buffer : string = terminal?.getBuffer() ?? "";
 
                 if (!buffer) {
                     log.debug("console", "No buffer found.");
@@ -153,6 +158,7 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 if (typeof(stackName) !== "string") {
                     throw new ValidationError("Stack name must be a string.");
                 }
+                await requireStackAccess(socket, stackName);
 
                 const stack = await Stack.getStack(server, stackName);
                 await stack.leaveCombinedTerminal(socket);
@@ -173,6 +179,8 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 if (typeof terminalName !== "string") {
                     throw new Error("Terminal name must be a string.");
                 }
+                const terminal = Terminal.getTerminal(terminalName);
+                await requireTerminalAccess(socket, terminal?.stackName);
 
                 if (typeof rows !== "number") {
                     throw new Error("Command must be a number.");
@@ -180,8 +188,6 @@ export class TerminalSocketHandler extends AgentSocketHandler {
                 if (typeof cols !== "number") {
                     throw new Error("Command must be a number.");
                 }
-
-                let terminal = Terminal.getTerminal(terminalName);
 
                 // log.info("terminal", terminal);
                 if (terminal instanceof Terminal) {
