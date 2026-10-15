@@ -1,5 +1,6 @@
 import { DockgeServer } from "./dockge-server";
 import * as os from "node:os";
+import path from "node:path";
 import * as pty from "@homebridge/node-pty-prebuilt-multiarch";
 import { LimitQueue } from "./utils/limit-queue";
 import { DockgeSocket } from "./util-server";
@@ -26,6 +27,7 @@ export class Terminal {
     protected args : string | string[];
     protected cwd : string;
     protected callback? : (exitCode : number) => void;
+    public stackName?: string;
 
     protected _rows : number = TERMINAL_ROWS;
     protected _cols : number = TERMINAL_COLS;
@@ -230,6 +232,7 @@ export class Terminal {
             }
 
             let terminal = new Terminal(server, terminalName, file, args, cwd);
+            terminal.stackName = path.basename(cwd);
             terminal.rows = PROGRESS_TERMINAL_ROWS;
 
             if (socket) {

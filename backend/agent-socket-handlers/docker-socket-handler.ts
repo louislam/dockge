@@ -3,6 +3,7 @@ import { DockgeServer } from "../dockge-server";
 import { callbackError, callbackResult, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { Stack } from "../stack";
 import { AgentSocket } from "../../common/agent-socket";
+import { deleteStackOwner, isAdmin, requireNewStackAccess, requireStackAccess, saveStackOwner, checkStackQuota, withStackSaveLock } from "../access-control";
 
 export class DockerSocketHandler extends AgentSocketHandler {
     create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
@@ -11,7 +12,8 @@ export class DockerSocketHandler extends AgentSocketHandler {
         agentSocket.on("deployStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
             try {
                 checkLogin(socket);
-                const stack = await this.saveStack(server, name, composeYAML, composeENV, isAdd);
+                const stack = await this.saveStack(socket, server, name, composeYAML, composeENV, isAdd);
+                await this.validateStackQuota(socket, stack);
                 await stack.deploy(socket);
                 server.sendStackList();
                 callbackResult({
@@ -28,7 +30,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
         agentSocket.on("saveStack", async (name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown, callback) => {
             try {
                 checkLogin(socket);
-                await this.saveStack(server, name, composeYAML, composeENV, isAdd);
+                await this.saveStack(socket, server, name, composeYAML, composeENV, isAdd);
                 callbackResult({
                     ok: true,
                     msg: "Saved",
@@ -46,10 +48,12 @@ export class DockerSocketHandler extends AgentSocketHandler {
                 if (typeof(name) !== "string") {
                     throw new ValidationError("Name must be a string");
                 }
+                await requireStackAccess(socket, name);
                 const stack = await Stack.getStack(server, name);
 
                 try {
                     await stack.delete(socket);
+                    await deleteStackOwner(name, socket.endpoint);
                 } catch (e) {
                     server.sendStackList();
                     throw e;
@@ -75,6 +79,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
+                await requireStackAccess(socket, stackName);
                 const stack = await Stack.getStack(server, stackName);
 
                 if (stack.isManagedByDockge) {
@@ -114,7 +119,9 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
+                await requireStackAccess(socket, stackName);
                 const stack = await Stack.getStack(server, stackName);
+                await this.validateStackQuota(socket, stack);
                 await stack.start(socket);
                 callbackResult({
                     ok: true,
@@ -139,6 +146,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
+                await requireStackAccess(socket, stackName);
                 const stack = await Stack.getStack(server, stackName);
                 await stack.stop(socket);
                 callbackResult({
@@ -163,7 +171,9 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
+                await requireStackAccess(socket, stackName);
                 const stack = await Stack.getStack(server, stackName);
+                await this.validateStackQuota(socket, stack);
                 await stack.restart(socket);
                 callbackResult({
                     ok: true,
@@ -185,7 +195,9 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
+                await requireStackAccess(socket, stackName);
                 const stack = await Stack.getStack(server, stackName);
+                await this.validateStackQuota(socket, stack);
                 await stack.update(socket);
                 callbackResult({
                     ok: true,
@@ -207,6 +219,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
+                await requireStackAccess(socket, stackName);
                 const stack = await Stack.getStack(server, stackName);
                 await stack.down(socket);
                 callbackResult({
@@ -229,6 +242,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Stack name must be a string");
                 }
 
+                await requireStackAccess(socket, stackName);
                 const stack = await Stack.getStack(server, stackName, true);
                 const serviceStatusList = Object.fromEntries(await stack.getServiceStatusList());
                 callbackResult({
@@ -244,8 +258,9 @@ export class DockerSocketHandler extends AgentSocketHandler {
         agentSocket.on("dockerStats", async (callback) => {
             try {
                 checkLogin(socket);
-
-                const dockerStats = Object.fromEntries(await server.getDockerStats());
+                const dockerStats = Object.fromEntries(
+                    await (await isAdmin(socket) ? server.getDockerStats() : server.getDockerStatsForUser(socket.userID))
+                );
                 callbackResult({
                     ok: true,
                     dockerStats,
@@ -265,7 +280,9 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Stack name and service name must be strings");
                 }
 
+                await requireStackAccess(socket, stackName);
                 const stack = await Stack.getStack(server, stackName);
+                await this.validateStackQuota(socket, stack);
                 await stack.startService(socket, serviceName);
                 stack.joinCombinedTerminal(socket); // Ensure the combined terminal is joined
                 callbackResult({
@@ -287,6 +304,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new ValidationError("Stack name and service name must be strings");
                 }
 
+                await requireStackAccess(socket, stackName);
                 const stack = await Stack.getStack(server, stackName);
                 await stack.stopService(socket, serviceName);
                 callbackResult({
@@ -307,7 +325,9 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     throw new Error("Invalid stackName or serviceName");
                 }
 
+                await requireStackAccess(socket, stackName);
                 const stack = await Stack.getStack(server, stackName, true);
+                await this.validateStackQuota(socket, stack);
                 await stack.restartService(socket, serviceName);
                 callbackResult({
                     ok: true,
@@ -333,7 +353,7 @@ export class DockerSocketHandler extends AgentSocketHandler {
         });
     }
 
-    async saveStack(server : DockgeServer, name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown) : Promise<Stack> {
+    async saveStack(socket: DockgeSocket, server : DockgeServer, name : unknown, composeYAML : unknown, composeENV : unknown, isAdd : unknown) : Promise<Stack> {
         // Check types
         if (typeof(name) !== "string") {
             throw new ValidationError("Name must be a string");
@@ -348,10 +368,29 @@ export class DockerSocketHandler extends AgentSocketHandler {
             throw new ValidationError("isAdd must be a boolean");
         }
 
-        const stack = new Stack(server, name, composeYAML, composeENV, false);
-        await stack.save(isAdd);
-        return stack;
+        if (isAdd) {
+            await requireNewStackAccess(socket, name);
+            if (!await isAdmin(socket) && (await Stack.getStackList(server)).has(name)) {
+                throw new ValidationError("Stack name already exists");
+            }
+        } else {
+            await requireStackAccess(socket, name);
+        }
+
+        return withStackSaveLock(socket, name, async () => {
+            const usage = await checkStackQuota(socket, name, composeYAML);
+            const stack = new Stack(server, name, composeYAML, composeENV, false);
+            await stack.save(isAdd);
+            await saveStackOwner(socket, name, usage);
+            return stack;
+        });
+    }
+
+    private async validateStackQuota(socket: DockgeSocket, stack: Stack): Promise<void> {
+        await withStackSaveLock(socket, stack.name, async () => {
+            const usage = await checkStackQuota(socket, stack.name, stack.composeYAML);
+            await saveStackOwner(socket, stack.name, usage);
+        });
     }
 
 }
-

@@ -4,6 +4,7 @@ import { log } from "../log";
 import { checkLogin, DockgeSocket } from "../util-server";
 import { AgentSocket } from "../../common/agent-socket";
 import { ALL_ENDPOINTS } from "../../common/util-common";
+import { requireAdmin } from "../access-control";
 
 export class AgentProxySocketHandler extends SocketHandler {
 
@@ -22,6 +23,7 @@ export class AgentProxySocketHandler extends SocketHandler {
                 }
 
                 if (endpoint === ALL_ENDPOINTS) {      // Send to all endpoints
+                    await requireAdmin(socket);
                     log.debug("agent", "Sending to all endpoints: " + eventName);
                     socket.instanceManager.emitToAllEndpoints(eventName, ...args);
 
@@ -30,12 +32,23 @@ export class AgentProxySocketHandler extends SocketHandler {
                     agentSocket.call(eventName, ...args);
 
                 } else {
+                    await requireAdmin(socket);
                     log.debug("agent", "Proxying request to " + endpoint + " for " + eventName);
                     await socket.instanceManager.emitToEndpoint(endpoint, eventName, ...args);
                 }
             } catch (e) {
                 if (e instanceof Error) {
                     log.warn("agent", e.message);
+                    const callback = args[args.length - 1];
+                    if (typeof callback === "function") {
+                        callback({
+                            ok: false,
+                            msg: e.message,
+                            msgi18n: true,
+                        });
+                    }
+                } else {
+                    log.warn("agent", "Unknown error while handling agent request");
                 }
             }
         });

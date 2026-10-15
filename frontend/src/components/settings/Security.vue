@@ -7,6 +7,11 @@
                     {{ $t("Current User") }}: <strong>{{ $root.username }}</strong>
                     <button v-if="! settings.disableAuth" id="logout-btn" class="btn btn-danger ms-4 me-2 mb-2" @click="$root.logout">{{ $t("Logout") }}</button>
                 </p>
+                <p v-if="!$root.isAdmin">
+                    {{ $t("Your resource limits") }}:
+                    {{ $t("CPU quota (cores)") }} {{ $root.cpuLimit || $t("No limit") }},
+                    {{ $t("Memory quota (MiB)") }} {{ $root.memoryLimit ? Math.floor($root.memoryLimit / (1024 ** 2)) : $t("No limit") }}
+                </p>
 
                 <h5 class="my-4 settings-subheading">{{ $t("Change Password") }}</h5>
                 <form class="mb-3" @submit.prevent="savePassword">
@@ -80,7 +85,7 @@
                 </div>
             </div>
 
-            <div class="my-4">
+            <div v-if="$root.isAdmin" class="my-4">
                 <!-- Advanced -->
                 <h5 class="my-4 settings-subheading">{{ $t("Advanced") }}</h5>
 
