@@ -260,6 +260,67 @@ export class Stack {
         return false;
     }
 
+    /**
+     * Get the containers belonging to a compose project.
+     */
+    static async getSingleComposeStatus(composeName : string) : Promise<Array<{ State?: string, Status?: string }> | null> {
+        try {
+            let res = await childProcessAsync.spawn("docker", [ "ps", "-a", "--filter", `label=com.docker.compose.project=${composeName}`, "--format", "json" ], {
+                encoding: "utf-8",
+            });
+            if (!res.stdout) {
+                return null;
+            }
+
+            return res.stdout.toString().trim().split("\n").filter(Boolean).map((line) => JSON.parse(line));
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Return true when at least one container is running and every exited
+     * container completed successfully.
+     */
+    static isComposeExitClean(containers : Array<{ State?: string, Status?: string }>) : boolean {
+        let anyRunning = false;
+
+        for (let container of containers) {
+            let state = container.State?.toLowerCase();
+            if (state === "running") {
+                anyRunning = true;
+                continue;
+            }
+
+            if (state === "exited") {
+                let exitCode = container.Status?.match(/Exited\s+\((\d+)\)/i)?.[1];
+                if (exitCode !== "0") {
+                    return false;
+                }
+            }
+        }
+
+        return anyRunning;
+    }
+
+    /**
+     * Resolve a compose-list status, keeping running stacks active when only
+     * one-time init containers have exited successfully.
+     */
+    static async resolveComposeStatus(composeStack : { Name: string, Status: string }) : Promise<number> {
+        let status = this.statusConvert(composeStack.Status);
+        if (status !== EXITED || !composeStack.Status.includes("running")) {
+            return status;
+        }
+
+        let containers = await this.getSingleComposeStatus(composeStack.Name);
+        if (containers && this.isComposeExitClean(containers)) {
+            return RUNNING;
+        }
+
+        return status;
+    }
+
     static async getStackList(server : DockgeServer, useCacheForManaged = false) : Promise<Map<string, Stack>> {
         let stacksDir = server.stacksDir;
         let stackList : Map<string, Stack>;
@@ -322,7 +383,7 @@ export class Stack {
                 stackList.set(composeStack.Name, stack);
             }
 
-            stack._status = this.statusConvert(composeStack.Status);
+            stack._status = await this.resolveComposeStatus(composeStack);
             stack._configFilePath = composeStack.ConfigFiles;
         }
 
@@ -347,7 +408,7 @@ export class Stack {
         let composeList = JSON.parse(res.stdout.toString());
 
         for (let composeStack of composeList) {
-            statusList.set(composeStack.Name, this.statusConvert(composeStack.Status));
+            statusList.set(composeStack.Name, await this.resolveComposeStatus(composeStack));
         }
 
         return statusList;
