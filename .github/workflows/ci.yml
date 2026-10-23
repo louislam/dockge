@@ -10,19 +10,30 @@ on:
     paths-ignore:
       - '*.md'
 
+permissions: {}
+
 jobs:
   ci:
+    name: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, ARM, ARM64]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         node: [22] # Can be changed
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
     steps:
-      - name: Checkout Code
-        run: |  # Mainly for Windows
+      - name: Disable autocrlf
+        run: | # Mainly for Windows
           git config --global core.autocrlf false
           git config --global core.eol lf
+
+      - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -41,4 +52,3 @@ jobs:
       - name: Build
         run: npm run build:frontend
       # more things can be add later like tests etc..
-
