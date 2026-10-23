@@ -3,6 +3,7 @@ import { DockgeServer } from "../dockge-server";
 import { callbackError, callbackResult, checkLogin, DockgeSocket, ValidationError } from "../util-server";
 import { Stack } from "../stack";
 import { AgentSocket } from "../../common/agent-socket";
+import { ImageUpdateService } from "../image-update-service";
 
 export class DockerSocketHandler extends AgentSocketHandler {
     create(socket : DockgeSocket, server : DockgeServer, agentSocket : AgentSocket) {
@@ -99,6 +100,46 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     ok: true,
                     msg: "Updated",
                     msgi18n: true,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("getApiStackList", async (callback) => {
+            try {
+                checkLogin(socket);
+                const stackList = await Stack.getStackList(server, true);
+                const stacks: Record<string, object> = {};
+                for (const [ name, stack ] of stackList) {
+                    stacks[name] = {
+                        ...stack.toSimpleJSON(socket.endpoint),
+                        imageUpdatesAvailable: ImageUpdateService.hasUpdates(name),
+                        services: await ImageUpdateService.getServices(stack, false),
+                    };
+                }
+                callbackResult({
+                    ok: true,
+                    stacks,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        agentSocket.on("checkApiStackUpdates", async (stackName: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof stackName !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+                const stack = await Stack.getStack(server, stackName);
+                const services = await ImageUpdateService.getServices(stack, true);
+                callbackResult({
+                    ok: true,
+                    services,
+                    imageUpdatesAvailable: Object.values(services)
+                        .some((service) => service.imageUpdateAvailable),
                 }, callback);
             } catch (e) {
                 callbackError(e, callback);
@@ -354,4 +395,3 @@ export class DockerSocketHandler extends AgentSocketHandler {
     }
 
 }
-

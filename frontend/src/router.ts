@@ -7,6 +7,7 @@ import DashboardHome from "./pages/DashboardHome.vue";
 import Console from "./pages/Console.vue";
 import Compose from "./pages/Compose.vue";
 import ContainerTerminal from "./pages/ContainerTerminal.vue";
+const UpdateHistory = () => import("./pages/UpdateHistory.vue");
 
 const Settings = () => import("./pages/Settings.vue");
 
@@ -14,6 +15,8 @@ const Settings = () => import("./pages/Settings.vue");
 import Appearance from "./components/settings/Appearance.vue";
 import General from "./components/settings/General.vue";
 const Security = () => import("./components/settings/Security.vue");
+const Integrations = () => import("./components/settings/Integrations.vue");
+const Updates = () => import("./components/settings/Updates.vue");
 const GlobalEnv = () => import("./components/settings/GlobalEnv.vue");
 import About from "./components/settings/About.vue";
 
@@ -64,6 +67,10 @@ const routes = [
                         component: Console,
                     },
                     {
+                        path: "/update-history",
+                        component: UpdateHistory,
+                    },
+                    {
                         path: "/settings",
                         component: Settings,
                         children: [
@@ -78,6 +85,14 @@ const routes = [
                             {
                                 path: "security",
                                 component: Security,
+                            },
+                            {
+                                path: "integrations",
+                                component: Integrations,
+                            },
+                            {
+                                path: "updates",
+                                component: Updates,
                             },
                             {
                                 path: "globalEnv",

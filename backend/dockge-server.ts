@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { MainRouter } from "./routers/main-router";
+import { ApiRouter } from "./routers/api-router";
 import * as fs from "node:fs";
 import { PackageJson } from "type-fest";
 import { Database } from "./database";
@@ -37,6 +38,11 @@ import { AgentSocketHandler } from "./agent-socket-handler";
 import { AgentSocket } from "../common/agent-socket";
 import { ManageAgentSocketHandler } from "./socket-handlers/manage-agent-socket-handler";
 import { Terminal } from "./terminal";
+import { ApiSocketHandler } from "./socket-handlers/api-socket-handler";
+import { AutoUpdateScheduler } from "./auto-update-scheduler";
+import { UpdateManagementSocketHandler } from "./socket-handlers/update-management-socket-handler";
+import { ServerAgentManager } from "./server-agent-manager";
+import { SseManager } from "./sse-manager";
 
 export class DockgeServer {
     app : Express;
@@ -50,6 +56,7 @@ export class DockgeServer {
      * List of express routers
      */
     routerList : Router[] = [
+        new ApiRouter(),
         new MainRouter(),
     ];
 
@@ -59,6 +66,8 @@ export class DockgeServer {
     socketHandlerList : SocketHandler[] = [
         new MainSocketHandler(),
         new ManageAgentSocketHandler(),
+        new ApiSocketHandler(),
+        new UpdateManagementSocketHandler(),
     ];
 
     agentProxySocketHandler = new AgentProxySocketHandler();
@@ -79,6 +88,14 @@ export class DockgeServer {
     jwtSecret : string = "";
 
     stacksDir : string = "";
+
+    restartScheduler?: () => void;
+
+    autoUpdateScheduler?: AutoUpdateScheduler;
+
+    serverAgentManager = new ServerAgentManager();
+
+    sseManager = new SseManager();
 
     /**
      *
@@ -186,6 +203,9 @@ export class DockgeServer {
             log.info("server", "Server Type: HTTP");
             this.httpServer = http.createServer(this.app);
         }
+
+        // Parse JSON request bodies used by API routes.
+        this.app.use(express.json());
 
         // Binding Routers
         for (const router of this.routerList) {
@@ -386,6 +406,10 @@ export class DockgeServer {
             log.info("server", "No user, need setup");
             this.needSetup = true;
         }
+
+        this.autoUpdateScheduler = new AutoUpdateScheduler(this);
+        await this.autoUpdateScheduler.start();
+        await this.serverAgentManager.connectAll();
 
         // Listen
         this.httpServer.listen(this.config.port, this.config.hostname, () => {
@@ -681,6 +705,9 @@ export class DockgeServer {
 
         // TODO: Close all terminals?
 
+        this.autoUpdateScheduler?.stop();
+        this.serverAgentManager.disconnectAll();
+        this.sseManager.close();
         await Database.close();
         Settings.stopCacheCleaner();
     }

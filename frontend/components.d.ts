@@ -23,6 +23,7 @@ declare module 'vue' {
     General: typeof import('./src/components/settings/General.vue')['default']
     GlobalEnv: typeof import('./src/components/settings/GlobalEnv.vue')['default']
     HiddenInput: typeof import('./src/components/HiddenInput.vue')['default']
+    Integrations: typeof import('./src/components/settings/Integrations.vue')['default']
     Login: typeof import('./src/components/Login.vue')['default']
     NetworkInput: typeof import('./src/components/NetworkInput.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
@@ -32,6 +33,7 @@ declare module 'vue' {
     StackListItem: typeof import('./src/components/StackListItem.vue')['default']
     Terminal: typeof import('./src/components/Terminal.vue')['default']
     TwoFADialog: typeof import('./src/components/TwoFADialog.vue')['default']
+    Updates: typeof import('./src/components/settings/Updates.vue')['default']
     Uptime: typeof import('./src/components/Uptime.vue')['default']
   }
   export interface ComponentCustomProperties {
