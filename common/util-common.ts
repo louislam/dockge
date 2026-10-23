@@ -219,7 +219,10 @@ export function copyYAMLComments(doc : Document, src : Document) {
 
     if (doc && doc.contents && src && src.contents) {
         // @ts-ignore
-        copyYAMLCommentsItems(doc.contents.items, src.contents.items);
+        const hasLegacyOctal = copyYAMLCommentsItems(doc.contents.items, src.contents.items);
+        if (hasLegacyOctal) {
+            doc.setSchema("1.1");
+        }
     }
 }
 
@@ -228,10 +231,12 @@ export function copyYAMLComments(doc : Document, src : Document) {
  * Attempts to preserve comments by matching content rather than just array indices
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function copyYAMLCommentsItems(items: any, srcItems: any) {
+function copyYAMLCommentsItems(items: any, srcItems: any): boolean {
     if (!items || !srcItems) {
-        return;
+        return false;
     }
+
+    let hasLegacyOctal = false;
 
     // First pass - try to match items by their content
     for (let i = 0; i < items.length; i++) {
@@ -274,18 +279,34 @@ function copyYAMLCommentsItems(items: any, srcItems: any) {
                 }
             }
 
+            if (
+                item.value instanceof Scalar &&
+                srcItem.value instanceof Scalar &&
+                typeof item.value.value === "number" &&
+                typeof srcItem.value.source === "string" &&
+                /^0[0-7]+$/.test(srcItem.value.source)
+            ) {
+                item.value.value = Number.parseInt(srcItem.value.source, 8);
+                item.value.format = "OCT";
+                hasLegacyOctal = true;
+            }
+
             if (item.value && srcItem.value) {
                 if (typeof item.value === "object" && typeof srcItem.value === "object") {
                     item.value.comment = srcItem.value.comment;
                     item.value.commentBefore = srcItem.value.commentBefore;
 
                     if (item.value.items && srcItem.value.items) {
-                        copyYAMLCommentsItems(item.value.items, srcItem.value.items);
+                        hasLegacyOctal =
+                            copyYAMLCommentsItems(item.value.items, srcItem.value.items) ||
+                            hasLegacyOctal;
                     }
                 }
             }
         }
     }
+
+    return hasLegacyOctal;
 }
 
 /**
@@ -427,4 +448,3 @@ function traverseYAML(pair : Pair, env : DotenvParseOutput) : void {
         pair.value.value = envsubst(pair.value.value, env);
     }
 }
-
