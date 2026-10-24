@@ -478,6 +478,7 @@ export class Stack {
     async joinCombinedTerminal(socket: DockgeSocket) {
         const terminalName = getCombinedTerminalName(socket.endpoint, this.name);
         const terminal = Terminal.getOrCreateTerminal(this.server, terminalName, "docker", this.getComposeOptions("logs", "-f", "--tail", "100"), this.path);
+        terminal.stackName = this.name;
         terminal.enableKeepAlive = true;
         terminal.rows = COMBINED_TERMINAL_ROWS;
         terminal.cols = COMBINED_TERMINAL_COLS;
@@ -503,6 +504,7 @@ export class Stack {
             log.debug("joinContainerTerminal", "Terminal created");
         }
 
+        terminal.stackName = this.name;
         terminal.join(socket);
         terminal.start();
     }

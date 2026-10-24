@@ -29,6 +29,9 @@ export default defineComponent({
             loggedIn: false,
             allowLoginDialog: false,
             username: null,
+            role: "user",
+            cpuLimit: 0,
+            memoryLimit: 0,
             composeTemplate: "",
 
             stackList: {},
@@ -75,6 +78,10 @@ export default defineComponent({
             } else {
                 return "🐬";
             }
+        },
+
+        isAdmin() {
+            return this.role === "admin";
         },
 
         /**
@@ -225,6 +232,13 @@ export default defineComponent({
 
             socket.on("info", (info) => {
                 this.info = info;
+            });
+
+            socket.on("userInfo", (userInfo) => {
+                this.username = userInfo.username;
+                this.role = userInfo.role;
+                this.cpuLimit = userInfo.cpuLimit;
+                this.memoryLimit = userInfo.memoryLimit;
             });
 
             socket.on("autoLogin", () => {
@@ -386,6 +400,9 @@ export default defineComponent({
             this.socketIO.token = null;
             this.loggedIn = false;
             this.username = null;
+            this.role = "user";
+            this.cpuLimit = 0;
+            this.memoryLimit = 0;
             this.clearData();
         },
 

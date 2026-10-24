@@ -20,6 +20,7 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
 - ⌨️ Interactive Editor for `compose.yaml`
 - 🦦 Interactive Web Terminal
 - 🕷️ (1.4.0 🆕) Multiple agents support - You can manage multiple stacks from different Docker hosts in one single interface
+- 👥 User accounts with per-user stack ownership and CPU/memory quotas
 - 🏪 Convert `docker run ...` commands into `compose.yaml`
 - 📙 File based structure - Dockge won't kidnap your compose files, they are stored on your drive as usual. You can interact with them using normal `docker compose` commands
 
@@ -68,6 +69,27 @@ docker compose up -d
 ```
 
 Dockge is now running on http://localhost:5001
+
+## User accounts and resource quotas
+
+The first account created during setup is the administrator. Administrators can create accounts and assign roles and CPU/memory quotas from **Settings → User accounts**. Regular users can have quotas; administrators are unrestricted. Existing stacks remain administrator-owned; stacks created by a regular user are visible and manageable only by that account. Remote agents, global settings, and the host console are administrator-only.
+
+Quota values are maximum aggregate Compose limits per account, summed across saved stacks and their fixed `deploy.replicas` counts, whether or not a stack is currently running. A value of `0` means unlimited. When a CPU quota is set, every service in a user's stack must specify a fixed `deploy.resources.limits.cpus`; when a memory quota is set, every service must specify `deploy.resources.limits.memory`. Resource values that depend on Compose variable interpolation are not accepted for a limited resource. Compose `include`, `extends`, `scale`, and global deployment mode are not supported while a quota is active because their resource totals cannot be bounded from the stack file alone. For example:
+
+```yaml
+services:
+  web:
+    image: nginx
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+```
+
+These account permissions are intended for trusted collaborators, not hostile tenants. Dockge needs access to the Docker socket, and a user who can deploy Compose configurations may gain host-level access through privileged containers, host mounts, or other Docker features. CPU/memory quotas are enforced against the configured Compose limits; they are not a measure of live host usage or a substitute for OS/container isolation.
+
+Deleting a user removes their ownership records but leaves their stack files in place; those stacks then become administrator-only.
 
 ### Advanced
 

@@ -26,7 +26,7 @@
                     </a>
                 </div>
                 <div class="settings-content col-lg-9 col-md-7">
-                    <div v-if="currentPage" class="settings-content-header">
+                    <div v-if="currentPage && subMenus[currentPage]" class="settings-content-header">
                         {{ subMenus[currentPage].title }}
                     </div>
                     <div class="mx-3">
@@ -73,7 +73,7 @@ export default {
         },
 
         subMenus() {
-            return {
+            const menus = {
                 general: {
                     title: this.$t("general"),
                 },
@@ -90,6 +90,15 @@ export default {
                     title: this.$t("About"),
                 },
             };
+            if (this.$root.isAdmin) {
+                menus.accounts = {
+                    title: this.$t("User accounts"),
+                };
+            } else {
+                delete menus.general;
+                delete menus.globalEnv;
+            }
+            return menus;
         },
     },
 
@@ -100,6 +109,9 @@ export default {
     },
 
     mounted() {
+        if (!this.$root.isAdmin && [ "general", "globalEnv", "accounts" ].includes(this.currentPage)) {
+            this.$router.replace("/settings/security");
+        }
         this.loadSettings();
         this.loadGeneralPage();
     },
@@ -118,7 +130,16 @@ export default {
 
         /** Load settings from server */
         loadSettings() {
+            if (!this.$root.isAdmin) {
+                this.settings = { disableAuth: false };
+                this.settingsLoaded = true;
+                return;
+            }
             this.$root.getSocket().emit("getSettings", (res) => {
+                if (!res.ok) {
+                    this.$root.toastRes(res);
+                    return;
+                }
                 this.settings = res.data;
                 if (this.settings.checkUpdate === undefined) {
                     this.settings.checkUpdate = true;

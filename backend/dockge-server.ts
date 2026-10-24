@@ -330,6 +330,12 @@ export class DockgeServer {
     async afterLogin(socket : DockgeSocket, user : User) {
         socket.userID = user.id;
         socket.join(user.id.toString());
+        socket.emit("userInfo", {
+            username: user.username,
+            role: user.role || "admin",
+            cpuLimit: Number(user.cpu_limit || 0),
+            memoryLimit: Number(user.memory_limit || 0),
+        });
 
         this.sendInfo(socket);
 
@@ -339,10 +345,22 @@ export class DockgeServer {
             log.error("server", e);
         }
 
-        socket.instanceManager.sendAgentList();
-
-        // Also connect to other dockge instances
-        socket.instanceManager.connectAll();
+        if (user.role === "admin" || !user.role) {
+            socket.instanceManager.sendAgentList();
+            socket.instanceManager.connectAll();
+        } else {
+            socket.emit("agentList", {
+                ok: true,
+                agentList: {
+                    "": {
+                        url: "",
+                        username: "",
+                        endpoint: "",
+                        name: "",
+                    },
+                },
+            });
+        }
     }
 
     /**
@@ -602,8 +620,20 @@ export class DockgeServer {
                 }
 
                 let map : Map<string, object> = new Map();
+                const role = await R.getCell("SELECT role FROM user WHERE id = ? AND active = 1", [ dockgeSocket.userID ]);
+                let ownedStackNames: Set<string> | undefined;
+                if (role !== "admin") {
+                    const rows = await R.getAll(
+                        "SELECT stack_name FROM stack_owner WHERE user_id = ? AND endpoint = ?",
+                        [ dockgeSocket.userID, dockgeSocket.endpoint ]
+                    ) as { stack_name: string }[];
+                    ownedStackNames = new Set(rows.map((row) => row.stack_name));
+                }
 
                 for (let [ stackName, stack ] of stackList) {
+                    if (ownedStackNames && !ownedStackNames.has(stackName)) {
+                        continue;
+                    }
                     map.set(stackName, stack.toSimpleJSON(dockgeSocket.endpoint));
                 }
 
@@ -664,6 +694,40 @@ export class DockgeServer {
             log.error("getDockerStats", e);
             return stats;
         }
+    }
+
+    async getDockerStatsForUser(userID: number): Promise<Map<string, object>> {
+        const ownedStacks = await R.getAll(
+            "SELECT stack_name AS stackName FROM stack_owner WHERE user_id = ? AND endpoint = ''",
+            [ userID ]
+        ) as { stackName: string }[];
+        const projectNames = new Set(ownedStacks.map(({ stackName }) => stackName));
+        if (projectNames.size === 0) {
+            return new Map();
+        }
+
+        const res = await childProcessAsync.spawn("docker", [
+            "ps",
+            "--format",
+            "{{.Names}}|{{.Label \"com.docker.compose.project\"}}",
+        ], {
+            encoding: "utf-8",
+        });
+        const allowedContainerNames = new Set<string>();
+        for (const line of res.stdout?.toString().split("\n") ?? []) {
+            const separator = line.indexOf("|");
+            if (separator < 0) {
+                continue;
+            }
+            const containerName = line.slice(0, separator);
+            const projectName = line.slice(separator + 1);
+            if (projectNames.has(projectName)) {
+                allowedContainerNames.add(containerName);
+            }
+        }
+
+        const allStats = await this.getDockerStats();
+        return new Map(Array.from(allStats).filter(([ containerName ]) => allowedContainerNames.has(containerName)));
     }
 
     get stackDirFullPath() {
