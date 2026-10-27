@@ -71,6 +71,8 @@ export default {
             first: true,
             terminalInputBuffer: "",
             cursorPosition: 0,
+            filterQuery: "",    // Search string from parent Compose.vue
+            fullLogBuffer: ""   // Memory buffer where the entire log history from the server is stored
         };
     },
     created() {
@@ -102,6 +104,14 @@ export default {
         // Bind to a div
         this.terminal.open(this.$refs.terminal);
         this.terminal.focus();
+
+        // First log capture
+        // Saves everything the server sent during the first page load to a buffer
+        this.terminal.onWriteParsed(() => {
+            if (this.first && !this.filterQuery) {
+                this.fullLogBuffer = this.getBuffer();
+            }
+        });
 
         // Add right-click context menu handler for paste
         this.$refs.terminal.addEventListener("contextmenu", this.handleContextMenu);
@@ -149,37 +159,82 @@ export default {
     },
 
     methods: {
+        // Method for redrawing the screen when entering text into the filter
+        applyFilter() {
+            this.terminal.reset();
+            this.terminal.clear();
+            const allLines = this.fullLogBuffer.split("\n");
+            // If the filter is cleared, we return all logs from memory in their original form
+            if (!this.filterQuery) {
+                allLines.forEach(line => this.terminal.writeln(line));
+                return;
+            }
+            const query = this.filterQuery.toLowerCase();
+            allLines.forEach(line => {
+                // Clear the string of Docker-colored special characters before searching
+                const cleanLine = line.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "");
+                if (cleanLine.toLowerCase().includes(query)) {
+                    // Safe regular expression with escaped special characters
+                    const regex = new RegExp(`(${this.escapeRegExp(this.filterQuery)})`, 'gi');
+                    // Wrap the match in ANSI code for a yellow background (\x1B[43m) and write it to the screen
+                    this.terminal.writeln(line.replace(regex, "\x1B[43m\x1B[30m$1\x1B[0m"));
+                }
+            });
+        },
+        // Extract raw text from the active xterm.js screen
+        getBuffer() {
+            let bufferText = "";
+            const buffer = this.terminal.buffer.active;
+            for (let i = 0; i < buffer.length; i++) {
+                const line = buffer.getLine(i);
+                if (line) bufferText += line.translateToString(true) + "\n";
+            }
+            return bufferText;
+        },
+        // Escaping special characters (+, ?, ., ()) so that RegExp doesn't fail with an error
+        escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        },
+        // Modified socket binding method
         bind(endpoint, name) {
-            // Workaround: normally this.name should be set, but it is not sometimes, so we use the parameter, but eventually this.name and name must be the same name
-            if (name) {
-                this.$root.unbindTerminal(name);
-                this.$root.bindTerminal(endpoint, name, this.terminal);
-                console.debug("Terminal bound via parameter: " + name);
-            } else if (this.name) {
-                this.$root.unbindTerminal(this.name);
-                this.$root.bindTerminal(this.endpoint, this.name, this.terminal);
-                console.debug("Terminal bound: " + this.name);
-            } else {
-                console.debug("Terminal name not set");
+            const targetName = name || this.name;
+            if (targetName) {
+                this.$root.unbindTerminal(targetName);
+                this.$root.bindTerminal(endpoint || this.endpoint, targetName, this.terminal);
+                // Safely intercept the original socket write method
+                const originalWrite = this.terminal.write.bind(this.terminal);
+                this.terminal.write = (data) => {
+                    if (typeof data === "string") {
+                        // Always write new logs to the background history buffer
+                        this.fullLogBuffer += data;
+                        if (!this.filterQuery) {
+                            // If there is no filter, stream the original output to the screen
+                            originalWrite(data);
+                        } else {
+                            // If the filter is active, filter and highlight new logs in real time
+                            const cleanData = data.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "");
+                            if (cleanData.toLowerCase().includes(this.filterQuery.toLowerCase())) {
+                                const regex = new RegExp(`(${this.escapeRegExp(this.filterQuery)})`, 'gi');
+                                originalWrite(data.replace(regex, "\x1B[43m\x1B[30m$1\x1B[0m"));
+                            }
+                        }
+                    } else {
+                        originalWrite(data);
+                    }
+                };
             }
         },
 
         removeInput() {
             const textAfterCursorLength = this.terminalInputBuffer.length - this.cursorPosition;
             const spaces = " ".repeat(textAfterCursorLength);
-            const backspaceCount = this.terminalInputBuffer.length;
-            const backspaces = "\b \b".repeat(backspaceCount);
+            this.terminal.write(spaces + "\b \b".repeat(this.terminalInputBuffer.length));
             this.cursorPosition = 0;
-            this.terminal.write(spaces + backspaces);
             this.terminalInputBuffer = "";
         },
 
         clearCurrentLine() {
-            // Move cursor to the beginning of the input and clear it
-            const backspaces = "\b".repeat(this.cursorPosition);
-            const spaces = " ".repeat(this.terminalInputBuffer.length);
-            const moreBackspaces = "\b".repeat(this.terminalInputBuffer.length);
-            this.terminal.write(backspaces + spaces + moreBackspaces);
+            this.terminal.write("\b".repeat(this.cursorPosition) + " ".repeat(this.terminalInputBuffer.length) + "\b".repeat(this.terminalInputBuffer.length));
         },
 
         mainTerminalConfig() {
