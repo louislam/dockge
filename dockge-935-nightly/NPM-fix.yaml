@@ -1,0 +1,16 @@
+services:
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 81:81
+      - 443:443
+    volumes:
+      - /opt/stacks/npm/data:/data
+      - /opt/stacks/npm/letsencrypt:/etc/letsencrypt
+networks: {}
+
+# Users must create host folders before starting the container:
+# mkdir -p ./data/npm/config ./data/npm/letsencrypt
+# Ensures DB, settings, and SSL certificates survive container/VM restarts
