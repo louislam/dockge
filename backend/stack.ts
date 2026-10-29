@@ -156,6 +156,10 @@ export class Stack {
         return path.join(this.server.stacksDir, this.name);
     }
 
+    get normalizedName() : string {
+        return this.name.replace(/\./g, "").toLowerCase();
+    }
+
     get fullPath() : string {
         let dir = this.path;
 
@@ -307,10 +311,15 @@ export class Stack {
             return stackList;
         }
 
+        let normalizedNameMap = new Map<string, Stack>();
+        for (let stack of stackList.values()) {
+            normalizedNameMap.set(stack.normalizedName, stack);
+        }
+
         let composeList = JSON.parse(res.stdout.toString());
 
         for (let composeStack of composeList) {
-            let stack = stackList.get(composeStack.Name);
+            let stack = stackList.get(composeStack.Name) || normalizedNameMap.get(composeStack.Name);
 
             // This stack probably is not managed by Dockge, but we still want to show it
             if (!stack) {
