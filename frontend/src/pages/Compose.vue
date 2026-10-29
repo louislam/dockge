@@ -171,6 +171,11 @@
 
                     <!-- YAML editor -->
                     <div class="shadow-box mb-3 editor-box" :class="{'edit-mode' : isEditMode}">
+                        <div class="d-flex justify-content-end p-1">
+                            <button class="btn btn-sm btn-outline-secondary" title="Copy to clipboard" @click="copyYAML">
+                                <font-awesome-icon icon="copy" />
+                            </button>
+                        </div>
                         <code-mirror
                             ref="editor"
                             v-model="stack.composeYAML"
@@ -516,6 +521,22 @@ export default {
 
     },
     methods: {
+
+        async copyYAML() {
+            try {
+                await navigator.clipboard.writeText(this.stack.composeYAML);
+                this.$root.toastRes({
+                    ok: true,
+                    msg: "Copied to clipboard!",
+                });
+            } catch (e) {
+                this.$root.toastRes({
+                    ok: false,
+                    msg: "Failed to copy!",
+                });
+            }
+        },
+
         startServiceStatusTimeout() {
             clearTimeout(serviceStatusTimeout);
             serviceStatusTimeout = setTimeout(async () => {
