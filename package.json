@@ -38,7 +38,7 @@
         "croner": "~8.1.2",
         "dayjs": "~1.11.13",
         "dotenv": "~16.3.2",
-        "express": "~4.21.2",
+        "express": "~4.22.1",
         "express-static-gzip": "~2.1.8",
         "http-graceful-shutdown": "~3.1.14",
         "jsonwebtoken": "~9.0.2",
