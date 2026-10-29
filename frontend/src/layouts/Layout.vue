@@ -33,6 +33,12 @@
                     </router-link>
                 </li>
 
+                <li v-if="$root.loggedIn" class="nav-item me-1 d-flex align-items-center">
+                    <button class="theme-toggle" :title="$root.isDark ? 'Switch to light mode' : 'Switch to dark mode'" @click="toggleTheme">
+                        <font-awesome-icon :icon="$root.isDark ? 'sun' : 'moon'" />
+                    </button>
+                </li>
+
                 <li v-if="$root.loggedIn" class="nav-item">
                     <div class="dropdown dropdown-profile-pic">
                         <div class="nav-link" data-bs-toggle="dropdown">
@@ -145,6 +151,10 @@ export default {
     },
 
     methods: {
+        toggleTheme() {
+            this.$root.userTheme = this.$root.isDark ? "light" : "dark";
+        },
+
         scanFolder() {
             this.$root.emitAgent(ALL_ENDPOINTS, "requestStackList", (res) => {
                 this.$root.toastRes(res);
@@ -205,6 +215,30 @@ main {
 
 .title {
     font-weight: bold;
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem 0.6rem;
+    border-radius: 50%;
+    color: #555;
+    font-size: 1rem;
+    line-height: 1;
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .dark & {
+        color: #c9d1d9;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    }
 }
 
 .nav {
