@@ -28,6 +28,7 @@
     "cancel": "Cancel",
     "stackNotManagedByDockgeMsg": "This stack is not managed by Dockge.",
     "primaryHostname": "Primary Hostname",
+    "defaultComposeTemplate": "Default Compose Template",
     "general": "General",
     "container": "Container | Containers",
     "scanFolder": "Scan Stacks Folder",
