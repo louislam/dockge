@@ -117,6 +117,13 @@ export class Terminal {
                 cwd: this.cwd,
                 cols: TERMINAL_COLS,
                 rows: this.rows,
+                env: {
+                    ...process.env,
+                    // shells in the web console otherwise start without a
+                    // TERM, which leaves clear, readline Ctrl+L and colors
+                    // dead on arrival
+                    TERM: "xterm-256color",
+                },
             });
 
             // On Data
