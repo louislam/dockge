@@ -17,6 +17,10 @@
                         </div>
                     </router-link>
 
+                    <router-link to="/links?settings=1">
+                        <div class="menu-item">{{ $t("dashboardSettings") }}</div>
+                    </router-link>
+
                     <!-- Logout Button -->
                     <a v-if="$root.isMobile && $root.loggedIn && $root.socket.token !== 'autoLogin'" class="logout" @click.prevent="$root.logout">
                         <div class="menu-item">

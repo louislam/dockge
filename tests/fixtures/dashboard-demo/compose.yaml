@@ -1,0 +1,9 @@
+services:
+  web:
+    image: node:22-bookworm-slim
+    command: ["node", "-e", "require('http').createServer((req,res)=>res.end('dashboard demo')).listen(8080)"]
+    ports:
+      - "127.0.0.1:18080:8080"
+x-dockge:
+  urls:
+    - http://127.0.0.1:18080

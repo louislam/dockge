@@ -1,3 +1,5 @@
+import yaml from "yaml";
+import { createHash } from "crypto";
 import { AgentSocketHandler } from "../agent-socket-handler";
 import { DockgeServer } from "../dockge-server";
 import { callbackError, callbackResult, checkLogin, DockgeSocket, ValidationError } from "../util-server";
@@ -215,6 +217,55 @@ export class DockerSocketHandler extends AgentSocketHandler {
                     msgi18n: true,
                 }, callback);
                 server.sendStackList();
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // Return only dashboard metadata; Compose remains the source of truth.
+        agentSocket.on("dashboard:stack", async (stackName: unknown, callback) => {
+            try {
+                checkLogin(socket);
+                if (typeof stackName !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+                const stack = await Stack.getStack(server, stackName, true);
+                const parsed = yaml.parse(stack.composeYAML || "") || {};
+                const urls = Array.isArray(parsed["x-dockge"]?.urls) ? parsed["x-dockge"].urls : [];
+                const seen = new Set<string>();
+                const links = urls.flatMap((raw: unknown, index: number) => {
+                    if (typeof raw !== "string" || seen.has(raw)) {
+                        return [];
+                    }
+                    seen.add(raw);
+                    try {
+                        const url = new URL(raw);
+                        if (![ "http:", "https:" ].includes(url.protocol) || url.username || url.password) {
+                            return [];
+                        }
+                        const hash = createHash("sha256").update(raw).digest("hex").slice(0, 24);
+                        return [{ id: `stack:${encodeURIComponent(socket.endpoint || "local")}:${encodeURIComponent(stackName)}:${hash}`,
+                            name: index ? `${stackName} #${index + 1}` : stackName,
+                            url: raw,
+                            stackName,
+                            endpoint: socket.endpoint,
+                            source: "stack" }];
+                    } catch {
+                        return [];
+                    }
+                });
+                const services = await stack.getServiceStatusList();
+                let runningContainers = 0;
+                for (const containers of services.values()) {
+                    for (const container of containers as Array<{ status: string }>) {
+                        if ([ "running", "healthy" ].includes(container.status)) {
+                            runningContainers++;
+                        }
+                    }
+                }
+                callbackResult({ ok: true,
+                    links,
+                    runningContainers }, callback);
             } catch (e) {
                 callbackError(e, callback);
             }

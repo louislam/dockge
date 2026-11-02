@@ -10,10 +10,10 @@
         </div>
 
         <!-- Desktop header -->
-        <header v-if="! $root.isMobile" class="d-flex flex-wrap justify-content-center py-3 mb-3 border-bottom">
+        <header class="d-flex flex-wrap justify-content-center py-3 mb-3 border-bottom">
             <router-link to="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
                 <object class="bi me-2 ms-4" width="40" height="40" data="/icon.svg" />
-                <span class="fs-4 title">Dockge</span>
+                <span class="fs-4 title">Dockge Dashboard</span>
             </router-link>
 
             <a v-if="hasNewVersion" target="_blank" href="https://github.com/louislam/dockge/releases" class="btn btn-warning me-3">
@@ -23,10 +23,13 @@
             <ul class="nav nav-pills">
                 <li v-if="$root.loggedIn" class="nav-item me-2">
                     <router-link to="/" class="nav-link">
-                        <font-awesome-icon icon="home" /> {{ $t("home") }}
+                        <font-awesome-icon icon="home" /> {{ $t("overview") }}
                     </router-link>
                 </li>
 
+                <li v-if="$root.loggedIn" class="nav-item me-2"><router-link to="/stacks" class="nav-link">{{ $t("dockerManagement") }}</router-link></li>
+                <li v-if="$root.loggedIn" class="nav-item me-2"><router-link to="/links" class="nav-link">{{ $t("quickLinks") }}</router-link></li>
+                <li v-if="$root.loggedIn" class="nav-item me-2"><router-link to="/settings/general" class="nav-link">{{ $t("Settings") }}</router-link></li>
                 <li v-if="$root.loggedIn" class="nav-item me-2">
                     <router-link to="/console" class="nav-link">
                         <font-awesome-icon icon="terminal" /> {{ $t("console") }}

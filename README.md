@@ -205,3 +205,27 @@ Yes, you can.
 ## Others
 
 Dockge is built on top of [Compose V2](https://docs.docker.com/compose/migrate/). `compose.yaml`  also known as `docker-compose.yml`.
+
+### Dashboard
+
+The overview provides a launcher for manual links and URLs declared under a stack's
+`x-dockge.urls`. Manage links, groups, display settings and stack link overrides
+from **Quick Links**. The settings menu also links to these controls. Manual
+links and display preferences are stored in `dashboard.json` in Dockge's data
+directory; stack URLs remain in the Compose file. Back up this file together
+with the rest of the data directory. If it becomes invalid, Dockge preserves it
+and displays a warning; restore or move the file before saving changes.
+
+Only HTTP and HTTPS links are accepted. Dashboard status is based on Dockge's
+stack state, not an HTTP availability check. Container counts use Dockge's
+existing Compose service status data. No server-side URL probing is performed.
+
+For a local smoke-test stack, copy `tests/fixtures/dashboard-demo` into the
+configured stacks directory and run `docker compose up -d` there. Its web port
+is bound to loopback and is intended for testing only. The `x-dockge.urls`
+entry uses the Docker host's loopback address; adjust it if the browser runs on
+another machine. On a new isolated Dockge instance, the optional
+`tests/cloud-smoke.mjs` script exercises first-time setup, login, Stack URL
+aggregation, running-container count and config validation. It creates a test
+account and must not be run against an existing installation. Set
+`DOCKGE_TEST_URL` if the test instance is not at `http://127.0.0.1:15001`.
