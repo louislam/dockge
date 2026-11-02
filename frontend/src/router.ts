@@ -4,6 +4,7 @@ import Layout from "./layouts/Layout.vue";
 import Setup from "./pages/Setup.vue";
 import Dashboard from "./pages/Dashboard.vue";
 import DashboardHome from "./pages/DashboardHome.vue";
+import Overview from "./pages/Overview.vue";
 import Console from "./pages/Console.vue";
 import Compose from "./pages/Compose.vue";
 import ContainerTerminal from "./pages/ContainerTerminal.vue";
@@ -28,7 +29,7 @@ const routes = [
                 children: [
                     {
                         name: "DashboardHome",
-                        path: "/",
+                        path: "/stacks",
                         component: DashboardHome,
                         children: [
                             {
@@ -55,8 +56,12 @@ const routes = [
                             },
                         ]
                     },
-                    {
-                        path: "/console",
+                    { path: "/",
+                        component: Overview },
+                    { path: "/links",
+                        component: Overview,
+                        props: { management: true } },
+                    { path: "/console",
                         component: Console,
                     },
                     {

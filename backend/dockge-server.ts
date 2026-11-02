@@ -12,6 +12,7 @@ import https from "https";
 import http from "http";
 import { Router } from "./router";
 import { Socket } from "socket.io";
+import { DashboardSocketHandler } from "./dashboard/socket";
 import { MainSocketHandler } from "./socket-handlers/main-socket-handler";
 import { SocketHandler } from "./socket-handler";
 import { Settings } from "./settings";
@@ -58,6 +59,7 @@ export class DockgeServer {
      */
     socketHandlerList : SocketHandler[] = [
         new MainSocketHandler(),
+        new DashboardSocketHandler(),
         new ManageAgentSocketHandler(),
     ];
 
