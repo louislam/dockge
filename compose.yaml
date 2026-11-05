@@ -20,3 +20,6 @@ services:
     environment:
       # Tell Dockge where is your stacks directory
       - DOCKGE_STACKS_DIR=/opt/stacks
+    # Usefull for interactive action within the container
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
