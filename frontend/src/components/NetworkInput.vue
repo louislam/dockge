@@ -221,7 +221,7 @@ export default {
 
 .delete {
     text-decoration: underline;
-    font-size: 13px;
+    font-size: 10px;
     cursor: pointer;
 }
 </style>

@@ -84,7 +84,7 @@ export default {
         }
 
         this.terminal = new Terminal({
-            fontSize: 14,
+            fontSize: 11,
             fontFamily: "'JetBrains Mono', monospace",
             cursorBlink,
             cols: this.cols,
