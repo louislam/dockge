@@ -134,5 +134,9 @@
     "cancel": "Cancelar",
     "Console is not enabled": "La consola está deshabilitada",
     "ConsoleNotEnabledMSG3": "Si entiendes el riesgo, puedes habilitarlo estableciendo <code>DOCKGE_ENABLE_CONSOLE=true</code> en las variables de entorno.",
-    "ConsoleNotEnabledMSG1": "La consola es una herramienta poderosa que te permite ejecutar cualquier comando, como <code>docker</code> o <code>rm</code>, dentro del contenedor de Dockge en esta interfaz web."
+    "ConsoleNotEnabledMSG1": "La consola es una herramienta poderosa que te permite ejecutar cualquier comando, como <code>docker</code> o <code>rm</code>, dentro del contenedor de Dockge en esta interfaz web.",
+    "GlobalEnv": ".env Global",
+    "CPU": "Procesador",
+    "memory": "Memoria",
+    "memoryAbbreviated": "Mem"
 }
