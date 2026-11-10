@@ -196,11 +196,22 @@ export class Stack {
 
         // Write or overwrite the compose.yaml
         fs.writeFileSync(path.join(dir, this._composeFileName), this.composeYAML);
+
+        // Write or overwrite the .env
+        // If .env is not existing and the composeENV is empty, we don't need to write it
+        const envPath = path.join(dir, ".env");
+        if (await fileExists(envPath) || this.composeENV.trim() !== "") {
+            await fsAsync.writeFile(envPath, this.composeENV);
+        }
+
         if (process.env.PUID && process.env.PGID) {
             const uid = Number(process.env.PUID);
             const gid = Number(process.env.PGID);
             fs.lchownSync(dir, uid, gid);
             fs.chownSync(path.join(dir, this._composeFileName), uid, gid);
+            if (await fileExists(envPath)) {
+                fs.chownSync(envPath, uid, gid);
+            }
         }
     }
 
